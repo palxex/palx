@@ -1,10 +1,12 @@
 #include "resource.h"
 #include "pallib.h"
 
+#include <boost/shared_array.hpp>
+
 using namespace boost;
 using namespace Pal::Tools;
 namespace{
-	shared_array<uint8_t> demkf(FILE *fp,int n,long &len)
+	uint8_t *demkf_t(FILE *fp,int n,long &len)
 	{
 		int32_t offset=n*4,length;
 		fseek(fp,offset,SEEK_SET);
@@ -14,7 +16,11 @@ namespace{
 		uint8_t *buf=new uint8_t[length];
 		fread(buf,length,1,fp);
 		len=length;
-		return shared_array<uint8_t>(buf);
+		return buf;
+	}
+	shared_array<uint8_t> demkf(FILE *fp,int n,long &len)
+	{
+		return shared_array<uint8_t>(demkf_t(fp,n,len));
 	}
 	shared_array<uint8_t> demkf_impl(shared_array<uint8_t> &src,int n,long &len)
 	{
@@ -25,33 +31,43 @@ namespace{
 		len=length;
 		return shared_array<uint8_t>(buf);
 	}
-	shared_array<uint8_t> desmkf(shared_array<uint8_t> &src,int n,long &len)//todo:算法不完整
+	uint8_t *desmkf(shared_array<uint8_t> &src,int n,long &len)//todo:算法不完整
 	{
 		uint16_t *usrc=(uint16_t *)src.get();
-		int16_t length=(usrc[n+1]-usrc[n])*2;
+		int files=usrc[0];
+		int16_t length;
+		if(n == files - 1 || (n == files - 2 && usrc[files-1] == 0) )
+			length=len-usrc[n]*2;
+		else
+			length=(usrc[n+1]-usrc[n])*2;
 		uint8_t *buf=new uint8_t[length];
 		memcpy(buf,src.get()+usrc[n]*2,length);
 		len=length;
-		return shared_array<uint8_t>(buf);
+		return buf;
 	}
-	shared_array<uint8_t> deyj1(shared_array<uint8_t> &src,long &len)
+	uint8_t *deyj1(shared_array<uint8_t> &src,long &len)
 	{
 		void *dst;
 		uint32_t length;
 		DecodeYJ1(src.get(),dst,(uint32&)length);
 		len=length;
-		return shared_array<uint8_t>((uint8_t*)dst);
+		return (uint8_t*)dst;
+	}
+	shared_array<uint8_t> deyj1_t(shared_array<uint8_t> &src,long &len)
+	{
+		return shared_array<uint8_t>(deyj1(src,len));
 	}
 }
-decoder_func de_mkf			=bind(demkf,_1,_2,_4);
+decoder_func de_mkf			=bind(demkf_t,_1,_2,_4);
 decoder_func de_mkf_yj1		=bind(deyj1,	bind(demkf,		_1,_2,_4),_4);
 decoder_func de_mkf_mkf_yj1	=bind(deyj1,	bind(demkf_impl,bind(demkf,_1,_2,_4),_3,_4),_4);
 decoder_func de_mkf_smkf	=bind(desmkf,	bind(demkf,		_1,_2,_4),_3,_4);
-decoder_func de_mkf_yj1_smkf=bind(desmkf,	bind(deyj1,		bind(demkf,_1,_2,_4),_4),_3,_4);
+decoder_func de_mkf_yj1_smkf=bind(desmkf,	bind(deyj1_t,		bind(demkf,_1,_2,_4),_4),_3,_4);
 
 long _len;
 
 cached_res::cached_res(const char *filename,decoder_func &func):
+	file(filename),
 	fp(fopen(filename,"rb"))
 {
 	if(!fp)
@@ -60,6 +76,7 @@ cached_res::cached_res(const char *filename,decoder_func &func):
 }
 cached_res::~cached_res(){
 	fclose(fp);
+	clear();
 }
 decoder_func cached_res::setdecoder(decoder_func &func)
 {
@@ -67,7 +84,7 @@ decoder_func cached_res::setdecoder(decoder_func &func)
 	decoder=func;
 	return old_decoder;
 }
-boost::shared_array<uint8_t> cached_res::decode(int n,int n2,long &length)
+uint8_t *cached_res::decode(int n,int n2,long &length)
 {
 	std::pair<int,int> pos(n,n2);
 	cache_type::iterator i=cache.find(pos);

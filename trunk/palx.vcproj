@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="Include"
+				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,8 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alld.lib alfontdll.lib"
+				AdditionalDependencies="alld.lib alfontdll.lib adplugd.lib biniod.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="F:\MyProjects\palx\trunk\Adplug\lib\debug"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -118,7 +119,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Include"
+				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -137,8 +138,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alleg.lib alfontdll.lib"
+				AdditionalDependencies="alleg.lib alfontdll.lib adplug.lib binio.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="F:\MyProjects\palx\trunk\Adplug\lib\release"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -179,57 +181,85 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\src\begin.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\game.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\palx.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\resource.cpp"
-				>
-			</File>
 			<Filter
 				Name="PalLibrary"
 				>
 				<File
-					RelativePath=".\src\PalLibrary\rle.cpp"
+					RelativePath=".\PalLibrary\src\rle.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\src\PalLibrary\rng.cpp"
+					RelativePath=".\PalLibrary\src\rng.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\src\PalLibrary\yj1.cpp"
+					RelativePath=".\PalLibrary\src\yj1.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\src\PalLibrary\yj1s.h"
+					RelativePath=".\PalLibrary\src\yj1s.h"
 					>
 				</File>
 			</Filter>
 			<Filter
-				Name="graph"
+				Name="alleg"
 				>
+				<File
+					RelativePath=".\src\audio.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\src\graph.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\src\keyboard.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
-				Name="mainloop"
+				Name="game"
 				>
+				<File
+					RelativePath=".\src\begin.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\game.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\src\mainloop.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\src\palx.cpp"
+					>
+				</File>
+				<Filter
+					Name="define"
+					>
+					<File
+						RelativePath=".\src\internal.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\qbrand.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\resource.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="script"
+					>
+					<File
+						RelativePath=".\src\script.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -237,38 +267,138 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\Include\begin.h"
+			<Filter
+				Name="Adplug"
 				>
-			</File>
-			<File
-				RelativePath=".\Include\config.h"
+				<File
+					RelativePath=".\Adplug\include\adplug\adlibemu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\adplug.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\analopl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\binfile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\binio.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\binstr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\binwrap.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\database.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\debug.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\diskopl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\emuopl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\fmopl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\fprovide.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\kemuopl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\player.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\players.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\realopl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\rix.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Adplug\include\adplug\silentopl.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="PalLibrary"
 				>
-			</File>
-			<File
-				RelativePath=".\Include\game.h"
+				<File
+					RelativePath=".\PalLibrary\include\config.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PalLibrary\include\grf.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PalLibrary\include\pallib.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="game"
 				>
-			</File>
-			<File
-				RelativePath=".\Include\graphdef.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\mainloop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\pallib.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\structs.h"
-				>
-			</File>
+				<File
+					RelativePath=".\src\begin.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\game.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\scene.h"
+					>
+				</File>
+				<Filter
+					Name="define"
+					>
+					<File
+						RelativePath=".\src\allegdef.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\internal.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\resource.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\structs.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="资源文件"
