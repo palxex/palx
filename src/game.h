@@ -17,23 +17,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Game_H_
+#define Game_H_
 
-#include "Game.h"
-#include "begin.h"
-#include "pallib.h"
+#include <vector>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <cstdio>
 
-#include <iostream>
-#include <cstdlib>
-using namespace std;
+#include "allegdef.h"
 
-#include "internal.h"
-int main(int argc, char *argv[])
-{
-	randomize();
-	Game  thegame(argc>=2? argv[1][0]-0x30 : begin_scene()()); game=&thegame;
-	Scene normal(new ::map());	scene=&normal;
-	Scene battle(new fbp());	battle_scene=&battle;
-	playrix player;				rix=&player;
-	return thegame.run();
-}
-END_OF_MAIN();
+class Game{
+	RPG rpg;
+	palette pat;
+	//data
+public:
+	std::vector<SHOP> shops;
+	std::vector<MONSTER> monsters;
+	static std::vector<ENEMYTEAM> enemyteams;
+	//std::vector<
+	
+	//sss
+	std::vector<EVENT_OBJECT> evtobjs;
+	std::vector<SCENE>   scenes;
+	std::vector<OBJECT>  objects;
+	std::vector<int32_t> msg_idxes;
+	std::vector<SCRIPT>  scripts;
+	Game(int);
+	~Game();
+	void load(int id);
+	void save(int id);
+	void reload();
+	int run();
+};
+
+#endif //Game_H_

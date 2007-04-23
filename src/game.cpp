@@ -1,30 +1,33 @@
-#include "game.h"
+#include "Game.h"
 
 #include <alfont.h>
-#include <boost/shared_array.hpp>
+
+#include "internal.h"
 
 using namespace std;
-using namespace boost;
 namespace{
 	template<typename T>
-	inline void reunion(vector<T> &vec,shared_array<uint8_t> &src,long &len)
+	inline void reunion(vector<T> &vec,uint8_t *src,long &len)
 	{
-		T *usrc=(T *)src.get();
+		T *usrc=(T *)src;
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
 	template<typename T>
-	inline void reunion(T *vec,shared_array<uint8_t> &src,long &len)
+	inline void reunion(T *vec,uint8_t *src,long &len)
 	{
-		T *usrc=(T *)src.get();
+		T *usrc=(T *)src;
 		memcpy(vec,usrc,len);
 	}
 }
 
-game::game(int save=0):
+Game::Game(int save=0):
 	rpg((memset(&rpg,0,sizeof(RPG)),rpg))
 {
 	//allegro init
 	allegro_init();
+	install_timer();
+	install_keyboard();
+	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	set_gfx_mode(GFX_AUTODETECT_WINDOWED,320,200,0,0);
 	set_color_depth(8);
 
@@ -41,30 +44,35 @@ game::game(int save=0):
 	long t;
 	EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
 	SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
-	reunion(evtobjs,	SSS.decode(0,0,t),t);
-	reunion(scenes,		SSS.decode(1,0,t),t);
-	reunion(objects,	SSS.decode(2,0,t),t);
-	reunion(msg_idxes,	SSS.decode(3,0,t),t);
-	reunion(scripts,	SSS.decode(4,0,t),t);
+	reunion(evtobjs,	SSS.decode(0,0,t), t);
+	reunion(scenes,		SSS.decode(1,0,t), t);
+	reunion(objects,	SSS.decode(2,0,t), t);
+	reunion(msg_idxes,	SSS.decode(3,0,t), t);
+	reunion(scripts,	SSS.decode(4,0,t), t);
 	reunion(shops,		DATA.decode(0,0,t),t);
 
 	pat.set(0);
+	flag_to_load=0x1D;
 	//load save
 	if(save!=0)
 		load(save);
 }
-game::~game(){
+Game::~Game(){
 }
 
-void game::load(int id){
+void Game::load(int id){
+	flag_to_load=0x12;
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"rb");
 	if(!fprpg){
 		allegro_message("ºÜ±§Ç¸£¬%d.rpg²»´æÔÚ¡«",id);
 		exit(-1);
 	}
+	scene->toload=rpg.scene_id;
 	fclose(fprpg);
 }
-void game::save(int id){
+void Game::save(int id){
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"wb");
 	fclose(fprpg);
 }
+void Game::reload()
+{}

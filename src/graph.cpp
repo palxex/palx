@@ -1,9 +1,10 @@
-#include "graphdef.h"
+#include "allegdef.h"
 
 bitmap::bitmap(const uint8_t *src,int width,int height):
 	bmp(create_bitmap(width,height))
 {
-	memcpy(bmp->dat,src,width*height);
+	if(src)
+		memcpy(bmp->dat,src,width*height);
 }
 bitmap::~bitmap()
 {
@@ -20,7 +21,7 @@ sprite::~sprite()
 {}
 bool sprite::blit_to(BITMAP *dest,int dest_x,int dest_y)
 {
-	Pal::Tools::DecodeRLE(buf.get(),dest->dat,dest->w,dest->h,dest_x,dest_y);
+	Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->h,dest_x,dest_y);
 	return true;
 }
 
