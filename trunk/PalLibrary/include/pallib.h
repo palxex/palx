@@ -91,7 +91,6 @@ namespace Pal
 			bool GRFflush(GRFFILE* stream);
 			bool GRFgettype(GRFFILE* stream, int& type);
 			bool GRFenumname(GRFFILE* stream, const char* prevname, char*& nextname);
-
 			int GRFerror(GRFFILE* stream);
 			void GRFclearerr(GRFFILE* stream);
 
@@ -156,7 +155,6 @@ int grfclose(GRFFILE* stream);
 int grfflush(GRFFILE* stream);
 int grfgettype(GRFFILE* stream);
 char* grfenumname(GRFFILE* stream, const char* prevname);
-
 int grferror(GRFFILE* stream);
 void grfclearerr(GRFFILE* stream);
 
@@ -174,9 +172,7 @@ long grftell(GRFFILE* stream);
 long grfread(GRFFILE* stream, void* buffer, long size);
 int grfgetattr(GRFFILE* stream, int attr, void* value);
 
-/*
-int grfPackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
-int grfExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
-*/
+int grfpackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
+int grfextract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
 
 #endif

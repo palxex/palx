@@ -825,138 +825,288 @@ bool Pal::Tools::GRF::GRFgetattr(GRFFILE* stream, int attr, void* value)
 
 	return true;
 }
-/*
+
 bool Pal::Tools::GRF::GRFPackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
 {
-	GRFFILE* grf;
-	int grftype, fd;
-	char* name = NULL;
+	int fdold, fdnew;
+	size_t pathlen;
+	char* name;
 	void* buf;
-	GRF_HEADER* hdr;
-	INDEX_ENTRY* ptr;
-	INDEX_ENTRY* ptrend;
+	bool flag;
+	long idxpos;
+	GRF_HEADER hdr;
+	INDEX_ENTRY cur, old;
 
 	//检查输入参数
-	if (pszGRF == NULL || pszNewFile == NULL || strlen(pszGRF) == 0 || strlen(pszNewFile) == 0)
+	if (pszGRF == NULL || pszNewFile == NULL || strlen(pszGRF) == 0 || strlen(pszNewFile) == 0 ||
+		(name = _icheckpath(pszBasePath)) == NULL)
 		return false;
 
-	//打开 GRF 文件
-	if (!Pal::Tools::GRF::GRFopen(pszGRF, pszBasePath, 0, grf))
-		return false;
-	//检查 GRF 文件类型
-	hdr = (GRF_HEADER*)grf->pie;
-	Pal::Tools::GRF::GRFgettype(grf, grftype);
-	if (grftype != GRF_TYPE_STANDALONE || hdr->EntryCount == 0)
+	//打开原 GRF 文件
+	if ((fdold = open(pszGRF, O_BINARY | O_RDONLY)) == -1)
 	{
-		Pal::Tools::GRF::GRFclose(grf);
-		return true;
+		free(name);
+		return false;
 	}
 	else
 	{
-		ptr = (INDEX_ENTRY*)(hdr + 1);
-		ptrend = (INDEX_ENTRY*)((uint8*)grf->pie + hdr->FileLength);
+		//检查 GRF 文件
+		if (read(fdold, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER) ||
+			memcmp(hdr.Signature, "GRF", 4) != 0 ||
+			hdr.DataOffset != 0 || hdr.EntryCount == 0)
+		{
+			close(fdold);
+			free(name);
+			return false;
+		}
+		else
+			hdr.DataOffset = hdr.FileLength;
 	}
-
 	//创建新的 GRF 文件
-	if ((fd = open(pszNewFile, O_CREAT | O_TRUNC | O_BINARY | O_RDWR, S_IREAD | S_IWRITE)) == -1)
+	if ((fdnew = open(pszNewFile, O_CREAT | O_TRUNC | O_BINARY | O_RDWR, S_IREAD | S_IWRITE)) == -1)
 	{
-		Pal::Tools::GRF::GRFclose(grf);
+		close(fdold);
+		free(name);
 		return false;
 	}
-
-	//移动文件指针到数据区
-	if (lseek(fd, hdr->FileLength, SEEK_SET) == -1)
-	{
-		close(fd);
-		Pal::Tools::GRF::GRFclose(grf);
-		return false;
-	}
-	//更新文件头
-	hdr->DataOffset = hdr->FileLength;
-	ptr->Offset = hdr->DataOffset;
+	memset(&old, 0, sizeof(INDEX_ENTRY));
+	old.Offset = hdr.DataOffset;
+	pathlen = strlen(name);
+	idxpos = sizeof(GRF_HEADER);
 
 	//开辟数据缓冲区
 	if ((buf = malloc(0x4000)) == NULL)
 	{
-		close(fd);
-		Pal::Tools::GRF::GRFclose(grf);
+		close(fdnew);
+		close(fdold);
+		free(name);
 		return false;
 	}
-	//开辟名字缓冲区
-	if ((name = malloc(ptr->PathLength + 1)) == NULL)
-	{
-		free(buf);
-		close(fd);
-		Pal::Tools::GRF::GRFclose(grf);
-		return false;
-	}
+	else
+		flag = true;
 
-	while(ptr < ptrend)
+	for(uint32 i = 0; i < hdr.EntryCount; i++, old = cur)
 	{
-		//取得名字
-		FILE* fp;
 		void* temp;
-		int dfd;
-		uint32 ret, len = 0;
+		int fddat;
+		long ret, datalen = 0;
 
-		if ((temp = realloc(name, ptr->PathLength + 1)) == NULL)
+		//读取索引项
+		if (read(fdold, &cur, sizeof(INDEX_ENTRY)) < sizeof(INDEX_ENTRY))
 		{
-			free(name);
-			free(buf);
-			close(fd);
-			Pal::Tools::GRF::GRFclose(grf);
-			return false;
+			flag = false;
+			break;
 		}
-		name = (char*)temp;
-		memcpy(name, ptr->EntryPath, ptr->PathLength);
-		name[ptr->PathLength] = '\0';
-		//打开文件
-		if (!Pal::Tools::GRF::GRFopenfile(grf, name, "r+", fp))
+		else
+			cur.Offset = old.Offset + old.Length;
+		//分配名字空间
+		if ((temp = realloc(name, pathlen + cur.PathLength + 1)) == NULL)
+		{
+			flag = false;
+			break;
+		}
+		else
+			name = (char*)temp;
+		//读取名字并拼接到路径中
+		if (read(fdold, name + pathlen, cur.PathLength) < cur.PathLength)
+		{
+			flag = false;
+			break;
+		}
+		name[pathlen + cur.PathLength] = '\0';
+		//移动文件指针到数据区
+		if (lseek(fdnew, cur.Offset, SEEK_SET) == -1)
+		{
+			flag = false;
+			break;
+		}
+		//打开数据文件
+		if ((fddat = open(name, O_BINARY | O_RDONLY)) == -1)
 			continue;
-		setbuf(fp, NULL);
-		dfd = fileno(fp);
-		while(true)
+		while((ret = read(fddat, buf, 0x4000)) > 0)
 		{
-			if ((ret = (uint32)read(dfd, buf, 0x4000)) == -1)
-				break;
-			if (ret > 0)
+			if (write(fdnew, buf, ret) < ret)
 			{
-				if (write(fd, buf, ret) == -1)
-					break;
-				len += ret;
-			}
-			if (eof(fd))
+				flag = false;
 				break;
+			}
+			datalen += ret;
 		}
-
+		close(fddat);
+		cur.Length = datalen;
+		//移动文件指针到索引区
+		if (lseek(fdnew, idxpos, SEEK_SET) == -1)
+		{
+			flag = false;
+			break;
+		}
+		//写入索引
+		if (write(fdnew, &cur, sizeof(INDEX_ENTRY)) < sizeof(INDEX_ENTRY) ||
+			write(fdnew, name + pathlen, cur.PathLength) < cur.PathLength)
+		{
+			flag = false;
+			break;
+		}
+		idxpos += sizeof(INDEX_ENTRY) + cur.PathLength;
 	}
+	//更新文件头
+	hdr.FileLength = cur.Offset + cur.Length;
+	if (lseek(fdnew, 0, SEEK_SET) != -1)
+		write(fdnew, &hdr, sizeof(GRF_HEADER));
 
-	return true;
+	//收尾工作
+	free(buf);
+	close(fdnew);
+	close(fdold);
+	free(name);
+	return flag;
 }
 
 bool Pal::Tools::GRF::GRFExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
 {
-	char* pszOldLocale;
-	char* pszFile;
-	size_t pathlen, namelen;
+	int fdold, fdnew;
+	size_t pathlen;
+	char* name;
+	void* buf;
+	bool flag;
+	long idxpos;
+	GRF_HEADER hdr;
+	INDEX_ENTRY cur;
 
 	//检查输入参数
-	if (pszGRF == NULL || pszNewFile == NULL || strlen(pszGRF) == 0 || strlen(pszNewFile) == 0)
+	if (pszGRF == NULL || pszNewFile == NULL || strlen(pszGRF) == 0 || strlen(pszNewFile) == 0 ||
+		(name = _icheckpath(pszBasePath)) == NULL)
 		return false;
 
-	//首先将路径名复制到临时变量中
-	if (pszBasePath == NULL || (pathlen = strlen(pszBasePath)) == 0)
+	//打开原 GRF 文件
+	if ((fdold = open(pszGRF, O_BINARY | O_RDONLY)) == -1)
 	{
-		pszFile = NULL;
-		pathlen = 0;
+		free(name);
+		return false;
 	}
 	else
 	{
-		if ((pszFile = (char*)malloc(pathlen + 1)) == NULL)
+		//检查 GRF 文件
+		if (read(fdold, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER) ||
+			memcmp(hdr.Signature, "GRF", 4) != 0 ||
+			hdr.DataOffset == 0 || hdr.EntryCount == 0)
+		{
+			close(fdold);
+			free(name);
 			return false;
-		strcpy(pszFile, pszBasePath);
+		}
+		else
+			hdr.DataOffset = hdr.FileLength;
 	}
+	//创建新的 GRF 文件
+	if ((fdnew = open(pszNewFile, O_CREAT | O_TRUNC | O_BINARY | O_RDWR, S_IREAD | S_IWRITE)) == -1)
+	{
+		close(fdold);
+		free(name);
+		return false;
+	}
+	pathlen = strlen(name);
+	idxpos = sizeof(GRF_HEADER);
 
-	return true;
+	//开辟数据缓冲区
+	if ((buf = malloc(0x4000)) == NULL)
+	{
+		close(fdnew);
+		close(fdold);
+		free(name);
+		return false;
+	}
+	else
+		flag = true;
+
+	for(uint32 i = 0; i < hdr.EntryCount; i++)
+	{
+		void* temp;
+		int fddat;
+		long ret, datalen;
+
+		//移动文件指针到索引区
+		if (lseek(fdold, idxpos, SEEK_SET) == -1)
+		{
+			flag = false;
+			break;
+		}
+		//读取索引项
+		if (read(fdold, &cur, sizeof(INDEX_ENTRY)) < sizeof(INDEX_ENTRY))
+		{
+			flag = false;
+			break;
+		}
+		//分配名字空间
+		if ((temp = realloc(name, pathlen + cur.PathLength + 1)) == NULL)
+		{
+			flag = false;
+			break;
+		}
+		else
+			name = (char*)temp;
+		//读取名字并拼接到路径中
+		if (read(fdold, name + pathlen, cur.PathLength) < cur.PathLength)
+		{
+			flag = false;
+			break;
+		}
+		name[pathlen + cur.PathLength] = '\0';
+		//移动文件指针到数据区
+		if (lseek(fdold, cur.Offset, SEEK_SET) == -1)
+		{
+			flag = false;
+			break;
+		}
+		//打开数据文件
+		if ((fddat = open(name, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE)) == -1)
+			continue;
+		//写入数据
+		for(datalen = cur.Length; datalen > 0;)
+		{
+			if (datalen >= 0x4000)
+				ret = read(fdold, buf, 0x4000);
+			else
+				ret = read(fdold, buf, datalen);
+			if (ret > 0)
+			{
+				if (write(fddat, buf, ret) < ret)
+				{
+					flag = false;
+					break;
+				}
+				datalen -= ret;
+			}
+			else
+				break;
+		}
+		close(fddat);
+		cur.Offset = cur.Length = 0;
+		//移动文件指针到索引区
+		if (lseek(fdnew, idxpos, SEEK_SET) == -1)
+		{
+			flag = false;
+			break;
+		}
+		//写入索引
+		if (write(fdnew, &cur, sizeof(INDEX_ENTRY)) < sizeof(INDEX_ENTRY) ||
+			write(fdnew, name + pathlen, cur.PathLength) < cur.PathLength)
+		{
+			flag = false;
+			break;
+		}
+		idxpos += sizeof(INDEX_ENTRY) + cur.PathLength;
+	}
+	//更新文件头
+	hdr.FileLength = idxpos;
+	hdr.DataOffset = 0;
+	if (lseek(fdnew, 0, SEEK_SET) != -1)
+		write(fdnew, &hdr, sizeof(GRF_HEADER));
+
+	//收尾工作
+	free(buf);
+	close(fdnew);
+	close(fdold);
+	free(name);
+	return flag;
 }
-*/

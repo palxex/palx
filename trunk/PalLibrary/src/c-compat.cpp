@@ -269,14 +269,12 @@ extern "C" int grfgetattr(GRFFILE* stream, int attr, void* value)
 	return Pal::Tools::GRF::GRFgetattr(stream, attr, value) ? 0 : -1;
 }
 
-/*
-int grfPackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
+extern "C" int grfpackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
 {
 	return Pal::Tools::GRF::GRFPackage(pszGRF, pszBasePath, pszNewFile) ? 0 : -1;
 }
 
-int grfExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
+extern "C" int grfextract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
 {
 	return Pal::Tools::GRF::GRFExtract(pszGRF, pszBasePath, pszNewFile) ? 0 : -1;
 }
-*/
