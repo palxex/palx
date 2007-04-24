@@ -54,7 +54,7 @@ int get_key()
 			vk = k;
 		}
 	if(key_shifts & KB_CTRL_FLAG)
-		vk = VK_EXPLORE;
+		vk = VK_EXPLORE, key_shifts = 0;
 	clear_keybuf();
 	return vk;
 }

@@ -60,9 +60,9 @@ namespace Pal
 		bool EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible = true);
 		bool DecodeRNG(const void* Source, void* PrevFrame);
 		bool EncodeRNG(const void* PrevFrame, const void* CurFrame, void*& Destination, uint32& Length);
-		bool DecodeRLE(const void* Rle, void* Destination, sint32 Width, sint32 Height, sint32 x, sint32 y);
-		bool EncodeRLE(const void* Source, const void *Base, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
-		bool EncodeRLE(const void* Source, uint8 TransparentColor, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
+		bool DecodeRLE(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
+		bool EncodeRLE(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
+		bool EncodeRLE(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
 
 		bool DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy = 0x10000);
 		bool DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength);
@@ -86,7 +86,7 @@ namespace Pal
 
 		namespace GRF
 		{
-			bool GRFopen(const char* grffile, const char* base, int mode, GRFFILE*& stream);
+			bool GRFopen(const char* grffile, const char* base, bool create, bool truncate, GRFFILE*& stream);
 			bool GRFclose(GRFFILE* stream);
 			bool GRFflush(GRFFILE* stream);
 			bool GRFgettype(GRFFILE* stream, int& type);
@@ -126,9 +126,9 @@ int decodeyj2(const void* Source, void** Destination, uint32* Length);
 int encodeyj2(const void* Source, uint32 SourceLength, void** Destination, uint32* Length, int bCompatible);
 int decoderng(const void* Source, void* PrevFrame);
 int encoderng(const void* PrevFrame, const void* CurFrame, void** Destination, uint32* Length);
-int decoderle(const void* Rle, void* Destination, sint32 Width, sint32 Height, sint32 x, sint32 y);
-int encoderle(const void* Source, const void *Base, sint32 Width, sint32 Height, void** Destination, uint32* Length);
-int encoderlet(const void* Source, uint8 TransparentColor, sint32 Width, sint32 Height, void** Destination, uint32* Length);
+int decoderle(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
+int encoderle(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length);
+int encoderlet(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length);
 
 int decodeyj1streaminitialize(void** pvState, uint32 uiGrowBy);
 int decodeyj1streaminput(void* pvState, const void* Source, uint32 SourceLength);
@@ -150,7 +150,7 @@ int encodeyj2streamoutput(void* pvState, void* Destination, uint32* Length, uint
 int encodeyj2streamfinished(void* pvState);
 int encodeyj2streamfinalize(void* pvState);
 
-GRFFILE* grfopen(const char* grffile, const char* base, int mode);
+GRFFILE* grfopen(const char* grffile, const char* base, int create, int truncate);
 int grfclose(GRFFILE* stream);
 int grfflush(GRFFILE* stream);
 int grfgettype(GRFFILE* stream);

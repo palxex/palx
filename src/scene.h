@@ -18,23 +18,23 @@ class fbp:public scene_map{
 public: 
 	fbp():scene_map(0,320,200){}
 	void change(int p){
-		memcpy(bmp->dat,FBP.decode(p,0,len),bmp->w*bmp->h);
+		memcpy(bmp->dat,FBP.decode(p,0),bmp->w*bmp->h);
 	}
 };
 class map:public scene_map{
 public: 
 	map():scene_map(0,2032,2040){}
 	void change(int p){
-		uint8_t *mapbuf=MAP.decode(p,0,len);
+		uint8_t *mapbuf=MAP.decode(p,0);
 		for(int y=0;y<0x80;y++)
 			for(int x=0;x<0x40;x++)
 				for(int h=0;h<2;h++)
 				{
 					uint8_t *_buf=mapbuf+y*0x200+x*8+h*4;
 					int index=(_buf[1]&0x10)<<4|_buf[0],index2=(_buf[3]&0x10)<<4|_buf[2];
-					sprite(GOP.decode(p,index,len)).blit_to(bmp,x*32+h*16-16,y*16+h*8-8);
+					sprite(GOP.decode(p,index)).blit_to(bmp,x*32+h*16-16,y*16+h*8-8);
 					if(index2)
-						sprite(GOP.decode(p,index2-1,len)).blit_to(bmp,x*32+h*16-16,y*16+h*8-8);
+						sprite(GOP.decode(p,index2-1)).blit_to(bmp,x*32+h*16-16,y*16+h*8-8);
 				}
 	}
 };
@@ -55,18 +55,17 @@ struct Scene{
 		void toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y;	}}
 		void toXY(){	if(status){		x=x*32+h*16;y=y*32+h*8;	}}
 	}user_pos,camera_pos;
-	Scene(scene_map *_map):now(_map),scene_buf(create_bitmap(320,200)),current(0),toload(1)
-	{
-	}
-	~Scene(){}
-	void clear_scene(){ clear_bitmap(scene_buf);}
-	void clear_active(){active_list.swap(s_list());}
-	void calc_team_walking(){}
-	void our_team_setdraw(){}
-	void visible_NPC_movment_setdraw(){}
-	void Redraw_Tiles_or_Fade_to_pic(){}
-	void adjust_viewport(){}
-	void moveright(){ camera_pos.x+=16;camera_pos.y+=8;}
+	Scene(scene_map *_map);
+	~Scene();
+	void clear_scene();
+	void clear_active();
+	void calc_team_walking();
+	void our_team_setdraw();
+	void visible_NPC_movment_setdraw();
+	void Redraw_Tiles_or_Fade_to_pic();
+	void adjust_viewport();
+	void get_sprites();
+	void produce_one_screen();
 };
 
 class cut_msg_impl

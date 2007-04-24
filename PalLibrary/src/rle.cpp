@@ -45,67 +45,7 @@
 #include "pallib.h"
 using namespace Pal::Tools;
 
-bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sint32 Height, sint32 x, sint32 y)
-{
-	sint32 sx, sy, dx, dy, i, j, width, height;
-	uint8 count;
-	uint8* dst;
-	uint8* dest;
-	uint16	rle_width = *(uint16*)Rle,
-			rle_height = *((uint16*)Rle + 1);
-	uint8* ptr = (uint8*)Rle + 4;
-
-	if (Rle == NULL || Destination == NULL)
-		return false;
-	if (x + rle_width < 0 || x >= Width || y + rle_height < 0 || y >= Height)
-		return true;
-
-	if (x < 0)
-		sx = 0, dx = -x;
-	else
-		sx = x, dx = 0;
-	if (y < 0)
-		sy = 0, dy = -y;
-	else
-		sy = y, dy = 0;
-	width = (Width - sx < rle_width - dx) ? (Width - sx) : (rle_width - dx);
-	height = (Height - sy < rle_height - dy) ? (Height - sy) : (rle_height - dy);
-
-	for(i = 0; i < dy; i++)
-		for(j =0; j< rle_width;)
-		{
-			count=*ptr++;
-			if(count < 0x80)
-				ptr += count;
-			j += count & 0x7f;
-		}
-	for(dst = dest = (uint8 *)Destination + (sy * Width) + sx, i = 0; i < height; i++, dest = dst + i * Width)
-		for(j = 0; j < rle_width;)
-		{
-			count = *ptr++;
-			if (count < 0x80)
-			{
-				if(j < dx &&  j + count > dx){
-					memcpy(dest, ptr + dx - j, count - dx + j);
-					dest += (count - dx +j);
-				}else if(j >= dx && j < dx + width){
-					int count2 = (j + count < dx + width ) ? count : dx + width - j;
-					memcpy(dest, ptr, count2);
-					dest += count2;
-				}else
-					dest += count;
-				ptr += count;
-			}else
-				if(j >= dx)
-					dest += count & 0x7f;
-			j += count & 0x7f;
-		}
-
-	return true;
-}
-
-/*
-bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sint32 Height, sint32 x, sint32 y)
+bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
 {
 	sint32 sx, sy, dx, dy, temp;
 	uint16 rle_width, rle_height;
@@ -129,18 +69,14 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sin
 		for(sx = 0; sx < rle_width;)
 		{
 			count = *ptr++;
+			sx += count & 0x7f;
 			if (count < 0x80)
-			{
 				ptr += count;
-				sx += count;
-			}
-			else
-				sx += count & 0x7f;
 		}
 	//设置目标区域指针
-	dest = (uint8*)Destination + dy * Width;
+	dest = (uint8*)Destination + dy * Stride;
 	//填充目标区域
-	for(; dy < Height && sy < rle_height; dy++, sy++)
+	for(; dy < Height && sy < rle_height; dy++, sy++, dest += Stride)
 	{
 		//跳过由于 x < 0 导致的不能显示的部分
 		for(count = 0, dx = x; dx < 0;)
@@ -161,12 +97,10 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sin
 				dx += count & 0x7f;
 		}
 		//检查是否已经越过目标图像边界
-		if ((temp = Width - dx) <= 0)
-			dest += Width;
-		else
+		if ((temp = Width - dx) > 0)
 		{
 			//填充目标图像
-			if (count < 0x80)
+			if (count < 0x80 && count > 0)
 			{
 				//不透明部分
 				if (count > temp)
@@ -174,14 +108,11 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sin
 				else
 					cnt = count;
 				//填充
-				memcpy(dest, ptr, cnt);
-				dest += cnt;
+				memcpy(dest + dx, ptr, cnt);
 				dx += cnt;
 				//调整源指针
 				ptr += count;
 			}
-			else
-				dest += dx;
 			//填充该行剩下的部分
 			for(sx = dx - x; sx < rle_width && dx < Width;)
 			{
@@ -195,8 +126,7 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sin
 					else
 						cnt = count;
 					//填充
-					memcpy(dest, ptr, cnt);
-					dest += cnt;
+					memcpy(dest + dx, ptr, cnt);
 					dx += cnt;
 					//调整源指针和源 x 值
 					ptr += count;
@@ -211,9 +141,6 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sin
 					dx += count;
 				}
 			}
-			//填充未到行尾，调整目标指针
-			if (dx < Width)
-				dest += Width - dx;
 		}
 		//调整源指针，使指针指向下一行
 		while(sx < rle_width)
@@ -230,13 +157,11 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Width, sin
 	}
 	return true;
 }
-*/
 
-bool Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
+bool Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
 {
-	sint32 i, j, length = 0;
-	bool flag;
-	uint8 count;
+	sint32 i, j, count;
+	uint32 length;
 	uint8* src = (uint8*)Source;
 	uint8* base = (uint8*)Base;
 	uint8* temp;
@@ -244,137 +169,105 @@ bool Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Width, s
 
 	if (Source == NULL || Base == NULL)
 		return false;
-	if ((ptr = temp = new uint8 [Width * Height * 2]) == NULL)
+	if ((ptr = temp = (uint8*)malloc(Width * Height * 2)) == NULL)
 		return false;
 
-	for(i = 0; i < Height; i++)
+	for(i = 0, ptr = temp + 4; i < Height; i++)
 	{
-		flag = (*src == *base); count = 0;
-		for(j = 0; j < Width; j++)
+		for(j = 0; j < Width;)
 		{
-			if (flag)
-				if (*src++ == *base++)
+			for(count = 0; j < Width && *src == *base; j++, base++, src++, count++);
+			while(count > 0)
+			{
+				*ptr++ = (count > 0x7f) ? 0xff : count;
+				count -= 0x7f;
+			}
+			for(count = 0; j < Width && *src != *base; j++, base++, src++, count++);
+			while(count > 0)
+			{
+				if (count > 0x7f)
 				{
-					if (count < 0x7f)
-						count++;
-					else
-					{
-						*ptr++ = 0xff;
-						count = 1;
-					}
-				}
-				else
-				{
-					*ptr++ = count | 0x80;
-					flag = false;
-					count = 1;
-				}
-			else
-				if (*src++ != *base++)
-				{
-					if (count < 0x7f)
-						count++;
-					else
-					{
-						*ptr++ = 0x7f;
-						memcpy(ptr, src - 0x7f, 0x7f);
-						ptr += 0x7f;
-						count = 1;
-					}
+					*ptr++ = 0x7f;
+					memcpy(src - count, ptr, 0x7f);
+					ptr += 0x7f;
 				}
 				else
 				{
 					*ptr++ = count;
-					memcpy(ptr, src - count, count);
+					memcpy(src - count, ptr, count);
 					ptr += count;
-					flag = true;
-					count = 1;
 				}
+				count -= 0x7f;
+			}
 		}
+		src += Stride - Width;
+		base += Stride - Width;
 	}
+	length = (uint32)(ptr - temp);
 
-	if ((Destination = malloc(length + 4)) == NULL)
+	if ((Destination = realloc(temp, length)) == NULL)
 	{
-		delete [] temp;
+		free(temp);
 		return false;
 	}
 	*((uint16*)Destination) = (uint16)Width;
 	*((uint16*)Destination + 1) = (uint16)Height;
-	memcpy((uint8*)Destination + 4, temp, length);
-	Length = length + 4;
-	delete [] temp;
+	Length = length;
 	return true;
 }
 
-bool Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
+bool Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
 {
-	sint32 i, j, length = 0;
-	bool flag;
-	uint8 count;
+	sint32 i, j, count;
+	uint32 length;
 	uint8* src = (uint8*)Source;
 	uint8* temp;
 	uint8* ptr;
 
 	if (Source == NULL)
 		return false;
-	if ((ptr = temp = new uint8 [Width * Height * 2]) == NULL)
+	if ((ptr = temp = (uint8*)malloc(Width * Height * 2 + 4)) == NULL)
 		return false;
 
-	for(i = 0; i < Height; i++)
+	for(i = 0, ptr = temp + 4; i < Height; i++)
 	{
-		flag = (*src == TransparentColor); count = 0;
-		for(j = 0; j < Width; j++)
+		for(j = 0; j < Width;)
 		{
-			if (flag)
-				if (*src++ == TransparentColor)
+			for(count = 0; j < Width && *src == TransparentColor; j++, src++, count++);
+			while(count > 0)
+			{
+				*ptr++ = (count > 0x7f) ? 0xff : count;
+				count -= 0x7f;
+			}
+			for(count = 0; j < Width && *src != TransparentColor; j++, src++, count++);
+			while(count > 0)
+			{
+				if (count > 0x7f)
 				{
-					if (count < 0x7f)
-						count++;
-					else
-					{
-						*ptr++ = 0xff;
-						count = 1;
-					}
-				}
-				else
-				{
-					*ptr++ = count | 0x80;
-					flag = false;
-					count = 1;
-				}
-			else
-				if (*src++ != TransparentColor)
-				{
-					if (count < 0x7f)
-						count++;
-					else
-					{
-						*ptr++ = 0x7f;
-						memcpy(ptr, src - 0x7f, 0x7f);
-						ptr += 0x7f;
-						count = 1;
-					}
+					*ptr++ = 0x7f;
+					memcpy(src - count, ptr, 0x7f);
+					ptr += 0x7f;
 				}
 				else
 				{
 					*ptr++ = count;
-					memcpy(ptr, src - count, count);
+					memcpy(src - count, ptr, count);
 					ptr += count;
-					flag = true;
-					count = 1;
 				}
+				count -= 0x7f;
+			}
 		}
+		src += Stride - Width;
 	}
+	length = (uint32)(ptr - temp);
 
-	if ((Destination = malloc(length + 4)) == NULL)
+	if ((Destination = realloc(temp, length)) == NULL)
 	{
-		delete [] temp;
+		free(temp);
 		return false;
 	}
 	*((uint16*)Destination) = (uint16)Width;
 	*((uint16*)Destination + 1) = (uint16)Height;
-	memcpy((uint8*)Destination + 4, temp, length);
-	Length = length + 4;
-	delete [] temp;
+	Length = length;
 	return true;
 }

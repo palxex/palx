@@ -54,7 +54,7 @@ typedef struct scene_def{
 	int16_t prev_evtobjs;
 }SCENE;
 
-const int ALLROLES=6;
+const int ALLROLES=6,TEAMROLES=5;
 
 typedef struct object_def{
 	int16_t inbeing;
@@ -96,11 +96,11 @@ typedef struct rpg_def{
 		int16_t x,y;
 		int16_t direction;
 		int16_t img_handler;
-	}team_pos[5];
+	}team_pos[TEAMROLES];
 	struct track{
 		int16_t x,y;
 		int16_t direction;
-	}team_track[5];
+	}team_track[TEAMROLES];
 	struct _exp{
 		int32_t exp;
 		int16_t level;
@@ -110,7 +110,7 @@ typedef struct rpg_def{
 	struct {
 		int16_t poison;
 		int16_t script;
-	}poison_stack[16][5];
+	}poison_stack[16][TEAMROLES];
 	struct {
 		int16_t item;
 		int16_t amount;
@@ -191,6 +191,26 @@ typedef struct {
 	int16_t flame;
 	int16_t earth;
 }BATTLE_FIELD;
+
+struct _LEARN{
+	int16_t level;
+	int16_t magic;
+};
+typedef struct{
+	_LEARN learning[ALLROLES];
+}UPGRADE_LEARN;
+
+struct _POS{
+	int16_t x,y;
+};
+typedef struct{
+	_POS pos[TEAMROLES][TEAMROLES];
+}ENEMY_POSES;
+
+typedef struct{
+	int16_t level;
+	int16_t exp;
+}UPGRADE_EXP;
 #pragma pack()
 
 #endif

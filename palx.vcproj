@@ -251,6 +251,14 @@
 						RelativePath=".\src\resource.cpp"
 						>
 					</File>
+					<File
+						RelativePath=".\src\scene.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\team.cpp"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="script"

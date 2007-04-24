@@ -262,7 +262,7 @@ bool Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& D
 	void* pNewData;
 
 	if (PrevFrame == NULL || CurFrame == NULL ||
-		(dst = dest = new uint8 [0x10000]) == NULL)
+		(dst = dest = (uint8*)malloc(0x10000)) == NULL)
 		return false;
 
 	while(data < end)
@@ -359,13 +359,11 @@ bool Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& D
 		len++;
 	}
 
-	if ((pNewData = malloc(len)) == NULL)
+	if ((pNewData = realloc(dst, len)) == NULL)
 	{
-		delete [] dst;
+		free(dst);
 		return false;
 	}
-	memcpy(pNewData, dst, len);
 	Length = len;
-	delete [] dst;
 	return true;
 }
