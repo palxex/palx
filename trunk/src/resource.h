@@ -22,15 +22,15 @@ class cached_res{
 	decoder_func decoder;
 	typedef std::map<std::pair<int,int>,uint8_t *> cache_type;
 	cache_type cache;
+	bool changed;
 public:
 	cached_res(const char *filename,decoder_func &d);
 	~cached_res();
 	decoder_func setdecoder(decoder_func &);
 	uint8_t *decode(int,int,long& =_len);
-	void clear(){
-		for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;
-		cache.swap(cache_type());
-	}
+	uint8_t *decode(int,long& =_len);
+	void clear();
+	void clear(int n,int n2);
 };
 extern cached_res ABC,VOC,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT;
 

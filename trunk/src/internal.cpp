@@ -3,38 +3,52 @@
 bool flag_battling=false;
 
 int flag_to_load=0;
+int rpg_to_load=0;
 int step_off_x=16,step_off_y=8;
 int coordinate_x_max=1696,coordinate_y_max=1840;
 bool flag_parallel_mutex=false;
+int x_scrn_offset=0xA0;
+int y_scrn_offset=0x70;
+int redraw_flag=0;
+
+bool mutux_setpalette=false;
+volatile int time_interrupt_occers; 
+
+int RPG_screen_wave_grade=0;
+int wave_progression=0;
 
 Scene *scene,*battle_scene;
 playrix *rix;
 Game *game;
-void redraw_everything(){}
+
 void Load_Data(int flag)
 {
 	if(flag&0x10){
-		//load sfx
+		//load sfx; this task has been not needed since we didn't be limited by 640K.
 	}
 	if(flag&0x20){
 		//load rpg
-		game->reload();
+		game->load(rpg_to_load);
 	}
-	if(scene->current!=scene->toload){
-		if(scene->current!=0){
-			//save previous scene's event objects
-		}
-		scene->current=scene->toload;
+	else if(scene->current!=scene->toload){
+		RPG_screen_wave_grade=0;
+		wave_progression=0;
+		//save previous scene's event objects,not needed in this policy
 	}
+	x_scrn_offset=0xA0;
+	y_scrn_offset=0x70;
+	scene->current=2;//scene->toload;
 	if(flag&4){
 		//load evtobjs
 		scene->sprites_begin=game->evtobjs.begin()+game->scenes[scene->current].prev_evtobjs+1;
-		scene->sprites_end  =game->evtobjs.begin()+game->scenes[scene->current+1].prev_evtobjs+1;
-		
-		//load map & npc mgo
+		scene->sprites_end  =game->evtobjs.begin()+game->scenes[scene->current+1].prev_evtobjs+1;		
 	}
+	//load map & npc
+	scene->now->change(scene->current);
+	scene->get_sprites();
+	scene->produce_one_screen();
 	if(flag&1){
-		//load role mgo
+		load_team_mgo();
 	}
 	if(flag&8){
 		//enter a new scene;
@@ -46,6 +60,7 @@ void Load_Data(int flag)
 	}
 	if(flag&2){
 		//play music
+		rix->play(game->rpg.music);
 	}
 	flag=0;
 }
@@ -89,11 +104,13 @@ void GameLoop_OneCycle(bool trigger)
 }
 void process_scrn_drawing(int)
 {
-	scene->now->blit_to(screen,scene->camera_pos.x,scene->camera_pos.y,0,0);
+//	blit(scene->scene_buf,screen,0,0,0,0,320,200);
 }
 bool process_Menu()
 {
 	return false;
 }
 void process_Explore()
-{}
+{
+	allegro_message("gota!");
+}

@@ -29,26 +29,31 @@
 #include "allegdef.h"
 
 class Game{
-	RPG rpg;
 	palette pat;
 	//data
 public:
+	RPG rpg;
 	std::vector<SHOP> shops;
 	std::vector<MONSTER> monsters;
-	static std::vector<ENEMYTEAM> enemyteams;
-	//std::vector<
+	std::vector<ENEMYTEAM> enemyteams;
+	std::vector<MAGIC> magics;
+	std::vector<BATTLE_FIELD> battlefields;
+	std::vector<UPGRADE_LEARN> learns;
+	std::vector<sprite *> UIpics;
+	std::vector<sprite *> discharge_effects;
+	std::vector<sprite *> message_handles;
+	std::vector<ENEMY_POSES> enemyposes;
+	std::vector<UPGRADE_EXP> upgradexp;
 	
 	//sss
 	std::vector<EVENT_OBJECT> evtobjs;
 	std::vector<SCENE>   scenes;
-	std::vector<OBJECT>  objects;
 	std::vector<int32_t> msg_idxes;
 	std::vector<SCRIPT>  scripts;
 	Game(int);
 	~Game();
 	void load(int id);
 	void save(int id);
-	void reload();
 	int run();
 };
 

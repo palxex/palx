@@ -179,24 +179,45 @@ static bool _iGRFseekfile(GRFFILE* stream, const char* name)
 
 //公共函数
 
-bool Pal::Tools::GRF::GRFopen(const char* grffile, const char* base, int mode, GRFFILE*& stream)
+bool Pal::Tools::GRF::GRFopen(const char* grffile, const char* base, bool create, bool truncate, GRFFILE*& stream)
 {
 	GRFFILE* grf;
 	char* _base;
 	void* ptr;
-	int fd, _mode = O_BINARY | O_RDWR;
+	int fd, _mode = O_BINARY;
 	long flen;
+	bool oflag;
 	uint32 flag;
 
 	//检查输入参数
 	if (grffile == NULL || (_base = _icheckpath(base)) == NULL)
 		return false;
 
+	//尝试打开文件，以确定打开方式
+	if ((fd = open(grffile, O_BINARY | O_RDONLY)) == -1)
+		oflag = true;
+	else
+	{
+		GRF_HEADER hdr;
+		memset(&hdr, 0, sizeof(GRF_HEADER));
+		read(fd, &hdr, sizeof(GRF_HEADER));
+		if (hdr.DataOffset == 0)
+			oflag = true;
+		else
+			oflag = false;
+		close(fd);
+	}
+
 	//设置打开模式
-	if ((mode & O_CREAT) != 0)
-		_mode &= O_CREAT;
-	if ((mode & O_TRUNC) != 0)
-		_mode &= O_TRUNC;
+	if (create)
+		_mode |= O_CREAT;
+	if (truncate)
+	{
+		_mode |= O_TRUNC;
+		oflag = true;
+	}
+	_mode |= oflag ? O_RDWR : O_RDONLY;
+
 	//尝试打开索引文件
 	if ((fd = open(grffile, _mode, S_IREAD | S_IWRITE)) == -1)
 	{

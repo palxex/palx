@@ -32,19 +32,19 @@ extern "C" int encoderng(const void* PrevFrame, const void* CurFrame, void** Des
 	return Pal::Tools::EncodeRNG(PrevFrame, CurFrame, *Destination, *Length) ? 0 : -1;
 }
 
-extern "C" int decoderle(const void* Rle, void* Destination, sint32 Width, sint32 Height, sint32 x, sint32 y)
+extern "C" int decoderle(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
 {
-	return Pal::Tools::DecodeRLE(Rle, Destination, Width, Height, x, y) ? 0 : -1;
+	return Pal::Tools::DecodeRLE(Rle, Destination, Stride, Width, Height, x, y) ? 0 : -1;
 }
 
-extern "C" int encoderle(const void* Source, const void *Base, sint32 Width, sint32 Height, void** Destination, uint32* Length)
+extern "C" int encoderle(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length)
 {
-	return Pal::Tools::EncodeRLE(Source, Base, Width, Height, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeRLE(Source, Base, Stride, Width, Height, *Destination, *Length) ? 0 : -1;
 }
 
-extern "C" int encoderlet(const void* Source, uint8 TransparentColor, sint32 Width, sint32 Height, void** Destination, uint32* Length)
+extern "C" int encoderlet(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length)
 {
-	return Pal::Tools::EncodeRLE(Source, TransparentColor, Width, Height, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeRLE(Source, TransparentColor, Stride, Width, Height, *Destination, *Length) ? 0 : -1;
 }
 
 
@@ -136,11 +136,11 @@ extern "C" int encodeyj2streamfinalize(void* pvState)
 }
 
 
-extern "C" GRFFILE* grfopen(const char* grffile, const char* base, int mode)
+extern "C" GRFFILE* grfopen(const char* grffile, const char* base, int create, int truncate)
 {
 	GRFFILE* grf;
 
-	if (Pal::Tools::GRF::GRFopen(grffile, base, mode, grf))
+	if (Pal::Tools::GRF::GRFopen(grffile, base, (create != 0), (truncate != 0), grf))
 		return grf;
 	else
 		return NULL;

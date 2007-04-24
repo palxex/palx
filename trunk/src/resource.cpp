@@ -37,7 +37,7 @@ namespace{
 		int files=usrc[0];
 		int16_t length;
 		if(n == files - 1 || (n == files - 2 && usrc[files-1] == 0) )
-			length=len-usrc[n]*2;
+			length=(int16_t)len-usrc[n]*2;
 		else
 			length=(usrc[n+1]-usrc[n])*2;
 		uint8_t *buf=new uint8_t[length];
@@ -73,6 +73,7 @@ cached_res::cached_res(const char *filename,decoder_func &func):
 	if(!fp)
 		exit(-1);
 	setdecoder(func);
+	changed=false;
 }
 cached_res::~cached_res(){
 	fclose(fp);
@@ -80,6 +81,7 @@ cached_res::~cached_res(){
 }
 decoder_func cached_res::setdecoder(decoder_func &func)
 {
+	changed=true;
 	decoder_func old_decoder=decoder;
 	decoder=func;
 	return old_decoder;
@@ -90,7 +92,22 @@ uint8_t *cached_res::decode(int n,int n2,long &length)
 	cache_type::iterator i=cache.find(pos);
 	if(i==cache.end())
 		cache[pos]=decoder(fp,n,n2,length);
+	else if(changed)
+		clear(n,n2);
 	return cache[pos];
+}
+uint8_t *cached_res::decode(int n,long &length)
+{
+	return decode(n,0,_len);
+}
+void cached_res::clear(){
+	for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;
+	cache.swap(cache_type());
+}
+void cached_res::clear(int n, int n2){
+	cache_type::iterator iter=cache.find(std::pair<int,int>(n,n2));
+	delete iter->second;
+	cache.erase(iter);
 }
 
 cached_res ABC("abc.mkf" ,de_mkf_yj1_smkf);
