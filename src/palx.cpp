@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 {
 	randomize();
 	Game  thegame(argc>=2? argv[1][0]-0x30 : begin_scene()()); game=&thegame;
-	Scene normal(new ::map());	scene=&normal;
-	Scene battle(new fbp());	battle_scene=&battle;
+	Scene normal;	scene=&normal;
+	BattleScene battle;	battle_scene=&battle;
 	playrix player;				rix=&player;
 	return thegame.run();
 }

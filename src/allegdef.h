@@ -3,7 +3,8 @@
 #define GRAPH_HEADER
 
 
-#include <list>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include "pallib.h"
 #include "resource.h"
@@ -28,6 +29,23 @@ public:
 	sprite(uint8_t *);
 	~sprite();
 	bool blit_to(BITMAP *dest,int dest_x,int dest_y);
+};
+class sprite_action{
+	std::vector<boost::shared_ptr<sprite> > sprites;	
+	int determain_smkfs(uint8_t *src)
+	{
+		uint16_t *usrc=(uint16_t*)src;
+		return usrc[0]-(usrc[usrc[0]-1]==0?1:0);
+	}
+public:
+	void getsource(uint8_t *src){
+		for(int i=0;i<determain_smkfs(src);i++)
+			sprites.push_back(boost::shared_ptr<sprite>(new sprite(src+((uint16_t *)src)[i])));
+	}
+	void blit(int i,BITMAP *bmp,int dest_x,int dest_y)
+	{
+		sprites[i]->blit_to(bmp,dest_x,dest_y);
+	}
 };
 
 class ttfont{

@@ -19,14 +19,14 @@ namespace{
 		GameLoop_OneCycle(true);
 
 		//clear scene back
-		scene->clear_scene();
+		scene->clear_scanlines();
 		scene->clear_active();
-		scene->calc_team_walking();
+		scene->calc_team_walking(keygot);
 		scene->our_team_setdraw();
 		scene->visible_NPC_movment_setdraw();
 		scene->Redraw_Tiles_or_Fade_to_pic();
-		scene->adjust_viewport();
-		process_scrn_drawing(1);
+		scene->move_usable_screen();
+		scene->process_scrn_drawing(1);
 		if(keygot==VK_MENU)
 			running=process_Menu();
 		if(keygot==VK_EXPLORE)

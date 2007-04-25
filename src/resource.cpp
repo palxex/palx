@@ -98,7 +98,7 @@ uint8_t *cached_res::decode(int n,int n2,long &length)
 }
 uint8_t *cached_res::decode(int n,long &length)
 {
-	return decode(n,0,_len);
+	return decode(n,0,length);
 }
 void cached_res::clear(){
 	for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;

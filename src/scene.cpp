@@ -1,19 +1,18 @@
 #include "scene.h"
 #include "internal.h"
 
-Scene::Scene(scene_map *_map):now(_map),scene_buf(create_bitmap(320,200)),current(0),toload(1)
+Scene::Scene():scene_buf(create_bitmap(320,200)),current(0),toload(1)
 {}
 Scene::~Scene()
 {}
-void Scene::clear_scene()
+void Scene::clear_scanlines()
 {
-	clear_bitmap(scene_buf);
 }
 void Scene::clear_active()
 {
 	active_list.swap(s_list());
 }
-void Scene::calc_team_walking()
+void Scene::calc_team_walking(int key)
 {}
 void Scene::our_team_setdraw()
 {}
@@ -21,14 +20,19 @@ void Scene::visible_NPC_movment_setdraw()
 {}
 void Scene::Redraw_Tiles_or_Fade_to_pic()
 {}
-void Scene::adjust_viewport()
+void Scene::move_usable_screen()
 {
-	camera_pos.x=team_pos.x-x_scrn_offset;
-	camera_pos.y=team_pos.x-y_scrn_offset;
 }
 void Scene::get_sprites()
-{}
+{
+}
 void Scene::produce_one_screen()
 {
-	now->blit_to(scene_buf,camera_pos.x,camera_pos.y,0,0);
+	scenemap.blit_to(scene_buf,game->rpg.viewport_x,game->rpg.viewport_y,0,0);
+}
+void Scene::process_scrn_drawing(int)
+{
+	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
+		(*i)->blit(0,scene_buf,team_pos.x,team_pos.y);
+	blit(scene->scene_buf,screen,0,0,0,0,320,200);
 }

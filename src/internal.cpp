@@ -17,7 +17,8 @@ volatile int time_interrupt_occers;
 int RPG_screen_wave_grade=0;
 int wave_progression=0;
 
-Scene *scene,*battle_scene;
+Scene *scene;
+BattleScene *battle_scene;
 playrix *rix;
 Game *game;
 
@@ -44,7 +45,7 @@ void Load_Data(int &flag)
 		scene->sprites_end  =game->evtobjs.begin()+game->scenes[scene->current+1].prev_evtobjs+1;		
 	}
 	//load map & npc
-	scene->now->change(game->scenes[scene->current].id);
+	scene->scenemap.change(game->scenes[scene->current].id);
 	scene->get_sprites();
 	scene->produce_one_screen();
 	if(flag&1){
@@ -99,10 +100,6 @@ void GameLoop_OneCycle(bool trigger)
 			//check barrier;this means, role status 2 means it takes place
 		}
 	}
-}
-void process_scrn_drawing(int)
-{
-	blit(scene->scene_buf,screen,0,0,0,0,320,200);
 }
 bool process_Menu()
 {

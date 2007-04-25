@@ -71,10 +71,17 @@ typedef struct script_def{
 //typedef struct 
 
 enum DIRECTION{WEST,NORTH,EAST,SOUTH};
+enum ROLE{LEE,LINGR,YUERU,WUHOU,GAI,ANU};
+
+typedef int16_t roles[ALLROLES];
+typedef struct {
+	roles icon;
+	roles avator;
+}ROLES_PROP;
 
 typedef struct rpg_def{
 	int16_t save_times;
-	int16_t team_x,team_y;
+	int16_t viewport_x,viewport_y;
 	int16_t team_roles;
 	int16_t scene_id;
 	int16_t palette_id;
@@ -96,7 +103,7 @@ typedef struct rpg_def{
 		int16_t x,y;
 		int16_t direction;
 		int16_t img_handler;
-	}team_pos[TEAMROLES];
+	}team[TEAMROLES];
 	struct track{
 		int16_t x,y;
 		int16_t direction;
@@ -106,7 +113,7 @@ typedef struct rpg_def{
 		int16_t level;
 		int16_t count;
 	}roles_exp[8][ALLROLES];
-	int16_t roles_properties[0x4B][ALLROLES];
+	ROLES_PROP roles_properties;
 	struct {
 		int16_t poison;
 		int16_t script;

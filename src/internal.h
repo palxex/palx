@@ -6,7 +6,7 @@
 #include "game.h"
 
 extern Scene *scene;
-extern Scene *battle_scene;
+extern BattleScene *battle_scene;
 extern playrix *rix;
 extern Game *game;
 
@@ -29,7 +29,6 @@ extern float rnd0();
 
 extern void Load_Data(int &flag);
 extern void GameLoop_OneCycle(bool);
-extern void process_scrn_drawing(int);
 extern bool process_Menu();
 extern void process_Explore();
 extern uint16_t process_script(uint16_t script,int16_t object);
