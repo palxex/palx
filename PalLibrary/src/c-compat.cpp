@@ -2,182 +2,176 @@
 
 #include "pallib.h"
 
-extern "C" int decodeyj1(const void* Source, void** Destination, uint32* Length)
+extern "C" errno_t decodeyj1(const void* Source, void** Destination, uint32* Length)
 {
-	return Pal::Tools::DecodeYJ1(Source, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1(Source, *Destination, *Length);
 }
 
-extern "C" int encodeyj1(const void* Source, uint32 SourceLength, void** Destination, uint32* Length)
+extern "C" errno_t encodeyj1(const void* Source, uint32 SourceLength, void** Destination, uint32* Length)
 {
-	return Pal::Tools::EncodeYJ1(Source, SourceLength, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeYJ1(Source, SourceLength, *Destination, *Length);
 }
 
-extern "C" int decodeyj2(const void* Source, void** Destination, uint32* Length)
+extern "C" errno_t decodeyj2(const void* Source, void** Destination, uint32* Length)
 {
-	return Pal::Tools::DecodeYJ2(Source, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2(Source, *Destination, *Length);
 }
 
-extern "C" int encodeyj2(const void* Source, uint32 SourceLength, void** Destination, uint32* Length, int bCompatible)
+extern "C" errno_t encodeyj2(const void* Source, uint32 SourceLength, void** Destination, uint32* Length, int bCompatible)
 {
-	return Pal::Tools::EncodeYJ2(Source, SourceLength, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeYJ2(Source, SourceLength, *Destination, *Length);
 }
 
-extern "C" int decoderng(const void* Source, void* PrevFrame)
+extern "C" errno_t decoderng(const void* Source, void* PrevFrame)
 {
-	return Pal::Tools::DecodeRNG(Source, PrevFrame) ? 0 : -1;
+	return Pal::Tools::DecodeRNG(Source, PrevFrame);
 }
 
-extern "C" int encoderng(const void* PrevFrame, const void* CurFrame, void** Destination, uint32* Length)
+extern "C" errno_t encoderng(const void* PrevFrame, const void* CurFrame, void** Destination, uint32* Length)
 {
-	return Pal::Tools::EncodeRNG(PrevFrame, CurFrame, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeRNG(PrevFrame, CurFrame, *Destination, *Length);
 }
 
-extern "C" int decoderle(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
+extern "C" errno_t decoderle(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
 {
-	return Pal::Tools::DecodeRLE(Rle, Destination, Stride, Width, Height, x, y) ? 0 : -1;
+	return Pal::Tools::DecodeRLE(Rle, Destination, Stride, Width, Height, x, y);
 }
 
-extern "C" int encoderle(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length)
+extern "C" errno_t encoderle(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length)
 {
-	return Pal::Tools::EncodeRLE(Source, Base, Stride, Width, Height, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeRLE(Source, Base, Stride, Width, Height, *Destination, *Length);
 }
 
-extern "C" int encoderlet(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length)
+extern "C" errno_t encoderlet(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length)
 {
-	return Pal::Tools::EncodeRLE(Source, TransparentColor, Stride, Width, Height, *Destination, *Length) ? 0 : -1;
+	return Pal::Tools::EncodeRLE(Source, TransparentColor, Stride, Width, Height, *Destination, *Length);
 }
 
 
-extern "C" int decodeyj1streaminitialize(void** pvState, uint32 uiGrowBy)
+extern "C" errno_t decodeyj1streaminitialize(void** pvState, uint32 uiGrowBy)
 {
-	return Pal::Tools::DecodeYJ1StreamInitialize(*pvState, uiGrowBy) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1StreamInitialize(*pvState, uiGrowBy);
 }
 
-extern "C" int decodeyj1streaminput(void* pvState, const void* Source, uint32 SourceLength)
+extern "C" errno_t decodeyj1streaminput(void* pvState, const void* Source, uint32 SourceLength)
 {
-	return Pal::Tools::DecodeYJ1StreamInput(pvState, Source, SourceLength) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1StreamInput(pvState, Source, SourceLength);
 }
 
-extern "C" int decodeyj1streamoutput(void* pvState, void* Destination, uint32* Length)
+extern "C" errno_t decodeyj1streamoutput(void* pvState, void* Destination, uint32 Length, uint32* ActualLength)
 {
-	return Pal::Tools::DecodeYJ1StreamOutput(pvState, Destination, *Length) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1StreamOutput(pvState, Destination, Length, *ActualLength);
 }
 
 extern "C" int decodeyj1streamfinished(void* pvState, uint32* AvailableLength)
 {
-	return Pal::Tools::DecodeYJ1StreamFinished(pvState, *AvailableLength) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1StreamFinished(pvState, *AvailableLength);
 }
 
-extern "C" int decodeyj1streamfinalize(void* pvState)
+extern "C" errno_t decodeyj1streamfinalize(void* pvState)
 {
-	return Pal::Tools::DecodeYJ1StreamFinalize(pvState) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1StreamFinalize(pvState);
 }
 
-extern "C" int decodeyj1streamreset(void* pvState)
+extern "C" errno_t decodeyj1streamreset(void* pvState)
 {
-	return Pal::Tools::DecodeYJ1StreamReset(pvState) ? 0 : -1;
+	return Pal::Tools::DecodeYJ1StreamReset(pvState);
 }
 
 
-extern "C" int decodeyj2streaminitialize(void** pvState, uint32 uiGrowBy)
+extern "C" errno_t decodeyj2streaminitialize(void** pvState, uint32 uiGrowBy)
 {
-	return Pal::Tools::DecodeYJ2StreamInitialize(*pvState, uiGrowBy) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2StreamInitialize(*pvState, uiGrowBy);
 }
 
-extern "C" int decodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength)
+extern "C" errno_t decodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength)
 {
-	return Pal::Tools::DecodeYJ2StreamInput(pvState, Source, SourceLength) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2StreamInput(pvState, Source, SourceLength);
 }
 
-extern "C" int decodeyj2streamoutput(void* pvState, void* Destination, uint32* Length)
+extern "C" errno_t decodeyj2streamoutput(void* pvState, void* Destination, uint32 Length, uint32* ActualLength)
 {
-	return Pal::Tools::DecodeYJ2StreamOutput(pvState, Destination, *Length) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2StreamOutput(pvState, Destination, Length, *ActualLength);
 }
 
 extern "C" int decodeyj2streamfinished(void* pvState, uint32* AvailableLength)
 {
-	return Pal::Tools::DecodeYJ2StreamFinished(pvState, *AvailableLength) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2StreamFinished(pvState, *AvailableLength);
 }
 
-extern "C" int decodeyj2streamfinalize(void* pvState)
+extern "C" errno_t decodeyj2streamfinalize(void* pvState)
 {
-	return Pal::Tools::DecodeYJ2StreamFinalize(pvState) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2StreamFinalize(pvState);
 }
 
-extern "C" int decodeyj2streamreset(void* pvState)
+extern "C" errno_t decodeyj2streamreset(void* pvState)
 {
-	return Pal::Tools::DecodeYJ2StreamReset(pvState) ? 0 : -1;
+	return Pal::Tools::DecodeYJ2StreamReset(pvState);
 }
 
 
-extern "C" int encodeyj2streaminitialize(void** pvState, uint32 uiSourceLength, uint32 uiGrowBy, int bCompatible)
+extern "C" errno_t encodeyj2streaminitialize(void** pvState, uint32 uiSourceLength, uint32 uiGrowBy, int bCompatible)
 {
-	return Pal::Tools::EncodeYJ2StreamInitialize(*pvState, uiSourceLength, uiGrowBy, bCompatible != 0) ? 0 : -1;
+	return Pal::Tools::EncodeYJ2StreamInitialize(*pvState, uiSourceLength, uiGrowBy, bCompatible != 0);
 }
 
-extern "C" int encodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength, int bFinished)
+extern "C" errno_t encodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength, int bFinished)
 {
-	return Pal::Tools::EncodeYJ2StreamInput(pvState, Source, SourceLength, bFinished != 0) ? 0 : -1;
+	return Pal::Tools::EncodeYJ2StreamInput(pvState, Source, SourceLength, bFinished != 0);
 }
 
-extern "C" int encodeyj2streamoutput(void* pvState, void* Destination, uint32* Length, uint32* Bits)
+extern "C" errno_t encodeyj2streamoutput(void* pvState, void* Destination, uint32 Length, uint32* ActualLength, uint32* Bits)
 {
-	return Pal::Tools::EncodeYJ2StreamOutput(pvState, Destination, *Length, *Bits) ? 0 : -1;
+	return Pal::Tools::EncodeYJ2StreamOutput(pvState, Destination, Length, *ActualLength, *Bits);
 }
 
 extern "C" int encodeyj2streamfinished(void* pvState)
 {
-	return Pal::Tools::EncodeYJ2StreamFinished(pvState) ? 0 : -1;
+	return Pal::Tools::EncodeYJ2StreamFinished(pvState);
 }
 
-extern "C" int encodeyj2streamfinalize(void* pvState)
+extern "C" errno_t encodeyj2streamfinalize(void* pvState)
 {
-	return Pal::Tools::EncodeYJ2StreamFinalize(pvState) ? 0 : -1;
+	return Pal::Tools::EncodeYJ2StreamFinalize(pvState);
 }
 
 
-extern "C" GRFFILE* grfopen(const char* grffile, const char* base, int create, int truncate)
+extern "C" errno_t grfopen(const char* grffile, const char* base, int create, int truncate, GRFFILE** grf)
 {
-	GRFFILE* grf;
-
-	if (Pal::Tools::GRF::GRFopen(grffile, base, (create != 0), (truncate != 0), grf))
-		return grf;
+	if (grf == NULL)
+		return EINVAL;
 	else
-		return NULL;
+		return Pal::Tools::GRF::GRFopen(grffile, base, (create != 0), (truncate != 0), *grf);
 }
 
-extern "C" int grfclose(GRFFILE* stream)
+extern "C" errno_t grfclose(GRFFILE* stream)
 {
-	return Pal::Tools::GRF::GRFclose(stream) ? 0 : -1;
+	return Pal::Tools::GRF::GRFclose(stream);
 }
 
-extern "C" int grfflush(GRFFILE* stream)
+extern "C" errno_t grfflush(GRFFILE* stream)
 {
-	return Pal::Tools::GRF::GRFflush(stream) ? 0 : -1;
+	return Pal::Tools::GRF::GRFflush(stream);
 }
 
-extern "C" int grfgettype(GRFFILE* stream)
+extern "C" errno_t grfgettype(GRFFILE* stream, int* type)
 {
-	int type;
-
-	if (Pal::Tools::GRF::GRFgettype(stream, type))
-		return type;
+	if (type == NULL)
+		return EINVAL;
 	else
-		return -1;
+		return Pal::Tools::GRF::GRFgettype(stream, *type);
 }
 
-extern "C" char* grfenumname(GRFFILE* stream, const char* prevname)
+extern "C" errno_t grfenumname(GRFFILE* stream, const char* prevname, char** nextname)
 {
-	char* name;
-
-	if (Pal::Tools::GRF::GRFenumname(stream, prevname, name))
-		return name;
+	if (nextname == NULL)
+		return EINVAL;
 	else
-		return NULL;
+		return Pal::Tools::GRF::GRFenumname(stream, prevname, *nextname);
 }
 
 
-extern "C" int grferror(GRFFILE* stream)
+extern "C" errno_t grferror(GRFFILE* stream)
 {
 	return Pal::Tools::GRF::GRFerror(stream);
 }
@@ -188,93 +182,85 @@ extern "C" void grfclearerr(GRFFILE* stream)
 }
 
 
-extern "C" FILE* grfopenfile(GRFFILE* stream, const char* name, const char* mode)
+extern "C" errno_t grfopenfile(GRFFILE* stream, const char* name, const char* mode, FILE** fp)
 {
-	FILE* fp;
-
-	if (Pal::Tools::GRF::GRFopenfile(stream, name, mode, fp))
-		return fp;
+	if (fp == NULL)
+		return EINVAL;
 	else
-		return NULL;
+		return Pal::Tools::GRF::GRFopenfile(stream, name, mode, *fp);
 }
 
-extern "C" int grfappendfile(GRFFILE* stream, const char* name)
+extern "C" errno_t grfappendfile(GRFFILE* stream, const char* name)
 {
-	return Pal::Tools::GRF::GRFappendfile(stream, name) ? 0 : -1;
+	return Pal::Tools::GRF::GRFappendfile(stream, name);
 }
 
-extern "C" int grfremovefile(GRFFILE* stream, const char* name)
+extern "C" errno_t grfremovefile(GRFFILE* stream, const char* name)
 {
-	return Pal::Tools::GRF::GRFremovefile(stream, name) ? 0 : -1;
+	return Pal::Tools::GRF::GRFremovefile(stream, name);
 }
 
-extern "C" int grfrenamefile(GRFFILE* stream, const char* oldname, const char* newname)
+extern "C" errno_t grfrenamefile(GRFFILE* stream, const char* oldname, const char* newname)
 {
-	return Pal::Tools::GRF::GRFrenamefile(stream, oldname, newname) ? 0 : -1;
+	return Pal::Tools::GRF::GRFrenamefile(stream, oldname, newname);
 }
 
-extern "C" int grfgetfileattr(GRFFILE* stream, const char* name, int attr, void* value)
+extern "C" errno_t grfgetfileattr(GRFFILE* stream, const char* name, int attr, void* value)
 {
-	return Pal::Tools::GRF::GRFgetfileattr(stream, name, attr, value) ? 0 : -1;
+	return Pal::Tools::GRF::GRFgetfileattr(stream, name, attr, value);
 }
 
-extern "C" int grfsetfileattr(GRFFILE* stream, const char* name, int attr, const void* value)
+extern "C" errno_t grfsetfileattr(GRFFILE* stream, const char* name, int attr, const void* value)
 {
-	return Pal::Tools::GRF::GRFsetfileattr(stream, name, attr, value) ? 0 : -1;
+	return Pal::Tools::GRF::GRFsetfileattr(stream, name, attr, value);
 }
 
 
-extern "C" int grfseekfile(GRFFILE* stream, const char* name)
+extern "C" errno_t grfseekfile(GRFFILE* stream, const char* name)
 {
-	return Pal::Tools::GRF::GRFseekfile(stream, name) ? 0 : -1;
+	return Pal::Tools::GRF::GRFseekfile(stream, name);
 }
 
-extern "C" int grfeof(GRFFILE* stream)
+extern "C" errno_t grfeof(GRFFILE* stream)
 {
 	return Pal::Tools::GRF::GRFeof(stream);
 }
 
-extern "C" long grfseek(GRFFILE* stream, long offset, int origin)
+extern "C" errno_t grfseek(GRFFILE* stream, long offset, int origin, long* pos)
 {
-	long pos;
-
-	if (Pal::Tools::GRF::GRFseek(stream, offset, origin, pos))
-		return pos;
+	if (pos == NULL)
+		return EINVAL;
 	else
-		return -1;
+		return Pal::Tools::GRF::GRFseek(stream, offset, origin, *pos);
 }
 
-extern "C" long grftell(GRFFILE* stream)
+extern "C" errno_t grftell(GRFFILE* stream, long* pos)
 {
-	long pos;
-
-	if (Pal::Tools::GRF::GRFtell(stream, pos))
-		return pos;
+	if (pos == NULL)
+		return EINVAL;
 	else
-		return -1;
+		return Pal::Tools::GRF::GRFtell(stream, *pos);
 }
 
-extern "C" long grfread(GRFFILE* stream, void* buffer, long size)
+extern "C" errno_t grfread(GRFFILE* stream, void* buffer, long size, long* len)
 {
-	uint32 len;
-
-	if (Pal::Tools::GRF::GRFread(stream, buffer, size, len))
-		return (long)len;
+	if (len == NULL)
+		return EINVAL;
 	else
-		return -1;
+		return Pal::Tools::GRF::GRFread(stream, buffer, size, (uint32&)*len);
 }
 
-extern "C" int grfgetattr(GRFFILE* stream, int attr, void* value)
+extern "C" errno_t grfgetattr(GRFFILE* stream, int attr, void* value)
 {
-	return Pal::Tools::GRF::GRFgetattr(stream, attr, value) ? 0 : -1;
+	return Pal::Tools::GRF::GRFgetattr(stream, attr, value);
 }
 
-extern "C" int grfpackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
+extern "C" errno_t grfpackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
 {
-	return Pal::Tools::GRF::GRFPackage(pszGRF, pszBasePath, pszNewFile) ? 0 : -1;
+	return Pal::Tools::GRF::GRFPackage(pszGRF, pszBasePath, pszNewFile);
 }
 
-extern "C" int grfextract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
+extern "C" errno_t grfextract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
 {
-	return Pal::Tools::GRF::GRFExtract(pszGRF, pszBasePath, pszNewFile) ? 0 : -1;
+	return Pal::Tools::GRF::GRFExtract(pszGRF, pszBasePath, pszNewFile);
 }

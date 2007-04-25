@@ -45,7 +45,7 @@
 #include "pallib.h"
 using namespace Pal::Tools;
 
-bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
+errno_t Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
 {
 	sint32 sx, sy, dx, dy, temp;
 	uint16 rle_width, rle_height;
@@ -55,14 +55,14 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, si
 
 	//检查输入参数
 	if (Rle == NULL || Destination == NULL)
-		return false;
+		return EINVAL;
 	//取 RLE 图像的宽度和高度
 	rle_width = *(uint16*)Rle;
 	rle_height = *((uint16*)Rle + 1);
 	ptr = (uint8*)Rle + 4;
 	//检查 RLE 图像能否显示到指定的图像中
 	if (Width <= 0 || Height <= 0 || x + rle_width < 0 || x >= Width || y + rle_height < 0 || y >= Height)
-		return true;
+		return 0;
 
 	//跳过由于 y < 0 导致的不能显示的部分
 	for(sy = 0, dy = y; dy < 0; dy++, sy++)
@@ -155,10 +155,10 @@ bool Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, si
 				sx += count & 0x7f;
 		}
 	}
-	return true;
+	return 0;
 }
 
-bool Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
+errno_t Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
 {
 	sint32 i, j, count;
 	uint32 length;
@@ -168,9 +168,9 @@ bool Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, 
 	uint8* ptr;
 
 	if (Source == NULL || Base == NULL)
-		return false;
+		return EINVAL;
 	if ((ptr = temp = (uint8*)malloc(Width * Height * 2)) == NULL)
-		return false;
+		return ENOMEM;
 
 	for(i = 0, ptr = temp + 4; i < Height; i++)
 	{
@@ -208,15 +208,15 @@ bool Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, 
 	if ((Destination = realloc(temp, length)) == NULL)
 	{
 		free(temp);
-		return false;
+		return ENOMEM;
 	}
 	*((uint16*)Destination) = (uint16)Width;
 	*((uint16*)Destination + 1) = (uint16)Height;
 	Length = length;
-	return true;
+	return 0;
 }
 
-bool Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
+errno_t Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
 {
 	sint32 i, j, count;
 	uint32 length;
@@ -225,9 +225,9 @@ bool Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sin
 	uint8* ptr;
 
 	if (Source == NULL)
-		return false;
+		return EINVAL;
 	if ((ptr = temp = (uint8*)malloc(Width * Height * 2 + 4)) == NULL)
-		return false;
+		return ENOMEM;
 
 	for(i = 0, ptr = temp + 4; i < Height; i++)
 	{
@@ -264,10 +264,10 @@ bool Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sin
 	if ((Destination = realloc(temp, length)) == NULL)
 	{
 		free(temp);
-		return false;
+		return ENOMEM;
 	}
 	*((uint16*)Destination) = (uint16)Width;
 	*((uint16*)Destination + 1) = (uint16)Height;
 	Length = length;
-	return true;
+	return 0;
 }
