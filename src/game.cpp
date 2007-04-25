@@ -13,11 +13,9 @@ namespace{
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
 	template<typename T>
-	inline void reunion(vector<boost::shared_ptr<T> > &vec,uint8_t *src,long &len)
+	inline void reunion(sprite_action &vec,uint8_t *src,long &len)
 	{
-		T *t=new T;
-		t.getsource(src);
-		vec.push_back(boost::shared_ptr<T>(t));
+		vec.getsource(src);
 	}
 	template<typename T>
 	inline void reunion(T *vec,uint8_t *src,long &len)
