@@ -54,7 +54,7 @@ struct Scene{
 		position():x(0),y(0),status(false){}
 		void toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y;	}}
 		void toXY(){	if(status){		x=x*32+h*16;y=y*32+h*8;	}}
-	}user_pos,camera_pos;
+	}team_pos,camera_pos;
 	Scene(scene_map *_map);
 	~Scene();
 	void clear_scene();

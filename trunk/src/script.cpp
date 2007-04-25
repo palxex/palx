@@ -57,13 +57,19 @@ __walk_npc:
 			break;
 		case 0x40:
 			break;
+		case 0x43:
+			game->rpg.music=param1;
+			break;
 		case 0x44:
 			GameLoop_OneCycle(false);
 			//redraw_everything();
 			break;
+		case 0x45:
+			game->rpg.battle_music=param1;
+			break;
 		case 0x46:
-			scene->user_pos.x=param1*32+param3*16;
-			scene->user_pos.y=param2*16+param3*8;
+			scene->team_pos.x=param1*32+param3*16;
+			scene->team_pos.y=param2*16+param3*8;
 			break;
 		case 0x49:
 			(game->rpg.evtobjs+(param1!=-1?param1:object))->status=param2;
@@ -90,9 +96,9 @@ __walk_npc:
 __walk_role:
 			{
 				int16_t x_diff,y_diff;
-				while((x_diff=scene->user_pos.x-(param1*32+param3*16)) && (y_diff=scene->user_pos.y-(param2*16+param3*8))){
-					scene->user_pos.x += role_speed*(x_diff<0 ? 2 : -2);
-					scene->user_pos.y += role_speed*(y_diff<0 ? 1 : -1);
+				while((x_diff=scene->team_pos.x-(param1*32+param3*16)) && (y_diff=scene->team_pos.y-(param2*16+param3*8))){
+					scene->team_pos.x += role_speed*(x_diff<0 ? 2 : -2);
+					scene->team_pos.y += role_speed*(y_diff<0 ? 1 : -1);
 					GameLoop_OneCycle(false);
 					redraw_everything();
 				}
@@ -115,11 +121,11 @@ __walk_role:
 			npc_speed=4;
 			goto __walk_npc;
 		case 0x7f:
-			GameLoop_OneCycle(false);
+			//GameLoop_OneCycle(false);
 			//redraw_everything();
 			break;
 		case 0x80:
-			GameLoop_OneCycle(false);
+			//GameLoop_OneCycle(false);
 			//redraw_everything();
 			break;
 		case 0x82:
@@ -129,7 +135,7 @@ __walk_role:
 			//clear_effective(1,0x41);
 			break;
 		case 0x93:
-			GameLoop_OneCycle(false);
+			//GameLoop_OneCycle(false);
 			//redraw_everything();
 			break;
 		case 0x9d:
@@ -144,13 +150,11 @@ __walk_role:
 			//clear_effective(1,0x48);
 			break;
 	}
-	if(addition[0])
-		//printf("%s\n",addition);
 	return id;
 }
 
-void process_script(uint16_t &id,int16_t object)
-{/*
+uint16_t process_script(uint16_t id,int16_t object)
+{
 	EVENT_OBJECT &obj=game->rpg.evtobjs[object];
 	uint16_t next_id=id;
 	while(id)
@@ -163,20 +167,21 @@ void process_script(uint16_t &id,int16_t object)
 			case 0:
 				id = next_id;
 				//printf("停止执行\n");
+				return id;
 			case 0xffff:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
-				id++;
+				return id+1;
 			case 2:
 				//printf("停止执行，将调用地址替换为脚本%x:",param1);
 				if(curr.param[1]==0){
 					//printf("成功\n");
-					id = param1;
+					return param1;
 				}else if(obj.scr_jmp_count++<curr.param[1]){
 					//printf("第%x次成功\n",obj.scr_jmp_count);
-					id = param1;
+					return param1;
 				}else{
 					//printf("过期失效\n");
 					obj.scr_jmp_count = 0;
@@ -247,10 +252,10 @@ void process_script(uint16_t &id,int16_t object)
 		}
 		++id;
 	}
-	return id;*/
+	return id;
 }
-void process_autoscript(uint16_t &id,int16_t object)
-{/*
+uint16_t process_autoscript(uint16_t id,int16_t object)
+{
 	if(id==0)
 		return 0;
 	SCRIPT &curr=game->scripts[id];
@@ -280,11 +285,11 @@ void process_autoscript(uint16_t &id,int16_t object)
 			if(param2==0){
 				//printf("成功\n");
 				id = param1;
-				process_autoSCRIPT(id,object);
+				process_autoscript(id,object);
 			}else if(obj.scr_jmp_count_auto++<param2){
 				//printf("第%x次成功\n",obj.scr_jmp_count_auto);
 				id = param1;
-				process_autoSCRIPT(id,object);
+				process_autoscript(id,object);
 			}else{
 				//printf("失败\n");
 				obj.scr_jmp_count_auto = 0;
@@ -300,7 +305,7 @@ void process_autoscript(uint16_t &id,int16_t object)
 			if(rnd0()*100<param1){
 				//printf("成功\n");
 				id = param2;
-				process_autoSCRIPT(id,object);
+				process_autoscript(id,object);
 			}else
 				//printf("失败\n");
 			break;
@@ -314,5 +319,5 @@ void process_autoscript(uint16_t &id,int16_t object)
 		default:
 			id = process_script_entry(curr.func,curr.param,id,object);
 	}
-	return id+1;*/
+	return id+1;
 }

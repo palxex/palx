@@ -82,7 +82,7 @@ typedef struct rpg_def{
 	int16_t music;
 	int16_t battle_music;
 	int16_t battlefield;
-	int16_t confusion;
+	int16_t wave_grade;
 	int16_t reserved;
 	int16_t gourd_value;
 	int16_t layer;//?
