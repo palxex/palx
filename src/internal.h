@@ -27,13 +27,13 @@ extern volatile int time_interrupt_occers;
 extern void randomize();
 extern float rnd0();
 
-extern void Load_Data(int flag);
+extern void Load_Data(int &flag);
 extern void GameLoop_OneCycle(bool);
 extern void process_scrn_drawing(int);
 extern bool process_Menu();
 extern void process_Explore();
-extern void process_script(uint16_t &script,int16_t object);
-extern void process_autoscript(uint16_t &script,int16_t object);
+extern uint16_t process_script(uint16_t script,int16_t object);
+extern uint16_t process_autoscript(uint16_t script,int16_t object);
 extern void load_team_mgo(int =0,int =0,int =0);
 extern void redraw_everything();
 

@@ -61,7 +61,6 @@ namespace{
 }
 
 int Game::run(){
-	rix->play(23);
 	//游戏主循环10fps,画面100fps,音乐70fps。
 	//因为allegro int无法调试，调试期改用循环。
 	/*
