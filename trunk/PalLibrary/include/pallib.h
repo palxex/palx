@@ -45,6 +45,8 @@
 #	define	PAL_LIBRARY_H
 #endif
 
+#include <errno.h>
+
 #include "config.h"
 #include "grf.h"
 
@@ -54,125 +56,126 @@ namespace Pal
 {
 	namespace Tools
 	{
-		bool DecodeYJ1(const void* Source, void*& Destination, uint32& Length);
-		bool EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length);
-		bool DecodeYJ2(const void* Source, void*& Destination, uint32& Length);
-		bool EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible = true);
-		bool DecodeRNG(const void* Source, void* PrevFrame);
-		bool EncodeRNG(const void* PrevFrame, const void* CurFrame, void*& Destination, uint32& Length);
-		bool DecodeRLE(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
-		bool EncodeRLE(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
-		bool EncodeRLE(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
+		errno_t DecodeYJ1(const void* Source, void*& Destination, uint32& Length);
+		errno_t EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length);
+		errno_t DecodeYJ2(const void* Source, void*& Destination, uint32& Length);
+		errno_t EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible = true);
+		errno_t DecodeRNG(const void* Source, void* PrevFrame);
+		errno_t EncodeRNG(const void* PrevFrame, const void* CurFrame, void*& Destination, uint32& Length);
+		errno_t DecodeRLE(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
+		errno_t EncodeRLE(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
+		errno_t EncodeRLE(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
 
-		bool DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy = 0x10000);
-		bool DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength);
-		bool DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32& Length);
+		errno_t DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy = 0x10000);
+		errno_t DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength);
+		errno_t DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength);
 		bool DecodeYJ1StreamFinished(void* pvState, uint32& AvailableLength);
-		bool DecodeYJ1StreamFinalize(void* pvState);
-		bool DecodeYJ1StreamReset(void* pvState);
+		errno_t DecodeYJ1StreamFinalize(void* pvState);
+		errno_t DecodeYJ1StreamReset(void* pvState);
 
-		bool DecodeYJ2StreamInitialize(void*& pvState, uint32 uiGrowBy = 0x10000);
-		bool DecodeYJ2StreamInput(void* pvState, const void* Source, uint32 SourceLength);
-		bool DecodeYJ2StreamOutput(void* pvState, void* Destination, uint32& Length);
+		errno_t DecodeYJ2StreamInitialize(void*& pvState, uint32 uiGrowBy = 0x10000);
+		errno_t DecodeYJ2StreamInput(void* pvState, const void* Source, uint32 SourceLength);
+		errno_t DecodeYJ2StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength);
 		bool DecodeYJ2StreamFinished(void* pvState, uint32& AvailableLength);
-		bool DecodeYJ2StreamFinalize(void* pvState);
-		bool DecodeYJ2StreamReset(void* pvState);
+		errno_t DecodeYJ2StreamFinalize(void* pvState);
+		errno_t DecodeYJ2StreamReset(void* pvState);
 
-		bool EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength, uint32 uiGrowBy = 0x10000, bool bCompatible = true);
-		bool EncodeYJ2StreamInput(void* pvState, const void* Source, uint32 SourceLength, bool bFinished = false);
-		bool EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32& Length, uint32& Bits);
+		errno_t EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength, uint32 uiGrowBy = 0x10000, bool bCompatible = true);
+		errno_t EncodeYJ2StreamInput(void* pvState, const void* Source, uint32 SourceLength, bool bFinished = false);
+		errno_t EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength, uint32& Bits);
 		bool EncodeYJ2StreamFinished(void* pvState);
-		bool EncodeYJ2StreamFinalize(void* pvState);
+		errno_t EncodeYJ2StreamFinalize(void* pvState);
 
 		namespace GRF
 		{
-			bool GRFopen(const char* grffile, const char* base, bool create, bool truncate, GRFFILE*& stream);
-			bool GRFclose(GRFFILE* stream);
-			bool GRFflush(GRFFILE* stream);
-			bool GRFgettype(GRFFILE* stream, int& type);
-			bool GRFenumname(GRFFILE* stream, const char* prevname, char*& nextname);
-			int GRFerror(GRFFILE* stream);
+			errno_t GRFopen(const char* grffile, const char* base, bool create, bool truncate, GRFFILE*& stream);
+			errno_t GRFclose(GRFFILE* stream);
+			errno_t GRFflush(GRFFILE* stream);
+			errno_t GRFgettype(GRFFILE* stream, int& type);
+			errno_t GRFenumname(GRFFILE* stream, const char* prevname, char*& nextname);
+			errno_t GRFerror(GRFFILE* stream);
 			void GRFclearerr(GRFFILE* stream);
 
 			//只提供给单独版本的 GRF 文件使用
-			bool GRFopenfile(GRFFILE* stream, const char* name, const char* mode, FILE*& fpout);
-			bool GRFappendfile(GRFFILE* stream, const char* name);
-			bool GRFremovefile(GRFFILE* stream, const char* name);
-			bool GRFrenamefile(GRFFILE* stream, const char* oldname, const char* newname);
-			bool GRFgetfileattr(GRFFILE* stream, const char* name, int attr, void* value);
-			bool GRFsetfileattr(GRFFILE* stream, const char* name, int attr, const void* value);
+			errno_t GRFgetfilename(GRFFILE* stream, const char* name, char*& filename, bool& forcenew);
+			errno_t GRFopenfile(GRFFILE* stream, const char* name, const char* mode, FILE*& fpout);
+			errno_t GRFappendfile(GRFFILE* stream, const char* name);
+			errno_t GRFremovefile(GRFFILE* stream, const char* name);
+			errno_t GRFrenamefile(GRFFILE* stream, const char* oldname, const char* newname);
+			errno_t GRFgetfileattr(GRFFILE* stream, const char* name, int attr, void* value);
+			errno_t GRFsetfileattr(GRFFILE* stream, const char* name, int attr, const void* value);
 
 			//只提供给集成版本的 GRF 文件使用
-			bool GRFseekfile(GRFFILE* stream, const char* name);
-			bool GRFeof(GRFFILE* stream);
-			bool GRFseek(GRFFILE* stream, long offset, int origin, long& newpos);
-			bool GRFtell(GRFFILE* stream, long& pos);
-			bool GRFread(GRFFILE* stream, void* buffer, uint32 size, uint32& actual);
-			bool GRFgetattr(GRFFILE* stream, int attr, void* value);
+			errno_t GRFseekfile(GRFFILE* stream, const char* name);
+			errno_t GRFeof(GRFFILE* stream);
+			errno_t GRFseek(GRFFILE* stream, long offset, int origin, long& newpos);
+			errno_t GRFtell(GRFFILE* stream, long& pos);
+			errno_t GRFread(GRFFILE* stream, void* buffer, uint32 size, uint32& actual);
+			errno_t GRFgetattr(GRFFILE* stream, int attr, void* value);
 
-			bool GRFPackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
-			bool GRFExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
+			errno_t GRFPackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
+			errno_t GRFExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
 		}
 	}
 }
 
 #else
 
-//以下函数，除返回指针的以 NULL 表示错误外，其余均以返回 -1 表示错误
+//以下函数，均以返回非 0 表示错误
 
-int decodeyj1(const void* Source, void** Destination, uint32* Length);
-int encodeyj1(const void* Source, uint32 SourceLength, void** Destination, uint32* Length);
-int decodeyj2(const void* Source, void** Destination, uint32* Length);
-int encodeyj2(const void* Source, uint32 SourceLength, void** Destination, uint32* Length, int bCompatible);
-int decoderng(const void* Source, void* PrevFrame);
-int encoderng(const void* PrevFrame, const void* CurFrame, void** Destination, uint32* Length);
-int decoderle(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
-int encoderle(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length);
-int encoderlet(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length);
+errno_t decodeyj1(const void* Source, void** Destination, uint32* Length);
+errno_t encodeyj1(const void* Source, uint32 SourceLength, void** Destination, uint32* Length);
+errno_t decodeyj2(const void* Source, void** Destination, uint32* Length);
+errno_t encodeyj2(const void* Source, uint32 SourceLength, void** Destination, uint32* Length, errno_t bCompatible);
+errno_t decoderng(const void* Source, void* PrevFrame);
+errno_t encoderng(const void* PrevFrame, const void* CurFrame, void** Destination, uint32* Length);
+errno_t decoderle(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
+errno_t encoderle(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length);
+errno_t encoderlet(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void** Destination, uint32* Length);
 
-int decodeyj1streaminitialize(void** pvState, uint32 uiGrowBy);
-int decodeyj1streaminput(void* pvState, const void* Source, uint32 SourceLength);
-int decodeyj1streamoutput(void* pvState, void* Destination, uint32* Length);
+errno_t decodeyj1streaminitialize(void** pvState, uint32 uiGrowBy);
+errno_t decodeyj1streaminput(void* pvState, const void* Source, uint32 SourceLength);
+errno_t decodeyj1streamoutput(void* pvState, void* Destination, uint32 Length, uint32* ActualLength);
 int decodeyj1streamfinished(void* pvState, uint32* AvailableLength);
-int decodeyj1streamfinalize(void* pvState);
-int decodeyj1streamreset(void* pvState);
+errno_t decodeyj1streamfinalize(void* pvState);
+errno_t decodeyj1streamreset(void* pvState);
 
-int decodeyj2streaminitialize(void** pvState, uint32 uiGrowBy);
-int decodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength);
-int decodeyj2streamoutput(void* pvState, void* Destination, uint32* Length);
+errno_t decodeyj2streaminitialize(void** pvState, uint32 uiGrowBy);
+errno_t decodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength);
+errno_t decodeyj2streamoutput(void* pvState, void* Destination, uint32 Length, uint32* ActualLength);
 int decodeyj2streamfinished(void* pvState, uint32* AvailableLength);
-int decodeyj2streamfinalize(void* pvState);
-int decodeyj2streamreset(void* pvState);
+errno_t decodeyj2streamfinalize(void* pvState);
+errno_t decodeyj2streamreset(void* pvState);
 
-int encodeyj2streaminitialize(void** pvState, uint32 uiSourceLength, uint32 uiGrowBy, int bCompatible);
-int encodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength, int bFinished);
-int encodeyj2streamoutput(void* pvState, void* Destination, uint32* Length, uint32* Bits);
+errno_t encodeyj2streaminitialize(void** pvState, uint32 uiSourceLength, uint32 uiGrowBy, int bCompatible);
+errno_t encodeyj2streaminput(void* pvState, const void* Source, uint32 SourceLength, int bFinished);
+errno_t encodeyj2streamoutput(void* pvState, void* Destination, uint32 Length, uint32* ActualLength, uint32* Bits);
 int encodeyj2streamfinished(void* pvState);
-int encodeyj2streamfinalize(void* pvState);
+errno_t encodeyj2streamfinalize(void* pvState);
 
-GRFFILE* grfopen(const char* grffile, const char* base, int create, int truncate);
-int grfclose(GRFFILE* stream);
-int grfflush(GRFFILE* stream);
-int grfgettype(GRFFILE* stream);
-char* grfenumname(GRFFILE* stream, const char* prevname);
-int grferror(GRFFILE* stream);
+errno_t grfopen(const char* grffile, const char* base, int create, int truncate, GRFFILE** grf);
+errno_t grfclose(GRFFILE* stream);
+errno_t grfflush(GRFFILE* stream);
+errno_t grfgettype(GRFFILE* stream, int* type);
+errno_t grfenumname(GRFFILE* stream, const char* prevname, char** nextname);
+errno_t grferror(GRFFILE* stream);
 void grfclearerr(GRFFILE* stream);
 
-FILE* grfopenfile(GRFFILE* stream, const char* name, const char* mode);
-int grfappendfile(GRFFILE* stream, const char* name);
-int grfremovefile(GRFFILE* stream, const char* name);
-int grfrenamefile(GRFFILE* stream, const char* oldname, const char* newname);
-int grfgetfileattr(GRFFILE* stream, const char* name, int attr, void* value);
-int grfsetfileattr(GRFFILE* stream, const char* name, int attr, const void* value);
+errno_t grfopenfile(GRFFILE* stream, const char* name, const char* mode, FILE** fp);
+errno_t grfappendfile(GRFFILE* stream, const char* name);
+errno_t grfremovefile(GRFFILE* stream, const char* name);
+errno_t grfrenamefile(GRFFILE* stream, const char* oldname, const char* newname);
+errno_t grfgetfileattr(GRFFILE* stream, const char* name, int attr, void* value);
+errno_t grfsetfileattr(GRFFILE* stream, const char* name, int attr, const void* value);
 
-int grfseekfile(GRFFILE* stream, const char* name);
-int grfeof(GRFFILE* stream);
-long grfseek(GRFFILE* stream, long offset, int origin);
-long grftell(GRFFILE* stream);
-long grfread(GRFFILE* stream, void* buffer, long size);
-int grfgetattr(GRFFILE* stream, int attr, void* value);
+errno_t grfseekfile(GRFFILE* stream, const char* name);
+errno_t grfeof(GRFFILE* stream);
+errno_t grfseek(GRFFILE* stream, long offset, int origin, long pos);
+errno_t grftell(GRFFILE* stream, long pos);
+errno_t grfread(GRFFILE* stream, void* buffer, long size, long len);
+errno_t grfgetattr(GRFFILE* stream, int attr, void* value);
 
-int grfpackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
-int grfextract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
+errno_t grfpackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
+errno_t grfextract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
 
 #endif

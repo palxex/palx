@@ -61,34 +61,34 @@ struct YJ1_Decode_State
 	uint16		curblk;
 };
 
-bool Pal::Tools::DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy)
+errno_t Pal::Tools::DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy)
 {
 	struct YJ1_Decode_State* state;
 
 	if (uiGrowBy < 0x1000)
 		uiGrowBy = 0x1000;
 	if ((state = new YJ1_Decode_State) == NULL)
-		return false;
+		return ENOMEM;
 	memset(state, 0, sizeof(struct YJ1_Decode_State));
 	if ((state->pIBuffer = new uint8 [uiGrowBy]) == NULL)
 	{
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	if ((state->pOBuffer = new uint8 [0x4000]) == NULL)
 	{
 		delete [] state->pIBuffer;
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	state->bInitialed = true;
 	state->uiILength = uiGrowBy;
 	state->uiIGrowBy = uiGrowBy;
 	pvState = state;
-	return true;
+	return 0;
 }
 
-bool Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength)
+errno_t Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -97,20 +97,20 @@ bool Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 
 		uint8* src;
 
 		if (Source == NULL || SourceLength == 0)
-			return true;
+			return 0;
 		if (state->inputstep == 0)
 		{
 			if (state->uiIEnd + SourceLength < sizeof(YJ_1_FILEHEADER))
 			{
 				memcpy((uint8*)state->pIBuffer + state->uiIEnd, Source, SourceLength);
 				state->uiIEnd += SourceLength;
-				return true;
+				return 0;
 			}
 			else
 				memcpy((uint8*)state->pIBuffer + state->uiIEnd, Source, sizeof(YJ_1_FILEHEADER) - state->uiIEnd);
 			state->header = *((PYJ_1_FILEHEADER)state->pIBuffer);
 			if (state->header.Signature != '1_JY')
-				return false;
+				return EILSEQ;
 			SourceLength -= sizeof(YJ_1_FILEHEADER) - state->uiIEnd;
 			src = (uint8*)Source + sizeof(YJ_1_FILEHEADER) - state->uiIEnd;
 			state->uiIEnd = 0;
@@ -144,7 +144,7 @@ bool Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 
 				uint8* flag = state->pIBuffer + tree_len;
 
 				if ((state->root = new TreeNode [tree_len + 1]) == NULL)
-					return false;
+					return ENOMEM;
 				state->root[0].leaf = false;
 				state->root[0].value = 0;
 				state->root[0].left = state->root + 1;
@@ -172,7 +172,7 @@ bool Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 
 				uint8* pbuf;
 				uint32 len = (state->uiIEnd + SourceLength) / state->uiIGrowBy + state->uiIGrowBy;
 				if ((pbuf = new uint8 [state->uiILength + len]) == NULL)
-					return false;
+					return ENOMEM;
 				memcpy(pbuf, state->pIBuffer, state->uiIEnd);
 				delete [] state->pIBuffer;
 				state->pIBuffer = pbuf;
@@ -181,10 +181,10 @@ bool Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 
 			memcpy(state->pIBuffer + state->uiIEnd, src, SourceLength);
 			state->uiIEnd += SourceLength;
 		}
-		return true;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }
 
 static void DecodeYJ1StreamProcess(void* pvState)
@@ -240,10 +240,9 @@ static void DecodeYJ1StreamProcess(void* pvState)
 			}
 		}
 	}
-	return;
 }
 
-bool Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32& Length)
+errno_t Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -255,8 +254,8 @@ bool Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32&
 
 		if (Destination == NULL || Length == 0 || state->inputstep < 2)
 		{
-			Length = 0;
-			return true;
+			ActualLength = 0;
+			return 0;
 		}
 
 		if (state->uiOEnd < state->uiOTop)
@@ -272,7 +271,8 @@ bool Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32&
 			{
 				memcpy(dest, state->pOBuffer + state->uiOEnd, Length);
 				state->uiOEnd += Length;
-				return true;
+				ActualLength = Length;
+				return 0;
 			}
 		}
 
@@ -302,17 +302,18 @@ bool Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32&
 				{
 					memcpy(dest + len, state->pOBuffer, Length - len);
 					state->uiOEnd = Length - len;
-					return true;
+					ActualLength = Length;
+					return 0;
 				}
 			}
 			else
 				break;
 		}
-		Length = len;
-		return true;
+		ActualLength = len;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }
 
 bool Pal::Tools::DecodeYJ1StreamFinished(void* pvState, uint32& AvailableLength)
@@ -331,7 +332,7 @@ bool Pal::Tools::DecodeYJ1StreamFinished(void* pvState, uint32& AvailableLength)
 		return false;
 }
 
-bool Pal::Tools::DecodeYJ1StreamFinalize(void* pvState)
+errno_t Pal::Tools::DecodeYJ1StreamFinalize(void* pvState)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -342,13 +343,13 @@ bool Pal::Tools::DecodeYJ1StreamFinalize(void* pvState)
 		delete [] state->pOBuffer;
 		delete [] state->pIBuffer;
 		delete state;
-		return true;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }
 
-bool Pal::Tools::DecodeYJ1StreamReset(void* pvState)
+errno_t Pal::Tools::DecodeYJ1StreamReset(void* pvState)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -367,8 +368,8 @@ bool Pal::Tools::DecodeYJ1StreamReset(void* pvState)
 		state->uiIGrowBy = uiGrowBy;
 		state->uiILength = uiLength;
 		state->bInitialed = true;
-		return true;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }

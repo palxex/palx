@@ -45,7 +45,7 @@
 #include "pallib.h"
 using namespace Pal::Tools;
 
-bool Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
+errno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 {
 	sint32 ptr = 0, dst_ptr = 0;
 	uint8 data;
@@ -55,7 +55,7 @@ bool Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 	uint8* dest = (uint8*)PrevFrame;
 
 	if (Source == NULL || PrevFrame == NULL)
-		return false;
+		return EINVAL;
 
 	while(1)
 	{
@@ -65,7 +65,7 @@ bool Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 		case 0x00:
 		case 0x13:
 			//0x1000411b
-			return true;
+			return 0;
 		case 0x01:
 		case 0x05:
 			break;
@@ -161,7 +161,7 @@ bool Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 			break;
 		}
 	}
-	return true;
+	return 0;
 }
 
 static uint16 encode_1(uint16 *&start, uint16 *&data, uint8 *&dest)
@@ -250,7 +250,7 @@ static uint16 encode_3(uint16 *&start, uint16 *&data, uint8 *&dest)
 	return len;
 }
 
-bool Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& Destination, uint32& Length)
+errno_t Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& Destination, uint32& Length)
 {
 	sint32 len = 0, status = 0;
 	uint16* data = (uint16*)CurFrame;
@@ -261,9 +261,10 @@ bool Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& D
 	uint8* dst;
 	void* pNewData;
 
-	if (PrevFrame == NULL || CurFrame == NULL ||
-		(dst = dest = (uint8*)malloc(0x10000)) == NULL)
-		return false;
+	if (PrevFrame == NULL || CurFrame == NULL)
+		return EINVAL;
+	if ((dst = dest = (uint8*)malloc(0x10000)) == NULL)
+		return ENOMEM;
 
 	while(data < end)
 	{
@@ -362,8 +363,8 @@ bool Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& D
 	if ((pNewData = realloc(dst, len)) == NULL)
 	{
 		free(dst);
-		return false;
+		return ENOMEM;
 	}
 	Length = len;
-	return true;
+	return 0;
 }

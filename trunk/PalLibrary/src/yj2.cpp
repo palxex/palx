@@ -245,7 +245,7 @@ static inline void bit(void* data, uint32 pos, bool set)
 	}
 }
 
-bool Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Length)
+errno_t Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Length)
 {
 	uint32 len = 0, ptr = 0;
 	uint8* src = (uint8*)Source + 4;
@@ -254,16 +254,16 @@ bool Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Lengt
 	TreeNode* node;
 
 	if (Source == NULL)
-		return false;
+		return EINVAL;
 
 	if (!build_tree(tree))
-		return false;
+		return ENOMEM;
 
 	if ((Destination = malloc(*((uint32*)Source))) == NULL)
 	{
 		delete [] tree.list;
 		delete [] tree.node;
-		return false;
+		return ENOMEM;
 	}
 	Length = *((uint32*)Source);
 	dest = (uint8*)Destination;
@@ -318,10 +318,10 @@ bool Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Lengt
 	}
 	delete [] tree.list;
 	delete [] tree.node;
-	return true;
+	return 0;
 }
 
-bool Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible)
+errno_t Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible)
 {
 	uint32 len = 0, ptr, pos, top, srclen = SourceLength;
 	sint32 head[0x100], _prev[0x2000];
@@ -336,18 +336,18 @@ bool Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& Desti
 	void* pNewData;
 
 	if (Source == NULL)
-		return false;
+		return EINVAL;
 
 	if (!build_tree(tree))
-		return false;
+		return ENOMEM;
 
-	if ((pNewData = malloc(SourceLength + 256)) == NULL)
+	if ((pNewData = malloc(SourceLength + 260)) == NULL)
 	{
 		delete [] tree.list;
 		delete [] tree.node;
-		return false;
+		return ENOMEM;
 	}
-	dest = (uint8*)pNewData;
+	dest = (uint8*)pNewData + 4;
 
 	pre = prev = _prev;
 	memset(head, 0xff, 0x100 * sizeof(sint32));
@@ -463,22 +463,20 @@ bool Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& Desti
 	}
 	len += 4;
 
-	if ((Destination = malloc(len)) == NULL)
+	if ((Destination = realloc(pNewData, len)) == NULL)
 	{
 		free(pNewData);
 		delete [] tree.list;
 		delete [] tree.node;
-		return false;
+		return ENOMEM;
 	}
 	*((uint32*)Destination) = srclen;
-	memcpy((uint8*)Destination + 4, pNewData, len - 4);
 	Length = len;
 
-	free(pNewData);
 	delete [] tree.list;
 	delete [] tree.node;
 
-	return true;
+	return 0;
 }
 
 #include "yj2sd.h"

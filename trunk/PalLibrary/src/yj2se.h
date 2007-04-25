@@ -71,26 +71,26 @@ struct YJ2_Encode_State
 	uint8		shift;
 };
 
-bool Pal::Tools::EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength, uint32 uiGrowBy, bool bCompatible)
+errno_t Pal::Tools::EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength, uint32 uiGrowBy, bool bCompatible)
 {
 	struct YJ2_Encode_State* state;
 
 	if (uiGrowBy < 0x1000)
 		uiGrowBy = 0x1000;
 	if ((state = new YJ2_Encode_State) == NULL)
-		return false;
+		return ENOMEM;
 	memset(state, 0, sizeof(struct YJ2_Encode_State));
 	if (!build_tree(state->tree))
 	{
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	if ((state->head = new sint32 [0x100]) == NULL)
 	{
 		delete [] state->tree.list;
 		delete [] state->tree.node;
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	if ((state->_pre = state->prev = new sint32 [0x2000]) == NULL)
 	{
@@ -98,7 +98,7 @@ bool Pal::Tools::EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength
 		delete [] state->tree.list;
 		delete [] state->tree.node;
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	if ((state->code = new bool [0x140]) == NULL)
 	{
@@ -107,7 +107,7 @@ bool Pal::Tools::EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength
 		delete [] state->tree.list;
 		delete [] state->tree.node;
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	if ((state->pIBuffer = new uint8 [uiGrowBy]) == NULL)
 	{
@@ -117,7 +117,7 @@ bool Pal::Tools::EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength
 		delete [] state->tree.list;
 		delete [] state->tree.node;
 		delete state;
-		return false;
+		return ENOMEM;
 	}
 	memset(state->head, 0xff, 0x100 * sizeof(sint32));
 	memset(state->prev, 0xff, 0x2000 * sizeof(sint32));
@@ -128,10 +128,10 @@ bool Pal::Tools::EncodeYJ2StreamInitialize(void*& pvState, uint32 uiSourceLength
 	state->length = uiSourceLength;
 	state->bCompatible = bCompatible;
 	pvState = state;
-	return true;
+	return 0;
 }
 
-bool Pal::Tools::EncodeYJ2StreamInput(void* pvState, const void* Source, uint32 SourceLength, bool bFinished)
+errno_t Pal::Tools::EncodeYJ2StreamInput(void* pvState, const void* Source, uint32 SourceLength, bool bFinished)
 {
 	struct YJ2_Encode_State* state = (struct YJ2_Encode_State*)pvState;
 
@@ -142,14 +142,14 @@ bool Pal::Tools::EncodeYJ2StreamInput(void* pvState, const void* Source, uint32 
 		if (Source == NULL || SourceLength == 0)
 		{
 			state->bFinished = bFinished;
-			return true;
+			return 0;
 		}
 		if (state->uiIEnd + SourceLength > state->uiILength)
 		{
 			uint8* pbuf;
 			uint32 len = (state->uiIEnd + SourceLength) / state->uiIGrowBy + state->uiIGrowBy;
 			if ((pbuf = new uint8 [state->uiILength + len]) == NULL)
-				return false;
+				return ENOMEM;
 			memcpy(pbuf, state->pIBuffer, state->uiIEnd);
 			delete [] state->pIBuffer;
 			state->pIBuffer = pbuf;
@@ -158,19 +158,19 @@ bool Pal::Tools::EncodeYJ2StreamInput(void* pvState, const void* Source, uint32 
 		memcpy(state->pIBuffer + state->uiIEnd, src, SourceLength);
 		state->bFinished = bFinished;
 		state->uiIEnd += SourceLength;
-		return true;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }
 
-static bool EncodeYJ2StreamProcess(struct YJ2_Encode_State* state, void* dest, unsigned long& dptr, unsigned long dptrs)
+static void EncodeYJ2StreamProcess(struct YJ2_Encode_State* state, void* dest, unsigned long& dptr, unsigned long dptrs)
 {
 	uint32 srclen;
 	TreeNode* node;
 
 	if (state->bCompleted)
-		return true;
+		return;
 	else if (state->bFinished)
 		srclen = state->uiIEnd;
 	else if (state->uiIEnd < 67)
@@ -255,7 +255,7 @@ static bool EncodeYJ2StreamProcess(struct YJ2_Encode_State* state, void* dest, u
 			while(state->pos > 0 && dptr < dptrs)
 				bit(dest, dptr++, state->code[--state->pos]);
 			if (state->pos > 0)
-				return true;
+				return;
 			if (state->tree.node[0x280].weight == 0x8000)
 			{
 				sint32 i;
@@ -282,7 +282,7 @@ static bool EncodeYJ2StreamProcess(struct YJ2_Encode_State* state, void* dest, u
 					tmp >>= 1;
 				}
 				if (state->shift < data2[table & 0xf] + 6)
-					return true;
+					return;
 			}
 			state->uiIStart += state->match_len;
 			state->step = 0;
@@ -309,44 +309,51 @@ static bool EncodeYJ2StreamProcess(struct YJ2_Encode_State* state, void* dest, u
 			while(state->pos > 0 && dptr < dptrs)
 				bit(dest, dptr++, state->code[--state->pos]);
 			if (state->pos > 0)
-				return true;
+				return;
 			state->shift = 0;
 			state->step = 4;
 		case 4:
 			for(; state->shift < 8 && dptr < dptrs; state->shift++)
 				bit(dest, dptr++, 0);
 			if (state->shift < 8)
-				return true;
+				return;
 			state->shift = 0;
 			state->step = 5;
 		case 5:
 			for(; state->shift < 6 && dptr < dptrs; state->shift++)
 				bit(dest, dptr++, 1);
 			if (state->shift < 6)
-				return true;
+				return;
 			state->shift = 0;
 			state->step = 0;
 		}
 	}
-	return true;
 }
 
-bool Pal::Tools::EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32& Length, uint32& Bits)
+errno_t Pal::Tools::EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength, uint32& Bits)
 {
 	struct YJ2_Encode_State* state = (struct YJ2_Encode_State*)pvState;
 
 	if (state && state->bInitialed)
 	{
 		unsigned long dptr = Bits;
-		uint32 destlen = Length, addlen = 0;
+		uint32 addlen = 0;
 		uint8* dest;
 
-		if (Destination == NULL || Length == 0)
-			return true;
-		if (state->bCompleted)
+		if (Destination == NULL || Length == 0 || state->bCompleted)
 		{
-			Length = 0;
-			return true;
+			if (state->bCompleted && state->bCompatible && state->length < state->top)
+			{
+				dest = (uint8*)Destination;
+				for(ActualLength = 0; ActualLength < Length && state->length < state->top; ActualLength++, state->length++)
+					dest[ActualLength] = 0;
+				if (state->length == state->top)
+					state->top = 0;
+			}
+			else
+				ActualLength = 0;
+			Bits = 0;
+			return 0;
 		}
 		if (!state->bOutput)
 		{
@@ -354,12 +361,14 @@ bool Pal::Tools::EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32&
 			{
 				memcpy((uint8*)Destination + state->top, (uint8*)(&state->length) + state->top, Length);
 				state->top += Length;
-				return false;
+				ActualLength = Length;
+				Bits = 0;
+				return 0;
 			}
 			else
 				memcpy((uint8*)Destination + state->top, (uint8*)(&state->length) + state->top, 4 - state->top);
 			dest = (uint8*)Destination + 4 - state->top;
-			destlen -= 4 - state->top;
+			Length -= 4 - state->top;
 			addlen = 4 - state->top;
 			state->length = 0;
 			state->top = 0;
@@ -367,8 +376,7 @@ bool Pal::Tools::EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32&
 		}
 		else
 			dest = (uint8*)Destination;
-		if (!EncodeYJ2StreamProcess(state, dest, dptr, destlen << 3))
-			return false;
+		EncodeYJ2StreamProcess(state, dest, dptr, Length << 3);
 		if (!state->bCompleted && state->uiIStart > 0x1000 && state->uiIEnd >= 0x1002 &&
 			state->uiIStart < state->uiIEnd && state->top > 0x1000)
 		{
@@ -389,31 +397,32 @@ bool Pal::Tools::EncodeYJ2StreamOutput(void* pvState, void* Destination, uint32&
 			state->top -= start;
 			state->_pre += start;
 		}
-		Length = addlen + (dptr >> 3);
+		ActualLength = addlen + (dptr >> 3);
 		Bits = dptr & 0x7;
-		state->length += Length;
+		state->length += ActualLength;
 		if (state->bFinished && state->step == 0)
 		{
 			if (Bits > 0)
 			{
 				for(uint32 i = Bits; i < 8; i++)
-					bit(dest + Length, i, 0);
-				Length++;
+					bit(dest + ActualLength, i, 0);
+				ActualLength++;
 				state->length++;
 				Bits = 0;
 			}
 			if (state->bCompatible)
 			{
 				uint32 temp = ((dptr - state->match - 14) >> 3) + 4 + addlen;
-				for(; Length < temp && Length < destlen; Length++, state->length++)
-					dest[Length] = 0;
+				state->top = state->length + temp - ActualLength;
+				for(; ActualLength < temp && ActualLength < Length; ActualLength++, state->length++)
+					dest[ActualLength] = 0;
 			}
 			state->bCompleted = true;
 		}
-		return true;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }
 
 bool Pal::Tools::EncodeYJ2StreamFinished(void* pvState)
@@ -421,12 +430,12 @@ bool Pal::Tools::EncodeYJ2StreamFinished(void* pvState)
 	struct YJ2_Encode_State* state = (struct YJ2_Encode_State*)pvState;
 
 	if (state && state->bInitialed)
-		return (state->bFinished && state->step == 0);
+		return (state->bCompleted && (!state->bCompatible || state->top == 0));
 	else
 		return false;
 }
 
-bool Pal::Tools::EncodeYJ2StreamFinalize(void* pvState)
+errno_t Pal::Tools::EncodeYJ2StreamFinalize(void* pvState)
 {
 	struct YJ2_Encode_State* state = (struct YJ2_Encode_State*)pvState;
 
@@ -439,8 +448,8 @@ bool Pal::Tools::EncodeYJ2StreamFinalize(void* pvState)
 		delete [] state->tree.list;
 		delete [] state->tree.node;
 		delete state;
-		return true;
+		return 0;
 	}
 	else
-		return false;
+		return EINVAL;
 }
