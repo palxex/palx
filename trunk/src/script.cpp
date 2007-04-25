@@ -68,8 +68,12 @@ __walk_npc:
 			game->rpg.battle_music=param1;
 			break;
 		case 0x46:
-			scene->team_pos.x=param1*32+param3*16;
-			scene->team_pos.y=param2*16+param3*8;
+			scene->team_pos.toXYH().x=param1;
+			scene->team_pos.toXYH().y=param2;
+			scene->team_pos.toXYH().h=param3;
+			game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+			game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+			scene->produce_one_screen();
 			break;
 		case 0x49:
 			(game->rpg.evtobjs+(param1!=-1?param1:object))->status=param2;
@@ -77,6 +81,8 @@ __walk_npc:
 		case 0x59:
 			scene->toload=param1;
 			flag_to_load|=0xC;
+			break;
+		case 0x65:
 			break;
 		case 0x6c:			
 			if(param1){
@@ -106,6 +112,15 @@ __walk_role:
 			break;
 		case 0x73:
 			//clear_effective(param1,param2);
+			break;
+		case 0x75:
+			game->rpg.team[0].role=param1-1;
+			game->rpg.team[1].role=param2-1;
+			game->rpg.team[2].role=param3-1;
+			game->rpg.team_roles=((param1-1)?1:0)+((param2-1)?1:0)+((param3-1)?1:0);
+			break;
+		case 0x76:
+			scene->produce_one_screen();
 			break;
 		case 0x7a:
 			role_speed=4;
@@ -137,6 +152,9 @@ __walk_role:
 		case 0x93:
 			//GameLoop_OneCycle(false);
 			//redraw_everything();
+			break;
+		case 0x9b:
+			scene->produce_one_screen();
 			break;
 		case 0x9d:
 			//clear_effective(2,0x4E);

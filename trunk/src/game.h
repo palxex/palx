@@ -39,9 +39,9 @@ public:
 	std::vector<MAGIC> magics;
 	std::vector<BATTLE_FIELD> battlefields;
 	std::vector<UPGRADE_LEARN> learns;
-	std::vector<sprite *> UIpics;
-	std::vector<sprite *> discharge_effects;
-	std::vector<sprite *> message_handles;
+	sprite_action UIpics;
+	sprite_action discharge_effects;
+	sprite_action message_handles;
 	std::vector<ENEMY_POSES> enemyposes;
 	std::vector<UPGRADE_EXP> upgradexp;
 	

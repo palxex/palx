@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "allegdef.h"
 
+#include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
@@ -40,11 +41,11 @@ public:
 };
 
 struct Scene{
-	boost::shared_ptr<scene_map> now;
+	::map scenemap;
 	BITMAP *scene_buf;
 	int current,toload;
 	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
-	typedef std::list<sprite *> s_list;
+	typedef std::list<boost::shared_ptr<sprite_action> > s_list;
 	s_list active_list;
 	struct position{
 		int x,y,h;
@@ -52,21 +53,29 @@ struct Scene{
 		position(int x_,int y_,int h_):x(x_),y(y_),h(h_),status(true){}
 		position(int x_,int y_):x(x_),y(y_),status(false){}
 		position():x(0),y(0),status(false){}
-		void toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y;	}}
-		void toXY(){	if(status){		x=x*32+h*16;y=y*32+h*8;	}}
+		position &toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y/16;	status=true;} return *this;}
+		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}
 	}team_pos,camera_pos;
-	Scene(scene_map *_map);
+	Scene();
 	~Scene();
-	void clear_scene();
+	void clear_scanlines();
 	void clear_active();
-	void calc_team_walking();
+	void calc_team_walking(int key);
 	void our_team_setdraw();
 	void visible_NPC_movment_setdraw();
 	void Redraw_Tiles_or_Fade_to_pic();
-	void adjust_viewport();
+	void move_usable_screen();
 	void get_sprites();
 	void produce_one_screen();
+	void process_scrn_drawing(int);
 };
+struct BattleScene{
+	fbp background;
+	typedef std::list<sprite *> s_list;
+	s_list active_list;
+	void draw();
+};
+
 
 class cut_msg_impl
 {

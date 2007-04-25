@@ -13,15 +13,22 @@ namespace{
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
 	template<typename T>
+	inline void reunion(vector<boost::shared_ptr<T> > &vec,uint8_t *src,long &len)
+	{
+		T *t=new T;
+		t.getsource(src);
+		vec.push_back(boost::shared_ptr<T>(t));
+	}
+	template<typename T>
 	inline void reunion(T *vec,uint8_t *src,long &len)
 	{
 		T *usrc=(T *)src;
 		memcpy(vec,usrc,len);
 	}
-	inline int determain_smkfs(uint8_t *src)
+	template<typename T>
+	inline void reunion(T &vec,uint8_t *src,long &len)
 	{
-		uint16_t *usrc=(uint16_t*)src;
-		return usrc[0]-(usrc[usrc[0]-1]==0?1:0);
+		memcpy(&vec,src,len);
 	}
 }
 
@@ -48,38 +55,30 @@ Game::Game(int save=0):
 	//global setting
 
 	//load sss&data
-	long t;
+	long len;
 	EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
 	SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
-	reunion(evtobjs,	SSS.decode(0,0,t), t);
-	reunion(scenes,		SSS.decode(1,0,t), t);
-	reunion(rpg.objects,SSS.decode(2,0,t), t);
-	reunion(msg_idxes,	SSS.decode(3,0,t), t);
-	reunion(scripts,	SSS.decode(4,0,t), t);
+	reunion(evtobjs,	SSS.decode(0,len), len);
+	reunion(scenes,		SSS.decode(1,len), len);
+	reunion(rpg.objects,SSS.decode(2,len), len);
+	reunion(msg_idxes,	SSS.decode(3,len), len);
+	reunion(scripts,	SSS.decode(4,len), len);
 
-	reunion(shops,								DATA.decode(0,0,t),t);
-	reunion(monsters,							DATA.decode(1,0,t),t);
-	reunion(enemyteams,							DATA.decode(2,0,t),t);
-	reunion(rpg.roles_properties,				DATA.decode(3,0,t),t);
-	reunion(magics,								DATA.decode(4,0,t),t);
-	reunion(battlefields,						DATA.decode(5,0,t),t);
-	reunion(learns,								DATA.decode(6,0,t),t);
+	reunion(shops,					DATA.decode(0,len),len);
+	reunion(monsters,				DATA.decode(1,len),len);
+	reunion(enemyteams,				DATA.decode(2,len),len);
+	reunion(rpg.roles_properties,	DATA.decode(3,len),len);
+	reunion(magics,					DATA.decode(4,len),len);
+	reunion(battlefields,			DATA.decode(5,len),len);
+	reunion(learns,					DATA.decode(6,len),len);
 	//7:not used
 	//8:not used
+	reunion(UIpics,					DATA.decode(9,len),len);
+	reunion(discharge_effects,		DATA.decode(10,len),len);
 	//11:not known!!!
-	reunion(enemyposes,							DATA.decode(13,0,t),t);
-	reunion(upgradexp,							DATA.decode(14,0,t),t);
-
-	int subfiles_9 =determain_smkfs(			DATA.decode( 9,0,t)),
-		subfiles_10=determain_smkfs(			DATA.decode(10,0,t)),
-		subfiles_12=determain_smkfs(			DATA.decode(12,0,t));
-	decoder_func olddecoder=DATA.setdecoder(de_mkf_smkf);
-	for(int i=0;i<subfiles_9;i++)
-		UIpics.push_back(new sprite(			DATA.decode( 9,i)));
-	for(int i=0;i<subfiles_10;i++)
-		discharge_effects.push_back(new sprite(	DATA.decode(10,i)));
-	for(int i=0;i<subfiles_12;i++)
-		message_handles.push_back(new sprite(	DATA.decode(12,i)));
+	reunion(message_handles,		DATA.decode(12,len),len);
+	reunion(enemyposes,				DATA.decode(13,len),len);
+	reunion(upgradexp,				DATA.decode(14,len),len);
 
 	flag_to_load=0x1D;
 	//load save
@@ -87,13 +86,6 @@ Game::Game(int save=0):
 		load(save);
 }
 Game::~Game(){
-	typedef vector<sprite *>::iterator iter;
-	for(iter i=UIpics.begin();i!=UIpics.end();i++)
-		delete *i;
-	for(iter i=discharge_effects.begin();i!=discharge_effects.end();i++)
-		delete *i;
-	for(iter i=message_handles.begin();i!=message_handles.end();i++)
-		delete *i;
 }
 
 void Game::load(int id){
