@@ -14,9 +14,9 @@
 class cached_res;
 typedef boost::function<uint8_t *(FILE *,int,int,long&)> decoder_func;
 extern decoder_func de_mkf,de_mkf_yj1,de_mkf_mkf_yj1,de_mkf_smkf,de_mkf_yj1_smkf;
-extern long _len;
 
 class cached_res{
+	static long _len;static bool _changed;
 	std::string file;
 	FILE *fp;
 	decoder_func decoder;
@@ -27,7 +27,8 @@ public:
 	cached_res(const char *filename,decoder_func &d);
 	~cached_res();
 	decoder_func setdecoder(decoder_func &);
-	uint8_t *decode(int,int,long& =_len);
+	uint8_t *decode(int,int,bool& =_changed,long& =_len);
+	uint8_t *decode(int,bool& =_changed,long& =_len);
 	uint8_t *decode(int,long& =_len);
 	void clear();
 	void clear(int n,int n2);

@@ -75,7 +75,7 @@ public:
 			return;
 		pal=i;
 		long len;
-		myRGB *buf=(myRGB *)PAT.decode(i,0,len);
+		myRGB *buf=(myRGB *)PAT.decode(i,len);
 		RGB   *p=(RGB*)pat;
 		for(int t=0;t<len/3;t++)
 			p[t].r=buf[t].r,
