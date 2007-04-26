@@ -64,7 +64,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="alld.lib alfontdll.lib adplugd.lib biniod.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="F:\MyProjects\palx\trunk\Adplug\lib\debug"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -140,7 +140,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="alleg.lib alfontdll.lib adplug.lib binio.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="F:\MyProjects\palx\trunk\Adplug\lib\release"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -275,86 +275,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<Filter
-				Name="Adplug"
-				>
-				<File
-					RelativePath=".\Adplug\include\adplug\adlibemu.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\adplug.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\analopl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\binfile.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\binio.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\binstr.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\binwrap.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\database.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\debug.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\diskopl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\emuopl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\fmopl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\fprovide.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\kemuopl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\player.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\players.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\realopl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\rix.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Adplug\include\adplug\silentopl.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="PalLibrary"
 				>

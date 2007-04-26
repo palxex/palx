@@ -12,7 +12,6 @@ namespace{
 		T *usrc=(T *)src;
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
-	template<typename T>
 	inline void reunion(sprite_action &vec,uint8_t *src,long &len)
 	{
 		vec.getsource(src);
