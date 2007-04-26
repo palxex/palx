@@ -107,5 +107,4 @@ bool process_Menu()
 }
 void process_Explore()
 {
-	allegro_message("gota!");
 }

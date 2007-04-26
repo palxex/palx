@@ -64,7 +64,8 @@ decoder_func de_mkf_mkf_yj1	=bind(deyj1,	bind(demkf_impl,bind(demkf,_1,_2,_4),_3
 decoder_func de_mkf_smkf	=bind(desmkf,	bind(demkf,		_1,_2,_4),_3,_4);
 decoder_func de_mkf_yj1_smkf=bind(desmkf,	bind(deyj1_t,		bind(demkf,_1,_2,_4),_4),_3,_4);
 
-long _len;
+long cached_res::_len;
+bool cached_res::_changed;
 
 cached_res::cached_res(const char *filename,decoder_func &func):
 	file(filename),
@@ -86,19 +87,25 @@ decoder_func cached_res::setdecoder(decoder_func &func)
 	decoder=func;
 	return old_decoder;
 }
-uint8_t *cached_res::decode(int n,int n2,long &length)
+uint8_t *cached_res::decode(int n,int n2,bool &changed,long &length)
 {
+	changed=false;
 	std::pair<int,int> pos(n,n2);
 	cache_type::iterator i=cache.find(pos);
 	if(i==cache.end())
-		cache[pos]=decoder(fp,n,n2,length);
+		cache[pos]=decoder(fp,n,n2,length),changed=true;
 	else if(changed)
 		clear(n,n2);
 	return cache[pos];
 }
+uint8_t *cached_res::decode(int n,bool &change,long &length)
+{
+	return decode(n,0,changed,length);
+}
 uint8_t *cached_res::decode(int n,long &length)
 {
-	return decode(n,0,length);
+	bool c;
+	return decode(n,0,c,length);
 }
 void cached_res::clear(){
 	for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;
@@ -110,7 +117,7 @@ void cached_res::clear(int n, int n2){
 	cache.erase(iter);
 }
 
-cached_res ABC("abc.mkf" ,de_mkf_yj1_smkf);
+cached_res ABC("abc.mkf" ,de_mkf_yj1);
 cached_res MIDI("midi.mkf",de_mkf);
 cached_res VOC("voc.mkf" ,de_mkf);
 cached_res MAP("map.mkf" ,de_mkf_yj1);
@@ -121,7 +128,7 @@ cached_res SSS("sss.mkf" ,de_mkf);
 cached_res BALL("ball.mkf",de_mkf_smkf);
 cached_res RGM("rgm.mkf" ,de_mkf_smkf);
 cached_res FBP("fbp.mkf" ,de_mkf_yj1);
-cached_res F("f.mkf"   ,de_mkf_yj1_smkf);
-cached_res FIRE("fire.mkf",de_mkf_yj1_smkf);
-cached_res MGO("mgo.mkf" ,de_mkf_yj1_smkf);
+cached_res F("f.mkf"   ,de_mkf_yj1);
+cached_res FIRE("fire.mkf",de_mkf_yj1);
+cached_res MGO("mgo.mkf" ,de_mkf_yj1);
 cached_res PAT("pat.mkf" ,de_mkf);

@@ -10,7 +10,7 @@ void Scene::clear_scanlines()
 }
 void Scene::clear_active()
 {
-	active_list.swap(s_list());
+	//active_list.swap(s_list());
 }
 void Scene::calc_team_walking(int key)
 {}
@@ -33,6 +33,6 @@ void Scene::produce_one_screen()
 void Scene::process_scrn_drawing(int)
 {
 	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
-		(*i)->blit(0,scene_buf,team_pos.x,team_pos.y);
+		(*i)->blit(0,scene_buf,team_pos.x-game->rpg.viewport_x,team_pos.y-game->rpg.viewport_y);
 	blit(scene->scene_buf,screen,0,0,0,0,320,200);
 }

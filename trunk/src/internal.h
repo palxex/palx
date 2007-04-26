@@ -33,7 +33,7 @@ extern bool process_Menu();
 extern void process_Explore();
 extern uint16_t process_script(uint16_t script,int16_t object);
 extern uint16_t process_autoscript(uint16_t script,int16_t object);
-extern void load_team_mgo(int =0,int =0,int =0);
+extern void load_team_mgo();
 extern void redraw_everything();
 
 #endif

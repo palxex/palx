@@ -83,6 +83,9 @@ __walk_npc:
 			flag_to_load|=0xC;
 			break;
 		case 0x65:
+			game->rpg.roles_properties.avator[param1]=param2;
+			if(!flag_battling && param3)
+				load_team_mgo();
 			break;
 		case 0x6c:			
 			if(param1){
@@ -114,10 +117,13 @@ __walk_role:
 			//clear_effective(param1,param2);
 			break;
 		case 0x75:
-			game->rpg.team[0].role=param1-1;
-			game->rpg.team[1].role=param2-1;
-			game->rpg.team[2].role=param3-1;
-			game->rpg.team_roles=((param1-1)?1:0)+((param2-1)?1:0)+((param3-1)?1:0);
+			game->rpg.team[0].role=(param2-1<0?0:param2-1);
+			game->rpg.team[1].role=(param2-1<0?0:param2-1);
+			game->rpg.team[2].role=(param3-1<0?0:param3-1);
+			game->rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;
+			load_team_mgo();
+			//call    setup_our_team_data_things
+			//call    store_team_frame_data
 			break;
 		case 0x76:
 			scene->produce_one_screen();
@@ -186,8 +192,9 @@ uint16_t process_script(uint16_t id,int16_t object)
 				id = next_id;
 				//printf("停止执行\n");
 				return id;
-			case 0xffff:
+			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
+				//while(!keypressed());
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
