@@ -25,14 +25,17 @@ public:
 };
 struct tile{
 	boost::shared_ptr<sprite> image;
-	bool throughable;
+	bool blocked;
 	int layer;
-	tile():image((sprite*)0),throughable(0),layer(-1){}
+	tile():image((sprite*)0),blocked(0),layer(-1){}
 };
 class map:public scene_map{
 	boost::multi_array<tile,4> sprites;
 	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
 public: 
+	void make_tile(uint8_t*,int,int,int,int,int,BITMAP*);
+	void make_onescreen(BITMAP *dest,int,int);
+	tile &gettile(int x,int y,int h,int l);
 	map();
 	void change(int p);
 };
@@ -52,6 +55,17 @@ struct Scene{
 		position():x(0),y(0),status(false){}
 		position &toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y/16;	status=true;} return *this;}
 		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}
+		position operator+(position &rhs){
+			if(status)
+				return position(toXYH().x+rhs.toXYH().x,toXYH().y+rhs.toXYH().y,toXYH().h+rhs.toXYH().h);
+			else
+				return position(toXY().x+rhs.toXY().x,toXY().y+rhs.toXY().y);
+		}
+		position &operator=(position &rhs)
+		{
+			x=rhs.x;y=rhs.y;h=rhs.h;status=rhs.status;
+			return *this;
+		}
 	}team_pos;
 	Scene();
 	~Scene();
@@ -64,7 +78,7 @@ struct Scene{
 	void move_usable_screen();
 	void get_sprites();
 	void produce_one_screen();
-	void process_scrn_drawing(int);
+	void draw_normal_scene(int);
 };
 struct BattleScene{
 	fbp background;
