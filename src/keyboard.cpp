@@ -8,10 +8,13 @@ int get_key()
 		case KEY_ESC:
 		case KEY_INSERT:
 		case KEY_ALT:
+		case KEY_ALTGR:
 			vk = VK_MENU;
 			break;
 		case KEY_ENTER:
 		case KEY_SPACE:
+		case KEY_LCONTROL:
+		case KEY_RCONTROL:
 			vk = VK_EXPLORE;
 			break;
 		case KEY_LEFT:
@@ -53,8 +56,6 @@ int get_key()
 		default:
 			vk = k;
 		}
-	if(key_shifts & KB_CTRL_FLAG)
-		vk = VK_EXPLORE, key_shifts = 0;
 	clear_keybuf();
 	return vk;
 }

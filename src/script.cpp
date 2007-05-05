@@ -6,16 +6,24 @@
 void redraw_everything()
 {
 	//lots of lots stuff;only implement the reverse of parallel mutex
+	scene->produce_one_screen();
 	flag_parallel_mutex=!flag_parallel_mutex;
 }
 void clear_effective(int16_t p1,int16_t p2)
 {
 	redraw_everything();
 }
+void sync_viewport()
+{
+	viewport_x_bak=game->rpg.viewport_x;
+	viewport_y_bak=game->rpg.viewport_y;
+	game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+	game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+}
 uint16_t process_script_entry(uint16_t func,int16_t param[],uint16_t id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
-	EVENT_OBJECT &obj=game->rpg.evtobjs[object];
+	EVENT_OBJECT &obj=game->evtobjs[object];
 	const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
 	char addition[100];memset(addition,0,sizeof(addition));
 	int npc_speed,role_speed;
@@ -52,11 +60,11 @@ __walk_npc:
 			goto __walk_npc;
 		case 0x24:
 			if(param1)
-				(param1>0 ? game->rpg.evtobjs[param1] : obj).auto_script= param2;
+				(param1>0 ? game->evtobjs[param1] : obj).auto_script= param2;
 			break;
 		case 0x25:
 			if(param1)
-				(param1>0 ? game->rpg.evtobjs[param1] : obj).trigger_script= param2;
+				(param1>0 ? game->evtobjs[param1] : obj).trigger_script= param2;
 			break;
 		case 0x40:
 			break;
@@ -65,7 +73,7 @@ __walk_npc:
 			break;
 		case 0x44:
 			GameLoop_OneCycle(false);
-			//redraw_everything();
+			redraw_everything();
 			break;
 		case 0x45:
 			game->rpg.battle_music=param1;
@@ -74,12 +82,11 @@ __walk_npc:
 			scene->team_pos.toXYH().x=param1;
 			scene->team_pos.toXYH().y=param2;
 			scene->team_pos.toXYH().h=param3;
-			game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-			game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+			sync_viewport();
 			scene->produce_one_screen();
 			break;
 		case 0x49:
-			(game->rpg.evtobjs+(param1!=-1?param1:object))->status=param2;
+			game->evtobjs[param1!=-1?param1:object].status=param2;
 			break;
 		case 0x59:
 			scene->toload=param1;
@@ -92,12 +99,12 @@ __walk_npc:
 			break;
 		case 0x6c:			
 			if(param1){
-				(param1>0 ? game->rpg.evtobjs[param1] : obj).pos_x += param2;
-				(param1>0 ? game->rpg.evtobjs[param1] : obj).pos_y += param3;
+				(param1>0 ? game->evtobjs[param1] : obj).pos_x += param2;
+				(param1>0 ? game->evtobjs[param1] : obj).pos_y += param3;
 			}
 			break;
 		case 0x6f:
-			if(game->rpg.evtobjs[param1].status==param2){
+			if(game->evtobjs[param1].status==param2){
 				obj.status=param2;
 				//printf(addition,"成功");
 			}//else
@@ -111,13 +118,14 @@ __walk_role:
 				while((x_diff=scene->team_pos.x-(param1*32+param3*16)) && (y_diff=scene->team_pos.y-(param2*16+param3*8))){
 					scene->team_pos.x += role_speed*(x_diff<0 ? 2 : -2);
 					scene->team_pos.y += role_speed*(y_diff<0 ? 1 : -1);
+					sync_viewport();
 					GameLoop_OneCycle(false);
 					redraw_everything();
 				}
 			}
 			break;
 		case 0x73:
-			//clear_effective(param1,param2);
+			clear_effective(param1,param2);
 			break;
 		case 0x75:
 			game->rpg.team[0].role=(param2-1<0?0:param2-1);
@@ -145,36 +153,36 @@ __walk_role:
 			npc_speed=4;
 			goto __walk_npc;
 		case 0x7f:
-			//GameLoop_OneCycle(false);
-			//redraw_everything();
+			GameLoop_OneCycle(false);
+			redraw_everything();
 			break;
 		case 0x80:
-			//GameLoop_OneCycle(false);
-			//redraw_everything();
+			GameLoop_OneCycle(false);
+			redraw_everything();
 			break;
 		case 0x82:
 			npc_speed=8;
 			goto __walk_npc;
 		case 0x92:
-			//clear_effective(1,0x41);
+			clear_effective(1,0x41);
 			break;
 		case 0x93:
-			//GameLoop_OneCycle(false);
-			//redraw_everything();
+			GameLoop_OneCycle(false);
+			redraw_everything();
 			break;
 		case 0x9b:
 			scene->produce_one_screen();
 			break;
 		case 0x9d:
-			//clear_effective(2,0x4E);
-			//clear_effective(1,0x2A);
+			clear_effective(2,0x4E);
+			clear_effective(1,0x2A);
 			break;
 		case 0x9e:
-			//clear_effective(1,0x4E);
-			//clear_effective(1,0x2A);
+			clear_effective(1,0x4E);
+			clear_effective(1,0x2A);
 			break;
 		case 0x9f:
-			//clear_effective(1,0x48);
+			clear_effective(1,0x48);
 			break;
 	}
 	return id;
@@ -182,7 +190,7 @@ __walk_role:
 
 uint16_t process_script(uint16_t id,int16_t object)
 {
-	EVENT_OBJECT &obj=game->rpg.evtobjs[object];
+	EVENT_OBJECT &obj=game->evtobjs[object];
 	uint16_t next_id=id;
 	while(id)
 	{
@@ -197,7 +205,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 				return id;
 			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
-				//while(!keypressed());
+				//while(!keypressed()) scene->our_team_setdraw(),scene->process_scrn_drawing(false);
+				//clear_keybuf();
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
@@ -287,7 +296,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 	if(id==0)
 		return 0;
 	SCRIPT &curr=game->scripts[id];
-	EVENT_OBJECT &obj=game->rpg.evtobjs[object];
+	EVENT_OBJECT &obj=game->evtobjs[object];
 	const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
 	//printf("触发场景:%s,触发对象:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
 	//printf("自动脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);

@@ -20,7 +20,8 @@ extern int rpg_to_load;
 extern int step_off_x,step_off_y;
 extern int coordinate_x_max,coordinate_y_max;
 extern int x_scrn_offset,y_scrn_offset;
-extern int role_abstract_x,role_abstract_y,abstract_x_bak,abstract_y_bak;
+extern int abstract_x_bak,abstract_y_bak;
+extern int viewport_x_bak,viewport_y_bak;
 extern int direction_offs[][2];
 extern int frames3[],curframe;
 
