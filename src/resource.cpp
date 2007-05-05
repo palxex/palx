@@ -65,7 +65,7 @@ decoder_func de_mkf_smkf	=bind(desmkf,	bind(demkf,		_1,_2,_4),_3,_4);
 decoder_func de_mkf_yj1_smkf=bind(desmkf,	bind(deyj1_t,		bind(demkf,_1,_2,_4),_4),_3,_4);
 
 long cached_res::_len;
-bool cached_res::_changed;
+bool cached_res::_decoded;
 
 cached_res::cached_res(const char *filename,decoder_func &func):
 	file(filename),
@@ -87,20 +87,23 @@ decoder_func cached_res::setdecoder(decoder_func &func)
 	decoder=func;
 	return old_decoder;
 }
-uint8_t *cached_res::decode(int n,int n2,bool &changed,long &length)
+uint8_t *cached_res::decode(int n,int n2,bool &decoded,long &length)
 {
-	changed=false;
+	decoded=false;
 	std::pair<int,int> pos(n,n2);
 	cache_type::iterator i=cache.find(pos);
 	if(i==cache.end())
-		cache[pos]=decoder(fp,n,n2,length),changed=true;
-	else if(changed)
-		clear(n,n2);
+		cache[pos]=decoder(fp,n,n2,length);
+	else{
+		decoded=true;
+		if(changed)
+			clear(n,n2);
+	}
 	return cache[pos];
 }
-uint8_t *cached_res::decode(int n,bool &change,long &length)
+uint8_t *cached_res::decode(int n,bool &decoded,long &length)
 {
-	return decode(n,0,changed,length);
+	return decode(n,0,decoded,length);
 }
 uint8_t *cached_res::decode(int n,long &length)
 {

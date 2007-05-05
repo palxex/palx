@@ -27,6 +27,9 @@
 using namespace std;
 
 #include "internal.h"
+#include "game.h"
+#include "scene.h"
+#include "allegdef.h"
 int main(int argc, char *argv[])
 {
 	randomize();

@@ -1,10 +1,13 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-#include "allegdef.h"
-#include "scene.h"
-#include "game.h"
+#include "config.h"
+#include <list>
 
+struct Scene;
+struct BattleScene;
+class playrix;
+class Game;
 extern Scene *scene;
 extern BattleScene *battle_scene;
 extern playrix *rix;
@@ -16,13 +19,20 @@ extern int flag_to_load;
 extern int rpg_to_load;
 extern int step_off_x,step_off_y;
 extern int coordinate_x_max,coordinate_y_max;
-extern int x_scrn_offset;
-extern int y_scrn_offset;
+extern int x_scrn_offset,y_scrn_offset;
+extern int role_abstract_x,role_abstract_y,abstract_x_bak,abstract_y_bak;
+extern int direction_offs[][2];
+extern int frames3[],curframe;
+
 extern bool flag_parallel_mutex;
 extern int redraw_flag;
 
 extern bool mutux_setpalette;
 extern volatile int time_interrupt_occers; 
+
+class sprite_prim;
+extern std::list<sprite_prim> mgos;
+extern std::list<sprite_prim *> team_prims;
 
 extern void randomize();
 extern float rnd0();

@@ -3,6 +3,7 @@
 #include <alfont.h>
 
 #include "internal.h"
+#include "scene.h"
 
 using namespace std;
 namespace{
@@ -12,7 +13,7 @@ namespace{
 		T *usrc=(T *)src;
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
-	inline void reunion(sprite_action &vec,uint8_t *src,long &len)
+	inline void reunion(sprite_prim &vec,uint8_t *src,long &len)
 	{
 		vec.getsource(src);
 	}
@@ -32,6 +33,7 @@ namespace{
 Game::Game(int save=0):
 	rpg((memset(&rpg,0,sizeof(RPG)),rpg))
 {
+	rpg.team_roles=-1;
 	//allegro init
 	allegro_init();
 	install_timer();
