@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "config.h"
 
 #if defined _MSC_VER
 	#include <time.h>
@@ -13,7 +14,7 @@ void randomize()
 {
 	time_t t;
 	time(&t);
-	double f(t);
+	double f=*reinterpret_cast<double*>(&t);
 	uint64_t u=*reinterpret_cast<uint64_t*>(&f);
 	seed=((u>>48)^((u>>32)&0xffff))<<8;
 }

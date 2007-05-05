@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "internal.h"
+#include "scene.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -66,15 +67,18 @@ int Game::run(){
 	/*
 	install_int(mainloop_proc,100);
 	LOCK_VARIABLE(time_interrupt_occers);
-	install_int(palette_proc,10);
+	install_int(timer_proc,10);
 
 	while(running) rest(10);
 
 	remove_int(mainloop_proc);
-	remove_int(palette_proc);/*///
+	remove_int(timer_proc);/*///
 	while(running){
-		mainloop_proc();
+		static int i;
+		timer_proc();
 		rest(10);
+		if(i++==5)
+			i=0,mainloop_proc();
 	}//*/
 
 	return 1;

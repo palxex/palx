@@ -1,4 +1,7 @@
 #include "internal.h"
+#include "structs.h"
+#include "game.h"
+#include "scene.h"
 
 void redraw_everything()
 {

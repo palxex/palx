@@ -7,6 +7,7 @@
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/multi_array.hpp>
 
 struct scene_map:public bitmap
 {
@@ -22,22 +23,18 @@ public:
 		memcpy(bmp->dat,FBP.decode(p,0),bmp->w*bmp->h);
 	}
 };
+struct tile{
+	boost::shared_ptr<sprite> image;
+	bool throughable;
+	int layer;
+	tile():image((sprite*)0),throughable(0),layer(-1){}
+};
 class map:public scene_map{
+	boost::multi_array<tile,4> sprites;
+	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
 public: 
-	map():scene_map(0,2032,2040){}
-	void change(int p){
-		uint8_t *mapbuf=MAP.decode(p,0);
-		for(int y=0;y<0x80;y++)
-			for(int x=0;x<0x40;x++)
-				for(int h=0;h<2;h++)
-				{
-					uint8_t *_buf=mapbuf+y*0x200+x*8+h*4;
-					int index=(_buf[1]&0x10)<<4|_buf[0],index2=(_buf[3]&0x10)<<4|_buf[2];
-					sprite(GOP.decode(p,index)).blit_to(bmp,x*32+h*16-16,y*16+h*8-8);
-					if(index2)
-						sprite(GOP.decode(p,index2-1)).blit_to(bmp,x*32+h*16-16,y*16+h*8-8);
-				}
-	}
+	map();
+	void change(int p);
 };
 
 struct Scene{
@@ -45,7 +42,7 @@ struct Scene{
 	BITMAP *scene_buf;
 	int current,toload;
 	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
-	typedef std::list<boost::shared_ptr<sprite_action> > s_list;
+	typedef std::list<sprite *> s_list;
 	s_list active_list;
 	struct position{
 		int x,y,h;
@@ -55,7 +52,7 @@ struct Scene{
 		position():x(0),y(0),status(false){}
 		position &toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y/16;	status=true;} return *this;}
 		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}
-	}team_pos,camera_pos;
+	}team_pos;
 	Scene();
 	~Scene();
 	void clear_scanlines();

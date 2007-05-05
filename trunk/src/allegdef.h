@@ -24,13 +24,19 @@ public:
 	bool blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 };
 class sprite{
+	int x,y,l;
+	int width,height;
 	uint8_t *buf;
 public:
 	sprite(uint8_t *);
+	sprite(uint8_t *,int,int,int);
 	~sprite();
-	bool blit_to(BITMAP *dest,int dest_x,int dest_y);
+	bool blit_to(BITMAP *,int,int);
+	bool blit_to(BITMAP *dest);
+	friend bool operator<(const sprite&,const sprite&);
 };
-class sprite_action{
+class sprite_prim{
+	int id;
 	std::vector<boost::shared_ptr<sprite> > sprites;	
 	int determain_smkfs(uint8_t *src)
 	{
@@ -38,16 +44,21 @@ class sprite_action{
 		return usrc[0]-(usrc[usrc[0]-1]==0?1:0);
 	}
 public:
-	void getsource(uint8_t *src){
-		for(int i=0;i<determain_smkfs(src);i++)
-			sprites.push_back(boost::shared_ptr<sprite>(new sprite(src+((uint16_t *)src)[i])));
-	}
-	void blit(int i,BITMAP *bmp,int dest_x,int dest_y)
-	{
-		sprites[i]->blit_to(bmp,dest_x,dest_y);
-	}
+	int curr;
+	sprite_prim();
+	sprite_prim(int);
+	sprite_prim(int,uint8_t *src);
+	sprite_prim(int,uint8_t *src,int,int,int);
+	sprite_prim(const sprite_prim &);
+	void getsource(uint8_t *src,int,int,int);
+	void getsource(uint8_t *src);
+	sprite *getcurrent();
+	void blit(BITMAP *bmp);
+	friend bool operator==(const sprite_prim&,const sprite_prim&);
+	friend class map;
 };
-
+bool operator==(const sprite_prim&,const sprite_prim&);
+bool operator<(const sprite_prim&,const sprite_prim&);
 class ttfont{
 	const char *msg;
 public:
@@ -115,6 +126,6 @@ public:
 	void stop();
 };
 
-enum VKEY { VK_MENU=1,VK_EXPLORE,VK_UP,VK_DOWN,VK_LEFT,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE};
+enum VKEY { VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE,VK_NONE};
 extern int get_key();
 #endif
