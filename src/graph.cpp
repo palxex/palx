@@ -41,19 +41,19 @@ bool sprite::blit_to(BITMAP *dest,int dest_x,int dest_y)
 	return true;
 }
 
-sprite_prim::sprite_prim():id(-1),curr(0)
+sprite_prim::sprite_prim():id(-1)
 {}
-sprite_prim::sprite_prim(int _id):id(_id),curr(0)
+sprite_prim::sprite_prim(int _id):id(_id)
 {}
-sprite_prim::sprite_prim(int _id,uint8_t *src,int layer,int y_off,int layer_off):id(_id),curr(0)
+sprite_prim::sprite_prim(int _id,uint8_t *src,int layer,int y_off,int layer_off):id(_id)
 {
 	getsource(src,layer,y_off,layer_off);
 }
-sprite_prim::sprite_prim(int _id,uint8_t *src):id(_id),curr(0)
+sprite_prim::sprite_prim(int _id,uint8_t *src):id(_id)
 {
 	getsource(src);
 }
-sprite_prim::sprite_prim(const sprite_prim &rhs):id(rhs.id),sprites(rhs.sprites),curr(rhs.curr)
+sprite_prim::sprite_prim(const sprite_prim &rhs):id(rhs.id),sprites(rhs.sprites)
 {}
 void sprite_prim::getsource(uint8_t *src,int layer,int y_off,int layer_off)
 {
@@ -65,11 +65,11 @@ void sprite_prim::getsource(uint8_t *src)
 	for(int i=0,subfiles=determain_smkfs(src);i<subfiles;i++)
 		sprites.push_back(boost::shared_ptr<sprite>(new sprite(src+2*((uint16_t *)src)[i],0,0,0)));
 }
-sprite *sprite_prim::getcurrent()
+sprite * sprite_prim::getsprite(int i)
 {
-	return sprites[curr].get();
+	return sprites[i].get();
 }
-void sprite_prim::blit(BITMAP *bmp)
+void sprite_prim::blit(int curr,BITMAP *bmp)
 {
 	sprites[curr]->blit_to(bmp);
 }

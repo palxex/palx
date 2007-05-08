@@ -33,7 +33,6 @@ namespace{
 Game::Game(int save=0):
 	rpg((memset(&rpg,0,sizeof(RPG)),rpg))
 {
-	rpg.team_roles=-1;
 	//allegro init
 	allegro_init();
 	install_timer();

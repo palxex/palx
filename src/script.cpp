@@ -13,12 +13,17 @@ void clear_effective(int16_t p1,int16_t p2)
 {
 	redraw_everything();
 }
-void sync_viewport()
+inline void sync_viewport()
 {
 	viewport_x_bak=game->rpg.viewport_x;
 	viewport_y_bak=game->rpg.viewport_y;
 	game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
 	game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+}
+inline void backup_position()
+{
+	abstract_x_bak=scene->team_pos.toXY().x;
+	abstract_y_bak=scene->team_pos.toXY().y;
 }
 uint16_t process_script_entry(uint16_t func,int16_t param[],uint16_t id,int16_t object)
 {
@@ -58,6 +63,9 @@ __walk_npc:
 			}
 			npc_speed=2;
 			goto __walk_npc;
+		case 0x15:
+			game->rpg.team_direction=param1;
+			game->rpg.team[param3].direction=param1*3+param2;
 		case 0x24:
 			if(param1)
 				(param1>0 ? game->evtobjs[param1] : obj).auto_script= param2;
@@ -101,6 +109,17 @@ __walk_npc:
 			if(param1){
 				(param1>0 ? game->evtobjs[param1] : obj).pos_x += param2;
 				(param1>0 ? game->evtobjs[param1] : obj).pos_y += param3;
+			}
+			break;
+		case 0x6e:
+			backup_position();
+			sync_viewport();
+			game->rpg.viewport_x+=param1;
+			game->rpg.viewport_y+=param2;
+			game->rpg.layer=param3*8;
+			if(param1&&param2){
+				team_walk_one_step();
+				scene->move_usable_screen();
 			}
 			break;
 		case 0x6f:

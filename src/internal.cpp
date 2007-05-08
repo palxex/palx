@@ -6,14 +6,6 @@ bool flag_battling=false;
 
 int flag_to_load=0;
 int rpg_to_load=0;
-int step_off_x=16,step_off_y=8;
-int coordinate_x_max=1696,coordinate_y_max=1840;
-int x_scrn_offset=0xA0;
-int y_scrn_offset=0x70;
-int abstract_x_bak=0,abstract_y_bak=0;
-int viewport_x_bak=0,viewport_y_bak=0;
-int direction_offs[][2]={{-16,8},{-16,-8},{16,-8},{16,8}};
-int frames3[]={0,1,0,2},curframe=0;
 
 bool flag_parallel_mutex=false;
 int redraw_flag=0;
