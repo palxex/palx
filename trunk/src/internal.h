@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include <list>
+#include <vector>
 
 struct Scene;
 struct BattleScene;
@@ -23,7 +24,8 @@ extern int x_scrn_offset,y_scrn_offset;
 extern int abstract_x_bak,abstract_y_bak;
 extern int viewport_x_bak,viewport_y_bak;
 extern int direction_offs[][2];
-extern int frames3[],curframe;
+
+extern bool mapchanged;
 
 extern bool flag_parallel_mutex;
 extern int redraw_flag;
@@ -33,7 +35,7 @@ extern volatile int time_interrupt_occers;
 
 class sprite_prim;
 extern std::list<sprite_prim> mgos;
-extern std::list<sprite_prim *> team_prims;
+extern std::vector<sprite_prim *> team_prims;
 
 extern void randomize();
 extern float rnd0();
@@ -44,7 +46,10 @@ extern bool process_Menu();
 extern void process_Explore();
 extern uint16_t process_script(uint16_t script,int16_t object);
 extern uint16_t process_autoscript(uint16_t script,int16_t object);
+
 extern void load_team_mgo();
 extern void redraw_everything();
+extern void team_walk_one_step();
+extern void stop_and_update_frame();
 
 #endif

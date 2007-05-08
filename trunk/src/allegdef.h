@@ -44,7 +44,6 @@ class sprite_prim{
 		return usrc[0]-(usrc[usrc[0]-1]==0?1:0);
 	}
 public:
-	int curr;
 	sprite_prim();
 	sprite_prim(int);
 	sprite_prim(int,uint8_t *src);
@@ -52,8 +51,8 @@ public:
 	sprite_prim(const sprite_prim &);
 	void getsource(uint8_t *src,int,int,int);
 	void getsource(uint8_t *src);
-	sprite *getcurrent();
-	void blit(BITMAP *bmp);
+	sprite *getsprite(int);
+	void blit(int i,BITMAP *bmp);
 	friend bool operator==(const sprite_prim&,const sprite_prim&);
 	friend class map;
 };
