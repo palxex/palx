@@ -3,16 +3,8 @@
 #include "game.h"
 #include "scene.h"
 
-void redraw_everything()
-{
-	//lots of lots stuff;only implement the reverse of parallel mutex
-	scene->produce_one_screen();
-	flag_parallel_mutex=!flag_parallel_mutex;
-}
-void clear_effective(int16_t p1,int16_t p2)
-{
-	redraw_everything();
-}
+#include <wchar.h>
+
 inline void sync_viewport()
 {
 	viewport_x_bak=game->rpg.viewport_x;
@@ -65,7 +57,7 @@ __walk_npc:
 			goto __walk_npc;
 		case 0x15:
 			game->rpg.team_direction=param1;
-			game->rpg.team[param3].direction=param1*3+param2;
+			game->rpg.team[param3].frame=param1*3+param2;
 		case 0x24:
 			if(param1)
 				(param1>0 ? game->evtobjs[param1] : obj).auto_script= param2;
@@ -74,10 +66,31 @@ __walk_npc:
 			if(param1)
 				(param1>0 ? game->evtobjs[param1] : obj).trigger_script= param2;
 			break;
+		case 0x3c:
+			if(param1)
+				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x30,0x37);
+			PALETTE pal;get_palette(pal);
+			save_bitmap("test.bmp",screen,pal);
+			dialog_x=(param1?0x50:0xC);
+			dialog_y=8;
+			frame_text_x=(param1?0x60:0x2C);
+			frame_text_y=0x1A;
+			break;
+		case 0x3d:
+			if(param1)
+				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x10E,0x90);
+			dialog_x=(param1?4:0xC);
+			dialog_y=0x6C;
+			frame_text_x=(param1?0x14:0x2C);
+			frame_text_y=0x7E;
+			break;
+		case 0x3e:
+			break;
 		case 0x40:
 			break;
 		case 0x43:
 			game->rpg.music=param1;
+			rix->play(param1);
 			break;
 		case 0x44:
 			GameLoop_OneCycle(false);
@@ -138,13 +151,15 @@ __walk_role:
 					scene->team_pos.x += role_speed*(x_diff<0 ? 2 : -2);
 					scene->team_pos.y += role_speed*(y_diff<0 ? 1 : -1);
 					sync_viewport();
+					team_walk_one_step();
 					GameLoop_OneCycle(false);
+					scene->move_usable_screen();
 					redraw_everything();
 				}
 			}
 			break;
 		case 0x73:
-			clear_effective(param1,param2);
+			//clear_effective(param1,param2);
 			break;
 		case 0x75:
 			game->rpg.team[0].role=(param2-1<0?0:param2-1);
@@ -183,25 +198,23 @@ __walk_role:
 			npc_speed=8;
 			goto __walk_npc;
 		case 0x92:
-			clear_effective(1,0x41);
+			//clear_effective(1,0x41);
 			break;
 		case 0x93:
-			GameLoop_OneCycle(false);
-			redraw_everything();
 			break;
 		case 0x9b:
 			scene->produce_one_screen();
 			break;
 		case 0x9d:
-			clear_effective(2,0x4E);
-			clear_effective(1,0x2A);
+			//clear_effective(2,0x4E);
+			//clear_effective(1,0x2A);
 			break;
 		case 0x9e:
-			clear_effective(1,0x4E);
-			clear_effective(1,0x2A);
+			//clear_effective(1,0x4E);
+			//clear_effective(1,0x2A);
 			break;
 		case 0x9f:
-			clear_effective(1,0x48);
+			//clear_effective(1,0x48);
 			break;
 	}
 	return id;
@@ -209,8 +222,23 @@ __walk_role:
 
 uint16_t process_script(uint16_t id,int16_t object)
 {
+	static cut_msg_impl msges;
+	static cut_msg_impl objs("word.dat");
+	static BITMAP *backup=create_bitmap(320,200);
+	static char *msg,colon[3];static int i=sprintf(colon,"\xA3\xBA");
 	EVENT_OBJECT &obj=game->evtobjs[object];
-	uint16_t next_id=id;
+	uint16_t next_id=id;	
+	current_dialog_lines = 0;
+	glbvar_fontcolor  = 0x4F;
+	font_color_yellow = 0x2D;
+	font_color_red    = 0x1A;
+	font_color_cyan   = 0x8D;
+	font_color_cyan_1 = 0x8C;
+	frame_pos_flag = 1;
+	dialog_x = 12;
+	dialog_y = 8;
+	frame_text_x = 0x2C;
+	frame_text_y = 0x1A;
 	while(id)
 	{
 		SCRIPT &curr=game->scripts[id];
@@ -224,8 +252,16 @@ uint16_t process_script(uint16_t id,int16_t object)
 				return id;
 			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
-				//while(!keypressed()) scene->our_team_setdraw(),scene->process_scrn_drawing(false);
-				//clear_keybuf();
+				if(current_dialog_lines>3)
+				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,320,200);}
+				else if(current_dialog_lines==0)
+					blit(screen,backup,0,0,0,0,320,200);
+				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
+				if(memcmp(msg+strlen(msg)-2,&colon,2)==0)
+					dialog_firstline(msg);
+				else
+					dialog_string(msg,current_dialog_lines),
+					current_dialog_lines++;
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
@@ -265,7 +301,12 @@ uint16_t process_script(uint16_t id,int16_t object)
 			case 5:
 				//printf("清屏 方式%x 延迟%x,更新角色信息:%s\n",param1,curr.param[1],curr.param[2]?"是":"否");
 				//总算有一个不用实现的了……Oh no!
+				if(current_dialog_lines>0)
+					show_wait_icon(),current_dialog_lines=0;
+				if(param3)
+					stop_and_update_frame();
 				redraw_everything();
+				//blit(backup,screen,0,0,0,0,320,200);
 				break;
 			case 6:
 				//时间关系，不再模拟QB7的随机函数				

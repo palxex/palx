@@ -77,7 +77,7 @@ int Game::run(){
 		static int i;
 		timer_proc();
 		rest(10);
-		if(i++==5)
+		if(i++==10)
 			i=0,mainloop_proc();
 	}//*/
 

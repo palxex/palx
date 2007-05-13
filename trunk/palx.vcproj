@@ -247,6 +247,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\src\message.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\src\qbrand.cpp"
 						>
 					</File>

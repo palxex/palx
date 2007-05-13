@@ -35,6 +35,7 @@ void Load_Data(int &flag)
 		wave_progression=0;
 		//save previous scene's event objects,not needed in this policy
 	}
+	redraw_flag=0;
 	x_scrn_offset=0xA0;
 	y_scrn_offset=0x70;
 	scene->current=scene->toload;
@@ -81,7 +82,13 @@ void GameLoop_OneCycle(bool trigger)
 					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=(iter->trigger_method-4)*32)// in the distance that can trigger
 					{
 						if(iter->frames)
+						{
+							stop_and_update_frame();
+							iter->curr_frame=0;
+							//calc_facing_to();
 							redraw_everything();
+						}
+						//x_off=0,y_off=0;
 						uint16_t &triggerscript=iter->trigger_script;
 						triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
 					}
@@ -106,4 +113,22 @@ bool process_Menu()
 }
 void process_Explore()
 {
+}
+
+void redraw_everything(int time_gap)
+{
+	flag_parallel_mutex=!flag_parallel_mutex;
+	scene->clear_active();
+	if(flag_battling)
+		;
+	else{
+		scene->visible_NPC_movment_setdraw();
+		scene->our_team_setdraw();
+		scene->Redraw_Tiles_or_Fade_to_pic();
+		scene->draw_normal_scene(time_gap);
+	}
+}
+void clear_effective(int16_t p1,int16_t p2)
+{
+	redraw_everything();
 }

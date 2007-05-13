@@ -31,6 +31,7 @@ public:
 	sprite(uint8_t *);
 	sprite(uint8_t *,int,int,int);
 	~sprite();
+	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *,int,int);
 	bool blit_to(BITMAP *dest);
 	friend bool operator<(const sprite&,const sprite&);
@@ -50,7 +51,7 @@ public:
 	sprite_prim(int,uint8_t *src,int,int,int);
 	sprite_prim(const sprite_prim &);
 	void getsource(uint8_t *src,int,int,int);
-	void getsource(uint8_t *src);
+	sprite_prim &getsource(uint8_t *src);
 	sprite *getsprite(int);
 	void blit(int i,BITMAP *bmp);
 	friend bool operator==(const sprite_prim&,const sprite_prim&);
@@ -63,8 +64,8 @@ class ttfont{
 public:
 	static ALFONT_FONT *glb_font;
 	ttfont(const char *_msg):msg(_msg){}
-	void blit_to(BITMAP *dest,int start,int end,int x,int y){
-		alfont_textout(dest, glb_font, msg, x, y, 0xef);
+	void blit_to(BITMAP *dest,int x,int y,uint8_t color){
+		alfont_textout(dest, glb_font, msg, x, y, color);
 	}
 };
 class palette{

@@ -135,7 +135,7 @@ typedef struct rpg_def{
 	struct position{
 		int16_t role;
 		int16_t x,y;
-		int16_t direction;
+		int16_t frame;
 		int16_t img_handler;
 	}team[TEAMROLES];
 	struct track{

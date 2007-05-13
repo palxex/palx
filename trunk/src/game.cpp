@@ -8,23 +8,23 @@
 using namespace std;
 namespace{
 	template<typename T>
-	inline void reunion(vector<T> &vec,uint8_t *src,long &len)
+	inline void reunion(vector<T> &vec,uint8_t *src,const long &len)
 	{
 		T *usrc=(T *)src;
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
-	inline void reunion(sprite_prim &vec,uint8_t *src,long &len)
+	inline void reunion(sprite_prim &vec,uint8_t *src,const long &len)
 	{
 		vec.getsource(src);
 	}
 	template<typename T>
-	inline void reunion(T *vec,uint8_t *src,long &len)
+	inline void reunion(T *vec,uint8_t *src,const long &len)
 	{
 		T *usrc=(T *)src;
 		memcpy(vec,usrc,len);
 	}
 	template<typename T>
-	inline void reunion(T &vec,uint8_t *src,long &len)
+	inline void reunion(T &vec,uint8_t *src,const long &len)
 	{
 		memcpy(&vec,src,len);
 	}
@@ -53,7 +53,7 @@ Game::Game(int save=0):
 	//global setting
 
 	//load sss&data
-	long len;
+	long len=0;
 	EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
 	SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
 	reunion(evtobjs,	SSS.decode(0,len), len);
@@ -96,9 +96,15 @@ void Game::load(int id){
 	}
 	fread((RPG*)this,sizeof(RPG),1,fprpg);
 	scene->toload=rpg.scene_id;
+	vector<EVENT_OBJECT> t_evtobjs;t_evtobjs.push_back(EVENT_OBJECT());
+	reunion(t_evtobjs,(uint8_t*)&rpg.evtobjs,(const long&)sizeof(rpg.evtobjs));evtobjs.swap(t_evtobjs);
+	vector<SCENE> t_scenes;t_scenes.push_back(SCENE());
+	reunion(t_scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));scenes.swap(t_scenes);
 	fclose(fprpg);
 }
 void Game::save(int id){
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"wb");
+	copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
+	copy(scenes.begin()+1,scenes.end(),rpg.scenes);
 	fclose(fprpg);
 }

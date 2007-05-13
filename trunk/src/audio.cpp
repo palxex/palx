@@ -63,6 +63,8 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song)
 {
+	if(subsong==sub_song)
+		return;
 	stop();
 	int slen = rix.songlength(sub_song);
 	subsong=sub_song;
