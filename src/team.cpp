@@ -14,27 +14,27 @@ int direction_offs[][2]={{-16,8},{-16,-8},{16,-8},{16,8}};
 int this_step_frame=0;
 int step_frame_follower=0,step_frame_leader=0;
 
-std::list<sprite_prim> mgos;
-typedef std::list<sprite_prim>::iterator mgo_iter;
-std::vector<sprite_prim *> team_prims;
+std::vector<sprite_prim> mgos;
+std::map<int,int> team_mgos;
+std::map<int,int> npc_mgos;
 
-bool load_mgo(int id,int layer,int y_off,int layer_off)
+int load_mgo(int id,int layer,int y_off,int layer_off)
 {
 	bool decoded;
 	uint8_t *buf=MGO.decode(id,decoded);
-	if(!decoded)
+	if(!decoded){
 		mgos.push_back(sprite_prim(id,buf,layer,y_off,layer_off));
-	return decoded;
+		return mgos.end()-1-mgos.begin();
+	}else
+		return std::find(mgos.begin(),mgos.end(),sprite_prim(id))-mgos.begin();
 }
 void load_team_mgo()
 {
-	team_prims.swap(std::vector<sprite_prim *>());
+	team_mgos.swap(std::map<int,int>());
 	for(int i=0;i<=game->rpg.team_roles;i++)
 	{
 		int id=game->rpg.roles_properties.avator[game->rpg.team[i].role];
-		load_mgo(id,game->rpg.layer,10,6);
-		sprite_prim *tmp=&*std::find(mgos.begin(),mgos.end(),sprite_prim(id));
-		team_prims.push_back(tmp);
+		team_mgos[i]=load_mgo(id,game->rpg.layer,10,6);
 	};
 }
 inline void calc_trace_frames()

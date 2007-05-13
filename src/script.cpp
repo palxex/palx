@@ -3,7 +3,10 @@
 #include "game.h"
 #include "scene.h"
 
-#include <wchar.h>
+#include "stdlib.h"
+
+BITMAP *backup=0;
+void destroyit(){destroy_bitmap(backup);}
 
 inline void sync_viewport()
 {
@@ -195,6 +198,9 @@ __walk_role:
 		case 0x82:
 			npc_speed=8;
 			goto __walk_npc;
+		case 0x8e:
+			blit(backup,screen,0,0,0,0,WIDTH,HEIGHT);
+			break;
 		case 0x92:
 			//clear_effective(1,0x41);
 			break;
@@ -222,8 +228,10 @@ uint16_t process_script(uint16_t id,int16_t object)
 {
 	static cut_msg_impl msges;
 	static cut_msg_impl objs("word.dat");
-	static BITMAP *backup=create_bitmap(320,200);
-	static char *msg,colon[3];static int i=sprintf(colon,"\xA3\xBA");
+	static int _t_=atexit(destroyit);
+	if(!backup)
+		backup=create_bitmap(WIDTH,HEIGHT);
+	static char *msg,colon[3];static int i=sprintf(colon,"\xA1\x47");//"\xA3\xBA");
 	EVENT_OBJECT &obj=game->evtobjs[object];
 	uint16_t next_id=id;	
 	current_dialog_lines = 0;
@@ -253,9 +261,9 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(current_dialog_lines>3)
 				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,320,200);}
 				else if(current_dialog_lines==0)
-					blit(screen,backup,0,0,0,0,320,200);
+					blit(screen,backup,0,0,0,0,WIDTH,HEIGHT);
 				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
-				if(memcmp(msg+strlen(msg)-2,&colon,2)==0)
+				if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
 					dialog_firstline(msg);
 				else
 					dialog_string(msg,current_dialog_lines),
@@ -298,13 +306,12 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			case 5:
 				//printf("清屏 方式%x 延迟%x,更新角色信息:%s\n",param1,curr.param[1],curr.param[2]?"是":"否");
-				//总算有一个不用实现的了……Oh no!
 				if(current_dialog_lines>0)
 					show_wait_icon(),current_dialog_lines=0;
 				if(param3)
 					stop_and_update_frame();
 				redraw_everything();
-				//blit(backup,screen,0,0,0,0,320,200);
+				//blit(backup,screen,0,0,0,0,WIDTH,HEIGHT);
 				break;
 			case 6:
 				//时间关系，不再模拟QB7的随机函数				
@@ -318,6 +325,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			case 7:
 				//printf("开战 第%x组敌人 胜利脚本%x 逃跑脚本%x\n",param1,curr.param[1],curr.param[2]);
+				if(current_dialog_lines>0)
+					show_wait_icon(),current_dialog_lines=0;
 				break;
 			case 8:
 				next_id = id+1;
@@ -325,6 +334,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			case 9:
 				//printf("空闲%x循环\n",param1);
+				if(current_dialog_lines>0)
+					show_wait_icon(),current_dialog_lines=0;
 				for(int cycle=1;cycle<=(param1?param1:1);++cycle){
 					//printf("第%x循环:\n",cycle);
 					GameLoop_OneCycle(curr.param[1]!=0);
@@ -333,6 +344,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			case 0xA:
 				//printf("选择:选否则继续(y/n)");
+				current_dialog_lines=0;
 				char sele;
 				scanf("%c",&sele);
 				if(sele=='y'){
@@ -343,6 +355,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 				//printf("继续\n");
 				break;
 			default:
+				if(current_dialog_lines>0)
+					show_wait_icon();
 				id = process_script_entry(curr.func,curr.param,id,object);
 		}
 		++id;
