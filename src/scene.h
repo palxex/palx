@@ -34,7 +34,7 @@ class map:public scene_map{
 	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
 public: 
 	void make_tile(uint8_t*,int,int,int,int,int,BITMAP*);
-	void make_onescreen(BITMAP *dest,int,int,int,int);
+	void make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 	tile &gettile(int x,int y,int h,int l);
 	map();
 	void change(int p);
@@ -77,7 +77,7 @@ struct Scene{
 	void Redraw_Tiles_or_Fade_to_pic();
 	void move_usable_screen();
 	void get_sprites();
-	void produce_one_screen(bool =true);
+	void produce_one_screen();
 	void draw_normal_scene(int);
 };
 struct BattleScene{

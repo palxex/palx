@@ -129,7 +129,7 @@ cached_res RNG("rng.mkf" ,de_mkf_mkf_yj1);
 cached_res DATA("data.mkf",de_mkf);
 cached_res SSS("sss.mkf" ,de_mkf);
 cached_res BALL("ball.mkf",de_mkf_smkf);
-cached_res RGM("rgm.mkf" ,de_mkf_smkf);
+cached_res RGM("rgm.mkf" ,de_mkf);
 cached_res FBP("fbp.mkf" ,de_mkf_yj1);
 cached_res F("f.mkf"   ,de_mkf_yj1);
 cached_res FIRE("fire.mkf",de_mkf_yj1);
