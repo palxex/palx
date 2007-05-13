@@ -69,8 +69,6 @@ __walk_npc:
 		case 0x3c:
 			if(param1)
 				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x30,0x37);
-			PALETTE pal;get_palette(pal);
-			save_bitmap("test.bmp",screen,pal);
 			dialog_x=(param1?0x50:0xC);
 			dialog_y=8;
 			frame_text_x=(param1?0x60:0x2C);

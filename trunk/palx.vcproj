@@ -94,6 +94,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="set PATH=%PATH%;%WINDIR%\fonts\"
 			/>
 		</Configuration>
 		<Configuration
