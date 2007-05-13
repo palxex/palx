@@ -44,12 +44,12 @@ Game::Game(int save=0):
 	pat.set(0);
 
 	alfont_init();
-	ttfont::glb_font=alfont_load_font("simsun.ttc");
-	alfont_set_language(ttfont::glb_font, Encode_Code);	
+	ttfont::glb_font=alfont_load_font(strcat(getenv("WINDIR"),"\\fonts\\mingliu.ttc"));
+	alfont_set_language(ttfont::glb_font, "chinese-traditional");	
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);
 	alfont_set_font_background(ttfont::glb_font, FALSE);
-	alfont_set_font_size(ttfont::glb_font,15);
+	alfont_set_font_size(ttfont::glb_font,16);
 	//global setting
 
 	//load sss&data

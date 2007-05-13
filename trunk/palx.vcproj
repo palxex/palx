@@ -27,6 +27,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="set PATH=%PATH%;%WINDIR%\fonts\"
+				Outputs="那个啥，正在设置……"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -41,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;WIDTH=320;HEIGHT=200"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -94,7 +96,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="set PATH=%PATH%;%WINDIR%\fonts\"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration

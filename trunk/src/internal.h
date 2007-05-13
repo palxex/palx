@@ -2,8 +2,8 @@
 #define CONSTANTS
 
 #include "config.h"
-#include <list>
 #include <vector>
+#include <map>
 
 struct Scene;
 struct BattleScene;
@@ -46,8 +46,9 @@ extern int frame_text_x;
 extern int frame_text_y;
 
 class sprite_prim;
-extern std::list<sprite_prim> mgos;
-extern std::vector<sprite_prim *> team_prims;
+extern std::vector<sprite_prim> mgos;
+extern std::map<int,int> team_mgos;
+extern std::map<int,int> npc_mgos;
 
 extern void randomize();
 extern float rnd0();
