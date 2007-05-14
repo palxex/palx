@@ -27,7 +27,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="set PATH=%PATH%;%WINDIR%\fonts\"
+				CommandLine="set PATH=%PATH%;%WINDIR%\fonts\&#x0D;&#x0A;"
 				Outputs="那个啥，正在设置……"
 			/>
 			<Tool
