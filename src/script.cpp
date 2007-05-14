@@ -5,6 +5,8 @@
 
 #include "stdlib.h"
 
+extern int scale;
+
 BITMAP *backup=0;
 void destroyit(){destroy_bitmap(backup);}
 
@@ -71,19 +73,19 @@ __walk_npc:
 			break;
 		case 0x3c:
 			if(param1)
-				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x30,0x37);
-			dialog_x=(param1?0x50:0xC);
-			dialog_y=8;
-			frame_text_x=(param1?0x60:0x2C);
-			frame_text_y=0x1A;
+				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x30*scale,0x37*scale);
+			dialog_x=(param1?0x50:0xC)*scale;
+			dialog_y=8*scale;
+			frame_text_x=(param1?0x60:0x2C)*scale;
+			frame_text_y=0x1A*scale;
 			break;
 		case 0x3d:
 			if(param1)
-				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x10E,0x90);
-			dialog_x=(param1?4:0xC);
-			dialog_y=0x6C;
-			frame_text_x=(param1?0x14:0x2C);
-			frame_text_y=0x7E;
+				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x10E*scale,0x90*scale);
+			dialog_x=(param1?4:0xC)*scale;
+			dialog_y=0x6C*scale;
+			frame_text_x=(param1?0x14:0x2C)*scale;
+			frame_text_y=0x7E*scale;
 			break;
 		case 0x3e:
 			break;
@@ -199,7 +201,7 @@ __walk_role:
 			npc_speed=8;
 			goto __walk_npc;
 		case 0x8e:
-			blit(backup,screen,0,0,0,0,WIDTH,HEIGHT);
+			blit(backup,screen,0,0,0,0,screen->w,screen->h);
 			break;
 		case 0x92:
 			//clear_effective(1,0x41);
@@ -230,7 +232,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 	static cut_msg_impl objs("word.dat");
 	static int _t_=atexit(destroyit);
 	if(!backup)
-		backup=create_bitmap(WIDTH,HEIGHT);
+		backup=create_bitmap(screen->w,screen->h);
 	static char *msg,colon[3];static int i=sprintf(colon,"\xA1\x47");//"\xA3\xBA");
 	EVENT_OBJECT &obj=game->evtobjs[object];
 	uint16_t next_id=id;	
@@ -261,7 +263,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(current_dialog_lines>3)
 				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,320,200);}
 				else if(current_dialog_lines==0)
-					blit(screen,backup,0,0,0,0,WIDTH,HEIGHT);
+					blit(screen,backup,0,0,0,0,screen->w,screen->h);
 				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
 				if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
 					dialog_firstline(msg);
@@ -311,7 +313,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(param3)
 					stop_and_update_frame();
 				redraw_everything();
-				//blit(backup,screen,0,0,0,0,WIDTH,HEIGHT);
+				//blit(backup,screen,0,0,0,0,screen->w,screen->h);
 				break;
 			case 6:
 				//时间关系，不再模拟QB7的随机函数				

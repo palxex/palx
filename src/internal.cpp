@@ -21,6 +21,8 @@ BattleScene *battle_scene;
 playrix *rix;
 Game *game;
 
+extern int scale;
+
 void Load_Data(int &flag)
 {
 	if(flag&0x10){
@@ -36,8 +38,8 @@ void Load_Data(int &flag)
 		//save previous scene's event objects,not needed in this policy
 	}
 	redraw_flag=0;
-	x_scrn_offset=0xA0;
-	y_scrn_offset=0x70;
+	x_scrn_offset=0xA0*scale;
+	y_scrn_offset=0x70*scale;
 	scene->current=scene->toload;
 	if(flag&4){
 		//load evtobjs

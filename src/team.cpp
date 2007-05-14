@@ -97,3 +97,8 @@ void stop_and_update_frame()
 		game->rpg.team[game->rpg.team_roles+i].frame=game->rpg.team_track[i+2].direction*3;
 	this_step_frame&=2,this_step_frame^=2;
 }
+
+int calc_faceto(int from_x,int from_y,int to_x,int to_y)
+{
+	return 0;
+}

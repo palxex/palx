@@ -30,6 +30,7 @@ namespace{
 	}
 }
 
+int scale=1;
 Game::Game(int save=0):
 	rpg((memset(&rpg,0,sizeof(RPG)),rpg))
 {
@@ -38,7 +39,10 @@ Game::Game(int save=0):
 	install_timer();
 	install_keyboard();
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
-	set_gfx_mode(GFX_AUTODETECT_WINDOWED,320,200,0,0);
+	set_gfx_mode(GFX_AUTODETECT_WINDOWED,640,400,0,0);
+		scale=screen->w/320;
+		x_scrn_offset*=scale;
+		y_scrn_offset*=scale;
 	set_color_depth(8);
 
 	pat.set(0);
