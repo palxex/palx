@@ -64,6 +64,7 @@ extern void load_team_mgo();
 extern void redraw_everything(int gap=1);
 extern void team_walk_one_step();
 extern void stop_and_update_frame();
+extern int calc_faceto(int from_x,int from_y,int to_x,int to_y);
 
 extern void show_wait_icon();
 extern void dialog_firstline(char *);

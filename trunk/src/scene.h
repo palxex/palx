@@ -18,7 +18,7 @@ protected:
 };
 class fbp:public scene_map{
 public: 
-	fbp():scene_map(0,WIDTH,HEIGHT){}
+	fbp():scene_map(0,screen->w,screen->h){}
 	void change(int p){
 		memcpy(bmp->dat,FBP.decode(p,0),bmp->w*bmp->h);
 	}
