@@ -250,23 +250,11 @@
 						>
 					</File>
 					<File
-						RelativePath=".\src\message.cpp"
-						>
-					</File>
-					<File
 						RelativePath=".\src\qbrand.cpp"
 						>
 					</File>
 					<File
 						RelativePath=".\src\resource.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\src\scene.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\src\team.cpp"
 						>
 					</File>
 				</Filter>
@@ -275,6 +263,26 @@
 					>
 					<File
 						RelativePath=".\src\script.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="graph"
+					>
+					<File
+						RelativePath=".\src\fade.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\message.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\scene.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\team.cpp"
 						>
 					</File>
 				</Filter>

@@ -70,4 +70,7 @@ extern void show_wait_icon();
 extern void dialog_firstline(char *);
 extern void dialog_string(char *str,int);
 
+extern bool mutex_can_change_palette;
+extern void pal_fade_out(int gap);
+extern void pal_fade_in(int gap);
 #endif

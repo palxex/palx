@@ -9,7 +9,9 @@
 #include "pallib.h"
 #include "resource.h"
 
-#define ALFONT_DLL
+#if defined _DEBUG
+	#define ALFONT_DLL
+#endif
 #include <alfont.h>
 
 #include "adplug/emuopl.h"
@@ -93,6 +95,10 @@ public:
 			p[t].g=buf[t].g,
 			p[t].b=buf[t].b;
 		set_to(0);
+	}
+	PALETTE &get()
+	{
+		return pat[day];
 	}
 	void set_to(int t)
 	{

@@ -29,10 +29,10 @@
 #include "allegdef.h"
 
 class Game{
-	palette pat;
-	//data
 public:
+	palette pat;
 	RPG rpg;
+	//data
 	std::vector<SHOP> shops;
 	std::vector<MONSTER> monsters;
 	std::vector<ENEMYTEAM> enemyteams;

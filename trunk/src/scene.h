@@ -35,6 +35,7 @@ class map:public scene_map{
 public: 
 	void make_tile(uint8_t*,int,int,int,int,int,BITMAP*);
 	void make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
+	void blit_to(BITMAP *dest,int sx,int sy,int dx,int dy);
 	tile &gettile(int x,int y,int h,int l);
 	map();
 	void change(int p);

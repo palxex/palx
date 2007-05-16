@@ -18,6 +18,8 @@ namespace{
 		int keygot=get_key();
 		
 		GameLoop_OneCycle(true);
+		if(flag_to_load)
+			Load_Data(flag_to_load);
 
 		//clear scene back
 		scene->clear_scanlines();
@@ -34,9 +36,6 @@ namespace{
 			process_Explore();
 
 		flag_parallel_mutex=!flag_parallel_mutex;
-
-		if(flag_to_load)
-			Load_Data(flag_to_load);
 	}
 	END_OF_FUNCTION(mainloop_proc);
 	void timer_proc()

@@ -1,4 +1,3 @@
-#include "internal.h"
 #include "config.h"
 
 #if defined _MSC_VER
