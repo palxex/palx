@@ -1,6 +1,5 @@
 #include "allegdef.h"
 #include "internal.h"
-#include <cmath>
 
 bitmap::bitmap(const uint8_t *src,int width,int height):
 	bmp(create_bitmap(width,height))
@@ -14,7 +13,7 @@ bitmap::~bitmap()
 }
 bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
-	blit(bmp,dest,source_x,source_y,dest_x,dest_y,304,192);
+	blit(bmp,dest,source_x,source_y,dest_x,dest_y,screen->w-abs(source_x-dest_x),screen->h-abs(source_y-dest_y));
 	return true;
 }
 sprite::sprite(uint8_t *src):x(0),y(0),l(0),width(0),height(0),buf(src)

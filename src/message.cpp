@@ -1,4 +1,3 @@
-#include "internal.h"
 #include "allegdef.h"
 
 int current_dialog_lines = 0;

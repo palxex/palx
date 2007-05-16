@@ -37,7 +37,12 @@ void map::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int d
 		for(int x=source_x/32;x<dest_x/32+1;x++)
 			for(int h=0;h<2;h++)
 				make_tile(mapbuf+y*0x200+x*8+h*4,x,y,h,source_x,source_y,bmp);
-	blit(bmp,dest,0,0,0,0,screen->w,screen->h);//source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,dest_x-game->rpg.viewport_x,dest_y-game->rpg.viewport_y,320,200);
+	blit(bmp,dest,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,dest_x-source_x,dest_y-source_y);
+}
+void map::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
+{
+	bitmap::blit_to(dest,sx,sy,dx,dy);
+	blit(bmp,bmp,sx,sy,dx,dy,bmp->w,bmp->h);
 }
 
 Scene::Scene():scene_buf(create_bitmap(screen->w,screen->h)),current(0),toload(1),team_pos(game->rpg.viewport_x+x_scrn_offset,game->rpg.viewport_y+y_scrn_offset)
@@ -87,24 +92,25 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 {
 	redraw_flag=1;
 }
-int vx1=0,vy1=0,vx2=0,vy2=0;
 void Scene::move_usable_screen()
 {
 	if(redraw_flag)
 	{
 		produce_one_screen();
-		/*scenemap.blit_to(scene_buf,game->rpg.viewport_x-viewport_x_bak,game->rpg.viewport_y-viewport_y_bak,0,0);
-		vx1=vy1=vx2=vy2=0;
-		if(){
-			int x1,x2,y1,y2;
+		/*if(abstract_x_bak!=team_pos.toXY().x)
+		{
+			int x1,x2,y1,y2,vx1,vy1,vx2,vy2,tx=abs(team_pos.toXY().x-abstract_x_bak),ty=abs(team_pos.toXY().y-abstract_y_bak);
 			if(direction_offs[game->rpg.team_direction][1]>0)
-				y1=screen->h-8,y2=screen->h,vy1=8,vy2=0;
+				y1=screen->h-8,y2=screen->h,vy1=ty,vy2=0;
 			else
-				y1=0,y2=8,    vy1=0,vy2=8;
+				y1=0,y2=8,					vy1=0,vy2=ty;		
 			if(direction_offs[game->rpg.team_direction][0]>0)
-				x1=screen->w-16,x2=screen->w,vx1=16,vx2=0;
+				x1=screen->w-16,x2=screen->w,vx1=tx,vx2=0;
 			else
-				x1=0,x2=16,   vx1=0,vx2=16;
+				x1=0,x2=16,					vx1=0,vx2=tx;
+
+  			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
+			
 			short &vx=game->rpg.viewport_x,&vy=game->rpg.viewport_y;
 			scenemap.make_onescreen(scene_buf,vx,vy+y1,vx+screen->w,vy+y2);
 			scenemap.make_onescreen(scene_buf,vx+x1,vy,vx+x2,vy+screen->h);
@@ -125,4 +131,5 @@ void Scene::draw_normal_scene(int)
 	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
 		(*i)->blit_to(scanline);
 	blit(scanline,screen,0,0,0,0,screen->w,screen->h);
+	pal_fade_in(1);
 }

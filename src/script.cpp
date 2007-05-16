@@ -112,6 +112,12 @@ __walk_npc:
 		case 0x49:
 			game->evtobjs[param1!=-1?param1:object].status=param2;
 			break;
+		case 0x50:
+			pal_fade_out(param1==0?1:param1);
+			break;
+		case 0x51:
+			pal_fade_in(param1==0?1:param1);
+			break;
 		case 0x59:
 			scene->toload=param1;
 			flag_to_load|=0xC;
@@ -151,8 +157,10 @@ __walk_role:
 			{
 				int16_t x_diff,y_diff;
 				while((x_diff=scene->team_pos.x-(param1*32+param3*16)) && (y_diff=scene->team_pos.y-(param2*16+param3*8))){
-					scene->team_pos.x += role_speed*(x_diff<0 ? 2 : -2);
-					scene->team_pos.y += role_speed*(y_diff<0 ? 1 : -1);
+					backup_position();
+					scene->team_pos.toXY().x += role_speed*(x_diff<0 ? 2 : -2);
+					scene->team_pos.toXY().y += role_speed*(y_diff<0 ? 1 : -1);
+					game->rpg.team_direction=calc_faceto(abstract_x_bak,abstract_y_bak,scene->team_pos.x,scene->team_pos.y);
 					sync_viewport();
 					team_walk_one_step();
 					GameLoop_OneCycle(false);
@@ -193,9 +201,10 @@ __walk_role:
 			GameLoop_OneCycle(false);
 			redraw_everything();
 			break;
-		case 0x80:
+		case 0x80://todo:
 			GameLoop_OneCycle(false);
 			redraw_everything();
+			mutex_can_change_palette=false;
 			break;
 		case 0x82:
 			npc_speed=8;
@@ -233,7 +242,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 	static int _t_=atexit(destroyit);
 	if(!backup)
 		backup=create_bitmap(screen->w,screen->h);
-	static char *msg,colon[3];static int i=sprintf(colon,"\xA1\x47");//"\xA3\xBA");
+	static char *msg,colon[3];static int i=sprintf(colon,msges(0xc94,0xc96));
 	EVENT_OBJECT &obj=game->evtobjs[object];
 	uint16_t next_id=id;	
 	current_dialog_lines = 0;
@@ -261,7 +270,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 			case -1:
 				//printf("ÏÔÊ¾¶Ô»° `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
 				if(current_dialog_lines>3)
-				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,320,200);}
+				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,screen->w,screen->h);}
 				else if(current_dialog_lines==0)
 					blit(screen,backup,0,0,0,0,screen->w,screen->h);
 				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);

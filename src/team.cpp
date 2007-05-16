@@ -100,5 +100,13 @@ void stop_and_update_frame()
 
 int calc_faceto(int from_x,int from_y,int to_x,int to_y)
 {
-	return 0;
+	if(to_x-from_x>0 && to_y-from_y>0)
+		return 3;
+	else if(to_x-from_x>0 && to_y-from_y<0)
+		return 2;
+	else if(to_x-from_x<0 && to_y-from_y<0)
+		return 1;
+	else if(to_x-from_x<0 && to_y-from_y>0)
+		return 0;
+	return -1;
 }
