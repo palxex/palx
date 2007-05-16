@@ -119,8 +119,12 @@ __walk_npc:
 			pal_fade_in(param1==0?1:param1);
 			break;
 		case 0x59:
-			scene->toload=param1;
-			flag_to_load|=0xC;
+			if(param1>0 && game->rpg.scene_id!=param1)
+			{
+				map_toload=param1;
+				flag_to_load|=0xC;
+				game->rpg.layer=0;
+			}
 			break;
 		case 0x65:
 			game->rpg.roles_properties.avator[param1]=param2;
@@ -266,7 +270,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 			case 0:
 				id = next_id;
 				//printf("停止执行\n");
-				return id;
+				goto exit;
 			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
 				if(current_dialog_lines>3)
@@ -282,15 +286,18 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
-				return id+1;
+				id++;
+				goto exit;
 			case 2:
 				//printf("停止执行，将调用地址替换为脚本%x:",param1);
 				if(curr.param[1]==0){
 					//printf("成功\n");
-					return param1;
+					id = param1;
+					goto exit;
 				}else if(obj.scr_jmp_count++<curr.param[1]){
 					//printf("第%x次成功\n",obj.scr_jmp_count);
-					return param1;
+					id = param1;
+					goto exit;
 				}else{
 					//printf("过期失效\n");
 					obj.scr_jmp_count = 0;
@@ -372,6 +379,9 @@ uint16_t process_script(uint16_t id,int16_t object)
 		}
 		++id;
 	}
+exit:
+	if(current_dialog_lines>0)
+		show_wait_icon();
 	return id;
 }
 uint16_t process_autoscript(uint16_t id,int16_t object)

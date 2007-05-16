@@ -6,6 +6,7 @@ bool flag_battling=false;
 
 int flag_to_load=0;
 int rpg_to_load=0;
+int map_toload=0;
 
 bool flag_parallel_mutex=false;
 int redraw_flag=0;
@@ -32,7 +33,7 @@ void Load_Data(int &flag)
 		//load rpg
 		game->load(rpg_to_load);
 	}
-	else if(scene->current!=scene->toload){
+	else if(game->rpg.scene_id!=map_toload){
 		game->rpg.wave_grade=0;
 		wave_progression=0;
 		//save previous scene's event objects,not needed in this policy
@@ -40,14 +41,14 @@ void Load_Data(int &flag)
 	redraw_flag=0;
 	x_scrn_offset=0xA0*scale;
 	y_scrn_offset=0x70*scale;
-	scene->current=scene->toload;
+	game->rpg.scene_id=map_toload;
 	if(flag&4){
 		//load evtobjs
-		scene->sprites_begin=game->evtobjs.begin()+game->scenes[scene->current].prev_evtobjs+1;
-		scene->sprites_end  =game->evtobjs.begin()+game->scenes[scene->current+1].prev_evtobjs+1;		
+		scene->sprites_begin=game->evtobjs.begin()+game->scenes[game->rpg.scene_id].prev_evtobjs+1;
+		scene->sprites_end  =game->evtobjs.begin()+game->scenes[game->rpg.scene_id+1].prev_evtobjs+1;		
 	}
 	//load map & npc
-	scene->scenemap.change(game->scenes[scene->current].id);
+	scene->scenemap.change(game->scenes[game->rpg.scene_id].id);
 	scene->get_sprites();
 	scene->produce_one_screen();
 	if(flag&1){
@@ -55,10 +56,10 @@ void Load_Data(int &flag)
 	}
 	if(flag&8){
 		//enter a new scene;
-		flag|=2;
-		uint16_t &enterscript=game->scenes[scene->current].enter_script;
+		flag&=2;
+		uint16_t &enterscript=game->scenes[game->rpg.scene_id].enter_script;
 		enterscript=process_script(enterscript,0);
-		if(scene->current!=scene->toload)
+		if(game->rpg.scene_id!=map_toload)
 			Load_Data(flag);
 	}
 	if(flag&2){
@@ -78,7 +79,7 @@ void GameLoop_OneCycle(bool trigger)
 {
 	typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
 	if(trigger)
-		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&scene->current==scene->toload;++iter)
+		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 			if(absdec(iter->vanish_time)==0)
 				if(iter->status>0 && iter->trigger_method>=4){
 					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=(iter->trigger_method-4)*32)// in the distance that can trigger
@@ -98,7 +99,7 @@ void GameLoop_OneCycle(bool trigger)
 					iter->status=abs(iter->status);
 					//step==0
 				}
-	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&scene->current==scene->toload;++iter)
+	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 	{
 		if(iter->status!=0)
 			if(uint16_t &autoscript=iter->auto_script)

@@ -27,8 +27,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="set PATH=%PATH%;%WINDIR%\fonts\&#x0D;&#x0A;"
-				Outputs="那个啥，正在设置……"
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

@@ -31,11 +31,12 @@ class sprite{
 	uint8_t *buf;
 public:
 	sprite(uint8_t *);
-	sprite(uint8_t *,int,int,int);
+	sprite(uint8_t *,int,int,int,int,int);
 	~sprite();
+	void recalc(int,int);
 	void blit_middle(BITMAP*,int,int);
-	bool blit_to(BITMAP *,int,int);
-	bool blit_to(BITMAP *dest);
+	bool blit_to(BITMAP *);
+	bool blit_to(BITMAP *dest,int,int,int);
 	friend bool operator<(const sprite&,const sprite&);
 };
 class sprite_prim{
@@ -50,9 +51,9 @@ public:
 	sprite_prim();
 	sprite_prim(int);
 	sprite_prim(int,uint8_t *src);
-	sprite_prim(int,uint8_t *src,int,int,int);
+	sprite_prim(int,uint8_t *src,int,int,int,int,int);
 	sprite_prim(const sprite_prim &);
-	void getsource(uint8_t *src,int,int,int);
+	void getsource(uint8_t *src,int,int,int,int,int);
 	sprite_prim &getsource(uint8_t *src);
 	sprite *getsprite(int);
 	void blit(int i,BITMAP *bmp);
@@ -60,7 +61,6 @@ public:
 	friend class map;
 };
 bool operator==(const sprite_prim&,const sprite_prim&);
-bool operator<(const sprite_prim&,const sprite_prim&);
 class ttfont{
 	const char *msg;
 public:

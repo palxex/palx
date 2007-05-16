@@ -44,7 +44,6 @@ public:
 struct Scene{
 	::map scenemap;
 	BITMAP *scene_buf;
-	int current,toload;
 	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
 	typedef std::list<sprite *> s_list;
 	s_list active_list;

@@ -18,6 +18,8 @@ extern bool flag_battling;
 
 extern int flag_to_load;
 extern int rpg_to_load;
+extern int map_toload;
+
 extern int step_off_x,step_off_y;
 extern int coordinate_x_max,coordinate_y_max;
 extern int x_scrn_offset,y_scrn_offset;
@@ -61,6 +63,7 @@ extern uint16_t process_script(uint16_t script,int16_t object);
 extern uint16_t process_autoscript(uint16_t script,int16_t object);
 
 extern void load_team_mgo();
+extern void load_NPC_mgo();
 extern void redraw_everything(int gap=1);
 extern void team_walk_one_step();
 extern void stop_and_update_frame();
