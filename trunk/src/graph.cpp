@@ -39,11 +39,6 @@ void sprite::blit_middle(BITMAP *dest,int x,int y)
 	}else
 		Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x-((uint16_t*)buf)[0]/2,y-((uint16_t*)buf)[1]/2);
 }
-void sprite::recalc(int x,int y)
-{
-//	x-=game->rpg.viewport_x;
-//	y-=game->rpg.viewport_y;
-}
 bool sprite::blit_to(BITMAP *dest)
 {
 	if(!dest->dat)

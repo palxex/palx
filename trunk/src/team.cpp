@@ -34,7 +34,7 @@ void load_team_mgo()
 	for(int i=0;i<=game->rpg.team_roles;i++)
 	{
 		int id=game->rpg.roles_properties.avator[game->rpg.team[i].role];
-		team_mgos[i]=load_mgo(id,game->rpg.layer,x_scrn_offset,y_scrn_offset,10,6);
+		team_mgos[i]=load_mgo(id,game->rpg.layer,game->rpg.team[i].x,game->rpg.team[i].y,10,6);
 	};
 }
 void load_NPC_mgo()
@@ -42,7 +42,7 @@ void load_NPC_mgo()
 	npc_mgos.swap(std::map<int,int>());
 	for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 		if(i->image)
-			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image,i->layer,i->pos_x-game->rpg.viewport_x,i->pos_y-game->rpg.viewport_y,9,2);
+			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image,i->layer,i->pos_x,i->pos_y,9,2);
 }
 inline void calc_trace_frames()
 {

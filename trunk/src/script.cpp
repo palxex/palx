@@ -106,6 +106,8 @@ __walk_npc:
 			scene->team_pos.toXYH().x=param1;
 			scene->team_pos.toXYH().y=param2;
 			scene->team_pos.toXYH().h=param3;
+			game->rpg.team[0].x=scene->team_pos.toXY().x-game->rpg.viewport_x;
+			game->rpg.team[0].y=scene->team_pos.toXY().y-game->rpg.viewport_y;
 			sync_viewport();
 			scene->produce_one_screen();
 			break;

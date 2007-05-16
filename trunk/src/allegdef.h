@@ -26,14 +26,13 @@ public:
 	bool blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 };
 class sprite{
-	int x,y,l;
-	int width,height;
 	uint8_t *buf;
 public:
+	int x,y,l;
+	int width,height;
 	sprite(uint8_t *);
 	sprite(uint8_t *,int,int,int,int,int);
 	~sprite();
-	void recalc(int,int);
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int,int);
