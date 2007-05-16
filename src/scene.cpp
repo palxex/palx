@@ -26,9 +26,9 @@ inline void map::make_tile(uint8_t *_buf,int x,int y,int h,int vx,int vy,BITMAP 
 	int index=(_buf[1]&0x10)<<4|_buf[0],index2=(_buf[3]&0x10)<<4|_buf[2];
 	bool throu=(_buf[1]&0x20)?true:false,throu2=(_buf[3]&0x20)?true:false;
 	int layer=_buf[1]&0xf,layer2=_buf[3]&0xf;
-	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-vx,y*16+h*8-8-vy);
+	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-vx,y*16+h*8-8-vy+gettile(x,y,h,0).layer*8,gettile(x,y,h,0).layer*8);
 	if(index2)
-		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu,layer).blit_to(dest,x*32+h*16-16-vx,y*16+h*8-8-vy);
+		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu,layer).blit_to(dest,x*32+h*16-16-vx,y*16+h*8-8-vy+gettile(x,y,h,1).layer*8+1,gettile(x,y,h,1).layer*8+1);
 }
 void map::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
@@ -45,7 +45,7 @@ void map::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
 	blit(bmp,bmp,sx,sy,dx,dy,bmp->w,bmp->h);
 }
 
-Scene::Scene():scene_buf(create_bitmap(screen->w,screen->h)),current(0),toload(1),team_pos(game->rpg.viewport_x+x_scrn_offset,game->rpg.viewport_y+y_scrn_offset)
+Scene::Scene():scene_buf(create_bitmap(screen->w,screen->h)),team_pos(game->rpg.viewport_x+x_scrn_offset,game->rpg.viewport_y+y_scrn_offset)
 {}
 Scene::~Scene()
 {}
@@ -87,7 +87,17 @@ void Scene::our_team_setdraw()
 		active_list.push_back(mgos[team_mgos[i]].getsprite(game->rpg.team[i].frame));
 }
 void Scene::visible_NPC_movment_setdraw()
-{}
+{
+	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++)
+		if(i->pos_x>game->rpg.viewport_x && i->pos_x<game->rpg.viewport_x+screen->w &&
+			i->pos_y>game->rpg.viewport_y && i->pos_y<game->rpg.viewport_y+screen->h &&
+			i->image && i->status && i->vanish_time==0)
+		{
+			sprite *it=mgos[npc_mgos[i-sprites_begin]].getsprite(i->curr_frame);
+			//it->recalc(game->rpg.viewport_x,game->rpg.viewport_y);
+			active_list.push_back(it);
+		}
+}
 void Scene::Redraw_Tiles_or_Fade_to_pic()
 {
 	redraw_flag=1;
@@ -119,6 +129,7 @@ void Scene::move_usable_screen()
 }
 void Scene::get_sprites()
 {
+	load_NPC_mgo();
 }
 void Scene::produce_one_screen()
 {

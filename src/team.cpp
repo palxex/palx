@@ -18,13 +18,13 @@ std::vector<sprite_prim> mgos;
 std::map<int,int> team_mgos;
 std::map<int,int> npc_mgos;
 
-int load_mgo(int id,int layer,int y_off,int layer_off)
+int load_mgo(int id,int layer,int x,int y,int y_off,int layer_off)
 {
 	bool decoded;
 	uint8_t *buf=MGO.decode(id,decoded);
 	if(!decoded){
-		mgos.push_back(sprite_prim(id,buf,layer,y_off,layer_off));
-		return mgos.end()-1-mgos.begin();
+		mgos.push_back(sprite_prim(id,buf,x,y,layer,y_off,layer_off));
+		return mgos.end()-mgos.begin()-1;
 	}else
 		return std::find(mgos.begin(),mgos.end(),sprite_prim(id))-mgos.begin();
 }
@@ -34,8 +34,15 @@ void load_team_mgo()
 	for(int i=0;i<=game->rpg.team_roles;i++)
 	{
 		int id=game->rpg.roles_properties.avator[game->rpg.team[i].role];
-		team_mgos[i]=load_mgo(id,game->rpg.layer,10,6);
+		team_mgos[i]=load_mgo(id,game->rpg.layer,x_scrn_offset,y_scrn_offset,10,6);
 	};
+}
+void load_NPC_mgo()
+{
+	npc_mgos.swap(std::map<int,int>());
+	for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
+		if(i->image)
+			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image,i->layer,i->pos_x-game->rpg.viewport_x,i->pos_y-game->rpg.viewport_y,9,2);
 }
 inline void calc_trace_frames()
 {

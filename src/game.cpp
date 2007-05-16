@@ -39,7 +39,7 @@ Game::Game(int save=0):
 	install_timer();
 	install_keyboard();
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
-	set_gfx_mode(GFX_AUTODETECT_WINDOWED,640,400,0,0);
+	set_gfx_mode(GFX_AUTODETECT_WINDOWED,320,200,0,0);
 		scale=screen->w/320;
 		x_scrn_offset*=scale;
 		y_scrn_offset*=scale;
@@ -49,7 +49,7 @@ Game::Game(int save=0):
 
 	alfont_init();
 	ttfont::glb_font=alfont_load_font(strcat(getenv("WINDIR"),"\\fonts\\simsun.ttc"));
-	alfont_set_language(ttfont::glb_font, Encode_Code);	
+	alfont_set_language(ttfont::glb_font, "cht");	
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);
 	alfont_set_font_background(ttfont::glb_font, FALSE);
@@ -86,6 +86,8 @@ Game::Game(int save=0):
 	//load save
 	if(save!=0)
 		load(save);
+	else
+		map_toload=1;
 }
 Game::~Game(){
 }
@@ -98,17 +100,19 @@ void Game::load(int id){
 		allegro_message("ºÜ±§Ç¸£¬%d.rpg²»´æÔÚ¡«",id);
 		exit(-1);
 	}
-	fread((RPG*)this,sizeof(RPG),1,fprpg);
-	scene->toload=rpg.scene_id;
+	fread(&rpg,sizeof(RPG),1,fprpg);
+	map_toload=rpg.scene_id;
 	vector<EVENT_OBJECT> t_evtobjs;t_evtobjs.push_back(EVENT_OBJECT());
 	reunion(t_evtobjs,(uint8_t*)&rpg.evtobjs,(const long&)sizeof(rpg.evtobjs));evtobjs.swap(t_evtobjs);
 	vector<SCENE> t_scenes;t_scenes.push_back(SCENE());
 	reunion(t_scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));scenes.swap(t_scenes);
 	fclose(fprpg);
+	flag_to_load=0x17;
 }
 void Game::save(int id){
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"wb");
 	copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
 	copy(scenes.begin()+1,scenes.end(),rpg.scenes);
+	fwrite(&rpg,sizeof(RPG),1,fprpg);
 	fclose(fprpg);
 }
