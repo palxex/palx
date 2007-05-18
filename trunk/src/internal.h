@@ -67,6 +67,7 @@ extern void load_NPC_mgo();
 extern void redraw_everything(int gap=1);
 extern void team_walk_one_step();
 extern void stop_and_update_frame();
+extern void store_team_frame_data();
 extern int calc_faceto(int from_x,int from_y,int to_x,int to_y);
 
 extern void show_wait_icon();
