@@ -41,15 +41,15 @@ namespace{
 	void timer_proc()
 	{
 		static int pal_lock=0;
+		static PALETTE pal;
 		mutux_setpalette=false;
 		if(pal_lock++==10){
-			PALETTE pal;
 			get_palette(pal);
 			RGB temp=pal[0xF6];
 			memcpy(pal+0xF6,pal+0xF7,6);
 			pal[0xF8]=temp;
 			temp=pal[0xF9];
-			memcpy(pal+0xF9,pal+0xF8,0xF);
+			memcpy(pal+0xF9,pal+0xFA,0x12);
 			pal[0xFE]=temp;
 			set_palette(pal);
 			pal_lock=0;
@@ -63,7 +63,7 @@ namespace{
 int Game::run(){
 	//游戏主循环10fps,画面100fps,音乐70fps。
 	//因为allegro int无法调试，调试期改用循环。
-	/*
+	//*
 	install_int(mainloop_proc,100);
 	LOCK_VARIABLE(time_interrupt_occers);
 	install_int(timer_proc,10);
@@ -72,13 +72,13 @@ int Game::run(){
 
 	remove_int(mainloop_proc);
 	remove_int(timer_proc);/*///
+	LOCK_VARIABLE(time_interrupt_occers);
+	install_int(timer_proc,10);
 	while(running){
-		static int i;
-		timer_proc();
-		rest(10);
-		if(i++==10)
-			i=0,mainloop_proc();
-	}//*/
+		rest(100);
+		mainloop_proc();
+	}
+	remove_int(timer_proc);//*/
 
 	return 1;
 }

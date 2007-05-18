@@ -262,14 +262,6 @@
 					Name="script"
 					>
 					<File
-						RelativePath=".\src\script.cpp"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="graph"
-					>
-					<File
 						RelativePath=".\src\fade.cpp"
 						>
 					</File>
@@ -277,6 +269,14 @@
 						RelativePath=".\src\message.cpp"
 						>
 					</File>
+					<File
+						RelativePath=".\src\script.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="graph"
+					>
 					<File
 						RelativePath=".\src\scene.cpp"
 						>

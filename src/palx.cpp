@@ -33,7 +33,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	randomize();
-	Game  thegame(argc>=2? argv[1][0]-0x30 : begin_scene()()); game=&thegame;
+	Game  thegame(argc>=2? atoi(argv[1]) : begin_scene()()); game=&thegame;
 	Scene normal;	scene=&normal;
 	BattleScene battle;	battle_scene=&battle;
 	playrix player;				rix=&player;

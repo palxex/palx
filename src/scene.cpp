@@ -85,20 +85,21 @@ void Scene::our_team_setdraw()
 	//	active_list.push_back((*it)->getsprite(game->rpg.team[it-team_prims.begin()].frame));
 	for(int i=0;i<=game->rpg.team_roles+game->rpg.team_followers;i++){
 		sprite *it=mgos[team_mgos[i]].getsprite(game->rpg.team[i].frame);
-		it->x=game->rpg.team[i].x-game->rpg.viewport_x-it->width/2;
-		it->y=game->rpg.team[i].y-game->rpg.viewport_y+game->rpg.layer+10;
+		it->x=game->rpg.team[i].x-it->width/2;
+		it->y=game->rpg.team[i].y+game->rpg.layer+10;
 		it->l=game->rpg.layer+6;
 		active_list.push_back(it);
 	}
 }
 void Scene::visible_NPC_movment_setdraw()
 {
-	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++)
+	int t=0;
+	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++,t++)
 		if(i->pos_x>game->rpg.viewport_x && i->pos_x<game->rpg.viewport_x+screen->w &&
 			i->pos_y>game->rpg.viewport_y && i->pos_y<game->rpg.viewport_y+screen->h &&
 			i->image && i->status && i->vanish_time==0)
 		{
-			sprite *it=mgos[npc_mgos[i-sprites_begin]].getsprite(i->curr_frame);
+			sprite *it=mgos[npc_mgos[t]].getsprite(i->curr_frame);
 			it->x=i->pos_x-game->rpg.viewport_x-it->width/2;
 			it->y=i->pos_y-game->rpg.viewport_y-i->layer*8+9;
 			it->l=i->layer*8+2;

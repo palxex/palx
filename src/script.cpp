@@ -63,6 +63,10 @@ __walk_npc:
 		case 0x15:
 			game->rpg.team_direction=param1;
 			game->rpg.team[param3].frame=param1*3+param2;
+			break;
+		case 0x16:
+			(param1>0?game->evtobjs[param1]:obj).curr_frame=param2*3+param3;
+			break;
 		case 0x24:
 			if(param1)
 				(param1>0 ? game->evtobjs[param1] : obj).auto_script= param2;
@@ -106,8 +110,6 @@ __walk_npc:
 			scene->team_pos.toXYH().x=param1;
 			scene->team_pos.toXYH().y=param2;
 			scene->team_pos.toXYH().h=param3;
-			game->rpg.team[0].x=scene->team_pos.toXY().x-game->rpg.viewport_x;
-			game->rpg.team[0].y=scene->team_pos.toXY().y-game->rpg.viewport_y;
 			sync_viewport();
 			scene->produce_one_screen();
 			break;
@@ -185,7 +187,7 @@ __walk_role:
 			game->rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;
 			load_team_mgo();
 			//call    setup_our_team_data_things
-			//call    store_team_frame_data
+			store_team_frame_data();
 			break;
 		case 0x76:
 			scene->produce_one_screen();
@@ -222,6 +224,10 @@ __walk_role:
 			//clear_effective(1,0x41);
 			break;
 		case 0x93:
+			break;
+		case 0x98:
+			load_team_mgo();
+			store_team_frame_data();
 			break;
 		case 0x9b:
 			scene->produce_one_screen();
