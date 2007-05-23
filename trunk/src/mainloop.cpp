@@ -8,18 +8,15 @@ namespace{
 	bool running=true;
 	void mainloop_proc()
 	{
-		if(flag_battling)
-			return;
-
 		if(flag_to_load)
-			Load_Data(flag_to_load);
+			Load_Data();
 
 		//Parse Key
 		int keygot=get_key();
 		
 		GameLoop_OneCycle(true);
 		if(flag_to_load)
-			Load_Data(flag_to_load);
+			Load_Data();
 
 		//clear scene back
 		scene->clear_scanlines();
@@ -63,7 +60,7 @@ namespace{
 int Game::run(){
 	//游戏主循环10fps,画面100fps,音乐70fps。
 	//因为allegro int无法调试，调试期改用循环。
-	//*
+	/*
 	install_int(mainloop_proc,100);
 	LOCK_VARIABLE(time_interrupt_occers);
 	install_int(timer_proc,10);
@@ -75,7 +72,7 @@ int Game::run(){
 	LOCK_VARIABLE(time_interrupt_occers);
 	install_int(timer_proc,10);
 	while(running){
-		rest(100);
+		rest(50);
 		mainloop_proc();
 	}
 	remove_int(timer_proc);//*/

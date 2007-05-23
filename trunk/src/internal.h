@@ -55,7 +55,7 @@ extern std::map<int,int> npc_mgos;
 extern void randomize();
 extern float rnd0();
 
-extern void Load_Data(int &flag);
+extern void Load_Data();
 extern void GameLoop_OneCycle(bool);
 extern bool process_Menu();
 extern void process_Explore();

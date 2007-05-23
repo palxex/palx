@@ -27,6 +27,7 @@ void pal_fade_out(int t)
 }
 void pal_fade_in(int t)
 {
+	clear_keybuf();
 	if(mutex_can_change_palette)
 	{
 		mutex_can_change_palette=false;

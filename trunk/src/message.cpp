@@ -16,7 +16,7 @@ int frame_text_y = 0x1A;
 
 void show_wait_icon()
 {
-	game->message_handles.getsprite(0)->blit_to(screen,frame_text_x+80,frame_text_y,0);
+	game->message_handles.getsprite(0)->blit_to(screen,frame_text_x+80,frame_text_y);
 	while(!keypressed()) rest(100);
 	clear_keybuf();current_dialog_lines=0;
 }

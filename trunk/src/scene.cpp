@@ -1,8 +1,10 @@
 #include "scene.h"
 #include "internal.h"
 #include "game.h"
+#include <algorithm>
+#include <functional>
 
-inline sprite &map::getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer)
+inline sprite &palmap::getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer)
 {
 	tile &t=sprites[x][y][h][l];
 	t.image=boost::shared_ptr<sprite>(new sprite(src));
@@ -10,47 +12,48 @@ inline sprite &map::getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,in
 	t.layer=layer;
 	return *t.image.get();
 }
-inline tile &map::gettile(int x,int y,int h,int l)
+inline tile &palmap::gettile(int x,int y,int h,int l)
 {
 	return sprites[x][y][h][l];
 }
-map::map():scene_map(0,screen->w,screen->h),sprites(boost::extents[0x40][0x80][2][2])
+palmap::palmap():scene_map(0,SCREEN_W,SCREEN_H),sprites(boost::extents[0x40][0x80][2][2])
 {}
 int t=-1;
-void map::change(int p){
+void palmap::change(int p){
 	t=p;
 }
-inline void map::make_tile(uint8_t *_buf,int x,int y,int h,int vx,int vy,BITMAP *dest)
+inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 {
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return;
 	int index=(_buf[1]&0x10)<<4|_buf[0],index2=(_buf[3]&0x10)<<4|_buf[2];
 	bool throu=(_buf[1]&0x20)?true:false,throu2=(_buf[3]&0x20)?true:false;
 	int layer=_buf[1]&0xf,layer2=_buf[3]&0xf;
-	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-vx,y*16+h*8-8-vy+gettile(x,y,h,0).layer*8,gettile(x,y,h,0).layer*8);
+	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
 	if(index2)
-		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu,layer).blit_to(dest,x*32+h*16-16-vx,y*16+h*8-8-vy+gettile(x,y,h,1).layer*8+1,gettile(x,y,h,1).layer*8+1);
+		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu,layer).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
 }
-void map::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
+void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
 	uint8_t *mapbuf=MAP.decode(t,0);
-	for(int y=source_y/16;y<dest_y/16+1;y++)
-		for(int x=source_x/32;x<dest_x/32+1;x++)
+	for(int y=std::max(source_y/16-1,0);y<dest_y/16+1;y++)
+		for(int x=std::max(source_x/32-1,0);x<dest_x/32+1;x++)
 			for(int h=0;h<2;h++)
-				make_tile(mapbuf+y*0x200+x*8+h*4,x,y,h,source_x,source_y,bmp);
+				make_tile(mapbuf+y*0x200+x*8+h*4,x,y,h,bmp);
 	blit(bmp,dest,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,dest_x-source_x,dest_y-source_y);
 }
-void map::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
+void palmap::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
 {
 	bitmap::blit_to(dest,sx,sy,dx,dy);
 	blit(bmp,bmp,sx,sy,dx,dy,bmp->w,bmp->h);
 }
 
-Scene::Scene():scene_buf(create_bitmap(screen->w,screen->h)),team_pos(game->rpg.viewport_x+x_scrn_offset,game->rpg.viewport_y+y_scrn_offset)
+Scene::Scene():scene_buf(create_bitmap(SCREEN_W,SCREEN_H)),team_pos(game->rpg.viewport_x+x_scrn_offset,game->rpg.viewport_y+y_scrn_offset)
 {}
 Scene::~Scene()
 {}
 void Scene::clear_scanlines()
 {
+	//clear_bitmap(screen);
 }
 void Scene::clear_active()
 {
@@ -81,13 +84,9 @@ void Scene::calc_team_walking(int key)
 }
 void Scene::our_team_setdraw()
 {
-	//for(std::vector<sprite_prim *>::iterator it=team_prims.begin();it!=team_prims.end();it++)
-	//	active_list.push_back((*it)->getsprite(game->rpg.team[it-team_prims.begin()].frame));
 	for(int i=0;i<=game->rpg.team_roles+game->rpg.team_followers;i++){
 		sprite *it=mgos[team_mgos[i]].getsprite(game->rpg.team[i].frame);
-		it->x=game->rpg.team[i].x-it->width/2;
-		it->y=game->rpg.team[i].y+game->rpg.layer+10;
-		it->l=game->rpg.layer+6;
+		it->setXYL(game->rpg.team[i].x,game->rpg.team[i].y+game->rpg.layer+10,game->rpg.layer+6);
 		active_list.push_back(it);
 	}
 }
@@ -95,44 +94,72 @@ void Scene::visible_NPC_movment_setdraw()
 {
 	int t=0;
 	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++,t++)
-		if(i->pos_x>game->rpg.viewport_x && i->pos_x<game->rpg.viewport_x+screen->w &&
-			i->pos_y>game->rpg.viewport_y && i->pos_y<game->rpg.viewport_y+screen->h &&
+		if(i->pos_x>game->rpg.viewport_x && i->pos_x<game->rpg.viewport_x+SCREEN_W &&
+			i->pos_y>game->rpg.viewport_y && i->pos_y<game->rpg.viewport_y+SCREEN_H &&
 			i->image && i->status && i->vanish_time==0)
 		{
 			sprite *it=mgos[npc_mgos[t]].getsprite(i->curr_frame);
-			it->x=i->pos_x-game->rpg.viewport_x-it->width/2;
-			it->y=i->pos_y-game->rpg.viewport_y-i->layer*8+9;
-			it->l=i->layer*8+2;
+			it->setXYL(i->pos_x-game->rpg.viewport_x,i->pos_y-game->rpg.viewport_y+i->layer*8+9,i->layer*8+2);
 			active_list.push_back(it);
 		}
+}
+Scene::s_list Scene::filter_mask(sprite *masker)
+{
+	s_list redraw_list;
+	for(int vx=(game->rpg.viewport_x+masker->x)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
+		for(int vy=(game->rpg.viewport_y+masker->y)/16,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y+masker->height)/16;vy++)
+			for(int x=vx-1,y=vy;x<=vx+1;x++)
+				for(int h=vh;h<2;h++)
+				{
+					tile &tile0=scenemap.gettile(x,y,h,0);
+					tile &tile1=scenemap.gettile(x,y,h,1);
+					if(tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y+masker->height){
+						sprite *it=tile0.image.get();
+						it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
+						redraw_list.push_back(it);
+					}
+					if(tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y+masker->height){
+						sprite *it=tile1.image.get();
+						it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
+						redraw_list.push_back(it);
+					}
+				}
+	return redraw_list;
 }
 void Scene::Redraw_Tiles_or_Fade_to_pic()
 {
 	redraw_flag=1;
+	s_list tempall;
+	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
+	{
+		s_list temp(filter_mask(*i));
+		std::copy(temp.begin(),temp.end(),std::back_inserter(tempall));
+	}
+	std::copy(tempall.begin(),tempall.end(),std::back_inserter(active_list));
 }
 void Scene::move_usable_screen()
 {
 	if(redraw_flag)
 	{
-		produce_one_screen();
-		/*if(abstract_x_bak!=team_pos.toXY().x)
+		/*produce_one_screen();*/
+		if(abstract_x_bak!=team_pos.toXY().x)
 		{
 			int x1,x2,y1,y2,vx1,vy1,vx2,vy2,tx=abs(team_pos.toXY().x-abstract_x_bak),ty=abs(team_pos.toXY().y-abstract_y_bak);
 			if(direction_offs[game->rpg.team_direction][1]>0)
-				y1=screen->h-8,y2=screen->h,vy1=ty,vy2=0;
+				y1=SCREEN_H-8,y2=SCREEN_H,vy1=ty,vy2=0;
 			else
-				y1=0,y2=8,					vy1=0,vy2=ty;		
+				y1=0,y2=8,	vy1=0,vy2=ty;		
 			if(direction_offs[game->rpg.team_direction][0]>0)
-				x1=screen->w-16,x2=screen->w,vx1=tx,vx2=0;
+				x1=SCREEN_W-16,x2=SCREEN_W,vx1=tx,vx2=0;
 			else
 				x1=0,x2=16,					vx1=0,vx2=tx;
 
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
 			
 			short &vx=game->rpg.viewport_x,&vy=game->rpg.viewport_y;
-			scenemap.make_onescreen(scene_buf,vx,vy+y1,vx+screen->w,vy+y2);
-			scenemap.make_onescreen(scene_buf,vx+x1,vy,vx+x2,vy+screen->h);
-		}*/
+ 			scenemap.make_onescreen(scene_buf,vx,vy+y1,vx+SCREEN_W,vy+y2);
+			scenemap.make_onescreen(scene_buf,vx+x1,vy,vx+x2,vy+SCREEN_H);
+		}
 	}
 }
 void Scene::get_sprites()
@@ -141,14 +168,27 @@ void Scene::get_sprites()
 }
 void Scene::produce_one_screen()
 {
-	scenemap.make_onescreen(scene_buf,game->rpg.viewport_x,game->rpg.viewport_y,game->rpg.viewport_x+screen->w,game->rpg.viewport_y+screen->h);
+	scenemap.make_onescreen(scene_buf,game->rpg.viewport_x,game->rpg.viewport_y,game->rpg.viewport_x+SCREEN_W,game->rpg.viewport_y+SCREEN_H);
+}
+bool sprite_comp(sprite *lhs,sprite *rhs)
+{
+	return lhs->y<rhs->y;
 }
 void Scene::draw_normal_scene(int)
 {
-	static BITMAP *scanline=create_bitmap(screen->w,screen->h);
-	blit(scene_buf,scanline,0,0,0,0,screen->w,screen->h);
+	static BITMAP *scanline=create_bitmap(SCREEN_W,SCREEN_H);
+	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
+	std::sort(active_list.begin(),active_list.end(),sprite_comp);
 	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
 		(*i)->blit_to(scanline);
-	blit(scanline,screen,0,0,0,0,screen->w,screen->h);
+	blit(scanline,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	pal_fade_in(1);
+	/*
+	scenemap.blit_to(screen,0,0,0,0);
+	
+	std::sort(active_list.begin(),active_list.end(),sprite_comp);
+	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
+		(*i)->blit_to(screen);
+	pal_fade_in(1);
+	*/
 }

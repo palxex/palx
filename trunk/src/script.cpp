@@ -7,6 +7,8 @@
 
 extern int scale;
 
+extern int process_Battle(uint16_t,uint16_t);
+
 BITMAP *backup=0;
 void destroyit(){destroy_bitmap(backup);}
 
@@ -122,6 +124,10 @@ __walk_npc:
 		case 0x51:
 			pal_fade_in(param1==0?1:param1);
 			break;
+		case 0x52:
+			obj.status=-obj.status;
+			obj.vanish_time=(param1?param1:0x320);
+			break;
 		case 0x59:
 			if(param1>0 && game->rpg.scene_id!=param1)
 			{
@@ -192,6 +198,10 @@ __walk_role:
 		case 0x76:
 			scene->produce_one_screen();
 			break;
+		case 0x78:
+			flag_battling=0;
+			Load_Data();
+			break;
 		case 0x7a:
 			role_speed=4;
 			goto __walk_role;
@@ -218,7 +228,7 @@ __walk_role:
 			npc_speed=8;
 			goto __walk_npc;
 		case 0x8e:
-			blit(backup,screen,0,0,0,0,screen->w,screen->h);
+			blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 			break;
 		case 0x92:
 			//clear_effective(1,0x41);
@@ -253,7 +263,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 	static cut_msg_impl objs("word.dat");
 	static int _t_=atexit(destroyit);
 	if(!backup)
-		backup=create_bitmap(screen->w,screen->h);
+		backup=create_bitmap(SCREEN_W,SCREEN_H);
 	static char *msg,colon[3];static int i=sprintf(colon,msges(0xc94,0xc96));
 	EVENT_OBJECT &obj=game->evtobjs[object];
 	uint16_t next_id=id;	
@@ -282,9 +292,9 @@ uint16_t process_script(uint16_t id,int16_t object)
 			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
 				if(current_dialog_lines>3)
-				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,screen->w,screen->h);}
+				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);}
 				else if(current_dialog_lines==0)
-					blit(screen,backup,0,0,0,0,screen->w,screen->h);
+					blit(screen,backup,0,0,0,0,SCREEN_W,SCREEN_H);
 				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
 				if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
 					dialog_firstline(msg);
@@ -337,7 +347,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(param3)
 					stop_and_update_frame();
 				redraw_everything();
-				//blit(backup,screen,0,0,0,0,screen->w,screen->h);
+				//blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 				break;
 			case 6:
 				//时间关系，不再模拟QB7的随机函数				
@@ -352,7 +362,15 @@ uint16_t process_script(uint16_t id,int16_t object)
 			case 7:
 				//printf("开战 第%x组敌人 胜利脚本%x 逃跑脚本%x\n",param1,curr.param[1],curr.param[2]);
 				if(current_dialog_lines>0)
-					show_wait_icon(),current_dialog_lines=0;
+					show_wait_icon();
+				i=process_Battle(param1,param3);
+				if( param2 && i == 1){
+					id = param2;
+					continue;
+				}if( param3 && i == 2){
+					id = param3;
+					continue;
+				}
 				break;
 			case 8:
 				next_id = id+1;

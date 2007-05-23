@@ -286,6 +286,14 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="Battle"
+					>
+					<File
+						RelativePath=".\src\battle.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

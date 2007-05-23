@@ -40,7 +40,7 @@ Game::Game(int save=0):
 	install_keyboard();
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	set_gfx_mode(GFX_AUTODETECT_WINDOWED,320,200,0,0);
-		scale=screen->w/320;
+		scale=SCREEN_W/320;
 		x_scrn_offset*=scale;
 		y_scrn_offset*=scale;
 	set_color_depth(8);

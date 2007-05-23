@@ -24,6 +24,7 @@ public:
 	bitmap(const uint8_t *,int,int);
 	virtual ~bitmap();
 	bool blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
+	friend void draw_battle_scene(int);
 };
 class sprite{
 	uint8_t *buf;
@@ -31,12 +32,12 @@ public:
 	int x,y,l;
 	int width,height;
 	sprite(uint8_t *);
-	sprite(uint8_t *,int,int,int,int,int);
 	~sprite();
+	void setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
-	bool blit_to(BITMAP *dest,int,int,int);
-	friend bool operator<(const sprite&,const sprite&);
+	bool blit_to(BITMAP *dest,int,int);
+	friend bool sprite_comp(sprite *lhs,sprite *rhs);
 };
 class sprite_prim{
 	int id;
@@ -49,10 +50,9 @@ class sprite_prim{
 public:
 	sprite_prim();
 	sprite_prim(int);
+	sprite_prim(cached_res &,int);
 	sprite_prim(int,uint8_t *src);
-	sprite_prim(int,uint8_t *src,int,int,int,int,int);
 	sprite_prim(const sprite_prim &);
-	void getsource(uint8_t *src,int,int,int,int,int);
 	sprite_prim &getsource(uint8_t *src);
 	sprite *getsprite(int);
 	void blit(int i,BITMAP *bmp);

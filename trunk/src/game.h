@@ -42,7 +42,7 @@ public:
 	sprite_prim UIpics;
 	sprite_prim discharge_effects;
 	sprite_prim message_handles;
-	std::vector<ENEMY_POSES> enemyposes;
+	ENEMY_POSES enemyposes;
 	std::vector<UPGRADE_EXP> upgradexp;
 	
 	//sss
