@@ -24,12 +24,13 @@ Game *game;
 
 extern int scale;
 
-void Load_Data(int &flag)
+void Load_Data()
 {
-	if(flag&0x10){
+	flag_battling=false;
+	if(flag_to_load&0x10){
 		//load sfx; this task has been not needed since we didn't be limited by 640K.
 	}
-	if(flag&0x20){
+	if(flag_to_load&0x20){
 		//load rpg
 		game->load(rpg_to_load);
 	}
@@ -42,7 +43,7 @@ void Load_Data(int &flag)
 	x_scrn_offset=0xA0*scale;
 	y_scrn_offset=0x70*scale;
 	game->rpg.scene_id=map_toload;
-	if(flag&4){
+	if(flag_to_load&4){
 		//load evtobjs
 		scene->sprites_begin=game->evtobjs.begin()+game->scenes[game->rpg.scene_id].prev_evtobjs+1;
 		scene->sprites_end  =game->evtobjs.begin()+game->scenes[game->rpg.scene_id+1].prev_evtobjs+1;		
@@ -51,22 +52,22 @@ void Load_Data(int &flag)
 	scene->scenemap.change(game->scenes[game->rpg.scene_id].id);
 	scene->get_sprites();
 	scene->produce_one_screen();
-	if(flag&1){
+	if(flag_to_load&1){
 		load_team_mgo();
 	}
-	if(flag&8){
+	if(flag_to_load&8){
 		//enter a new scene;
-		flag&=2;
+		flag_to_load&=2;
 		uint16_t &enterscript=game->scenes[game->rpg.scene_id].enter_script;
 		enterscript=process_script(enterscript,0);
 		if(game->rpg.scene_id!=map_toload)
-			Load_Data(flag);
+			Load_Data();
 	}
-	if(flag&2){
+	if(flag_to_load&2){
 		//play music
 		rix->play(game->rpg.music);
 	}
-	flag=0;
+	flag_to_load=0;
 }
 inline int16_t absdec(int16_t &s)
 {

@@ -18,7 +18,7 @@ protected:
 };
 class fbp:public scene_map{
 public: 
-	fbp():scene_map(0,screen->w,screen->h){}
+	fbp():scene_map(0,SCREEN_W,SCREEN_H){}
 	void change(int p){
 		memcpy(bmp->dat,FBP.decode(p,0),bmp->w*bmp->h);
 	}
@@ -29,23 +29,23 @@ struct tile{
 	int layer;
 	tile():image((sprite*)0),blocked(0),layer(-1){}
 };
-class map:public scene_map{
+class palmap:public scene_map{
 	boost::multi_array<tile,4> sprites;
 	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
 public: 
-	void make_tile(uint8_t*,int,int,int,int,int,BITMAP*);
+	void make_tile(uint8_t*,int,int,int,BITMAP*);
 	void make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 	void blit_to(BITMAP *dest,int sx,int sy,int dx,int dy);
 	tile &gettile(int x,int y,int h,int l);
-	map();
+	palmap();
 	void change(int p);
 };
 
 struct Scene{
-	::map scenemap;
+	palmap scenemap;
 	BITMAP *scene_buf;
 	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
-	typedef std::list<sprite *> s_list;
+	typedef std::vector<sprite *> s_list;
 	s_list active_list;
 	struct position{
 		int x,y,h;
@@ -69,6 +69,7 @@ struct Scene{
 	}team_pos;
 	Scene();
 	~Scene();
+	s_list filter_mask(sprite *);
 	void clear_scanlines();
 	void clear_active();
 	void calc_team_walking(int key);
