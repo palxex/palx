@@ -70,6 +70,7 @@ extern void team_walk_one_step();
 extern void stop_and_update_frame();
 extern void store_team_frame_data();
 extern int calc_faceto(int x_diff,int y_diff);
+extern bool barrier_check(uint16_t self,int x,int y);
 
 extern void show_wait_icon();
 extern void dialog_firstline(char *);

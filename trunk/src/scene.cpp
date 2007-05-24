@@ -84,7 +84,7 @@ void Scene::calc_team_walking(int key)
 	if(key>=VK_DOWN && key<=VK_RIGHT && key_enable){
 		direction=key-3;
 		position target=team_pos+position(direction_offs[direction][0],direction_offs[direction][1]);
-		if(!scenemap.gettile(target.toXYH().x,target.toXYH().y,target.toXYH().h,0).blocked&&
+		if(!barrier_check(0,target.toXY().x,target.toXY().y)&&
 			target.toXY().x>=0 && target.toXY().x<=coordinate_x_max+x_scrn_offset &&
 			target.toXY().y>=0 && target.toXY().y<=coordinate_y_max+y_scrn_offset)
 		{
@@ -123,19 +123,19 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 	redraw_flag=1;
 	s_list redraw_list;sprite *masker;
 	for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
-		for(int vx=(game->rpg.viewport_x+masker->x)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
-			for(int vy=(game->rpg.viewport_y+masker->y)/16,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y+masker->height)/16;vy++)
+		for(int vx=(game->rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
+			for(int vy=(game->rpg.viewport_y+masker->y-masker->height)/16-1,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y)/16+1;vy++)
 				for(int x=vx-1,y=vy;x<=vx+1;x++)
-					for(int h=vh;h<2;h++)
+					for(int h=0;h<2;h++)
 					{
 						tile &tile0=scenemap.gettile(x,y,h,0);
 						tile &tile1=scenemap.gettile(x,y,h,1);
-						if(tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y+masker->height){
+						if(tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
 							sprite *it=tile0.image.get();
 							it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
 							redraw_list.push_back(it);
 						}
-						if(tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y+masker->height){
+						if(tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
 							sprite *it=tile1.image.get();
 							it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
 							redraw_list.push_back(it);
@@ -179,7 +179,7 @@ void Scene::produce_one_screen()
 }
 bool sprite_comp(sprite *lhs,sprite *rhs)
 {
-	return lhs->y>rhs->y;
+	return lhs->y<rhs->y;
 }
 void Scene::draw_normal_scene(int gap)
 {

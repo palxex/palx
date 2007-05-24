@@ -70,60 +70,9 @@ void Load_Data()
 	}
 	flag_to_load=0;
 }
-inline int16_t absdec(int16_t &s)
-{
-	int16_t s0=s;
-	if(s>0)	s--;
-	else if(s<0) s++;
-	return s0;
-}
-typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
-void GameLoop_OneCycle(bool trigger)
-{
-	if(trigger)
-		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
-			if(absdec(iter->vanish_time)==0)
-				if(iter->status>0 && iter->trigger_method>=4){
-					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=(iter->trigger_method-4)*32)// in the distance that can trigger
-					{
-						if(iter->frames)
-						{
-							stop_and_update_frame();
-							iter->curr_frame=0;
-							//calc_facing_to();
-							redraw_everything();
-						}
-						//x_off=0,y_off=0;
-						uint16_t &triggerscript=iter->trigger_script;
-						triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
-					}
-				}else if(iter->status<0){//&& in the screen
-					iter->status=abs(iter->status);
-					//step==0
-				}
-	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
-	{
-		if(iter->status!=0)
-			if(uint16_t &autoscript=iter->auto_script)
-				autoscript=process_autoscript(autoscript,(int16_t)(iter-game->evtobjs.begin()));
-		if(iter->status==2 && iter->image>0 && trigger)//&& beside role && face to it
-		{
-			//check barrier;this means, role status 2 means it takes place
-		}
-	}
-}
 bool process_Menu()
 {
 	return false;
-}
-void process_Explore()
-{
-	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
-	{
-		if(iter->status==2 && iter->image>0  )//&& beside role && face to it
-		{
-		}
-	}
 }
 
 void redraw_everything(int time_gap)
