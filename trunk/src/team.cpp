@@ -112,15 +112,15 @@ void stop_and_update_frame()
 	this_step_frame&=2,this_step_frame^=2;
 }
 
-int calc_faceto(int from_x,int from_y,int to_x,int to_y)
+int calc_faceto(int x_diff,int y_diff)
 {
-	if(to_x-from_x>0 && to_y-from_y>0)
+	if(x_diff>0 && y_diff>0)
 		return 3;
-	else if(to_x-from_x>0 && to_y-from_y<0)
+	else if(x_diff>0 && y_diff<0)
 		return 2;
-	else if(to_x-from_x<0 && to_y-from_y<0)
+	else if(x_diff<0 && y_diff<0)
 		return 1;
-	else if(to_x-from_x<0 && to_y-from_y>0)
+	else if(x_diff<0 && y_diff>0)
 		return 0;
 	return -1;
 }

@@ -37,21 +37,23 @@ uint16_t process_script_entry(uint16_t func,int16_t param[],uint16_t id,int16_t 
 __walk_npc:
 			{
 				int16_t x_diff=obj.pos_x-(param1*32+param3*16),y_diff=obj.pos_y-(param2*16+param3*8);
-				if(abs(x_diff)<npc_speed*2 && abs(y_diff)<npc_speed){
+				obj.direction=calc_faceto(-x_diff,-y_diff);
+				if(abs(x_diff)<npc_speed*2 || abs(y_diff)<npc_speed){
 					obj.pos_x = param1*32+param3*16;
 					obj.pos_y = param2*16+param3*8;
 				}else{
 					obj.pos_x += npc_speed*(x_diff<0 ? 2 : -2);
 					obj.pos_y += npc_speed*(y_diff<0 ? 1 : -1);
 				}
+				obj.curr_frame=(obj.curr_frame+1)%(obj.frames?obj.frames:obj.frames_auto);
 
 				//afterward check;MUST have,or will not match dospal exactly
-				/*if(obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
-					//printf(addition,"完成");
+				if(obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
+					;//printf(addition,"完成");
 				else{
 					//printf(addition,"当前X:%x,Y:%x  目的X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
 					--id;
-				}*/
+				}
 			}
 			break;
 		case 0x11:
@@ -67,7 +69,8 @@ __walk_npc:
 			game->rpg.team[param3].frame=param1*3+param2;
 			break;
 		case 0x16:
-			(param1>0?game->evtobjs[param1]:obj).curr_frame=param2*3+param3;
+			(param1>0?game->evtobjs[param1]:obj).direction=param2;
+			(param1>0?game->evtobjs[param1]:obj).curr_frame=param3;
 			break;
 		case 0x24:
 			if(param1)
@@ -174,7 +177,7 @@ __walk_role:
 					backup_position();
 					scene->team_pos.toXY().x += role_speed*(x_diff<0 ? 2 : -2);
 					scene->team_pos.toXY().y += role_speed*(y_diff<0 ? 1 : -1);
-					game->rpg.team_direction=calc_faceto(abstract_x_bak,abstract_y_bak,scene->team_pos.x,scene->team_pos.y);
+					game->rpg.team_direction=calc_faceto(scene->team_pos.x-abstract_x_bak,scene->team_pos.y-abstract_y_bak);
 					sync_viewport();
 					team_walk_one_step();
 					GameLoop_OneCycle(false);
@@ -382,7 +385,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 					show_wait_icon(),current_dialog_lines=0;
 				for(int cycle=1;cycle<=(param1?param1:1);++cycle){
 					//printf("第%x循环:\n",cycle);
-					GameLoop_OneCycle(curr.param[1]!=0);
+					GameLoop_OneCycle(param2!=0);
 					redraw_everything();
 				}
 				break;

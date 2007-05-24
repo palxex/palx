@@ -27,6 +27,7 @@ struct tile{
 	boost::shared_ptr<sprite> image;
 	bool blocked;
 	int layer;
+	bool valid;
 	tile():image((sprite*)0),blocked(0),layer(-1){}
 };
 class palmap:public scene_map{
@@ -69,7 +70,6 @@ struct Scene{
 	}team_pos;
 	Scene();
 	~Scene();
-	s_list filter_mask(sprite *);
 	void clear_scanlines();
 	void clear_active();
 	void calc_team_walking(int key);
