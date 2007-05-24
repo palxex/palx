@@ -23,6 +23,7 @@ playrix *rix;
 Game *game;
 
 extern int scale;
+bool key_enable=true;
 
 void Load_Data()
 {
@@ -57,7 +58,7 @@ void Load_Data()
 	}
 	if(flag_to_load&8){
 		//enter a new scene;
-		flag_to_load&=2;
+		flag_to_load&=2;key_enable=false;
 		uint16_t &enterscript=game->scenes[game->rpg.scene_id].enter_script;
 		enterscript=process_script(enterscript,0);
 		if(game->rpg.scene_id!=map_toload)
@@ -76,9 +77,9 @@ inline int16_t absdec(int16_t &s)
 	else if(s<0) s++;
 	return s0;
 }
+typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
 void GameLoop_OneCycle(bool trigger)
 {
-	typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
 	if(trigger)
 		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 			if(absdec(iter->vanish_time)==0)
@@ -117,6 +118,12 @@ bool process_Menu()
 }
 void process_Explore()
 {
+	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+	{
+		if(iter->status==2 && iter->image>0  )//&& beside role && face to it
+		{
+		}
+	}
 }
 
 void redraw_everything(int time_gap)

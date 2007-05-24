@@ -26,6 +26,7 @@ extern int x_scrn_offset,y_scrn_offset;
 extern int abstract_x_bak,abstract_y_bak;
 extern int viewport_x_bak,viewport_y_bak;
 extern int direction_offs[][2];
+extern bool key_enable;
 
 extern bool flag_parallel_mutex;
 extern int redraw_flag;
@@ -68,7 +69,7 @@ extern void redraw_everything(int gap=1);
 extern void team_walk_one_step();
 extern void stop_and_update_frame();
 extern void store_team_frame_data();
-extern int calc_faceto(int from_x,int from_y,int to_x,int to_y);
+extern int calc_faceto(int x_diff,int y_diff);
 
 extern void show_wait_icon();
 extern void dialog_firstline(char *);

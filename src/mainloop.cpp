@@ -24,8 +24,8 @@ namespace{
 		scene->calc_team_walking(keygot);
 		scene->our_team_setdraw();
 		scene->visible_NPC_movment_setdraw();
-		scene->Redraw_Tiles_or_Fade_to_pic();
 		scene->move_usable_screen();
+		scene->Redraw_Tiles_or_Fade_to_pic();
 		scene->draw_normal_scene(1);
 		if(keygot==VK_MENU)
 			running=process_Menu();
