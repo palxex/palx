@@ -24,6 +24,60 @@ inline void backup_position()
 	abstract_x_bak=scene->team_pos.toXY().x;
 	abstract_y_bak=scene->team_pos.toXY().y;
 }
+inline int16_t absdec(int16_t &s)
+{
+	int16_t s0=s;
+	if(s>0)	s--;
+	else if(s<0) s++;
+	return s0;
+}
+typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
+void GameLoop_OneCycle(bool trigger)
+{
+	if(trigger)
+		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+			if(absdec(iter->vanish_time)==0)
+				if(iter->status>0 && iter->trigger_method>=4){
+					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=(iter->trigger_method-4)*32)// in the distance that can trigger
+					{
+						if(iter->frames)
+						{
+							stop_and_update_frame();
+							iter->curr_frame=0;
+							//calc_facing_to();
+							redraw_everything();
+						}
+						//x_off=0,y_off=0;
+						uint16_t &triggerscript=iter->trigger_script;
+						triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
+					}
+				}else if(iter->status<0){//&& in the screen
+					iter->status=abs(iter->status);
+					//step==0
+				}
+	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+	{
+		if(iter->status!=0)
+			if(uint16_t &autoscript=iter->auto_script)
+				autoscript=process_autoscript(autoscript,(int16_t)(iter-game->evtobjs.begin()));
+		if(iter->status==2 && iter->image>0 && trigger
+			&& (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][0]>0
+			&& (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][1]>0)//&& beside role && face to it
+		{
+			//check barrier;this means, role status 2 means it takes place
+
+		}
+	}
+}
+void process_Explore()
+{
+	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+	{
+		if(iter->status==2 && iter->image>0  )//&& beside role && face to it
+		{
+		}
+	}
+}
 uint16_t process_script_entry(uint16_t func,int16_t param[],uint16_t id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
@@ -49,7 +103,7 @@ __walk_npc:
 
 				//afterward check;MUST have,or will not match dospal exactly
 				if(obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
-					;//printf(addition,"完成");
+					obj.curr_frame=0;//printf(addition,"完成");
 				else{
 					//printf(addition,"当前X:%x,Y:%x  目的X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
 					--id;
