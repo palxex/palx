@@ -45,7 +45,7 @@ inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 	int layer=_buf[1]&0xf,layer2=_buf[3]&0xf;
 	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
 	if(index2)
-		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu,layer).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
+		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu2,layer2).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
 }
 void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
@@ -152,13 +152,13 @@ void Scene::move_usable_screen()
 		{
 			int x1,x2,y1,y2,vx1,vy1,vx2,vy2,tx=abs(team_pos.toXY().x-abstract_x_bak),ty=abs(team_pos.toXY().y-abstract_y_bak);
 			if(direction_offs[game->rpg.team_direction][1]>0)
-				y1=SCREEN_H-8,y2=SCREEN_H,vy1=ty,vy2=0;
+				y1=SCREEN_H-ty,y2=SCREEN_H,	vy1=ty,vy2=0;
 			else
-				y1=0,y2=8,	vy1=0,vy2=ty;		
+				y1=0,y2=ty,					vy1=0,vy2=ty;		
 			if(direction_offs[game->rpg.team_direction][0]>0)
-				x1=SCREEN_W-16,x2=SCREEN_W,vx1=tx,vx2=0;
+				x1=SCREEN_W-tx,x2=SCREEN_W,	vx1=tx,vx2=0;
 			else
-				x1=0,x2=16,					vx1=0,vx2=tx;
+				x1=0,x2=tx,					vx1=0,vx2=tx;
 
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
 			

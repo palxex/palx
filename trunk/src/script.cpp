@@ -44,7 +44,7 @@ void GameLoop_OneCycle(bool trigger)
 						{
 							stop_and_update_frame();
 							iter->curr_frame=0;
-							//calc_facing_to();
+							iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
 							redraw_everything();
 						}
 						//x_off=0,y_off=0;
@@ -73,8 +73,9 @@ void process_Explore()
 {
 	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 	{
-		if(iter->status==2 && iter->image>0  )//&& beside role && face to it
+		if(iter->status==2 && iter->image>0 && abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=iter->trigger_method*32 )//&& beside role && face to it
 		{
+			process_script(iter->trigger_script,iter-game->evtobjs.begin());
 		}
 	}
 }
@@ -118,6 +119,9 @@ __walk_npc:
 			}
 			npc_speed=2;
 			goto __walk_npc;
+		case 0x14:
+			obj.curr_frame=param1;
+			break;
 		case 0x15:
 			game->rpg.team_direction=param1;
 			game->rpg.team[param3].frame=param1*3+param2;
@@ -202,6 +206,7 @@ __walk_npc:
 			if(param1){
 				(param1>0 ? game->evtobjs[param1] : obj).pos_x += param2;
 				(param1>0 ? game->evtobjs[param1] : obj).pos_y += param3;
+				obj.curr_frame=(obj.curr_frame+1)%(obj.frames?obj.frames:obj.frames_auto);
 			}
 			break;
 		case 0x6e:
@@ -524,7 +529,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 			break;
 		case 9:
 			//printf("自动脚本空闲第%x循环:\n",++obj.scr_jmp_count_auto);
-			if(obj.scr_jmp_count_auto<param1)
+			if(obj.scr_jmp_count_auto++<param1)
 				return id;
 			else
 				obj.scr_jmp_count_auto = 0;
