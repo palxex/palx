@@ -114,13 +114,13 @@ void stop_and_update_frame()
 
 int calc_faceto(int x_diff,int y_diff)
 {
-	if(x_diff>0 && y_diff>0)
+	if(x_diff>=0 && y_diff>=0)
 		return 3;
-	else if(x_diff>0 && y_diff<0)
+	else if(x_diff>=0 && y_diff<=0)
 		return 2;
-	else if(x_diff<0 && y_diff<0)
+	else if(x_diff<=0 && y_diff<=0)
 		return 1;
-	else if(x_diff<0 && y_diff>0)
+	else if(x_diff<=0 && y_diff>=0)
 		return 0;
 	return -1;
 }
