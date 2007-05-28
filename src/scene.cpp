@@ -130,12 +130,12 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 					{
 						tile &tile0=scenemap.gettile(x,y,h,0);
 						tile &tile1=scenemap.gettile(x,y,h,1);
-						if(tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
+						if(tile0.valid && tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
 							sprite *it=tile0.image.get();
 							it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
 							redraw_list.push_back(it);
 						}
-						if(tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
+						if(tile1.valid && tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
 							sprite *it=tile1.image.get();
 							it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
 							redraw_list.push_back(it);
