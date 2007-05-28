@@ -1,9 +1,9 @@
 #include "allegdef.h"
 
-#define BUFFER_SIZE 8192
+#define BUFFER_SIZE 16384
 
 #define SAMPLE_RATE	48000
-#define CHANNELS	2
+#define CHANNELS	1
 
 void playrix_timer(void *param)
 {

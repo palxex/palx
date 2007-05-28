@@ -38,7 +38,7 @@ void GameLoop_OneCycle(bool trigger)
 		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 			if(absdec(iter->vanish_time)==0)
 				if(iter->status>0 && iter->trigger_method>=4){
-					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=(iter->trigger_method-4)*32)// in the distance that can trigger
+					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<(iter->trigger_method-4)*32+16)// in the distance that can trigger
 					{
 						if(iter->frames)
 						{
@@ -61,11 +61,21 @@ void GameLoop_OneCycle(bool trigger)
 			if(uint16_t &autoscript=iter->auto_script)
 				autoscript=process_autoscript(autoscript,(int16_t)(iter-game->evtobjs.begin()));
 		if(iter->status==2 && iter->image>0 && trigger
-			&& (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][0]>0
-			&& (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][1]>0)//&& beside role && face to it
+			&& abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
 		{
 			//check barrier;this means, role status 2 means it takes place
-
+			/*
+			backup_position();
+			for(int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
+				if(!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
+				{
+					scene->team_pos.toXY().x+=direction_offs[direction][0];
+					scene->team_pos.toXY().y+=direction_offs[direction][1];
+					break;
+				}
+			sync_viewport();
+			scene->move_usable_screen();
+			*/
 		}
 	}
 }
@@ -73,9 +83,12 @@ void process_Explore()
 {
 	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 	{
-		if(iter->status==2 && iter->image>0 && abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<=iter->trigger_method*32 )//&& beside role && face to it
+		if(iter->status==2 && iter->image>0 && abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<iter->trigger_method*32+16
+		   && (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][0]>=0
+		   && (iter->pos_y-scene->team_pos.toXY().y)/direction_offs[game->rpg.team_direction][1]>=0)//&& beside role && face to it
 		{
-			process_script(iter->trigger_script,iter-game->evtobjs.begin());
+			iter->trigger_script=process_script(iter->trigger_script,iter-game->evtobjs.begin());
+			return;
 		}
 	}
 }
