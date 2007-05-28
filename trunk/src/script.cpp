@@ -217,9 +217,14 @@ __walk_npc:
 			break;
 		case 0x6c:			
 			if(param1){
-				(param1>0 ? game->evtobjs[param1] : obj).pos_x += param2;
-				(param1>0 ? game->evtobjs[param1] : obj).pos_y += param3;
-				obj.curr_frame=(obj.curr_frame+1)%(obj.frames?obj.frames:obj.frames_auto);
+				EVENT_OBJECT &target=(param1>0 ? game->evtobjs[param1] : obj);
+				target.pos_x += param2;
+				target.pos_y += param3;
+				if(!target.frames && !target.frames_auto){
+					uint16_t *usrc=(uint16_t *)MGO.decode(target.image);
+					target.frames_auto=usrc[0]-(usrc[usrc[0]-1]==0?1:0);
+				}
+				target.curr_frame=(target.curr_frame+1)%(target.frames?target.frames:target.frames_auto);
 			}
 			break;
 		case 0x6e:
