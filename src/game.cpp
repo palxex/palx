@@ -34,16 +34,9 @@ int scale=1;
 Game::Game(int save=0):
 	rpg((memset(&rpg,0,sizeof(RPG)),rpg))
 {
-	//allegro init
-	allegro_init();
-	install_timer();
-	install_keyboard();
-	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
-	set_gfx_mode(GFX_AUTODETECT_WINDOWED,320,200,0,0);
 		scale=SCREEN_W/320;
 		x_scrn_offset*=scale;
 		y_scrn_offset*=scale;
-	set_color_depth(8);
 
 	pat.set(0);
 

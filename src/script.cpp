@@ -267,7 +267,7 @@ __walk_role:
 			//clear_effective(param1,param2);
 			break;
 		case 0x75:
-			game->rpg.team[0].role=(param2-1<0?0:param2-1);
+			game->rpg.team[0].role=(param1-1<0?0:param1-1);
 			game->rpg.team[1].role=(param2-1<0?0:param2-1);
 			game->rpg.team[2].role=(param3-1<0?0:param3-1);
 			game->rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;

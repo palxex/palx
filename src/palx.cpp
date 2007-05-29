@@ -26,14 +26,24 @@
 #include <cstdlib>
 using namespace std;
 
+#include <boost/lexical_cast.hpp>
+
 #include "internal.h"
 #include "game.h"
 #include "scene.h"
 #include "allegdef.h"
 int main(int argc, char *argv[])
 {
+	//allegro init
+	allegro_init();
+	install_timer();
+	install_keyboard();
+	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
+	set_gfx_mode(GFX_AUTODETECT_WINDOWED,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
+	set_color_depth(8);
+
 	randomize();
-	Game  thegame(argc>=2? atoi(argv[1]) : begin_scene()()); game=&thegame;
+	Game  thegame(argc>=2? boost::lexical_cast<int>(argv[1]) : begin_scene()()); game=&thegame;
 	Scene normal;	scene=&normal;
 	BattleScene battle;	battle_scene=&battle;
 	playrix player;				rix=&player;
