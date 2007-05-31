@@ -2,6 +2,7 @@
 #include "allegdef.h"
 #include "scene.h"
 #include "game.h"
+#include "UI.h"
 bool flag_battling=false;
 
 int flag_to_load=0;
@@ -72,6 +73,9 @@ void Load_Data()
 }
 bool process_Menu()
 {
+	//show_money();
+	dialog(0,0,0,1,1);
+	PALETTE pal;get_palette(pal);save_bitmap("test.bmp",screen,pal);
 	return false;
 }
 

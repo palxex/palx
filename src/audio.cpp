@@ -1,6 +1,6 @@
 #include "allegdef.h"
 
-#define BUFFER_SIZE 16384
+#define BUFFER_SIZE 4096
 
 #define SAMPLE_RATE	48000
 #define CHANNELS	1

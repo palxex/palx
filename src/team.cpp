@@ -44,7 +44,7 @@ void load_NPC_mgo()
 		if(i->image)
 			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image);
 }
-inline void calc_trace_frames()
+void calc_trace_frames()
 {
 	this_step_frame=(this_step_frame+1)&3;
 	if(this_step_frame & 1)
