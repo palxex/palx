@@ -31,14 +31,10 @@ void sprite::setXYL(int x,int y,int l)
 }
 void sprite::blit_middle(BITMAP *dest,int x,int y)
 {
-	if(!dest->dat)
-	{
-		BITMAP *buf2=create_bitmap(dest->w,dest->h);
-		blit(dest,buf2,0,0,0,0,dest->w,dest->h);
-		Pal::Tools::DecodeRLE(buf,buf2->dat,dest->w,dest->w,dest->h,x-((uint16_t*)buf)[0]/2,y-((uint16_t*)buf)[1]/2);
-		blit(buf2,dest,0,0,0,0,dest->w,dest->h);
-	}else
-		Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x-((uint16_t*)buf)[0]/2,y-((uint16_t*)buf)[1]/2);
+	this->x=x-((uint16_t*)buf)[0]/2;
+	this->y=y+((uint16_t*)buf)[1];
+	this->l=0;
+	blit_to(dest);
 }
 bool sprite::blit_to(BITMAP *dest)
 {
@@ -54,8 +50,10 @@ bool sprite::blit_to(BITMAP *dest)
 }
 bool sprite::blit_to(BITMAP *dest,int x,int y)
 {
-	Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x,y);
-	return true;
+	this->x=x;
+	this->y=y+height;
+	this->l=0;
+	return blit_to(dest);
 }
 
 sprite_prim::sprite_prim():id(-1)

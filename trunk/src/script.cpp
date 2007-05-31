@@ -64,7 +64,6 @@ void GameLoop_OneCycle(bool trigger)
 			&& abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
 		{
 			//check barrier;this means, role status 2 means it takes place
-			/*
 			backup_position();
 			for(int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
 				if(!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
@@ -75,7 +74,6 @@ void GameLoop_OneCycle(bool trigger)
 				}
 			sync_viewport();
 			scene->move_usable_screen();
-			*/
 		}
 	}
 }
@@ -83,7 +81,8 @@ void process_Explore()
 {
 	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 	{
-		if(iter->status==2 && iter->image>0 && abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<iter->trigger_method*32+16
+		if(iter->status>0 && iter->trigger_method<=3
+		   && abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<iter->trigger_method*32+16
 		   && (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][0]>=0
 		   && (iter->pos_y-scene->team_pos.toXY().y)/direction_offs[game->rpg.team_direction][1]>=0)//&& beside role && face to it
 		{
@@ -92,11 +91,12 @@ void process_Explore()
 		}
 	}
 }
-uint16_t process_script_entry(uint16_t func,int16_t param[],uint16_t id,int16_t object)
+void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
-	EVENT_OBJECT &obj=game->evtobjs[object];
 	const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
+	EVENT_OBJECT &obj=game->evtobjs[object];
+	EVENT_OBJECT &curr_obj=(param1<0?obj:game->evtobjs[param1]);
 	char addition[100];memset(addition,0,sizeof(addition));
 	int npc_speed,role_speed;
 	switch(func){
@@ -132,6 +132,10 @@ __walk_npc:
 			}
 			npc_speed=2;
 			goto __walk_npc;
+		case 0x13:
+			game->evtobjs[param1].pos_x=param2;
+			game->evtobjs[param1].pos_y=param3;
+			break;
 		case 0x14:
 			obj.curr_frame=param1;
 			break;
@@ -140,16 +144,14 @@ __walk_npc:
 			game->rpg.team[param3].frame=param1*3+param2;
 			break;
 		case 0x16:
-			(param1>0?game->evtobjs[param1]:obj).direction=param2;
-			(param1>0?game->evtobjs[param1]:obj).curr_frame=param3;
+			curr_obj.direction=param2;
+			curr_obj.curr_frame=param3;
 			break;
 		case 0x24:
-			if(param1)
-				(param1>0 ? game->evtobjs[param1] : obj).auto_script= param2;
+			curr_obj.auto_script= param2;
 			break;
 		case 0x25:
-			if(param1)
-				(param1>0 ? game->evtobjs[param1] : obj).trigger_script= param2;
+			curr_obj.trigger_script= param2;
 			break;
 		case 0x3c:
 			if(param1)
@@ -170,6 +172,7 @@ __walk_npc:
 		case 0x3e:
 			break;
 		case 0x40:
+			curr_obj.trigger_method=param2;
 			break;
 		case 0x43:
 			game->rpg.music=param1;
@@ -217,14 +220,13 @@ __walk_npc:
 			break;
 		case 0x6c:			
 			if(param1){
-				EVENT_OBJECT &target=(param1>0 ? game->evtobjs[param1] : obj);
-				target.pos_x += param2;
-				target.pos_y += param3;
-				if(!target.frames && !target.frames_auto){
-					uint16_t *usrc=(uint16_t *)MGO.decode(target.image);
-					target.frames_auto=usrc[0]-(usrc[usrc[0]-1]==0?1:0);
+				curr_obj.pos_x += param2;
+				curr_obj.pos_y += param3;
+				if(!curr_obj.frames && !curr_obj.frames_auto){
+					uint16_t *usrc=(uint16_t *)MGO.decode(curr_obj.image);
+					curr_obj.frames_auto=usrc[0]-(usrc[usrc[0]-1]==0?1:0);
 				}
-				target.curr_frame=(target.curr_frame+1)%(target.frames?target.frames:target.frames_auto);
+				curr_obj.curr_frame=(curr_obj.curr_frame+1)%(curr_obj.frames?curr_obj.frames:curr_obj.frames_auto);
 			}
 			break;
 		case 0x6e:
@@ -233,7 +235,7 @@ __walk_npc:
 			game->rpg.viewport_x+=param1;
 			game->rpg.viewport_y+=param2;
 			game->rpg.layer=param3*8;
-			if(param1&&param2){
+			if(param1||param2){
 				team_walk_one_step();
 				scene->move_usable_screen();
 			}
@@ -334,7 +336,6 @@ __walk_role:
 			//clear_effective(1,0x48);
 			break;
 	}
-	return id;
 }
 
 uint16_t process_script(uint16_t id,int16_t object)
@@ -462,6 +463,9 @@ uint16_t process_script(uint16_t id,int16_t object)
 					show_wait_icon(),current_dialog_lines=0;
 				for(int cycle=1;cycle<=(param1?param1:1);++cycle){
 					//printf("第%x循环:\n",cycle);
+					if(param3)
+						calc_trace_frames(),
+						store_team_frame_data();
 					GameLoop_OneCycle(param2!=0);
 					redraw_everything();
 				}
@@ -481,7 +485,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 			default:
 				if(current_dialog_lines>0)
 					show_wait_icon();
-				id = process_script_entry(curr.func,curr.param,id,object);
+				process_script_entry(curr.func,curr.param,id,object);
 		}
 		++id;
 	}
@@ -502,15 +506,15 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 	switch(curr.func){
 		case 0:
 			//printf("停止执行\n");
-			return id;
+			id--;
 		case 2:
 			//printf("停止执行，将调用地址替换为脚本%x:",param1);
 			if(param2==0){
 				//printf("成功\n");
-				return id = param1;
+				id = param1 - 1;
 			}else if(obj.scr_jmp_count_auto++<param2){
 				//printf("第%x次成功\n",obj.scr_jmp_count_auto);
-				return id = param1;
+				id = param1 - 1;
 			}else{
 				//printf("失败\n");
 				obj.scr_jmp_count_auto = 0;
@@ -518,18 +522,15 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 			break;
 		case 3:
 			//printf("跳转到脚本%x",param1);
-			if(param2==0){
+			if(param2==0)
 				//printf("成功\n");
-				id = param1;
-				process_autoscript(id,object);
-			}else if(obj.scr_jmp_count_auto++<param2){
+				id = process_autoscript(param1,object) - 1;
+			else if(obj.scr_jmp_count_auto++<param2)
 				//printf("第%x次成功\n",obj.scr_jmp_count_auto);
-				id = param1;
-				process_autoscript(id,object);
-			}else{
+				id = process_autoscript(param1,object) - 1;
+			else
 				//printf("失败\n");
 				obj.scr_jmp_count_auto = 0;
-			}
 			break;
 		case 4:
 			//printf("调用脚本%x %x\n",param1,param2);
@@ -538,22 +539,19 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 		case 6:
 			//时间关系，不再模拟QB7的随机函数				
 			//printf("以%d%%几率跳转到脚本%x:",param1,param2);
-			if(rnd0()*100<param1){
+			if(rnd0()*100<param1)
 				//printf("成功\n");
-				id = param2;
-				process_autoscript(id,object);
-			}else
-				//printf("失败\n");
+				id = process_autoscript(param2,object) - 1;
 			break;
 		case 9:
 			//printf("自动脚本空闲第%x循环:\n",++obj.scr_jmp_count_auto);
 			if(obj.scr_jmp_count_auto++<param1)
-				return id;
+				id--;
 			else
 				obj.scr_jmp_count_auto = 0;
 			break;
 		default:
-			id = process_script_entry(curr.func,curr.param,id,object);
+			process_script_entry(curr.func,curr.param,id,object);
 	}
 	return id+1;
 }

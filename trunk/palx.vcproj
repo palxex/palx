@@ -295,6 +295,14 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="UI"
+					>
+					<File
+						RelativePath=".\src\dialog.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -354,6 +362,10 @@
 					</File>
 					<File
 						RelativePath=".\src\structs.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\UI.h"
 						>
 					</File>
 				</Filter>
