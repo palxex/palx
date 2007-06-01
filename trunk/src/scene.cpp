@@ -56,8 +56,8 @@ inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
 	uint8_t *mapbuf=MAP.decode(t,0);
-	for(int y=std::max(source_y/16-1,0);y<dest_y/16+1;y++)
-		for(int x=std::max(source_x/32-1,0);x<dest_x/32+1;x++)
+	for(int y=source_y/16;y<dest_y/16+2;y++)
+		for(int x=source_x/32;x<dest_x/32+1;x++)
 			for(int h=0;h<2;h++)
 				make_tile(mapbuf+y*0x200+x*8+h*4,x,y,h,bmp);
 	blit(bmp,dest,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,dest_x-source_x,dest_y-source_y);
