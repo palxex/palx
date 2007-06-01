@@ -68,6 +68,10 @@ public:
 	void blit_to(BITMAP *dest,int x,int y,uint8_t color){
 		alfont_textout(dest, glb_font, msg, x, y, color);
 	}
+	void shadow_blit(BITMAP *dest,int x,int y,uint8_t color){
+		blit_to(dest, x+1, y+1, 0);
+		blit_to(dest, x, y, color);
+	}
 };
 class palette{
 	struct myRGB{
@@ -81,7 +85,7 @@ public:
 		:pal(-1),day(-1)
 	{
 	}
-	void set(uint32_t i)
+	void set(uint32_t i,int offset)
 	{
 		if(i==pal)
 			return;
@@ -93,7 +97,7 @@ public:
 			p[t].r=buf[t].r,
 			p[t].g=buf[t].g,
 			p[t].b=buf[t].b;
-		set_to(0);
+		set_to(offset!=0);
 	}
 	PALETTE &get()
 	{

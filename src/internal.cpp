@@ -44,6 +44,8 @@ void Load_Data()
 	redraw_flag=0;
 	x_scrn_offset=0xA0*scale;
 	y_scrn_offset=0x70*scale;
+	scene->team_pos.toXY().x=game->rpg.viewport_x+x_scrn_offset;
+	scene->team_pos.toXY().y=game->rpg.viewport_y+y_scrn_offset;
 	game->rpg.scene_id=map_toload;
 	if(flag_to_load&4){
 		//load evtobjs
@@ -75,8 +77,28 @@ bool process_Menu()
 {
 	//show_money();
 	//dialog(,0,0,1,5);
-	menu(3,37,4,2).select;
-	return false;
+	switch(menu(3,37,4,3,2).select())
+	{
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		switch(menu(0x28,0x3c,5,0xB,4).select())
+		{
+		case 0:
+			game->save(rpg_to_load);
+			break;
+		case 1:
+			game->load(rpg_to_load);
+			break;
+		case 4:
+			return false;
+		}
+	}
+	return true;
 }
 
 void redraw_everything(int time_gap)

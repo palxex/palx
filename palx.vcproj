@@ -299,7 +299,7 @@
 					Name="UI"
 					>
 					<File
-						RelativePath=".\src\dialog.cpp"
+						RelativePath=".\src\UI.cpp"
 						>
 					</File>
 				</Filter>
