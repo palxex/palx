@@ -74,8 +74,8 @@ void Load_Data()
 bool process_Menu()
 {
 	//show_money();
-	dialog(0,0,0,1,1);
-	PALETTE pal;get_palette(pal);save_bitmap("test.bmp",screen,pal);
+	//dialog(,0,0,1,5);
+	menu(3,37,4,2).select;
 	return false;
 }
 
