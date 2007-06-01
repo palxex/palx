@@ -118,7 +118,7 @@ typedef struct rpg_def{
 	int16_t viewport_x,viewport_y;
 	int16_t team_roles;
 	int16_t scene_id;
-	int16_t palette_id;
+	int16_t palette_offset;
 	int16_t team_direction;
 	int16_t music;
 	int16_t battle_music;

@@ -126,32 +126,42 @@ void Scene::visible_NPC_movment_setdraw()
 }
 void Scene::Redraw_Tiles_or_Fade_to_pic()
 {
-	redraw_flag=1;
 	s_list redraw_list;sprite *masker;
-	for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
-		for(int vx=(game->rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
-			for(int vy=(game->rpg.viewport_y+masker->y-masker->height)/16-1,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y)/16+1;vy++)
-				for(int x=vx-1,y=vy;x<=vx+1;x++)
-					for(int h=0;h<2;h++)
-					{
-						tile &tile0=scenemap.gettile(x,y,h,0);
-						tile &tile1=scenemap.gettile(x,y,h,1);
-						if(tile0.valid && tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
-							sprite *it=tile0.image.get();
-							it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
-							redraw_list.push_back(it);
+	switch(redraw_flag)
+	{
+	case 0:
+		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
+			for(int vx=(game->rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
+				for(int vy=(game->rpg.viewport_y+masker->y-masker->height)/16-1,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y)/16+1;vy++)
+					for(int x=vx-1,y=vy;x<=vx+1;x++)
+						for(int h=0;h<2;h++)
+						{
+							tile &tile0=scenemap.gettile(x,y,h,0);
+							tile &tile1=scenemap.gettile(x,y,h,1);
+							if(tile0.valid && tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
+								sprite *it=tile0.image.get();
+								it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
+								redraw_list.push_back(it);
+							}
+							if(tile1.valid && tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
+								sprite *it=tile1.image.get();
+								it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
+								redraw_list.push_back(it);
+							}
 						}
-						if(tile1.valid && tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
-							sprite *it=tile1.image.get();
-							it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
-							redraw_list.push_back(it);
-						}
-					}
-	std::copy(redraw_list.begin(),redraw_list.end(),std::back_inserter(active_list));
+		std::copy(redraw_list.begin(),redraw_list.end(),std::back_inserter(active_list));
+		break;
+	case 1:
+		return;
+	case 2:
+		/*many many*/
+		redraw_flag=1;
+		break;
+	}
 }
 void Scene::move_usable_screen()
 {
-	if(redraw_flag)
+	if(redraw_flag==0)
 	{
 		/*produce_one_screen();*/
 		if(abstract_x_bak!=team_pos.toXY().x || abstract_y_bak!=team_pos.toXY().y)

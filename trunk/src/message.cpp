@@ -29,15 +29,14 @@ void show_wait_icon()
 
 void dialog_firstline(char *str)
 {
-	ttfont(str).blit_to(screen,dialog_x+1,dialog_y+1,0);
-	ttfont(str).blit_to(screen,dialog_x,dialog_y,font_color_cyan_1);
+	ttfont(str).shadow_blit(screen,dialog_x,dialog_y,font_color_cyan_1);
 }
 
 void dialog_string(char *str,int lines)
 {
 	static char word[3];
 	int text_x=frame_text_x;
-	for(int i=0,len=strlen(str);i<len;i++)
+	for(int i=0,len=(int)strlen(str);i<len;i++)
 		switch(str[i]){
 			case '-':
 				std::swap(glbvar_fontcolor, font_color_cyan);
@@ -60,8 +59,7 @@ void dialog_string(char *str,int lines)
 				break;
 			default:
 				strncpy(word,str+i,2);
-				ttfont(word).blit_to(screen,text_x+1,frame_text_y+lines*16+1,0);
-				ttfont(word).blit_to(screen,text_x,frame_text_y+lines*16,glbvar_fontcolor);
+				ttfont(word).shadow_blit(screen,text_x,frame_text_y+lines*16,glbvar_fontcolor);
 				icon_x=text_x+=16;
 				i++;
 	}
