@@ -1,5 +1,6 @@
 #include "internal.h"
 #include "game.h"
+#include "timing.h"
 
 std::map<int,sprite_prim> team_images;
 std::map<int,sprite_prim> enemy_images;
@@ -31,7 +32,7 @@ int process_Battle(uint16_t enemy_team,uint16_t script_escape)
 	for(int i=0;i<5;i++)
 		if(game->enemyteams[enemy_team].enemy[i]>0)
 			enemy_images[i]=sprite_prim(ABC,game->rpg.objects[game->enemyteams[enemy_team].enemy[i]].inbeing);
-	draw_battle_scene(enemy_team);while(!keypressed()) rest(100);
+	draw_battle_scene(enemy_team);while(!keypressed()) wait(10);
 	rix->play(game->rpg.music);
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include "allegdef.h"
 #include "internal.h"
+#include "game.h"
 
 bitmap::bitmap(const uint8_t *src,int width,int height):
 	bmp(create_bitmap(width,height))
@@ -55,6 +56,39 @@ bool sprite::blit_to(BITMAP *dest,int x,int y)
 	this->l=0;
 	return blit_to(dest);
 }
+void sprite::blit_shadow(BITMAP *dest, int x, int y)
+{
+	uint8_t *rle = buf + 4, *dst;
+	int l = dest->w;
+
+	BITMAP *bmp;
+	if(dest!=screen)
+		dst=(uint8_t *)dest->dat;
+	else{
+		bmp=create_bitmap(SCREEN_W,SCREEN_H);
+		blit(screen,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
+		dst=(uint8_t *)bmp->dat;
+	}
+
+	for(int i=(y+6)*l+x+6,prei=i;i<(y+6+height)*l+x+6;i=prei+l,prei=i)
+		for(int j=0;j<width;)
+		{
+			uint8_t flag=*rle++;
+			if(flag>=0x80)
+				i += (flag-0x80);
+			else{
+				for(int t=j;t<j+flag;t++)
+					dst[i+t]-=(dst[i+t]%0x10/2);
+				rle+=flag;
+			}
+			j+=(flag%0x80);
+		}
+
+	if(dest==screen)
+		blit(bmp,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+
+	blit_to(dest,x,y);
+}
 
 sprite_prim::sprite_prim():id(-1)
 {}
@@ -90,3 +124,37 @@ bool operator==(const sprite_prim& lhs,const sprite_prim& rhs)
 }
 
 ALFONT_FONT *ttfont::glb_font;
+void ttfont::blit_to(BITMAP *dest,int x,int y,uint8_t color,bool shadow){
+	if(shadow)
+		alfont_textout(dest, glb_font, msg, x+1, y+1, 0);
+	alfont_textout(dest, glb_font, msg, x, y, color);
+}
+
+palette::palette()
+	:pal(-1),day(-1)
+{}
+void palette::read(uint32_t i)
+{
+	pal=i;
+	long len;
+	myRGB *buf=(myRGB *)PAT.decode(i,len);
+	RGB   *p=(RGB*)pat;
+	for(int t=0;t<len/3;t++)
+		p[t].r=buf[t].r,
+		p[t].g=buf[t].g,
+		p[t].b=buf[t].b;
+}
+PALETTE &palette::get(int palette_offset)
+{
+	return pat[palette_offset!=0];
+}
+void palette::set(int t)
+{ 
+	day=t;
+	set_palette(pat[day]);
+}
+void palette::switch_daytime()
+{
+	day=!day;
+	set(day);
+}

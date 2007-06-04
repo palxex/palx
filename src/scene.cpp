@@ -115,11 +115,11 @@ void Scene::visible_NPC_movment_setdraw()
 {
 	int t=0;
 	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++,t++)
-		if(i->pos_x>game->rpg.viewport_x && i->pos_x<game->rpg.viewport_x+SCREEN_W &&
-			i->pos_y>game->rpg.viewport_y && i->pos_y<game->rpg.viewport_y+SCREEN_H &&
-			i->image && i->status && i->vanish_time==0)
+		if(i->pos_x-game->rpg.viewport_x>-64 && i->pos_x-game->rpg.viewport_x<0x180 &&
+		   i->pos_y-game->rpg.viewport_y>0   && i->pos_y-game->rpg.viewport_y<0x148 &&
+		   i->image && i->status && i->vanish_time==0)
 		{
-			sprite *it=mgos[npc_mgos[t]].getsprite(i->direction*(i->frames?i->frames:i->frames_auto)+i->curr_frame);
+			sprite *it=mgos[npc_mgos[t]].getsprite(i->direction*i->frames+i->curr_frame);
 			it->setXYL(i->pos_x-game->rpg.viewport_x,i->pos_y-game->rpg.viewport_y+i->layer*8+9,i->layer*8+2);
 			active_list.push_back(it);
 		}
@@ -208,7 +208,7 @@ void Scene::draw_normal_scene(int gap)
 	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
 		(*i)->blit_to(scanline);
 	blit(scanline,screen,0,0,0,0,SCREEN_W,SCREEN_H);
-	pal_fade_in(gap);rest(50);
+	pal_fade_in(gap);
 	/*
 	scenemap.blit_to(screen,0,0,0,0);
 	

@@ -2,6 +2,7 @@
 #define CONSTANTS
 
 #include "config.h"
+#include "structs.h"
 #include <vector>
 #include <map>
 
@@ -13,6 +14,7 @@ extern Scene *scene;
 extern BattleScene *battle_scene;
 extern playrix *rix;
 extern Game *game;
+extern RPG rpg;
 
 extern bool flag_battling;
 
@@ -30,23 +32,23 @@ extern bool key_enable;
 
 extern bool flag_parallel_mutex;
 extern int redraw_flag;
+extern int flag_pic_level;
 
 extern int dialog_type;
 
 extern bool mutux_setpalette;
-extern volatile int time_interrupt_occers; 
 
-extern int current_dialog_lines;
-extern int glbvar_fontcolor;
-extern int font_color_yellow;
-extern int font_color_red;
-extern int font_color_cyan;
-extern int font_color_cyan_1;
-extern int frame_pos_flag;
-extern int dialog_x;
-extern int dialog_y;
-extern int frame_text_x;
-extern int frame_text_y;
+extern uint32_t current_dialog_lines;
+extern uint32_t glbvar_fontcolor;
+extern uint32_t font_color_yellow;
+extern uint32_t font_color_red;
+extern uint32_t font_color_cyan;
+extern uint32_t font_color_cyan_1;
+extern uint32_t frame_pos_flag;
+extern uint32_t dialog_x;
+extern uint32_t dialog_y;
+extern uint32_t frame_text_x;
+extern uint32_t frame_text_y;
 
 class sprite_prim;
 extern std::vector<sprite_prim> mgos;
@@ -73,11 +75,10 @@ extern void store_team_frame_data();
 extern int calc_faceto(int x_diff,int y_diff);
 extern bool barrier_check(uint16_t self,int x,int y);
 
-extern void show_wait_icon();
-extern void dialog_firstline(char *);
-extern void dialog_string(char *str,int);
-
 extern bool mutex_can_change_palette;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
+
+extern int RNG_num;
+extern void play_RNG(int begin,int end,int gap);
 #endif

@@ -5,7 +5,10 @@
 #include "internal.h"
 #include "scene.h"
 
+#include "begin.h"
+
 using namespace std;
+volatile uint8_t time_interrupt_occurs; 
 namespace{
 	template<typename T>
 	inline void reunion(vector<T> &vec,uint8_t *src,const long &len)
@@ -28,17 +31,37 @@ namespace{
 	{
 		memcpy(&vec,src,len);
 	}
+	void timer_proc()
+	{
+		static int pal_lock=0;
+		static PALETTE pal;
+		mutux_setpalette=false;
+		if(pal_lock++==10){
+			get_palette(pal);
+			RGB temp=pal[0xF6];
+			memcpy(pal+0xF6,pal+0xF7,6);
+			pal[0xF8]=temp;
+			temp=pal[0xF9];
+			memcpy(pal+0xF9,pal+0xFA,0x12);
+			pal[0xFE]=temp;
+			set_palette(pal);
+			pal_lock=0;
+		};
+		time_interrupt_occurs++;
+		mutux_setpalette=true;
+	}
+	END_OF_FUNCTION(timer_proc);
 }
 
 int scale=1;
-Game::Game(int save=0):
-	rpg((memset(&rpg,0,sizeof(RPG)),rpg))
+RPG rpg;
+Game::Game(int save=0):rpg(::rpg)
 {
+	memset(&rpg,0,sizeof(RPG));
 		scale=SCREEN_W/320;
 		x_scrn_offset*=scale;
 		y_scrn_offset*=scale;
 
-	pat.set(0,0);
 
 	alfont_init();
 	ttfont::glb_font=alfont_load_font(strcat(getenv("WINDIR"),"\\fonts\\mingliu.ttc"));
@@ -48,6 +71,9 @@ Game::Game(int save=0):
 	alfont_set_font_background(ttfont::glb_font, FALSE);
 	alfont_set_font_size(ttfont::glb_font,16);
 	//global setting
+	
+	LOCK_VARIABLE(time_interrupt_occurs);
+	install_int(timer_proc,10);
 
 	//load sss&data
 	long len=0;
@@ -76,16 +102,20 @@ Game::Game(int save=0):
 	reunion(upgradexp,				DATA.decode(14,len),len);
 
 	flag_to_load=0x1D;
+
 	//load save
-	if(save!=0)
-		load(save);
+	if(save!=0 || (save=begin_scene()(this)))
+		rpg_to_load=save;
 	else
 		map_toload=1;
 }
 Game::~Game(){
+	remove_int(timer_proc);
 }
 
 void Game::load(int id){
+	if(!id)
+		return;
 	flag_to_load=0x12;
 	rpg_to_load=id;
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"rb");
@@ -101,7 +131,8 @@ void Game::load(int id){
 	reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
 	fclose(fprpg);
 	flag_to_load=0x17;
-	pat.set(0,rpg.palette_offset);
+	pat.read(0);
+	pal_fade_out(1);
 }
 void Game::save(int id){
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"wb");
