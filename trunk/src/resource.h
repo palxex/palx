@@ -22,7 +22,6 @@ class cached_res{
 	decoder_func decoder;
 	typedef std::map<std::pair<int,int>,uint8_t *> cache_type;
 	cache_type cache;
-	bool changed;
 public:
 	cached_res(const char *filename,decoder_func &d);
 	~cached_res();

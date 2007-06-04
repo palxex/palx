@@ -18,14 +18,70 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "begin.h"
+#include "UI.h"
+#include "timing.h"
+#include "internal.h"
 
-begin_scene::begin_scene()
-{
-}
+int begin_scene::operator()(Game *game){
+	::game=game;
+	RNG_num=6;
+	game->pat.read(3);
+	game->pat.set(rpg.palette_offset);
+	play_RNG(0,999,25);
+	wait_key(180);
+	pal_fade_out(1);
 
+	//ÔÆ¹Èº×·å
+	rix->play(5);
 
-begin_scene::~begin_scene()
-{
+	game->pat.read(0);
+	bitmap(FBP.decode(60),320,200).blit_to(screen,0,0,0,0);
+	rix->play(4);
+	pal_fade_in(1);
+	bool ok=false;
+	int save=0;
+	BITMAP *cache=create_bitmap(SCREEN_W,SCREEN_H);
+	do{
+		keygot=VK_NONE;
+		static int menu_selected=0;
+		static bool changed=true;
+		if(changed)
+			for(int i=7;i<9;i++)
+				ttfont(cut_msg_impl("word.dat")(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
+		changed=false;
+		get_key();
+		switch(keygot){
+			case VK_UP:
+				changed=true;
+				menu_selected++;
+				break;
+			case VK_DOWN:
+				changed=true;
+				menu_selected--;
+				break;
+			case VK_MENU:
+				continue;
+			case VK_EXPLORE:
+				ttfont(cut_msg_impl("word.dat")((menu_selected+7)*10,(menu_selected+7)*10+10)).blit_to(screen,0x70,0x54+menu_selected*0x12,0x2B,true);
+				blit(screen,cache,0,0,0,0,SCREEN_W,SCREEN_H);
+				if(menu_selected==0){
+					ok=true;
+					save = 0;
+				}else if(rpg_to_load=select_rpg(0,screen)+1){
+					ok=true;
+					save = rpg_to_load;
+				}else{
+					blit(cache,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+					changed=true;
+					continue;
+				}
+				break;
+		}
+		menu_selected+=2;menu_selected%=2;
+	}while(!ok);
+	destroy_bitmap(cache);
+	pal_fade_out(1);
+	return save;
 }
 
 

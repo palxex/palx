@@ -1,41 +1,43 @@
 #include "allegdef.h"
 #include "internal.h"
 #include "game.h"
+#include "timing.h"
+#include "UI.h"
 
-int current_dialog_lines = 0;
-int glbvar_fontcolor  = 0x4F;
-int font_color_yellow = 0x2D;
-int font_color_red    = 0x1A;
-int font_color_cyan   = 0x8D;
-int font_color_cyan_1 = 0x8C;
-int frame_pos_flag = 1;
-int dialog_x = 12;
-int dialog_y = 8;
-int frame_text_x = 0x2C;
-int frame_text_y = 0x1A;
+uint32_t current_dialog_lines = 0;
+uint32_t glbvar_fontcolor  = 0x4F;
+uint32_t font_color_yellow = 0x2D;
+uint32_t font_color_red    = 0x1A;
+uint32_t font_color_cyan   = 0x8D;
+uint32_t font_color_cyan_1 = 0x8C;
+uint32_t frame_pos_flag = 1;
+uint32_t dialog_x = 12;
+uint32_t dialog_y = 8;
+uint32_t frame_text_x = 0x2C;
+uint32_t frame_text_y = 0x1A;
 
-int icon_x=0;
-int icon_y=0;
-int icon=0;
+uint32_t icon_x=0;
+uint32_t icon_y=0;
+uint32_t icon=0;
 
 void show_wait_icon()
 {
-	game->message_handles.getsprite(icon)->blit_to(screen,icon_x,icon_y);
-	while(!keypressed()) rest(10);
-	clear_keybuf();
+	if(frame_pos_flag)
+		game->message_handles.getsprite(icon)->blit_to(screen,icon_x,icon_y);
+	wait_key();
 	current_dialog_lines=0;
 	icon=0;
 }
 
-void dialog_firstline(char *str)
+void dialog_string(const char *str,int x,int y,int color,bool shadow,BITMAP *bmp)
 {
-	ttfont(str).shadow_blit(screen,dialog_x,dialog_y,font_color_cyan_1);
+	ttfont(str).blit_to(bmp,x,y,color,shadow);
 }
 
-void dialog_string(char *str,int lines)
+void draw_oneline_m_text(char *str,int x,int y)
 {
 	static char word[3];
-	int text_x=frame_text_x;
+	int text_x=x;
 	for(int i=0,len=(int)strlen(str);i<len;i++)
 		switch(str[i]){
 			case '-':
@@ -59,9 +61,9 @@ void dialog_string(char *str,int lines)
 				break;
 			default:
 				strncpy(word,str+i,2);
-				ttfont(word).shadow_blit(screen,text_x,frame_text_y+lines*16,glbvar_fontcolor);
+				dialog_string(word,text_x,y,glbvar_fontcolor,true);
 				icon_x=text_x+=16;
 				i++;
 	}
-	icon_y=frame_text_y+lines*16;
+	icon_y=y;
 }

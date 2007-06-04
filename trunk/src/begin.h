@@ -23,15 +23,10 @@
 /**
 	@author Pal Lockheart <palxex@gmail.com>
 */
+class Game;
 class begin_scene{
 public:
-    begin_scene();
-
-    ~begin_scene();
-
-    int operator()(){
-	    return 0;
-    }
+    int operator()(Game *);
 };
 
 #endif

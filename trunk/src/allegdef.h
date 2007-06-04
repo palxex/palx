@@ -37,6 +37,7 @@ public:
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int);
+	void blit_shadow(BITMAP*,int,int);
 	friend bool sprite_comp(sprite *lhs,sprite *rhs);
 };
 class sprite_prim{
@@ -65,14 +66,9 @@ class ttfont{
 public:
 	static ALFONT_FONT *glb_font;
 	ttfont(const char *_msg):msg(_msg){}
-	void blit_to(BITMAP *dest,int x,int y,uint8_t color){
-		alfont_textout(dest, glb_font, msg, x, y, color);
-	}
-	void shadow_blit(BITMAP *dest,int x,int y,uint8_t color){
-		blit_to(dest, x+1, y+1, 0);
-		blit_to(dest, x, y, color);
-	}
+	void blit_to(BITMAP *dest,int x,int y,uint8_t color,bool shadow);
 };
+class Game;extern Game *game;
 class palette{
 	struct myRGB{
 		uint8_t r,g,b;
@@ -81,40 +77,11 @@ class palette{
 	int pal;
 	int day;
 public:
-	palette()
-		:pal(-1),day(-1)
-	{
-	}
-	void set(uint32_t i,int offset)
-	{
-		if(i==pal)
-			return;
-		pal=i;
-		long len;
-		myRGB *buf=(myRGB *)PAT.decode(i,len);
-		RGB   *p=(RGB*)pat;
-		for(int t=0;t<len/3;t++)
-			p[t].r=buf[t].r,
-			p[t].g=buf[t].g,
-			p[t].b=buf[t].b;
-		set_to(offset!=0);
-	}
-	PALETTE &get()
-	{
-		return pat[day];
-	}
-	void set_to(int t)
-	{
-		if(day==t)
-			return;
-		day=t;
-		set_palette(pat[day]);
-	}
-	void switch_daytime()
-	{
-		day=!day;
-		set_to(day);
-	}
+	palette();
+	void read(uint32_t i);
+	PALETTE &get(int);
+	void set(int t);
+	void switch_daytime();
 };
 class CEmuopl;
 class CrixPlayer;
@@ -135,6 +102,7 @@ public:
 	void stop();
 };
 
-enum VKEY { VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE,VK_NONE};
-extern int get_key();
+enum VKEY { VK_NONE=0,VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE};
+extern bool get_key();
+extern VKEY keygot;
 #endif

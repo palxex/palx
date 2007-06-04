@@ -27,11 +27,12 @@
 #include <cstdio>
 
 #include "allegdef.h"
+#include "internal.h"
 
 class Game{
 public:
 	palette pat;
-	RPG rpg;
+	RPG &rpg;
 	//data
 	std::vector<SHOP> shops;
 	std::vector<MONSTER> monsters;
@@ -52,7 +53,7 @@ public:
 	std::vector<SCRIPT>  scripts;
 	Game(int);
 	~Game();
-	void load(int id);
+	void load(int id=rpg_to_load);
 	void save(int id);
 	int run();
 };

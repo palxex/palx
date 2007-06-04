@@ -11,9 +11,9 @@ int map_toload=0;
 
 bool flag_parallel_mutex=false;
 int redraw_flag=0;
+int flag_pic_level=0;
 
 bool mutux_setpalette=false;
-volatile int time_interrupt_occers; 
 
 int RPG_screen_wave_grade=0;
 int wave_progression=0;
@@ -29,6 +29,7 @@ bool key_enable=true;
 void Load_Data()
 {
 	flag_battling=false;
+	keygot=(VKEY)0;
 	if(flag_to_load&0x10){
 		//load sfx; this task has been not needed since we didn't be limited by 640K.
 	}
@@ -75,9 +76,11 @@ void Load_Data()
 }
 bool process_Menu()
 {
+	static int main_select,role_select,item_select,sys_select,rpg_select;
 	//show_money();
-	//dialog(,0,0,1,5);
-	switch(menu(3,37,4,3,2).select())
+	single_dialog(0,0,5);
+	ttfont(cut_msg_impl("word.dat")(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);
+	switch(main_select=menu(3,37,4,3,2).select(main_select))
 	{
 	case 0:
 		break;
@@ -86,13 +89,19 @@ bool process_Menu()
 	case 2:
 		break;
 	case 3:
-		switch(menu(0x28,0x3c,5,0xB,4).select())
+		switch(sys_select=menu(0x28,0x3c,5,0xB,4).select(sys_select))
 		{
 		case 0:
-			game->save(rpg_to_load);
+			rpg_select=select_rpg(rpg_select);
+			if(rpg_to_load=rpg_select+1)
+				game->save(rpg_to_load);
 			break;
-		case 1:
-			game->load(rpg_to_load);
+		case 1:			
+			rpg_select=select_rpg(rpg_select);
+			if(rpg_to_load=rpg_select+1)
+				game->load(rpg_to_load);
+			else
+				return true;
 			break;
 		case 4:
 			return false;
@@ -108,6 +117,7 @@ void redraw_everything(int time_gap)
 	if(flag_battling)
 		;
 	else{
+		rest(100);
 		scene->visible_NPC_movment_setdraw();
 		scene->our_team_setdraw();
 		scene->Redraw_Tiles_or_Fade_to_pic();

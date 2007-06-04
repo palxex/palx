@@ -74,7 +74,6 @@ cached_res::cached_res(const char *filename,decoder_func &func):
 	if(!fp)
 		exit(-1);
 	setdecoder(func);
-	changed=false;
 }
 cached_res::~cached_res(){
 	fclose(fp);
@@ -82,7 +81,7 @@ cached_res::~cached_res(){
 }
 decoder_func cached_res::setdecoder(decoder_func &func)
 {
-	changed=true;
+	clear();
 	decoder_func old_decoder=decoder;
 	decoder=func;
 	return old_decoder;
@@ -94,11 +93,8 @@ uint8_t *cached_res::decode(int n,int n2,bool &decoded,long &length)
 	cache_type::iterator i=cache.find(pos);
 	if(i==cache.end())
 		cache[pos]=decoder(fp,n,n2,length);
-	else{
+	else
 		decoded=true;
-		if(changed)
-			clear(n,n2);
-	}
 	return cache[pos];
 }
 uint8_t *cached_res::decode(int n,bool &decoded,long &length)

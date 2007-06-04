@@ -2,6 +2,8 @@
 #include "structs.h"
 #include "game.h"
 #include "scene.h"
+#include "timing.h"
+#include "UI.h"
 
 #include "stdlib.h"
 
@@ -11,6 +13,15 @@ extern int process_Battle(uint16_t,uint16_t);
 
 BITMAP *backup=0;
 void destroyit(){destroy_bitmap(backup);}
+void restore_screen()
+{
+	blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+	flag_pic_level=0;
+}
+void backup_screen()
+{
+	blit(screen,backup,0,0,0,0,SCREEN_W,SCREEN_H);
+}
 
 inline void sync_viewport()
 {
@@ -47,7 +58,7 @@ void GameLoop_OneCycle(bool trigger)
 							iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
 							redraw_everything();
 						}
-						//x_off=0,y_off=0;
+						keygot=VK_NONE;
 						uint16_t &triggerscript=iter->trigger_script;
 						triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
 					}
@@ -138,6 +149,7 @@ __walk_npc:
 			break;
 		case 0x14:
 			obj.curr_frame=param1;
+			obj.direction=0;
 			break;
 		case 0x15:
 			game->rpg.team_direction=param1;
@@ -153,23 +165,59 @@ __walk_npc:
 		case 0x25:
 			curr_obj.trigger_script= param2;
 			break;
-		case 0x3c:
+		case 0x36://Set RNG
+			RNG.clear();
+			RNG_num=param1;
+			flag_to_load|=0x10;
+			break;
+		case 0x37:
+			play_RNG(param1,param2>0?param2:999,param3>0?param3:16);
+			break;
+		case 0x3b:
+			frame_pos_flag=0;
+			frame_text_x=0x50;
+			frame_text_y=0x28;
 			if(param1)
+				glbvar_fontcolor=param1;
+			break;
+		case 0x3c:
+			frame_pos_flag=1;
+			if(param1){
+				if(param3){
+					flag_pic_level=param3;
+					backup_screen();
+				}
 				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x30*scale,0x37*scale);
+			}
 			dialog_x=(param1?0x50:0xC)*scale;
 			dialog_y=8*scale;
 			frame_text_x=(param1?0x60:0x2C)*scale;
 			frame_text_y=0x1A*scale;
+			if(param2)
+				glbvar_fontcolor=param2;
 			break;
 		case 0x3d:
-			if(param1)
+			frame_pos_flag=2;
+			if(param1){
+				if(param3){
+					flag_pic_level=param3;
+					backup_screen();
+				}
 				sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x10E*scale,0x90*scale);
+			}
 			dialog_x=(param1?4:0xC)*scale;
 			dialog_y=0x6C*scale;
 			frame_text_x=(param1?0x14:0x2C)*scale;
 			frame_text_y=0x7E*scale;
+			if(param2)
+				glbvar_fontcolor=param2;
 			break;
 		case 0x3e:
+			frame_pos_flag=10;
+			frame_text_x=0xA0;
+			frame_text_y=0x28;
+			if(param1)
+				glbvar_fontcolor=param1;
 			break;
 		case 0x40:
 			curr_obj.trigger_method=param2;
@@ -204,6 +252,12 @@ __walk_npc:
 		case 0x52:
 			obj.status=-obj.status;
 			obj.vanish_time=(param1?param1:0x320);
+			break;
+		case 0x53:
+			game->rpg.palette_offset=0;
+			break;
+		case 0x54:
+			game->rpg.palette_offset=0x180;
 			break;
 		case 0x59:
 			if(param1>0 && game->rpg.scene_id!=param1)
@@ -254,6 +308,7 @@ __walk_role:
 				int16_t x_diff,y_diff;
 				while((x_diff=scene->team_pos.x-(param1*32+param3*16)) && (y_diff=scene->team_pos.y-(param2*16+param3*8))){
 					backup_position();
+					game->rpg.team_direction=calc_faceto(-x_diff,-y_diff);
 					scene->team_pos.toXY().x += role_speed*(x_diff<0 ? 2 : -2);
 					scene->team_pos.toXY().y += role_speed*(y_diff<0 ? 1 : -1);
 					game->rpg.team_direction=calc_faceto(scene->team_pos.x-abstract_x_bak,scene->team_pos.y-abstract_y_bak);
@@ -309,8 +364,14 @@ __walk_role:
 		case 0x82:
 			npc_speed=8;
 			goto __walk_npc;
+		case 0x85:
+			wait(param1*10);
+			break;
+		case 0x8b:
+			game->pat.set(param1);
+			break;
 		case 0x8e:
-			blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+			restore_screen();
 			break;
 		case 0x92:
 			//clear_effective(1,0x41);
@@ -372,16 +433,23 @@ uint16_t process_script(uint16_t id,int16_t object)
 				goto exit;
 			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
-				if(current_dialog_lines>3)
-				{	show_wait_icon();current_dialog_lines=0;blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);}
-				else if(current_dialog_lines==0)
-					blit(screen,backup,0,0,0,0,SCREEN_W,SCREEN_H);
+				if(current_dialog_lines>3){
+					show_wait_icon();current_dialog_lines=0;
+					restore_screen();
+				}else if(current_dialog_lines==0)
+					backup_screen();
 				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
-				if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
-					dialog_firstline(msg);
-				else
-					dialog_string(msg,current_dialog_lines),
+				if(frame_pos_flag==10){
+					frame_text_x-=strlen(msg)/2*8;
+					single_dialog(frame_text_x,frame_text_y,strlen(msg)/2);
+					dialog_string(msg,frame_text_x+10,frame_text_y+10,glbvar_fontcolor,false);
+					wait_key();
+				}else if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
+					dialog_string(msg,dialog_x,dialog_y,0x8C,true);
+				else{
+					draw_oneline_m_text(msg,frame_text_x,frame_text_y+current_dialog_lines*(frame_pos_flag?16:18));
 					current_dialog_lines++;
+				}
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
@@ -428,7 +496,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(param3)
 					stop_and_update_frame();
 				redraw_everything();
-				//blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+				//restore_screen();
 				break;
 			case 6:
 				//时间关系，不再模拟QB7的随机函数				
