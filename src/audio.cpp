@@ -65,13 +65,8 @@ void playrix::play(int sub_song)
 {
 	if(subsong==sub_song)
 		return;
-	if(sub_song==0)
-	{
-		stop();
-		return;
-	}
 	stop();
-	voice_start(stream->voice);
+	voice_set_volume(stream->voice,255);
 	int slen = rix.songlength(sub_song);
 	subsong=sub_song;
 	BufferLength = SAMPLE_RATE * CHANNELS / 1000 * slen;
@@ -82,7 +77,7 @@ void playrix::play(int sub_song)
 }
 void playrix::stop()
 {
-	voice_stop(stream->voice);
+	voice_set_volume(stream->voice,0);
 	remove_param_int(playrix_timer,this);
 	if(Buffer)
 		delete[] Buffer,Buffer=NULL;

@@ -92,13 +92,13 @@ bool process_Menu()
 		switch(sys_select=menu(0x28,0x3c,5,0xB,4).select(sys_select))
 		{
 		case 0:
-			rpg_select=select_rpg(rpg_select);
-			if(rpg_to_load=rpg_select+1)
+			if(rpg_select=select_rpg(rpg_to_load))
+				rpg_to_load=rpg_select,
 				game->save(rpg_to_load);
 			break;
 		case 1:			
-			rpg_select=select_rpg(rpg_select);
-			if(rpg_to_load=rpg_select+1)
+			if(rpg_select=select_rpg(rpg_to_load))
+				rpg_to_load=rpg_select,
 				game->load(rpg_to_load);
 			else
 				return true;
@@ -123,8 +123,4 @@ void redraw_everything(int time_gap)
 		scene->Redraw_Tiles_or_Fade_to_pic();
 		scene->draw_normal_scene(time_gap);
 	}
-}
-void clear_effective(int16_t p1,int16_t p2)
-{
-	redraw_everything();
 }

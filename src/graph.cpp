@@ -14,7 +14,7 @@ bitmap::~bitmap()
 }
 bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
-	blit(bmp,dest,source_x,source_y,dest_x,dest_y,SCREEN_W-abs(source_x-dest_x),SCREEN_H-abs(source_y-dest_y));
+	blit(bmp,dest,source_x,source_y,dest_x,dest_y,std::max(bmp->w,dest->w),std::max(bmp->h,dest->h));
 	return true;
 }
 sprite::sprite(uint8_t *src):x(0),y(0),l(0),width(0),height(0),buf(src)
@@ -24,6 +24,10 @@ sprite::sprite(uint8_t *src):x(0),y(0),l(0),width(0),height(0),buf(src)
 }
 sprite::~sprite()
 {}
+sprite *sprite::clone()
+{
+	return new sprite(buf);
+}
 void sprite::setXYL(int x,int y,int l)
 {
 	this->x=x-width/2;
@@ -89,6 +93,10 @@ void sprite::blit_shadow(BITMAP *dest, int x, int y)
 
 	blit_to(dest,x,y);
 }
+bool operator<(const sprite &lhs, const sprite &rhs)
+{
+	return lhs.y<rhs.y;
+}
 
 sprite_prim::sprite_prim():id(-1)
 {}
@@ -136,10 +144,10 @@ palette::palette()
 void palette::read(uint32_t i)
 {
 	pal=i;
-	long len;
-	myRGB *buf=(myRGB *)PAT.decode(i,len);
+	bool fx;long len;
+	myRGB *buf=(myRGB *)PAT.decode(i,0,fx,len);
 	RGB   *p=(RGB*)pat;
-	for(int t=0;t<len/3;t++)
+	for(int t=0;t<(i==0 || i==5?512:256);t++)
 		p[t].r=buf[t].r,
 		p[t].g=buf[t].g,
 		p[t].b=buf[t].b;

@@ -24,7 +24,7 @@ void show_wait_icon()
 {
 	if(frame_pos_flag)
 		game->message_handles.getsprite(icon)->blit_to(screen,icon_x,icon_y);
-	wait_key();
+	wait_for_key();
 	current_dialog_lines=0;
 	icon=0;
 }

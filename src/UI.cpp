@@ -1,6 +1,8 @@
 #include "UI.h"
 #include "timing.h"
 
+#include <boost/lexical_cast.hpp>
+
 dialog::dialog(int style,int x,int y,int rows,int columns)
 {
 	rows--;columns--;
@@ -38,19 +40,17 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp)
 
 int select_rpg(int ori_select,BITMAP *bmp)
 {
-	static int selected=ori_select;
+	static cut_msg_impl word("word.dat");
+	int selected=ori_select;
 	BITMAP *cache=create_bitmap(SCREEN_W,SCREEN_H);
-	selected=(selected>=0?selected:0);
+	selected=(selected>=1?selected:1);
 	int ok=1;
 	std::vector<std::string> menu_items;
-	for(int i=0x2B;i<0x30;i++)
-		menu_items.push_back(std::string(cut_msg_impl("word.dat")(i*10,(i+1)*10)));
 	blit(bmp,cache,0,0,0,0,SCREEN_W,SCREEN_H);
 	do{
-		int i=0;
-		for(std::vector<std::string>::iterator r=menu_items.begin();r!=menu_items.end();r++,i++){			
-			single_dialog(0xB4,4+0x26*i,6,cache);
-			dialog_string(r->c_str(),0xBE,14+0x26*i,i==selected?0xFA:0,i==selected,cache);
+		for(int r=0;r<5;r++){			
+			single_dialog(0xB4,4+0x26*r,6,cache);
+			dialog_string((std::string(word(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
 		while(!get_key()) delay(10);
@@ -61,14 +61,19 @@ int select_rpg(int ori_select,BITMAP *bmp)
 			case VK_DOWN:
 				selected++;
 				break;
+			case VK_PGUP:
+				selected-=5;
+				break;
+			case VK_PGDN:
+				selected+=5;
+				break;
 			case VK_MENU:
-				return -1;
+				return 0;
 			case VK_EXPLORE:
 				ok=0;
 				break;
 		}
-		selected+=(int)menu_items.size();
-		selected%=menu_items.size();
+		selected=(selected<=1?1:selected);
 	}while(ok);
 	destroy_bitmap(cache);
 	return selected;

@@ -3,6 +3,7 @@
 bool get_key()
 {
 	bool got=false;
+	keygot=VK_NONE;
 	if(keypressed()){
 		switch(int k=(readkey()>>8)){
 		case KEY_ESC:
@@ -28,6 +29,12 @@ bool get_key()
 			break;
 		case KEY_DOWN:
 			keygot = VK_DOWN;
+			break;
+		case KEY_PGUP:
+			keygot = VK_PGUP;
+			break;
+		case KEY_PGDN:
+			keygot = VK_PGDN;
 			break;
 		case KEY_R:
 			keygot = VK_REPEAT;
