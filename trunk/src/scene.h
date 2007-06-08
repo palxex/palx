@@ -46,7 +46,7 @@ struct Scene{
 	palmap scenemap;
 	BITMAP *scene_buf;
 	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
-	typedef std::vector<sprite *> s_list;
+	typedef std::vector<boost::shared_ptr<sprite> > s_list;
 	s_list active_list;
 	struct position{
 		int x,y,h;

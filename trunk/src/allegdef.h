@@ -23,6 +23,7 @@ protected:
 public:
 	bitmap(const uint8_t *,int,int);
 	virtual ~bitmap();
+	operator BITMAP *(){return bmp;}
 	bool blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 	friend void draw_battle_scene(int);
 };
@@ -33,12 +34,13 @@ public:
 	int width,height;
 	sprite(uint8_t *);
 	~sprite();
+	sprite *clone();
 	void setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int);
 	void blit_shadow(BITMAP*,int,int);
-	friend bool sprite_comp(sprite *lhs,sprite *rhs);
+	friend bool operator<(const sprite &lhs,const sprite &rhs);
 };
 class sprite_prim{
 	int id;
@@ -60,7 +62,6 @@ public:
 	friend bool operator==(const sprite_prim&,const sprite_prim&);
 	friend class map;
 };
-bool operator==(const sprite_prim&,const sprite_prim&);
 class ttfont{
 	const char *msg;
 public:

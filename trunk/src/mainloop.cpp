@@ -35,7 +35,6 @@ namespace{
 			running=process_Menu();
 
 		flag_parallel_mutex=!flag_parallel_mutex;
-		keygot=VK_NONE;
 	}
 	END_OF_FUNCTION(mainloop_proc);
 }

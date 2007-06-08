@@ -20,5 +20,5 @@ void randomize()
 float rnd0()
 {
 	seed=(seed*a+c)%d;
-	return (float)seed;
+	return (float)seed/d;
 }

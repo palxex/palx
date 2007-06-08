@@ -121,7 +121,7 @@ void Game::load(int id){
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"rb");
 	if(!fprpg){
 		allegro_message("ºÜ±§Ç¸£¬%d.rpg²»´æÔÚ¡«",id);
-		exit(-1);
+		return;
 	}
 	fread(&rpg,sizeof(RPG),1,fprpg);
 	map_toload=rpg.scene_id;

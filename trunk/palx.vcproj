@@ -125,8 +125,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
-				RuntimeLibrary="2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALLEGRO_STATICLINK"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -143,7 +143,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alfontdll.lib adplug.lib binio.lib alleg.lib"
+				AdditionalOptions="/force"
+				AdditionalDependencies="alfont.lib alleg_s_crt.lib adplug.lib binio.lib  user32.lib gdi32.lib winmm.lib ole32.lib dxguid.lib dinput.lib dsound.lib ddraw.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""

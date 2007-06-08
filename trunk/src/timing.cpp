@@ -14,6 +14,14 @@ void wait_key(uint8_t gap)
 	time_interrupt_occurs=0;
 	while(!keypressed() && time_interrupt_occurs<gap)
 		rest(0);
+	get_key();
+	keygot=VK_NONE;
+}
+
+void wait_for_key()
+{
+	while(!keypressed())
+		rest(0);
 	clear_keybuf();
 }
 

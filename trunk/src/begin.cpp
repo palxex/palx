@@ -22,18 +22,78 @@
 #include "timing.h"
 #include "internal.h"
 
-int begin_scene::operator()(Game *game){
-	::game=game;
-	RNG_num=6;
-	game->pat.read(3);
-	game->pat.set(rpg.palette_offset);
-	play_RNG(0,999,25);
-	wait_key(180);
-	pal_fade_out(1);
+void startup_splash()
+{
+	game->pat.read(1);
+	BITMAP *cat=create_bitmap(SCREEN_W,SCREEN_H*2);
+	bitmap(FBP.decode(0x26),320,200).blit_to(cat,0,0,0,0);
+	bitmap(FBP.decode(0x27),320,200).blit_to(cat,0,0,0,200);
 
-	//ÔÆ¹Èº×·å
+	sprite_prim goose(MGO,0x49),title(MGO,0x47);
+	uint16_t &title_height=((uint16_t *)MGO.decode(0x47))[3],max_height=title_height,temp_height=0;
+	int poses[9][3];
+	for(int i=0;i<9;i++){
+		poses[i][0]=rnd0()*260+420;
+		poses[i][1]=rnd0()*80;
+		poses[i][2]=rnd0()*8;
+	}
 	rix->play(5);
 
+	PALETTE pal;
+	get_palette(pal);
+	memset(pal,0,0xF0*sizeof(RGB));
+	set_palette(pal);
+
+	BITMAP *scrn_buf=create_bitmap(SCREEN_W,SCREEN_H*2);
+	int prog_lines=200,prog_pale=0,begin_pale=40,add_pale=16;
+	do{
+		keygot=VK_NONE;
+		get_key();
+		blit(cat,scrn_buf,0,std::max(prog_lines--,0),0,0,SCREEN_W,SCREEN_H);
+		for(int i=0;i<9;i++)
+			if(poses[i][0]-2*i>-40)
+				goose.getsprite(poses[i][2])->blit_to(scrn_buf,poses[i][0]-2*i,poses[i][1]+2*i);
+		if(temp_height<max_height)
+			temp_height++;
+		title_height=temp_height;
+		title.getsprite(0)->blit_to(scrn_buf,0xFE,10);
+		blit(scrn_buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		wait(10);
+		prog_pale=begin_pale/10;
+		begin_pale+=add_pale;
+		if(add_pale>=3)
+			add_pale--;
+		if(prog_pale<=0x40){
+			for(int i=0;i<0xF0;i++){
+				pal[i].r=game->pat.get(0)[i].r*prog_pale/0x40;
+				pal[i].g=game->pat.get(0)[i].g*prog_pale/0x40;
+				pal[i].b=game->pat.get(0)[i].b*prog_pale/0x40;
+			}
+			set_palette(pal);
+		}
+	}while(keygot!=VK_EXPLORE);
+	destroy_bitmap(scrn_buf);
+	destroy_bitmap(cat);
+	title_height=max_height;
+	title.getsprite(0)->blit_to(screen,0xFE,10);
+	if(prog_pale<0x40){
+		for(int i=prog_pale;i<0x40;i++){
+			for(int j=0;j<0xF0;j++){
+				pal[j].r=game->pat.get(0)[j].r*i/0x40;
+				pal[j].g=game->pat.get(0)[j].g*i/0x40;
+				pal[j].b=game->pat.get(0)[j].b*i/0x40;
+			}
+			set_palette(pal);
+			wait(1);
+		}
+	}
+	wait_key(90);
+	mutex_can_change_palette=false;
+	pal_fade_out(2);
+}
+
+int select_scene()
+{
 	game->pat.read(0);
 	bitmap(FBP.decode(60),320,200).blit_to(screen,0,0,0,0);
 	rix->play(4);
@@ -67,7 +127,7 @@ int begin_scene::operator()(Game *game){
 				if(menu_selected==0){
 					ok=true;
 					save = 0;
-				}else if(rpg_to_load=select_rpg(0,screen)+1){
+				}else if(rpg_to_load=select_rpg(0,screen)){
 					ok=true;
 					save = rpg_to_load;
 				}else{
@@ -82,6 +142,21 @@ int begin_scene::operator()(Game *game){
 	destroy_bitmap(cache);
 	pal_fade_out(1);
 	return save;
+}
+
+int begin_scene::operator()(Game *game){
+	::game=game;
+	RNG_num=6;
+	game->pat.read(3);
+	game->pat.set(rpg.palette_offset);
+	play_RNG(0,999,25);
+	wait_key(180);
+	pal_fade_out(1);
+
+	//ÔÆ¹Èº×·å
+	startup_splash();
+	
+	return select_scene();
 }
 
 

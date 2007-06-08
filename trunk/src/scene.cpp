@@ -106,7 +106,7 @@ void Scene::calc_team_walking(int key)
 void Scene::our_team_setdraw()
 {
 	for(int i=0;i<=game->rpg.team_roles+game->rpg.team_followers;i++){
-		sprite *it=mgos[team_mgos[i]].getsprite(game->rpg.team[i].frame);
+		s_list::value_type it=boost::shared_ptr<sprite>(mgos[team_mgos[i]].getsprite(game->rpg.team[i].frame)->clone());
 		it->setXYL(game->rpg.team[i].x,game->rpg.team[i].y+game->rpg.layer+10,game->rpg.layer+6);
 		active_list.push_back(it);
 	}
@@ -119,32 +119,32 @@ void Scene::visible_NPC_movment_setdraw()
 		   i->pos_y-game->rpg.viewport_y>0   && i->pos_y-game->rpg.viewport_y<0x148 &&
 		   i->image && i->status && i->vanish_time==0)
 		{
-			sprite *it=mgos[npc_mgos[t]].getsprite(i->direction*i->frames+i->curr_frame);
+			s_list::value_type it=boost::shared_ptr<sprite>(mgos[npc_mgos[t]].getsprite(i->direction*i->frames+i->curr_frame)->clone());
 			it->setXYL(i->pos_x-game->rpg.viewport_x,i->pos_y-game->rpg.viewport_y+i->layer*8+9,i->layer*8+2);
 			active_list.push_back(it);
 		}
 }
 void Scene::Redraw_Tiles_or_Fade_to_pic()
 {
-	s_list redraw_list;sprite *masker;
+	s_list redraw_list;s_list::value_type masker;
 	switch(redraw_flag)
 	{
 	case 0:
 		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
 			for(int vx=(game->rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
 				for(int vy=(game->rpg.viewport_y+masker->y-masker->height)/16-1,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y)/16+1;vy++)
-					for(int x=vx-1,y=vy;x<=vx+1;x++)
+					for(int x=vx-1,y=vy;x<=vx+1 && y>=0;x++)
 						for(int h=0;h<2;h++)
 						{
 							tile &tile0=scenemap.gettile(x,y,h,0);
 							tile &tile1=scenemap.gettile(x,y,h,1);
 							if(tile0.valid && tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
-								sprite *it=tile0.image.get();
+								s_list::value_type it=boost::shared_ptr<sprite>(tile0.image.get()->clone());
 								it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
 								redraw_list.push_back(it);
 							}
 							if(tile1.valid && tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
-								sprite *it=tile1.image.get();
+								s_list::value_type it=boost::shared_ptr<sprite>(tile1.image.get()->clone());
 								it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
 								redraw_list.push_back(it);
 							}
@@ -193,28 +193,21 @@ void Scene::produce_one_screen()
 {
 	scenemap.make_onescreen(scene_buf,game->rpg.viewport_x,game->rpg.viewport_y,game->rpg.viewport_x+SCREEN_W,game->rpg.viewport_y+SCREEN_H);
 }
-bool sprite_comp(sprite *lhs,sprite *rhs)
+template<typename T>
+bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)
 {
-	return lhs->y<rhs->y;
+	return *(lhs.get())<*(rhs.get());
 }
 void Scene::draw_normal_scene(int gap)
 {
-	static BITMAP *scanline=create_bitmap(SCREEN_W,SCREEN_H);
+	static bitmap scanline(0,SCREEN_W,SCREEN_H);
 	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
-	std::set<sprite*> greper(active_list.begin(),active_list.end());
+	std::set<s_list::value_type> greper(active_list.begin(),active_list.end());
 	active_list.clear();
 	std::copy(greper.begin(),greper.end(),back_inserter(active_list));
-	std::sort(active_list.begin(),active_list.end(),sprite_comp);
+	std::sort(active_list.begin(),active_list.end());
 	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
 		(*i)->blit_to(scanline);
 	blit(scanline,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	pal_fade_in(gap);
-	/*
-	scenemap.blit_to(screen,0,0,0,0);
-	
-	std::sort(active_list.begin(),active_list.end(),sprite_comp);
-	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
-		(*i)->blit_to(screen);
-	pal_fade_in(1);
-	*/
 }

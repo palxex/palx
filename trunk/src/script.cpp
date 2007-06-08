@@ -45,46 +45,49 @@ inline int16_t absdec(int16_t &s)
 typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
 void GameLoop_OneCycle(bool trigger)
 {
-	if(trigger)
-		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
-			if(absdec(iter->vanish_time)==0)
-				if(iter->status>0 && iter->trigger_method>=4){
-					if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<(iter->trigger_method-4)*32+16)// in the distance that can trigger
-					{
-						if(iter->frames)
-						{
-							stop_and_update_frame();
-							iter->curr_frame=0;
-							iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
-							redraw_everything();
-						}
-						keygot=VK_NONE;
-						uint16_t &triggerscript=iter->trigger_script;
-						triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
-					}
-				}else if(iter->status<0){//&& in the screen
-					iter->status=abs(iter->status);
-					//step==0
-				}
-	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+	if(!mutex_can_change_palette)
 	{
-		if(iter->status!=0)
-			if(uint16_t &autoscript=iter->auto_script)
-				autoscript=process_autoscript(autoscript,(int16_t)(iter-game->evtobjs.begin()));
-		if(iter->status==2 && iter->image>0 && trigger
-			&& abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
+		if(trigger)
+			for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+				if(absdec(iter->vanish_time)==0)
+					if(iter->status>0 && iter->trigger_method>=4){
+						if(abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<(iter->trigger_method-4)*32+16)// in the distance that can trigger
+						{
+							if(iter->frames)
+							{
+								stop_and_update_frame();
+								iter->curr_frame=0;
+								iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
+								redraw_everything();
+							}
+							keygot=VK_NONE;
+							uint16_t &triggerscript=iter->trigger_script;
+							triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
+						}
+					}else if(iter->status<0){//&& in the screen
+						iter->status=abs(iter->status);
+						//step==0
+					}
+		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 		{
-			//check barrier;this means, role status 2 means it takes place
-			backup_position();
-			for(int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
-				if(!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
-				{
-					scene->team_pos.toXY().x+=direction_offs[direction][0];
-					scene->team_pos.toXY().y+=direction_offs[direction][1];
-					break;
-				}
-			sync_viewport();
-			scene->move_usable_screen();
+			if(iter->status!=0)
+				if(uint16_t &autoscript=iter->auto_script)
+					autoscript=process_autoscript(autoscript,(int16_t)(iter-game->evtobjs.begin()));
+			if(iter->status==2 && iter->image>0 && trigger
+				&& abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
+			{
+				//check barrier;this means, role status 2 means it takes place
+				backup_position();
+				for(int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
+					if(!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
+					{
+						scene->team_pos.toXY().x+=direction_offs[direction][0];
+						scene->team_pos.toXY().y+=direction_offs[direction][1];
+						break;
+					}
+				sync_viewport();
+				scene->move_usable_screen();
+			}
 		}
 	}
 }
@@ -101,6 +104,10 @@ void process_Explore()
 			return;
 		}
 	}
+}
+void clear_effective(int16_t p1,int16_t p2)
+{
+	redraw_everything();
 }
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
@@ -223,8 +230,11 @@ __walk_npc:
 			curr_obj.trigger_method=param2;
 			break;
 		case 0x43:
-			game->rpg.music=param1;
-			rix->play(param1);
+			if(param1){
+				game->rpg.music=param1;
+				rix->play(param1);
+			}else
+				rix->stop();
 			break;
 		case 0x44:
 			GameLoop_OneCycle(false);
@@ -283,6 +293,17 @@ __walk_npc:
 				curr_obj.curr_frame=(curr_obj.curr_frame+1)%(curr_obj.frames?curr_obj.frames:curr_obj.frames_auto);
 			}
 			break;
+		case 0x6d:
+			if(param1){
+				if(param2)
+					game->scenes[param1].enter_script=param2;
+				if(param3)
+					game->scenes[param1].leave_script=param3;
+				if(!param2 && !param3)
+					game->scenes[param1].enter_script=0,
+					game->scenes[param1].leave_script=0;
+			}
+			break;
 		case 0x6e:
 			backup_position();
 			sync_viewport();
@@ -321,7 +342,7 @@ __walk_role:
 			}
 			break;
 		case 0x73:
-			//clear_effective(param1,param2);
+			clear_effective(param1,param2);
 			break;
 		case 0x75:
 			game->rpg.team[0].role=(param1-1<0?0:param1-1);
@@ -442,8 +463,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(frame_pos_flag==10){
 					frame_text_x-=strlen(msg)/2*8;
 					single_dialog(frame_text_x,frame_text_y,strlen(msg)/2);
-					dialog_string(msg,frame_text_x+10,frame_text_y+10,glbvar_fontcolor,false);
-					wait_key();
+					dialog_string(msg,frame_text_x+10,frame_text_y+10,0,false);
+					wait_key(140);
 				}else if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
 					dialog_string(msg,dialog_x,dialog_y,0x8C,true);
 				else{
@@ -498,8 +519,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				redraw_everything();
 				//restore_screen();
 				break;
-			case 6:
-				//时间关系，不再模拟QB7的随机函数				
+			case 6:			
 				//printf("以%d%%几率跳转到脚本%x:",param1,curr.param[1]);
 				if(rnd0()*100<param1){
 					//printf("成功\n");
