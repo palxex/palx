@@ -106,6 +106,11 @@ sprite_prim::sprite_prim(cached_res &archive,int _id):id(_id)
 {
 	getsource(archive.decode(id));
 }
+int sprite_prim::determain_smkfs(uint8_t *src)
+{
+	uint16_t *usrc=(uint16_t*)src;
+	return usrc[0]-(usrc[usrc[0]-1]==0||usrc[usrc[0]-1]>0x8000?1:0);
+}
 sprite_prim::sprite_prim(int _id,uint8_t *src):id(_id)
 {
 	getsource(src);

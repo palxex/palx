@@ -45,11 +45,7 @@ public:
 class sprite_prim{
 	int id;
 	std::vector<boost::shared_ptr<sprite> > sprites;	
-	int determain_smkfs(uint8_t *src)
-	{
-		uint16_t *usrc=(uint16_t*)src;
-		return usrc[0]-(usrc[usrc[0]-1]==0?1:0);
-	}
+	int determain_smkfs(uint8_t *src);
 public:
 	sprite_prim();
 	sprite_prim(int);
