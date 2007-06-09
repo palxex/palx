@@ -70,6 +70,7 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
+				AssemblyDebug="0"
 				SubSystem="2"
 				TargetMachine="1"
 			/>

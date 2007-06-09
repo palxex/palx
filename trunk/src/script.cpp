@@ -131,6 +131,10 @@ __walk_npc:
 					obj.pos_x += npc_speed*(x_diff<0 ? 2 : -2);
 					obj.pos_y += npc_speed*(y_diff<0 ? 1 : -1);
 				}
+				if(!obj.frames && !obj.frames_auto){
+					uint16_t *usrc=(uint16_t *)MGO.decode(obj.image);
+					obj.frames_auto=usrc[0]-(usrc[usrc[0]-1]==0?1:0);
+				}
 				obj.curr_frame=(obj.curr_frame+1)%(obj.frames?obj.frames:obj.frames_auto);
 
 				//afterward check;MUST have,or will not match dospal exactly
@@ -373,6 +377,10 @@ __walk_role:
 			}
 			npc_speed=4;
 			goto __walk_npc;
+		case 0x7d:
+			curr_obj.pos_x+=param2;
+			curr_obj.pos_y+=param3;
+			break;
 		case 0x7f:
 			GameLoop_OneCycle(false);
 			redraw_everything();
@@ -389,7 +397,8 @@ __walk_role:
 			wait(param1*10);
 			break;
 		case 0x8b:
-			game->pat.set(param1);
+			game->pat.read(param1);
+			color_began_fade=0;
 			break;
 		case 0x8e:
 			restore_screen();
