@@ -76,7 +76,7 @@ void Load_Data()
 }
 bool process_Menu()
 {
-	static int main_select,role_select,item_select,sys_select,rpg_select;
+	static int main_select,role_select,itemuse_select,item_select,sys_select,rpg_select;
 	//show_money();
 	single_dialog(0,0,5);
 	ttfont(cut_msg_impl("word.dat")(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);
@@ -87,6 +87,23 @@ bool process_Menu()
 	case 1:
 		break;
 	case 2:
+		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2).select(itemuse_select))
+		{
+		case 0:
+			item_select=select_item(2,0,item_select);
+			{
+				uint16_t &equip_script=game->rpg.objects[item_select].script[1];
+				process_script(equip_script,0);
+			}
+			break;
+		case 1:
+			item_select=select_item(1,0,item_select);
+			{
+				uint16_t &use_script=game->rpg.objects[item_select].script[0];
+				process_script(use_script,0);
+			}
+			break;
+		}
 		break;
 	case 3:
 		switch(sys_select=menu(0x28,0x3c,5,0xB,4).select(sys_select))
@@ -117,7 +134,7 @@ void redraw_everything(int time_gap)
 	if(flag_battling)
 		;
 	else{
-		rest(100);
+		rest(50);
 		scene->visible_NPC_movment_setdraw();
 		scene->our_team_setdraw();
 		scene->Redraw_Tiles_or_Fade_to_pic();

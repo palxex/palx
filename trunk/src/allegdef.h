@@ -38,8 +38,7 @@ public:
 	void setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
-	bool blit_to(BITMAP *dest,int,int);
-	void blit_shadow(BITMAP*,int,int);
+	bool blit_to(BITMAP *dest,int,int,bool =false);
 	friend bool operator<(const sprite &lhs,const sprite &rhs);
 };
 class sprite_prim{
@@ -97,6 +96,15 @@ public:
 	~playrix();
 	void play(int sub_song);
 	void stop();
+};
+
+class voc{
+	SAMPLE *spl;
+	SAMPLE *load_voc_mem(uint8_t *f);
+public:
+	voc(uint8_t *);
+	~voc();
+	void play();
 };
 
 enum VKEY { VK_NONE=0,VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE};

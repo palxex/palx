@@ -3,7 +3,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-dialog::dialog(int style,int x,int y,int rows,int columns)
+dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
 {
 	rows--;columns--;
 	for(int i=0;i<3;i++)
@@ -19,10 +19,10 @@ dialog::dialog(int style,int x,int y,int rows,int columns)
 				ti=2;
 		else
 			ti=1; 
-		border[ti][0]->blit_shadow(screen,x,y+len);
+		border[ti][0]->blit_to(screen,x,y+len,shadow);
 		for(;j<columns;j++)
-			border[ti][1]->blit_shadow(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len);
-		border[ti][2]->blit_shadow(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len);
+			border[ti][1]->blit_to(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
+		border[ti][2]->blit_to(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
 		len+=border[ti][1]->height;
 	}
 }
@@ -32,10 +32,10 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp)
 	int i=0;
 	for(i=0;i<3;i++)
 		border[i]=game->UIpics.getsprite(44+i);
-	border[0]->blit_shadow(bmp,x,y);
+	border[0]->blit_to(bmp,x,y,true);
 	for(i=0;i<len;i++)
-		border[1]->blit_shadow(bmp,x+border[0]->width+i*border[1]->width,y);
-	border[2]->blit_shadow(bmp,x+border[0]->width+i*border[1]->width,y);
+		border[1]->blit_to(bmp,x+border[0]->width+i*border[1]->width,y,true);
+	border[2]->blit_to(bmp,x+border[0]->width+i*border[1]->width,y,true);
 }
 
 int select_rpg(int ori_select,BITMAP *bmp)
@@ -121,5 +121,12 @@ int menu::select(int selected)
 		selected+=(int)menu_items.size();
 		selected%=menu_items.size();
 	}while(ok--);
+	return selected;
+}
+
+int select_item(int mask,int skip,int selected)
+{
+	dialog(9,2,33,8,18,false);
+	wait_for_key();
 	return selected;
 }
