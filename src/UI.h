@@ -17,7 +17,7 @@ class dialog
 {
 	sprite *border[3][3];
 public:
-	dialog(int style,int x,int y,int rows,int columns);
+	dialog(int style,int x,int y,int rows,int columns,bool =true);
 	friend class menu;
 };
 
@@ -39,5 +39,6 @@ public:
 };
 
 int select_rpg(int =0,BITMAP * =screen);
+int select_item(int mask,int ,int selected);
 void num2pic(int num,int x,int y);
 #endif

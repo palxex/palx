@@ -53,45 +53,44 @@ bool sprite::blit_to(BITMAP *dest)
 		Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x,y-l-height);
 	return true;
 }
-bool sprite::blit_to(BITMAP *dest,int x,int y)
+bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow)
 {
+	if(shadow)
+	{
+		uint8_t *rle = buf + 4, *dst;
+		int l = dest->w;
+
+		BITMAP *bmp;
+		if(dest!=screen)
+			dst=(uint8_t *)dest->dat;
+		else{
+			bmp=create_bitmap(SCREEN_W,SCREEN_H);
+			blit(screen,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
+			dst=(uint8_t *)bmp->dat;
+		}
+
+		for(int i=(y+6)*l+x+6,prei=i;i<(y+6+height)*l+x+6 && i<=dest->w*dest->h;i=prei+l,prei=i)
+			for(int j=0;j<width;)
+			{
+				uint8_t flag=*rle++;
+				if(flag>=0x80)
+					i += (flag-0x80);
+				else{
+					for(int t=j;t<j+flag;t++)
+						dst[i+t]-=(dst[i+t]%0x10/2);
+					rle+=flag;
+				}
+				j+=(flag%0x80);
+			}
+
+		if(dest==screen)
+			blit(bmp,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+	}
+
 	this->x=x;
 	this->y=y+height;
 	this->l=0;
 	return blit_to(dest);
-}
-void sprite::blit_shadow(BITMAP *dest, int x, int y)
-{
-	uint8_t *rle = buf + 4, *dst;
-	int l = dest->w;
-
-	BITMAP *bmp;
-	if(dest!=screen)
-		dst=(uint8_t *)dest->dat;
-	else{
-		bmp=create_bitmap(SCREEN_W,SCREEN_H);
-		blit(screen,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
-		dst=(uint8_t *)bmp->dat;
-	}
-
-	for(int i=(y+6)*l+x+6,prei=i;i<(y+6+height)*l+x+6;i=prei+l,prei=i)
-		for(int j=0;j<width;)
-		{
-			uint8_t flag=*rle++;
-			if(flag>=0x80)
-				i += (flag-0x80);
-			else{
-				for(int t=j;t<j+flag;t++)
-					dst[i+t]-=(dst[i+t]%0x10/2);
-				rle+=flag;
-			}
-			j+=(flag%0x80);
-		}
-
-	if(dest==screen)
-		blit(bmp,screen,0,0,0,0,SCREEN_W,SCREEN_H);
-
-	blit_to(dest,x,y);
 }
 bool operator<(const sprite &lhs, const sprite &rhs)
 {

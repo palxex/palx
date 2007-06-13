@@ -254,6 +254,9 @@ __walk_npc:
 			sync_viewport();
 			scene->produce_one_screen();
 			break;
+		case 0x47:
+			voc(VOC.decode(param1)).play();
+			break;
 		case 0x49:
 			game->evtobjs[param1!=-1?param1:object].status=param2;
 			break;
@@ -398,7 +401,7 @@ __walk_role:
 			break;
 		case 0x8b:
 			game->pat.read(param1);
-			color_began_fade=0;
+			game->rpg.palette_offset=0;
 			break;
 		case 0x8e:
 			restore_screen();
