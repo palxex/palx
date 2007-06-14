@@ -5,7 +5,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-VKEY keygot;
 namespace{
 	bool running=true;
 	void mainloop_proc()
@@ -14,7 +13,7 @@ namespace{
 			Load_Data();
 
 		//Parse Key
-		get_key();
+		VKEY keygot=get_key();
 		
 		GameLoop_OneCycle(true);
 		if(flag_to_load)
@@ -35,6 +34,8 @@ namespace{
 			running=process_Menu();
 
 		flag_parallel_mutex=!flag_parallel_mutex;
+		
+		get_key(false);
 	}
 	END_OF_FUNCTION(mainloop_proc);
 }
@@ -42,7 +43,7 @@ namespace{
 int Game::run(){
 	//游戏主循环10fps,画面100fps,音乐70fps。
 	while(running){
-		rest(5);
+		rest(1);
 		if(time_interrupt_occurs>=10)
 			mainloop_proc(),time_interrupt_occurs=0;
 	}
