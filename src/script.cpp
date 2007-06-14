@@ -60,7 +60,6 @@ void GameLoop_OneCycle(bool trigger)
 								iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
 								redraw_everything();
 							}
-							keygot=VK_NONE;
 							uint16_t &triggerscript=iter->trigger_script;
 							triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
 						}
@@ -114,7 +113,7 @@ void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t obj
 	//printf("%s\n",scr_desc(func,param).c_str());
 	const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
 	EVENT_OBJECT &obj=game->evtobjs[object];
-	EVENT_OBJECT &curr_obj=(param1<0?obj:game->evtobjs[param1]);
+#define curr_obj (param1<0?obj:game->evtobjs[param1])
 	char addition[100];memset(addition,0,sizeof(addition));
 	int npc_speed,role_speed;
 	switch(func){

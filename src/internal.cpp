@@ -29,7 +29,6 @@ bool key_enable=true;
 void Load_Data()
 {
 	flag_battling=false;
-	keygot=(VKEY)0;
 	if(flag_to_load&0x10){
 		//load sfx; this task has been not needed since we didn't be limited by 640K.
 	}
@@ -134,7 +133,7 @@ void redraw_everything(int time_gap)
 	if(flag_battling)
 		;
 	else{
-		rest(50);
+		rest(100);
 		scene->visible_NPC_movment_setdraw();
 		scene->our_team_setdraw();
 		scene->Redraw_Tiles_or_Fade_to_pic();

@@ -46,9 +46,8 @@ void startup_splash()
 
 	BITMAP *scrn_buf=create_bitmap(SCREEN_W,SCREEN_H*2);
 	int prog_lines=200,prog_pale=0,begin_pale=40,add_pale=16;
-	do{
-		keygot=VK_NONE;
-		get_key();
+	VKEY keygot=get_key();
+	do{		
 		blit(cat,scrn_buf,0,std::max(prog_lines--,0),0,0,SCREEN_W,SCREEN_H);
 		for(int i=0;i<9;i++)
 			if(poses[i][0]-2*i>-40)
@@ -71,7 +70,7 @@ void startup_splash()
 			}
 			set_palette(pal);
 		}
-	}while(keygot!=VK_EXPLORE);
+	}while((keygot=get_key())!=VK_EXPLORE);
 	destroy_bitmap(scrn_buf);
 	destroy_bitmap(cat);
 	title_height=max_height;
@@ -102,7 +101,6 @@ int select_scene()
 	int save=0;
 	BITMAP *cache=create_bitmap(SCREEN_W,SCREEN_H);
 	do{
-		keygot=VK_NONE;
 		static int menu_selected=0;
 		static bool changed=true;
 		if(changed)
@@ -110,7 +108,8 @@ int select_scene()
 				ttfont(cut_msg_impl("word.dat")(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
 		get_key();
-		switch(keygot){
+		VKEY keygot;
+		switch(keygot=get_key()){
 			case VK_UP:
 				changed=true;
 				menu_selected++;

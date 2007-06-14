@@ -51,6 +51,18 @@ namespace{
 		mutux_setpalette=true;
 	}
 	END_OF_FUNCTION(timer_proc);
+	void prtscrn_proc()
+	{
+		if(key[KEY_PRTSCR] || key[KEY_P]){
+			static PALETTE pal;
+			static char filename[30];
+			static int i=0;
+			get_palette(pal);
+			sprintf(filename,"ScrnShot\\%d.bmp",i++);
+			save_bitmap(filename,screen,pal);
+		}
+	}
+	END_OF_FUNCTION(prtscrn_proc);
 }
 
 int scale=1;
@@ -74,6 +86,8 @@ Game::Game(int save=0):rpg(::rpg)
 	
 	LOCK_VARIABLE(time_interrupt_occurs);
 	install_int(timer_proc,10);
+
+	install_int(prtscrn_proc,100);
 
 	//load sss&data
 	long len=0;
@@ -111,6 +125,7 @@ Game::Game(int save=0):rpg(::rpg)
 }
 Game::~Game(){
 	remove_int(timer_proc);
+	remove_int(prtscrn_proc);
 }
 
 void Game::load(int id){
@@ -131,6 +146,19 @@ void Game::load(int id){
 	reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
 	fclose(fprpg);
 	flag_to_load=0x17;
+	ABC.clear();
+	VOC.clear();
+	MAP.clear();
+	GOP.clear();
+	RNG.clear();
+	//DATA.clear();
+	SSS.clear();
+	BALL.clear();
+	RGM.clear();
+	FBP.clear();
+	F.clear();
+	FIRE.clear();
+	//MGO.clear();
 	pat.read(0);
 	pal_fade_out(1);
 }

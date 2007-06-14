@@ -1,11 +1,11 @@
 #include "allegdef.h"
 
-bool get_key()
+VKEY get_key(bool clear)
 {
-	bool got=false;
-	keygot=VK_NONE;
+	VKEY keygot=VK_NONE;
+	int k;
 	if(keypressed()){
-		switch(int k=(readkey()>>8)){
+		switch(k=(readkey()>>8)){
 		case KEY_ESC:
 		case KEY_INSERT:
 		case KEY_ALT:
@@ -60,11 +60,17 @@ bool get_key()
 		case KEY_F:
 			keygot = VK_FORCE;
 			break;
+		case KEY_P:
+		case KEY_PRTSCR:
+			keygot = VK_PRINTSCREEN;
+			break;
 		default:
-			keygot = (VKEY)k;
+			keygot = VK_NONE;
+			if(!clear)
+				simulate_keypress(k<<8);
 		}
-		clear_keybuf();
-		got=true;
+		if(clear)
+			clear_keybuf();
 	}
-	return got;
+	return keygot;
 }

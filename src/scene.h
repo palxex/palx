@@ -1,13 +1,13 @@
 #ifndef MAINLOOP_H
 #define MAINLOOP_H
 
-#include "resource.h"
-#include "allegdef.h"
-
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/multi_array.hpp>
+
+#include "resource.h"
+#include "allegdef.h"
 
 struct scene_map:public bitmap
 {
@@ -107,8 +107,10 @@ public:
 	{
 		delete[] glb_buf;
 	}
-	char *operator()(int start,int end)
+	char *operator()(int start,int end=-1)
 	{
+		if(end==-1)
+			end=start+10;
 		assert(end>start);assert(start>=0);
 		memset(buf,0,sizeof(buf));
 		memcpy(buf,glb_buf+start,end-start);

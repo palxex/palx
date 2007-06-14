@@ -3,6 +3,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+static cut_msg_impl word("word.dat");
+
 dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
 {
 	rows--;columns--;
@@ -40,7 +42,6 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp)
 
 int select_rpg(int ori_select,BITMAP *bmp)
 {
-	static cut_msg_impl word("word.dat");
 	int selected=ori_select;
 	BITMAP *cache=create_bitmap(SCREEN_W,SCREEN_H);
 	selected=(selected>=1?selected:1);
@@ -53,7 +54,8 @@ int select_rpg(int ori_select,BITMAP *bmp)
 			dialog_string((std::string(word(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
-		while(!get_key()) delay(10);
+		VKEY keygot;
+		while(!(keygot=get_key())) delay(10);
 		switch(keygot){
 			case VK_UP:
 				selected--;
@@ -83,7 +85,7 @@ menu::menu(int x,int y,int menus,int begin,int chars)
 	:menu_dialog(0,x,y,menus,chars),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
-		menu_items.push_back(std::string(cut_msg_impl("word.dat")(i*10,(i+1)*10)));
+		menu_items.push_back(std::string(word(i*10,(i+1)*10)));
 }
 int menu::select(int selected)
 {
@@ -100,8 +102,9 @@ int menu::select(int selected)
 				color=0x4E;
 			dialog_string(r->c_str(),text_x,text_y+18*i,color,true);
 		}
+		VKEY keygot;
 		if(ok)
-			while(!get_key()) wait(10);
+			while(!(keygot=get_key())) wait(10);
 		else
 			break;
 		switch(keygot){
@@ -126,7 +129,14 @@ int menu::select(int selected)
 
 int select_item(int mask,int skip,int selected)
 {
-	dialog(9,2,33,8,18,false);
-	wait_for_key();
+	dialog(9,2,33,8,18,false);//DOS ver;for item should use 98 ver.
+	VKEY keygot;
+	do{
+		static int offset=0,pre_locate=0,locating=0;
+		offset=locating/(3*8)*(3*8);//8 for dos
+		//for(int r=locating;r<locating+3*8;r++)
+		//	ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(
+		keygot=get_key();
+	}while(keygot!=VK_MENU);
 	return selected;
 }

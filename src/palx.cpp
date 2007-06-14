@@ -17,7 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
+#pragma warning(disable: 4819)
+#include <boost/lexical_cast.hpp>
+#include "scene.h"
 #include "Game.h"
 #include "pallib.h"
 
@@ -25,11 +27,9 @@
 #include <cstdlib>
 using namespace std;
 
-#include <boost/lexical_cast.hpp>
 
 #include "internal.h"
 #include "game.h"
-#include "scene.h"
 #include "allegdef.h"
 
 int main(int argc, char *argv[])
@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
 	playrix player;				rix=&player;
 	Game  thegame(argc>=2? boost::lexical_cast<int>(argv[1]) : 0); game=&thegame;
 	Scene normal;	scene=&normal;
-	BattleScene battle;	battle_scene=&battle;
 	game->load();
 	return thegame.run();
 }
