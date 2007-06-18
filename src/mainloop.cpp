@@ -13,7 +13,7 @@ namespace{
 			Load_Data();
 
 		//Parse Key
-		VKEY keygot=get_key();
+		VKEY keygot=get_key_lowlevel();
 		
 		GameLoop_OneCycle(true);
 		if(flag_to_load)
