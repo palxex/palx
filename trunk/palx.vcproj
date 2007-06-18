@@ -105,6 +105,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
+			UseOfMFC="0"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -127,7 +128,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALLEGRO_STATICLINK"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -144,11 +145,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/force"
-				AdditionalDependencies="alleg_s.lib alfont.lib adplug.lib binio.lib  user32.lib gdi32.lib winmm.lib ole32.lib dxguid.lib dinput.lib dsound.lib ddraw.lib"
+				AdditionalDependencies="alleg_s.lib alfont.lib adplug.lib binio.lib user32.lib gdi32.lib winmm.lib ole32.lib dxguid.lib dinput.lib dsound.lib ddraw.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
+				IgnoreDefaultLibraryNames="libcmt.lib"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
 				MapFileName="palx.map"
