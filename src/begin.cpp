@@ -46,7 +46,7 @@ void startup_splash()
 
 	BITMAP *scrn_buf=create_bitmap(SCREEN_W,SCREEN_H*2);
 	int prog_lines=200,prog_pale=0,begin_pale=40,add_pale=16;
-	VKEY keygot=get_key();
+	VKEY keygot;
 	do{		
 		blit(cat,scrn_buf,0,std::max(prog_lines--,0),0,0,SCREEN_W,SCREEN_H);
 		for(int i=0;i<9;i++)
@@ -107,7 +107,6 @@ int select_scene()
 			for(int i=7;i<9;i++)
 				ttfont(cut_msg_impl("word.dat")(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
-		get_key();
 		VKEY keygot;
 		switch(keygot=get_key()){
 			case VK_UP:

@@ -76,7 +76,9 @@ Game::Game(int save=0):rpg(::rpg)
 
 
 	alfont_init();
-	ttfont::glb_font=alfont_load_font(strcat(getenv("WINDIR"),"\\fonts\\mingliu.ttc"));
+	//char fontpath[100];
+	//sprintf(fontpath,"%s%s",/*getenv("WINDIR")*/"C:\\windows","\\fonts\\mingliu.ttc");
+	ttfont::glb_font=alfont_load_font("c:\\windows\\fonts\\mingliu.ttc");
 	alfont_set_language(ttfont::glb_font, "cht");	
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);
@@ -149,7 +151,7 @@ void Game::load(int id){
 	ABC.clear();
 	VOC.clear();
 	MAP.clear();
-	GOP.clear();
+	//GOP.clear();
 	RNG.clear();
 	//DATA.clear();
 	SSS.clear();
