@@ -45,7 +45,7 @@
 #include "pallib.h"
 using namespace Pal::Tools;
 
-errno_t Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
+int Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y)
 {
 	sint32 sx, sy, dx, dy, temp;
 	uint16 rle_width, rle_height;
@@ -158,7 +158,7 @@ errno_t Pal::Tools::DecodeRLE(const void *Rle, void *Destination, sint32 Stride,
 	return 0;
 }
 
-errno_t Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
+int Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
 {
 	sint32 i, j, count;
 	uint32 length;
@@ -216,7 +216,7 @@ errno_t Pal::Tools::EncodeRLE(const void *Source, const void *Base, sint32 Strid
 	return 0;
 }
 
-errno_t Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
+int Pal::Tools::EncodeRLE(const void *Source, const uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length)
 {
 	sint32 i, j, count;
 	uint32 length;

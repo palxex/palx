@@ -61,7 +61,7 @@ struct YJ1_Decode_State
 	uint16		curblk;
 };
 
-errno_t Pal::Tools::DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy)
+int Pal::Tools::DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy)
 {
 	struct YJ1_Decode_State* state;
 
@@ -88,7 +88,7 @@ errno_t Pal::Tools::DecodeYJ1StreamInitialize(void*& pvState, uint32 uiGrowBy)
 	return 0;
 }
 
-errno_t Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength)
+int Pal::Tools::DecodeYJ1StreamInput(void* pvState, const void* Source, uint32 SourceLength)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -242,7 +242,7 @@ static void DecodeYJ1StreamProcess(void* pvState)
 	}
 }
 
-errno_t Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength)
+int Pal::Tools::DecodeYJ1StreamOutput(void* pvState, void* Destination, uint32 Length, uint32& ActualLength)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -332,7 +332,7 @@ bool Pal::Tools::DecodeYJ1StreamFinished(void* pvState, uint32& AvailableLength)
 		return false;
 }
 
-errno_t Pal::Tools::DecodeYJ1StreamFinalize(void* pvState)
+int Pal::Tools::DecodeYJ1StreamFinalize(void* pvState)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 
@@ -349,7 +349,7 @@ errno_t Pal::Tools::DecodeYJ1StreamFinalize(void* pvState)
 		return EINVAL;
 }
 
-errno_t Pal::Tools::DecodeYJ1StreamReset(void* pvState)
+int Pal::Tools::DecodeYJ1StreamReset(void* pvState)
 {
 	struct YJ1_Decode_State* state = (struct YJ1_Decode_State*)pvState;
 

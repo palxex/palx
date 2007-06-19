@@ -22,7 +22,7 @@ namespace{
 	{
 		return shared_array<uint8_t>(demkf_t(fp,n,len));
 	}
-	shared_array<uint8_t> demkf_impl(shared_array<uint8_t> &src,int n,long &len)
+	shared_array<uint8_t> demkf_impl(shared_array<uint8_t> src,int n,long &len)
 	{
 		uint32_t *usrc=(uint32_t *)src.get();
 		int32_t length=usrc[n+1]-usrc[n];
@@ -31,7 +31,7 @@ namespace{
 		len=length;
 		return shared_array<uint8_t>(buf);
 	}
-	uint8_t *desmkf(shared_array<uint8_t> &src,int n,long &len)//todo:算法不完整
+	uint8_t *desmkf(shared_array<uint8_t> src,int n,long &len)//todo:算法不完整
 	{
 		uint16_t *usrc=(uint16_t *)src.get();
 		int files=usrc[0];
@@ -45,7 +45,7 @@ namespace{
 		len=length;
 		return buf;
 	}
-	uint8_t *deyj1(shared_array<uint8_t> &src,long &len)
+	uint8_t *deyj1(shared_array<uint8_t> src,long &len)
 	{
 		void *dst;
 		uint32_t length;
@@ -53,7 +53,7 @@ namespace{
 		len=length;
 		return (uint8_t*)dst;
 	}
-	shared_array<uint8_t> deyj1_t(shared_array<uint8_t> &src,long &len)
+	shared_array<uint8_t> deyj1_t(shared_array<uint8_t> src,long &len)
 	{
 		return shared_array<uint8_t>(deyj1(src,len));
 	}
@@ -108,7 +108,7 @@ uint8_t *cached_res::decode(int n,long &length)
 }
 void cached_res::clear(){
 	for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;
-	cache.swap(cache_type());
+	cache.clear();
 }
 void cached_res::clear(int n, int n2){
 	cache_type::iterator iter=cache.find(std::pair<int,int>(n,n2));

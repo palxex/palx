@@ -19,3 +19,4 @@ void play_RNG(int begin,int end,int gap)
 	}
 }
 
+
