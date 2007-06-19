@@ -20,7 +20,7 @@
 #pragma warning(disable: 4819)
 #include <boost/lexical_cast.hpp>
 #include "scene.h"
-#include "Game.h"
+#include "game.h"
 #include "pallib.h"
 
 #include <iostream>
