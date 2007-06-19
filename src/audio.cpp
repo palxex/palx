@@ -80,7 +80,7 @@ void playrix::stop()
 	voice_set_volume(stream->voice,0);
 	remove_param_int(playrix_timer,this);
 	if(Buffer)
-		delete[] Buffer,Buffer=NULL;
+		delete[] Buffer,Buffer=buf=NULL;
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f))

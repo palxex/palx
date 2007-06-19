@@ -13,9 +13,9 @@ void randomize()
 {
 	time_t t;
 	time(&t);
-	double f=*reinterpret_cast<double*>(&t);
+	double f=t;
 	uint64_t u=*reinterpret_cast<uint64_t*>(&f);
-	seed=t;((u>>48)^((u>>32)&0xffff))<<8;
+	seed=((u>>48)^((u>>32)&0xffff))<<8;
 }
 float rnd0()
 {

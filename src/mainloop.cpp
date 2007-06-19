@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "game.h"
 #include "internal.h"
 #include "scene.h"
 #include "timing.h"
