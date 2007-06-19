@@ -24,6 +24,7 @@
 
 void startup_splash()
 {
+	clear_keybuf();
 	game->pat.read(1);
 	BITMAP *cat=create_bitmap(SCREEN_W,SCREEN_H*2);
 	bitmap(FBP.decode(0x26),320,200).blit_to(cat,0,0,0,0);

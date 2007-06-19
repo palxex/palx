@@ -13,7 +13,13 @@
 
 #if	defined(__GNUC__) && !defined(_STDEXT)
 #	define	_STDEXT	__gnu_cxx
+#	if	defined(__MINGW32__)
+#		define errno_t int
+#	else
+#		define errno_t error_t
+#	endif
 #endif
+
 
 #ifndef	uint8
 typedef	unsigned char	uint8;
