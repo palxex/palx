@@ -207,10 +207,6 @@
 					RelativePath=".\PalLibrary\src\yj1.cpp"
 					>
 				</File>
-				<File
-					RelativePath=".\PalLibrary\src\yj1s.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="alleg"
@@ -388,10 +384,6 @@
 					</File>
 					<File
 						RelativePath=".\src\resource.h"
-						>
-					</File>
-					<File
-						RelativePath=".\src\rng.h"
 						>
 					</File>
 					<File

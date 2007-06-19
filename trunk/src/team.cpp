@@ -30,7 +30,7 @@ int load_mgo(int id)
 }
 void load_team_mgo()
 {
-	team_mgos.swap(std::map<int,int>());
+	team_mgos.clear();
 	for(int i=0;i<=game->rpg.team_roles;i++)
 	{
 		int id=game->rpg.roles_properties.avator[game->rpg.team[i].role];
@@ -39,7 +39,7 @@ void load_team_mgo()
 }
 void load_NPC_mgo()
 {
-	npc_mgos.swap(std::map<int,int>());
+	npc_mgos.clear();
 	for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 		if(i->image)
 			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image);

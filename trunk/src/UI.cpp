@@ -82,7 +82,7 @@ int select_rpg(int ori_select,BITMAP *bmp)
 }
 
 menu::menu(int x,int y,int menus,int begin,int chars)
-	:menu_dialog(0,x,y,menus,chars),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
+	:menu_dialog(0,x,y,menus,chars,false),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
 		menu_items.push_back(std::string(word(i*10,(i+1)*10)));

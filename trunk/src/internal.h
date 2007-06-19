@@ -82,3 +82,4 @@ extern void pal_fade_in(int gap);
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
 #endif
+

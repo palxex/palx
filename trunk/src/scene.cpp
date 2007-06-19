@@ -78,7 +78,7 @@ void Scene::clear_scanlines()
 }
 void Scene::clear_active()
 {
-	active_list.swap(s_list());
+	active_list.clear();
 }
 void Scene::calc_team_walking(int key)
 {

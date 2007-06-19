@@ -145,7 +145,7 @@ static inline uint16 get_count(const void* src, uint32& bitptr, PYJ_1_BLOCKHEADE
 		return header->LZSSRepeatTable[0];
 }
 
-errno_t Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length)
+int Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length)
 {
 	PYJ_1_FILEHEADER hdr = (PYJ_1_FILEHEADER)Source;
 	uint8* src = (uint8*)Source;
@@ -830,7 +830,7 @@ static void set_count(void* dest, uint32& ptr, uint32 match_len, PYJ_1_BLOCKHEAD
 		}
 }
 
-errno_t Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length)
+int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length)
 {
 	YJ_1_FILEHEADER hdr;
 	PYJ_1_BLOCKHEADER header;

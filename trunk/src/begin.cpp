@@ -45,13 +45,14 @@ void startup_splash()
 	set_palette(pal);
 
 	BITMAP *scrn_buf=create_bitmap(SCREEN_W,SCREEN_H*2);
-	int prog_lines=200,prog_pale=0,begin_pale=40,add_pale=16;
+	int prog_lines=200,prog_pale=0,prog_goose=0,begin_pale=40,add_pale=16;
 	VKEY keygot;
 	do{		
 		blit(cat,scrn_buf,0,std::max(prog_lines--,0),0,0,SCREEN_W,SCREEN_H);
 		for(int i=0;i<9;i++)
 			if(poses[i][0]-2*i>-40)
-				goose.getsprite(poses[i][2])->blit_to(scrn_buf,poses[i][0]-2*i,poses[i][1]+2*i);
+				goose.getsprite(poses[i][2]=(poses[i][2]+(prog_goose&1))%8)->blit_to(scrn_buf,poses[i][0]-=2,poses[i][1]+=(prog_lines>0 && prog_lines&1?1:0));
+		prog_goose++;
 		if(temp_height<max_height)
 			temp_height++;
 		title_height=temp_height;
