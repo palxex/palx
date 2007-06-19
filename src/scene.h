@@ -49,6 +49,7 @@ struct Scene{
 	typedef std::vector<boost::shared_ptr<sprite> > s_list;
 	s_list active_list;
 	struct position{
+		friend struct Scene;
 		int x,y,h;
 		bool status;
 		position(int x_,int y_,int h_):x(x_),y(y_),h(h_),status(true){}
