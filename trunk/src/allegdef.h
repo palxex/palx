@@ -90,6 +90,7 @@ class playrix
 	volatile long leaving;
 	volatile long 	slen,slen_buf, BufferLength;
 	volatile int tune,subsong;
+	bool playing;
 	friend void playrix_timer(void *);
 public:
 	playrix();

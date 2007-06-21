@@ -136,7 +136,19 @@ int select_item(int mask,int skip,int selected)
 		offset=locating/(3*8)*(3*8);//8 for dos
 		//for(int r=locating;r<locating+3*8;r++)
 		//	ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(
-		keygot=get_key();
+		keygot=get_key();		
+		switch(keygot){
+			case VK_UP:
+				selected--;
+				break;
+			case VK_DOWN:
+				selected++;
+				break;
+			case VK_MENU:
+				return -1;
+			case VK_EXPLORE:
+				break;
+		}
 	}while(keygot!=VK_MENU);
 	return selected;
 }
