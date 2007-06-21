@@ -41,10 +41,9 @@ void playrix_timer(void *param)
 }
 END_OF_FUNCTION(playrix::playrix_timer);
 
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0)
+playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0),playing(false)
 {
 	rix.load(std::string("mus.mkf"), CProvider_Filesystem());
-	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
 	LOCK_VARIABLE(Buffer);
 	LOCK_VARIABLE(leaving);
 	LOCK_VARIABLE(slen);
@@ -59,28 +58,31 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 playrix::~playrix()
 {
 	stop();
-	stop_audio_stream(stream);
 }
 void playrix::play(int sub_song)
 {
 	if(subsong==sub_song)
 		return;
-	stop();
-	voice_set_volume(stream->voice,255);
+	if(playing)
+		stop();
+	playing=true;
 	int slen = rix.songlength(sub_song);
 	subsong=sub_song;
 	BufferLength = SAMPLE_RATE * CHANNELS / 1000 * slen;
 	Buffer = buf = new short [BufferLength];
 	memset(buf, 0, sizeof(short) * BufferLength);
 	
+	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
 	install_param_int(playrix_timer,this,14);
 }
 void playrix::stop()
 {
 	voice_set_volume(stream->voice,0);
 	remove_param_int(playrix_timer,this);
+	stop_audio_stream(stream);
 	if(Buffer)
 		delete[] Buffer,Buffer=buf=NULL;
+	playing=false;
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f))

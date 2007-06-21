@@ -49,7 +49,6 @@ struct Scene{
 	typedef std::vector<boost::shared_ptr<sprite> > s_list;
 	s_list active_list;
 	struct position{
-		friend struct Scene;
 		int x,y,h;
 		bool status;
 		position(int x_,int y_,int h_):x(x_),y(y_),h(h_),status(true){}
@@ -57,11 +56,11 @@ struct Scene{
 		position():x(0),y(0),status(false){}
 		position &toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y/16;	status=true;} return *this;}
 		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}
-		friend position operator+(position &lhs,position &rhs){
-			if(lhs.status)
-				return position(lhs.toXYH().x+rhs.toXYH().x,lhs.toXYH().y+rhs.toXYH().y,lhs.toXYH().h+rhs.toXYH().h);
+		position operator+(const position &rhs){
+			if(status)
+				return position(toXYH().x+rhs.x,toXYH().y+rhs.y,toXYH().h+rhs.h);
 			else
-				return position(lhs.toXY().x+rhs.toXY().x,lhs.toXY().y+rhs.toXY().y);
+				return position(toXY().x+rhs.x,toXY().y+rhs.y);
 		}
 		position &operator=(position &rhs)
 		{
