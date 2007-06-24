@@ -9,9 +9,6 @@
 #include "pallib.h"
 #include "resource.h"
 
-#if defined _DEBUG
-	#define ALFONT_DLL
-#endif
 #include <alfont.h>
 
 #include "adplug/emuopl.h"
