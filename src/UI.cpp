@@ -82,7 +82,7 @@ int select_rpg(int ori_select,BITMAP *bmp)
 }
 
 menu::menu(int x,int y,int menus,int begin,int chars)
-	:menu_dialog(0,x,y,menus,chars,false),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8),menu_items()
+	:menu_dialog(0,x,y,menus,chars,false),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
 		menu_items.push_back(std::string(word(i*10,(i+1)*10)));
@@ -136,19 +136,7 @@ int select_item(int mask,int skip,int selected)
 		offset=locating/(3*8)*(3*8);//8 for dos
 		//for(int r=locating;r<locating+3*8;r++)
 		//	ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(
-		keygot=get_key();		
-		switch(keygot){
-			case VK_UP:
-				selected--;
-				break;
-			case VK_DOWN:
-				selected++;
-				break;
-			case VK_MENU:
-				return -1;
-			case VK_EXPLORE:
-				break;
-		}
+		keygot=get_key();
 	}while(keygot!=VK_MENU);
 	return selected;
 }

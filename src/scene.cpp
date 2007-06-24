@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <set>
 
+tile non_valid;
+
 inline sprite &palmap::getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer)
 {
 	tile &t=sprites[x][y][h][l];
@@ -17,6 +19,7 @@ inline sprite &palmap::getsprite(int x,int y,int h,int l,uint8_t *src,bool throu
 }
 inline tile &palmap::gettile(int x,int y,int h,int l)
 {
+	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return non_valid;
 	return sprites[x][y][h][l];
 }
 palmap::palmap():scene_map(0,SCREEN_W,SCREEN_H),sprites(boost::extents[0x40][0x80][2][2])
