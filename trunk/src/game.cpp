@@ -140,6 +140,7 @@ void Game::load(int id){
 		allegro_message("ºÜ±§Ç¸£¬%d.rpg²»´æÔÚ¡«",id);
 		return;
 	}
+	scene->scenemap.change(-1);
 	fread(&rpg,sizeof(RPG),1,fprpg);
 	map_toload=rpg.scene_id;
 	evtobjs.clear();evtobjs.push_back(EVENT_OBJECT());
@@ -148,18 +149,18 @@ void Game::load(int id){
 	reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
 	fclose(fprpg);
 	flag_to_load=0x17;
-	ABC.clear();
-	VOC.clear();
 	MAP.clear();
-	//GOP.clear();
+	GOP.clear();
 	RNG.clear();
-	//DATA.clear();
 	SSS.clear();
-	BALL.clear();
-	RGM.clear();
-	FBP.clear();
-	F.clear();
-	FIRE.clear();
+	//DATA.clear();
+	//ABC.clear();
+	//VOC.clear();
+	//BALL.clear();
+	//RGM.clear();
+	//FBP.clear();
+	//F.clear();
+	//FIRE.clear();
 	//MGO.clear();
 	pat.read(0);
 	pal_fade_out(1);

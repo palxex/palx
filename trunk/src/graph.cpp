@@ -49,6 +49,7 @@ bool sprite::blit_to(BITMAP *dest)
 		blit(dest,buf2,0,0,0,0,dest->w,dest->h);
 		Pal::Tools::DecodeRLE(buf,buf2->dat,dest->w,dest->w,dest->h,x,y-l-height);
 		blit(buf2,dest,0,0,0,0,dest->w,dest->h);
+		destroy_bitmap(buf2);
 	}else
 		Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x,y-l-height);
 	return true;
@@ -83,8 +84,10 @@ bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow)
 				j+=(flag%0x80);
 			}
 
-		if(dest==screen)
+		if(dest==screen){
 			blit(bmp,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+			destroy_bitmap(bmp);
+		}
 	}
 
 	this->x=x;

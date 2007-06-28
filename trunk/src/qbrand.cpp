@@ -1,10 +1,6 @@
 #include "config.h"
 
-#if defined _MSC_VER
-	#include <time.h>
-#elif defined __GNUC__
-	#include <sys/time.h>
-#endif
+#include <time.h>
 
 uint64_t seed;
 uint32_t a=214013,c=2531011,d=16777216;
