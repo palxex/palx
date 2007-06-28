@@ -55,6 +55,7 @@ void GameLoop_OneCycle(bool trigger)
 						{
 							if(iter->frames)
 							{
+								clear_keybuf();
 								stop_and_update_frame();
 								iter->curr_frame=0;
 								iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
@@ -108,6 +109,7 @@ void clear_effective(int16_t p1,int16_t p2)
 {
 	redraw_everything();
 }
+extern void NPC_walk_one_step(uint16_t object,int speed);
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
@@ -117,6 +119,28 @@ void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t obj
 	char addition[100];memset(addition,0,sizeof(addition));
 	int npc_speed,role_speed;
 	switch(func){
+		case 0xB:
+			obj.direction=0;
+			NPC_walk_one_step(object,2);
+			break;
+		case 0xC:
+			obj.direction=1;
+			NPC_walk_one_step(object,2);
+			break;
+		case 0xD:
+			obj.direction=2;
+			NPC_walk_one_step(object,2);
+			break;
+		case 0xE:
+			obj.direction=3;
+			NPC_walk_one_step(object,2);
+			break;
+		case 0xF:
+			if(param1>=0)
+				curr_obj.direction=param1;
+			if(param2>=0)
+				curr_obj.curr_frame=param2;
+			break;
 		case 0x10:
 			npc_speed=3;
 __walk_npc:
@@ -126,15 +150,8 @@ __walk_npc:
 				if(abs(x_diff)<npc_speed*2 || abs(y_diff)<npc_speed){
 					obj.pos_x = param1*32+param3*16;
 					obj.pos_y = param2*16+param3*8;
-				}else{
-					obj.pos_x += npc_speed*(x_diff<0 ? 2 : -2);
-					obj.pos_y += npc_speed*(y_diff<0 ? 1 : -1);
-				}
-				if(!obj.frames && !obj.frames_auto){
-					uint16_t *usrc=(uint16_t *)MGO.decode(obj.image);
-					obj.frames_auto=usrc[0]-(usrc[usrc[0]-1]==0?1:0);
-				}
-				obj.curr_frame=(obj.curr_frame+1)%(obj.frames?obj.frames:obj.frames_auto);
+				}else
+					NPC_walk_one_step(object,npc_speed);
 
 				//afterward check;MUST have,or will not match dospal exactly
 				if(obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
@@ -258,6 +275,9 @@ __walk_npc:
 			break;
 		case 0x49:
 			game->evtobjs[param1!=-1?param1:object].status=param2;
+			break;
+		case 0x4a:
+			game->rpg.battlefield=param1;
 			break;
 		case 0x50:
 			pal_fade_out(param1==0?1:param1);

@@ -156,6 +156,9 @@ int begin_scene::operator()(Game *game){
 	//ÔÆ¹Èº×·å
 	startup_splash();
 	
+	MGO.clear();
+	FBP.clear();
+	RNG.clear();
 	return select_scene();
 }
 

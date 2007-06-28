@@ -136,3 +136,13 @@ bool barrier_check(uint16_t self,int x,int y)
 		}
 	return ret;
 }
+void NPC_walk_one_step(uint16_t object,int speed)
+{
+	EVENT_OBJECT &obj=game->evtobjs[object];
+	obj.pos_x+=direction_offs[obj.direction][0]/8*speed;
+	obj.pos_y+=direction_offs[obj.direction][1]/8*speed;
+	if(obj.frames>0)
+		obj.curr_frame=(obj.curr_frame+1)%(obj.frames==3?3:4);
+	else if(obj.frames_auto>0)
+		obj.curr_frame=(obj.curr_frame+1)%obj.frames_auto;
+}

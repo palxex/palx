@@ -43,7 +43,7 @@ void palmap::change(int p){
 inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 {
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return;
-	if(sprites[x][y][h][0].valid || sprites[x][y][h][1].valid){
+	if(sprites[x][y][h][0].valid && sprites[x][y][h][1].valid){
 		sprites[x][y][h][0].image->blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
 		if(sprites[x][y][h][1].valid)
 			sprites[x][y][h][1].image->blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
