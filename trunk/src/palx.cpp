@@ -27,11 +27,6 @@
 #include <cstdlib>
 using namespace std;
 
-
-#include "internal.h"
-#include "game.h"
-#include "allegdef.h"
-
 int main(int argc, char *argv[])
 {
 	//allegro init
