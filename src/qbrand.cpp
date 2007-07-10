@@ -1,4 +1,4 @@
-#include "config.h"
+#include "integer.h"
 
 #include <time.h>
 

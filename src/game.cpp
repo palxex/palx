@@ -31,8 +31,11 @@ namespace{
 	{
 		memcpy(&vec,src,len);
 	}
+	int mutex=0;
 	void timer_proc()
 	{
+		while(mutex)
+			rest(0);
 		static int pal_lock=0;
 		static PALETTE pal;
 		mutux_setpalette=false;
@@ -53,6 +56,7 @@ namespace{
 	END_OF_FUNCTION(timer_proc);
 	void prtscrn_proc()
 	{
+		mutex++;
 		if(key[KEY_PRTSCR] || key[KEY_P]){
 			static PALETTE pal;
 			static char filename[30];
@@ -61,6 +65,20 @@ namespace{
 			sprintf(filename,"ScrnShot\\%d.bmp",i++);
 			save_bitmap(filename,screen,pal);
 		}
+		if((key[KEY_ALT]||key[KEY_ALTGR])&&key[KEY_ENTER])
+		{
+			static int mode=GFX_AUTODETECT;
+			static PALETTE pal;
+			if(mode==GFX_AUTODETECT_WINDOWED)
+				mode=GFX_AUTODETECT;
+			else
+				mode=GFX_AUTODETECT_WINDOWED;
+			get_palette(pal);
+			vsync();
+			set_gfx_mode(mode,320,200,0,0);
+			set_palette(pal);
+		}
+		mutex--;
 	}
 	END_OF_FUNCTION(prtscrn_proc);
 }
@@ -76,9 +94,9 @@ Game::Game(int save=0):rpg(::rpg)
 
 
 	alfont_init();
-	//char fontpath[100];
-	//sprintf(fontpath,"%s%s",/*getenv("WINDIR")*/"C:\\windows","\\fonts\\mingliu.ttc");
-	ttfont::glb_font=alfont_load_font("c:\\windows\\fonts\\mingliu.ttc");
+	char fontpath[100];
+	sprintf(fontpath,"%s%s",getenv("WINDIR"),"\\fonts\\mingliu.ttc");
+	ttfont::glb_font=alfont_load_font(fontpath);
 	alfont_set_language(ttfont::glb_font, "cht");	
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);

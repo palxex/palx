@@ -3,6 +3,7 @@
 
 AC_PREREQ(2.56)
 AC_INIT(palx, 0.21, palxex@gmail.com)
+AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
@@ -61,10 +62,10 @@ dnl Some stuff for the icon.
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)
        dnl Some stuff for the ico
-       AC_CHECK_TOOL(WINDRES, windres, :)
+       AC_CHECK_PROGS(WINDRES, windres, windres)
     ;;
     *)
-       WINDRES=":"
+       WINDRES="windres"
     ;;
 esac
        AM_CONDITIONAL(HAVE_WINDRES, test "x$WINDRES" != "x:")

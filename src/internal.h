@@ -1,7 +1,7 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-#include "config.h"
+#include "integer.h"
 #include "structs.h"
 #include <vector>
 #include <map>

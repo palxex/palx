@@ -20,7 +20,7 @@
 #ifndef SSS_STRUCTS_H
 #define SSS_STRUCTS_H
 
-#include "config.h"
+#include "integer.h"
 
 #pragma pack(2)
 typedef struct event_object{

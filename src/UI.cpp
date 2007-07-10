@@ -129,14 +129,42 @@ int menu::select(int selected)
 
 int select_item(int mask,int skip,int selected)
 {
+	static int paging=8;//8 for dos
+	static bitmap buf(0,SCREEN_W,SCREEN_H);
 	dialog(9,2,33,8,18,false);//DOS ver;for item should use 98 ver.
+	bool ok;int color_selecting,key;
 	VKEY keygot;
 	do{
 		static int offset=0,pre_locate=0,locating=0;
-		offset=locating/(3*8)*(3*8);//8 for dos
-		//for(int r=locating;r<locating+3*8;r++)
-		//	ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(
-		keygot=get_key();
+		offset=(locating/3<4?0:locating/3-4);
+		for(int r=offset*3;r<locating*3+paging*3;r++)
+			ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(buf,2+80*(r%3),33+r*16,r==locating,r==locating);
+		blit(screen,buf,0,0,0,0,SCREEN_W,SCREEN_H);
+		keygot=get_key();		
+		switch(keygot){
+			case VK_UP:
+				locating-=3;
+				break;
+			case VK_DOWN:
+				locating+=3;
+				break;
+			case VK_LEFT:
+				locating--;
+				break;
+			case VK_RIGHT:
+				locating++;
+				break;
+			case VK_PGUP:
+				locating+=3*paging;
+			case VK_PGDN:
+				locating+=3*paging;
+			case VK_MENU:
+				return -1;
+			case VK_EXPLORE:
+				ok=1;key=0;
+				color_selecting=0x2B;
+				break;
+		}
 	}while(keygot!=VK_MENU);
 	return selected;
 }
