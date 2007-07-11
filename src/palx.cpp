@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 
 	randomize();
 	playrix player;				rix=&player;
+	if(argc>=2) *strchr(argv[1],'.')='\0';
 	Game  thegame(argc>=2? boost::lexical_cast<int>(argv[1]) : 0); game=&thegame;
 	Scene normal;	scene=&normal;
 	game->load();

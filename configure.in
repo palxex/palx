@@ -12,9 +12,9 @@ AC_PROG_CC
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lalfont':
-#AC_CHECK_LIB(alfont, alfont_textout)
+#AC_CHECK_LIB(alfont_s, alfont_textout)
 # FIXME: Replace `main' with a function in `-lalleg':
-#AC_CHECK_LIB(alleg, set_palette)
+#AC_CHECK_LIB(alleg_s, set_palette)
 # FIXME: Replace `main' with a function in `-ladplug':
 #AC_CHECK_LIB(adplug, CrixPlayer::factory)
 # FIXME: Replace `main' with a function in `-lbinio':
