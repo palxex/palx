@@ -142,7 +142,7 @@ void NPC_walk_one_step(uint16_t object,int speed)
 	obj.pos_x+=direction_offs[obj.direction][0]/8*speed;
 	obj.pos_y+=direction_offs[obj.direction][1]/8*speed;
 	if(obj.frames>0)
-		obj.curr_frame=(obj.curr_frame+1)%(obj.frames==3?3:4);
+		obj.curr_frame=(obj.curr_frame+1)%obj.frames;
 	else if(obj.frames_auto>0)
 		obj.curr_frame=(obj.curr_frame+1)%obj.frames_auto;
 }
