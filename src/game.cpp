@@ -85,7 +85,7 @@ namespace{
 
 int scale=1;
 RPG rpg;
-Game::Game(int save=0):rpg(::rpg)
+Game::Game(int save):rpg(::rpg)
 {
 	memset(&rpg,0,sizeof(RPG));
 		scale=SCREEN_W/320;

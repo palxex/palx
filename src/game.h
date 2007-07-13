@@ -51,7 +51,7 @@ public:
 	std::vector<SCENE>   scenes;
 	std::vector<int32_t> msg_idxes;
 	std::vector<SCRIPT>  scripts;
-	Game(int);
+	Game(int = 0);
 	~Game();
 	void load(int id=rpg_to_load);
 	void save(int id);

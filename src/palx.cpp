@@ -19,6 +19,7 @@
  ***************************************************************************/
 #pragma warning(disable: 4819)
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 #include "scene.h"
 #include "game.h"
 #include "pallib.h"
@@ -29,6 +30,8 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+	//boost::program_options提取参数,boost::regex抽取存档。
+
 	//allegro init
 	allegro_init();
 	install_timer();
@@ -39,10 +42,17 @@ int main(int argc, char *argv[])
 
 	randomize();
 	playrix player;				rix=&player;
-	if(argc>=2) *strchr(argv[1],'.')='\0';
-	Game  thegame(argc>=2? boost::lexical_cast<int>(strrchr(argv[1],'\\')+1) : 0); game=&thegame;
+
+	char conv_buf[16]="0";
+	if(argc>=2){
+		boost::regex expression("(([[:alpha:]]:)(.+)\\Q\\\\E)?(\\d+)(.rpg|.RPG)?");
+		boost::cmatch what;
+		boost::regex_match(argv[1],what,expression);
+		strncpy(conv_buf,what[4].first,what[4].second-what[4].first);
+	}
+	Game  thegame(boost::lexical_cast<int>(conv_buf)); game=&thegame;
 	Scene normal;	scene=&normal;
 	game->load();
-	return thegame.run();
+	return game->run();
 }
 END_OF_MAIN();
