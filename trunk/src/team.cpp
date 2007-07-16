@@ -6,8 +6,8 @@
 
 int step_off_x=16,step_off_y=8;
 int coordinate_x_max=1696,coordinate_y_max=1840;
-int x_scrn_offset=0xA0;
-int y_scrn_offset=0x70;
+int x_scrn_offset;
+int y_scrn_offset;
 int abstract_x_bak=0,abstract_y_bak=0;
 int viewport_x_bak=0,viewport_y_bak=0;
 int direction_offs[][2]={{-16,8},{-16,-8},{16,-8},{16,8}};

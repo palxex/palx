@@ -4,8 +4,7 @@
 void wait(uint8_t gap)
 {
 	time_interrupt_occurs=0;
-	while(time_interrupt_occurs<gap)
-		rest(0);
+	rest(gap*10);
 }
 
 void wait_key(uint8_t gap)
