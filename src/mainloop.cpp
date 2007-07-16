@@ -4,11 +4,12 @@
 #include "timing.h"
 
 #include <boost/shared_ptr.hpp>
-
+extern int CARD,mutex;
 namespace{
 	bool running=true;
 	void mainloop_proc()
 	{
+		switch_proc();
 		if(flag_to_load)
 			Load_Data();
 
@@ -35,7 +36,6 @@ namespace{
 
 		flag_parallel_mutex=!flag_parallel_mutex;
 		
-		get_key(false);
 	}
 	END_OF_FUNCTION(mainloop_proc);
 }

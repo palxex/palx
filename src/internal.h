@@ -76,8 +76,13 @@ extern int calc_faceto(int x_diff,int y_diff);
 extern bool barrier_check(uint16_t self,int x,int y);
 
 extern bool mutex_can_change_palette;
+extern int mutex_paletting,mutex_blitting;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
+
+extern int CARD;
+extern int mutex_int;
+extern void switch_proc();
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);

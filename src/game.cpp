@@ -9,6 +9,7 @@
 
 using namespace std;
 volatile uint8_t time_interrupt_occurs; 
+int mutex_paletting=0,mutex_blitting=0,mutex_int=0;
 namespace{
 	template<typename T>
 	inline void reunion(vector<T> &vec,uint8_t *src,const long &len)
@@ -31,32 +32,31 @@ namespace{
 	{
 		memcpy(&vec,src,len);
 	}
-	int mutex=0;
 	void timer_proc()
 	{
-		while(mutex)
-			rest(0);
-		static int pal_lock=0;
-		static PALETTE pal;
-		mutux_setpalette=false;
-		if(pal_lock++==10){
-			get_palette(pal);
-			RGB temp=pal[0xF6];
-			memcpy(pal+0xF6,pal+0xF7,6);
-			pal[0xF8]=temp;
-			temp=pal[0xF9];
-			memcpy(pal+0xF9,pal+0xFA,0x12);
-			pal[0xFE]=temp;
-			set_palette(pal);
-			pal_lock=0;
-		};
-		time_interrupt_occurs++;
-		mutux_setpalette=true;
+		if(!mutex_int){
+			static int pal_lock=0;
+			static PALETTE pal;
+			mutux_setpalette=false;
+			if(pal_lock++==10){
+				get_palette_range(pal,0xF6,0xFF);
+				RGB temp=pal[0xF6];
+				memcpy(pal+0xF6,pal+0xF7,6);
+				pal[0xF8]=temp;
+				temp=pal[0xF9];
+				memcpy(pal+0xF9,pal+0xFA,0x12);
+				pal[0xFE]=temp;
+				set_palette_range(pal,0xF6,0xFF,1);
+				pal_lock=0;
+			};
+			time_interrupt_occurs++;
+			mutux_setpalette=true;
+		}
+		rest(0);
 	}
 	END_OF_FUNCTION(timer_proc);
 	void prtscrn_proc()
 	{
-		mutex++;
 		if(key[KEY_PRTSCR] || key[KEY_P]){
 			static PALETTE pal;
 			static char filename[30];
@@ -65,20 +65,7 @@ namespace{
 			sprintf(filename,"ScrnShot\\%d.bmp",i++);
 			save_bitmap(filename,screen,pal);
 		}
-		if((key[KEY_ALT]||key[KEY_ALTGR])&&key[KEY_ENTER])
-		{
-			static int mode=GFX_AUTODETECT;
-			static PALETTE pal;
-			if(mode==GFX_AUTODETECT_WINDOWED)
-				mode=GFX_AUTODETECT;
-			else
-				mode=GFX_AUTODETECT_WINDOWED;
-			get_palette(pal);
-			vsync();
-			set_gfx_mode(mode,320,200,0,0);
-			set_palette(pal);
-		}
-		mutex--;
+		rest(0);
 	}
 	END_OF_FUNCTION(prtscrn_proc);
 }
@@ -160,6 +147,8 @@ void Game::load(int id){
 	}
 	scene->scenemap.change(-1);
 	fread(&rpg,sizeof(RPG),1,fprpg);
+	rpg.viewport_x-=0xA0*(scale-1);
+	rpg.viewport_y-=0x70*(scale-1);
 	map_toload=rpg.scene_id;
 	evtobjs.clear();evtobjs.push_back(EVENT_OBJECT());
 	reunion(evtobjs,(uint8_t*)&rpg.evtobjs,(const long&)sizeof(rpg.evtobjs));

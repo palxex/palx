@@ -26,6 +26,26 @@ Game *game;
 extern int scale;
 bool key_enable=true;
 
+void switch_proc()
+{
+	mutex_int=1;
+	if(key[KEY_F11] || ((key[KEY_ALT]||key[KEY_ALTGR]) && key[KEY_ENTER]))
+	{
+		while(mutex_paletting || mutex_blitting)
+			rest(1);
+		int &mode=CARD;
+		static PALETTE pal;
+		if(mode==GFX_AUTODETECT_WINDOWED || mode ==GFX_AUTODETECT)
+			mode=GFX_AUTODETECT_FULLSCREEN;
+		else
+			mode=GFX_AUTODETECT_WINDOWED;
+		get_palette(pal);
+		vsync();
+		set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0);
+		set_palette(pal);
+	}
+	mutex_int=0;
+}
 void Load_Data()
 {
 	flag_battling=false;
@@ -128,6 +148,7 @@ bool process_Menu()
 
 void redraw_everything(int time_gap)
 {
+	switch_proc();
 	flag_parallel_mutex=!flag_parallel_mutex;
 	scene->clear_active();
 	if(flag_battling)

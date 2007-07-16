@@ -38,6 +38,7 @@ void playrix_timer(void *param)
 		 memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,plr->leaving*2);
 		 free_audio_stream_buffer(plr->stream);
 	}
+	rest(0);
 }
 END_OF_FUNCTION(playrix::playrix_timer);
 

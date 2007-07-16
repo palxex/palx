@@ -28,16 +28,19 @@
 #include <cstdlib>
 using namespace std;
 
+int CARD=0;
+
 int main(int argc, char *argv[])
 {
 	//boost::program_options提取参数,boost::regex抽取存档。
+	CARD=(argc>=5?GFX_AUTODETECT_FULLSCREEN:GFX_AUTODETECT_WINDOWED);
 
 	//allegro init
 	allegro_init();
 	install_timer();
 	install_keyboard();
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
-	set_gfx_mode(argc>=5?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
+	set_gfx_mode(CARD,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
 	set_color_depth(8);
 
 	randomize();

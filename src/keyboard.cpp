@@ -77,7 +77,7 @@ VKEY get_key(bool clear)
 VKEY get_key_lowlevel()
 {	
 	VKEY keygot=VK_NONE;
-	if(key[KEY_ESC] || key[KEY_INSERT] || key[KEY_ALT] || key[KEY_ALTGR])
+	if(key[KEY_ESC] || key[KEY_INSERT])// || key[KEY_ALT] || key[KEY_ALTGR])
 		keygot = VK_MENU;
 	else if(key[KEY_ENTER] || key[KEY_SPACE] || key[KEY_LCONTROL] || key[KEY_RCONTROL])
 		keygot = VK_EXPLORE;
