@@ -113,7 +113,7 @@ extern void NPC_walk_one_step(uint16_t object,int speed);
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
-	const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
+	int16_t &param1=param[0],&param2=param[1],&param3=param[2];
 	EVENT_OBJECT &obj=game->evtobjs[object];
 #define curr_obj (param1<0?obj:game->evtobjs[param1])
 	char addition[100];memset(addition,0,sizeof(addition));
@@ -404,6 +404,37 @@ __walk_role:
 			curr_obj.pos_y+=param3;
 			break;
 		case 0x7f:
+			if(param1==0 && param2==0 && param3==-1){
+				x_scrn_offset=0xA0*scale;
+				y_scrn_offset=0x70*scale;
+				game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+				game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+			}
+			for(int i=0;i<(param3>0?param3:1);i++)
+			{
+				viewport_x_bak=game->rpg.viewport_x;
+				viewport_y_bak=game->rpg.viewport_y;
+				if(!param1 && !param2 && !param3){
+					x_scrn_offset=0xA0*scale;
+					y_scrn_offset=0x70*scale;
+					game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+					game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+					scene->produce_one_screen();
+					param3=-1;
+				}else{
+					if(param3<0){
+						game->rpg.viewport_x=param1*32-0xA0*scale;
+						game->rpg.viewport_y=param2*16-0x70*scale;
+						scene->produce_one_screen();
+					}else{
+						game->rpg.viewport_x+=param1;
+						game->rpg.viewport_y+=param2;
+					}
+					x_scrn_offset=game->rpg.viewport_x-scene->team_pos.toXY().x;
+					y_scrn_offset=game->rpg.viewport_y-scene->team_pos.toXY().y;
+				}
+			}
+
 			GameLoop_OneCycle(false);
 			redraw_everything();
 			break;
