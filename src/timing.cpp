@@ -12,13 +12,13 @@ void wait_key(uint8_t gap)
 	clear_keybuf();
 	time_interrupt_occurs=0;
 	while(!keypressed() && time_interrupt_occurs<gap)
-		rest(0);
+		rest(10);
 }
 
 void wait_for_key()
 {
 	while(!keypressed())
-		rest(0);
+		rest(10);
 	clear_keybuf();
 }
 

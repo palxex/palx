@@ -4,6 +4,9 @@ palx_SOURCES = UI.cpp      fade.cpp      keyboard.cpp  playrng.cpp   script.cpp 
 palx_LDADD = -lalfont_s -lalleg_s -ladplug -lbinio -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lole32 -ldinput -lddraw -ldxguid -lwinmm -ldsound -L/local/lib -lboost_regex-mgw41-s-1_34
 palx_LDFLAGS =  -mwindows
 INCLUDES= -I$(top_srcdir)/PalLibrary/include
+CFLAGS = -O2
+CPPFLAGS = -O2
+CXXFLAGS = -O2
 AM_CPPFLAGS = -DALLEGRO_STATICLINK -mtune=pentium -O2 -ffast-math -fomit-frame-pointer
 
 if HAVE_WINDRES
