@@ -82,9 +82,9 @@ Game::Game(int save):rpg(::rpg)
 
 	alfont_init();
 	char fontpath[100];
-	sprintf(fontpath,"%s%s",getenv("WINDIR"),"\\fonts\\mingliu.ttc");
+	sprintf(fontpath,"%s","/win/c/WINDOWS/Fonts/mingliu.ttc");
 	ttfont::glb_font=alfont_load_font(fontpath);
-	alfont_set_language(ttfont::glb_font, "cht");	
+	alfont_set_language(ttfont::glb_font, "zh_CN");	
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);
 	alfont_set_font_background(ttfont::glb_font, FALSE);
