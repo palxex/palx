@@ -109,8 +109,9 @@ int select_scene()
 			for(int i=7;i<9;i++)
 				ttfont(cut_msg_impl("word.dat")(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
-		VKEY keygot;
-		switch(keygot=get_key()){
+		VKEY keygot;		
+		while(!(keygot=get_key())) delay(10);
+		switch(keygot){
 			case VK_UP:
 				changed=true;
 				menu_selected++;

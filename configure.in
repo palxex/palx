@@ -6,39 +6,19 @@ AC_INIT(palx, 0.21, palxex@gmail.com)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 
+
+dnl Detect the canonical host and target build environment
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lalfont':
-#AC_CHECK_LIB(alfont_s, alfont_textout)
-# FIXME: Replace `main' with a function in `-lalleg':
-#AC_CHECK_LIB(alleg_s, set_palette)
-# FIXME: Replace `main' with a function in `-ladplug':
-#AC_CHECK_LIB(adplug, CrixPlayer::factory)
-# FIXME: Replace `main' with a function in `-lbinio':
-#AC_CHECK_LIB(binio, binofstream::open)
-# FIXME: Replace `main' with a function in `-lcomdlg32':
-#AC_CHECK_LIB([comdlg32], [main])
-# FIXME: Replace `main' with a function in `-lddraw':
-#AC_CHECK_LIB([ddraw], [main])
-# FIXME: Replace `main' with a function in `-ldinput':
-#AC_CHECK_LIB([dinput], [main])
-# FIXME: Replace `main' with a function in `-ldsound':
-#AC_CHECK_LIB([dsound], [main])
-# FIXME: Replace `main' with a function in `-ldxguid':
-#AC_CHECK_LIB([dxguid], [main])
-# FIXME: Replace `main' with a function in `-lgdi32':
-#AC_CHECK_LIB([gdi32], [main])
-# FIXME: Replace `main' with a function in `-lkernel32':
-#AC_CHECK_LIB([kernel32], [main])
-# FIXME: Replace `main' with a function in `-lole32':
-#AC_CHECK_LIB([ole32], [main])
-# FIXME: Replace `main' with a function in `-luser32':
-#AC_CHECK_LIB([user32], [main])
-# FIXME: Replace `main' with a function in `-lwinmm':
-#AC_CHECK_LIB([winmm], [main])
+dnl Check for Allegro Installed
+AM_PATH_ALLEGRO(4.2.1)
+AX_BOOST_BASE([1.33])
+AX_BOOST_REGEX
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -62,10 +42,10 @@ dnl Some stuff for the icon.
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)
        dnl Some stuff for the ico
-       AC_CHECK_PROGS(WINDRES, windres, windres)
+       AC_CHECK_PROGS(WINDRES, windres, :)
     ;;
     *)
-       WINDRES="windres"
+       WINDRES=":"
     ;;
 esac
        AM_CONDITIONAL(HAVE_WINDRES, test "x$WINDRES" != "x:")
