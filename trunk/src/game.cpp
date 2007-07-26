@@ -149,6 +149,10 @@ void Game::load(int id){
 	fread(&rpg,sizeof(RPG),1,fprpg);
 	rpg.viewport_x-=0xA0*(scale-1);
 	rpg.viewport_y-=0x70*(scale-1);
+	for(int i=0;i<=rpg.team_roles+rpg.team_followers;i++){
+		rpg.team[i].x+=0xA0*(scale-1);
+		rpg.team[i].y+=0x70*(scale-1);
+	}
 	map_toload=rpg.scene_id;
 	evtobjs.clear();evtobjs.push_back(EVENT_OBJECT());
 	reunion(evtobjs,(uint8_t*)&rpg.evtobjs,(const long&)sizeof(rpg.evtobjs));
