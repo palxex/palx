@@ -40,7 +40,7 @@ void playrix_timer(void *param)
 	}
 	rest(0);
 }
-END_OF_FUNCTION(playrix::playrix_timer);
+END_OF_FUNCTION(playrix_timer);
 
 playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0),playing(false)
 {

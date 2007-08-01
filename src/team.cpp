@@ -10,7 +10,7 @@ int x_scrn_offset;
 int y_scrn_offset;
 int abstract_x_bak=0,abstract_y_bak=0;
 int viewport_x_bak=0,viewport_y_bak=0;
-int direction_offs[][2]={{-16,8},{-16,-8},{16,-8},{16,8}};
+int direction_offs[4][2]={{-16,8},{-16,-8},{16,-8},{16,8}};
 int this_step_frame=0;
 int step_frame_follower=0,step_frame_leader=0;
 

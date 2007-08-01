@@ -7,6 +7,8 @@
 
 #include "stdlib.h"
 
+#include <algorithm>
+
 extern int scale;
 
 extern int process_Battle(uint16_t,uint16_t);
@@ -93,17 +95,34 @@ void GameLoop_OneCycle(bool trigger)
 }
 void process_Explore()
 {
-	for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+	position poses[12];
+	int &x=scene->team_pos.toXY().x,&y=scene->team_pos.toXY().y;
+	int (&off)[2]=direction_offs[game->rpg.team_direction];
+	for(int i=0;i<4;i++)
 	{
-		if(iter->status>0 && iter->trigger_method<=3
-		   && abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<iter->trigger_method*32+16
-		   && (iter->pos_x-scene->team_pos.toXY().x)/direction_offs[game->rpg.team_direction][0]>=0
-		   && (iter->pos_y-scene->team_pos.toXY().y)/direction_offs[game->rpg.team_direction][1]>=0)//&& beside role && face to it
-		{
-			iter->trigger_script=process_script(iter->trigger_script,iter-game->evtobjs.begin());
-			return;
-		}
+		poses[i*3  ]=position(x+(i+1)*off[0],y+(i+1)*off[1]);
+		poses[i*3+1]=position(x             ,y+(i+1)*off[1]);
+		poses[i*3+2]=position(x+(i+1)*off[0],y             );
 	}
+	for(int i=0;i<12;i++)
+		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+			if(iter->status>0 && iter->trigger_method<=3
+				&& position(iter->pos_x,iter->pos_y).toXYH()==poses[i].toXYH()
+				&& iter->trigger_method*6-4>i)
+			{
+				if(iter->curr_frame < iter->frames*4 )
+				{
+					iter->curr_frame=0;
+					iter->direction=(game->rpg.team_direction+2)&3;
+					for(int t=0;t<=game->rpg.team_roles;t++)//跟随者不用转？
+						game->rpg.team[t].frame=game->rpg.team_direction*3;
+					redraw_everything(0);
+				}
+				iter->trigger_script=process_script(iter->trigger_script,iter-game->evtobjs.begin());
+				//my def
+				clear_keybuf();rest(0);
+				return;
+			}
 }
 void clear_effective(int16_t p1,int16_t p2)
 {
@@ -448,6 +467,9 @@ __walk_role:
 			goto __walk_npc;
 		case 0x85:
 			wait(param1*10);
+			break;
+		case 0x87:
+			NPC_walk_one_step(object,0);
 			break;
 		case 0x8b:
 			game->pat.read(param1);
