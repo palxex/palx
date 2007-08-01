@@ -27,7 +27,7 @@ extern int coordinate_x_max,coordinate_y_max;
 extern int x_scrn_offset,y_scrn_offset;
 extern int abstract_x_bak,abstract_y_bak;
 extern int viewport_x_bak,viewport_y_bak;
-extern int direction_offs[][2];
+extern int direction_offs[4][2];
 extern bool key_enable;
 
 extern bool flag_parallel_mutex;

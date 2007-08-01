@@ -254,5 +254,32 @@ typedef struct{
 }UPGRADE_EXP;
 #pragma pack()
 
+	struct position{
+		friend struct Scene;
+		int x,y,h;
+		bool status;
+		position(int x_,int y_,int h_):x(x_),y(y_),h(h_),status(true){}
+		position(int x_,int y_):x(x_),y(y_),status(false){}
+		position():x(0),y(0),status(false){}
+		position &toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y/16;	status=true;} return *this;}
+		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}
+		position operator+(const position &rhs){
+			if(rhs.status)
+				return position(toXYH().x+rhs.x,toXYH().y+rhs.y,toXYH().h+rhs.h);
+			else
+				return position(toXY().x+rhs.x,toXY().y+rhs.y);
+		}
+		position &operator=(const position &rhs)
+		{
+			x=rhs.x;y=rhs.y;h=rhs.h;status=rhs.status;
+			return *this;
+		}
+		bool operator==(const position &rhs){
+			if(rhs.status)
+				return toXYH().x==rhs.x && toXYH().y==rhs.y && toXYH().h==rhs.h;
+			else
+				return toXY().x==rhs.x && toXY().y==rhs.y;
+		}
+	};
 #endif
 
