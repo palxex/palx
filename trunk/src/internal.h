@@ -68,6 +68,7 @@ extern uint16_t process_autoscript(uint16_t script,int16_t object);
 extern void load_team_mgo();
 extern void load_NPC_mgo();
 extern void redraw_everything(int gap=1);
+extern void record_step();
 extern void calc_trace_frames();
 extern void team_walk_one_step();
 extern void stop_and_update_frame();

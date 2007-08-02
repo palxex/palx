@@ -22,11 +22,8 @@ int load_mgo(int id)
 {
 	bool decoded;
 	uint8_t *buf=MGO.decode(id,decoded);
-	if(!decoded){
-		mgos.push_back(sprite_prim(id,buf));
-		return mgos.end()-mgos.begin()-1;
-	}else
-		return std::find(mgos.begin(),mgos.end(),sprite_prim(id))-mgos.begin();
+	mgos.push_back(sprite_prim(id,buf));
+	return std::find(mgos.begin(),mgos.end(),sprite_prim(id))-mgos.begin();
 }
 void load_team_mgo()
 {
@@ -44,14 +41,8 @@ void load_NPC_mgo()
 		if(i->image)
 			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image);
 }
-void calc_trace_frames()
+void store_step()
 {
-	this_step_frame=(this_step_frame+1)&3;
-	if(this_step_frame & 1)
-		step_frame_leader=(this_step_frame+1)/2,
-		step_frame_follower=3-step_frame_leader;
-	else
-		step_frame_leader=step_frame_follower=0;
 	/*
 	memcpy(game->rpg.team_track+sizeof(RPG::track),game->rpg.team_track,4*sizeof(RPG::track));
 	/*///
@@ -60,6 +51,24 @@ void calc_trace_frames()
 	game->rpg.team_track[2]=game->rpg.team_track[1];
 	game->rpg.team_track[1]=game->rpg.team_track[0];
 	//*/
+}
+void record_step()
+{
+	store_step();
+	game->rpg.team_track[0].x=abstract_x_bak;
+	game->rpg.team_track[0].y=abstract_y_bak;
+	game->rpg.team_track[0].direction=game->rpg.team_direction;
+}
+void calc_trace_frames()
+{
+	this_step_frame=(this_step_frame+1)&3;
+	if(this_step_frame & 1)
+		step_frame_leader=(this_step_frame+1)/2,
+		step_frame_follower=3-step_frame_leader;
+	else
+		step_frame_leader=step_frame_follower=0;
+
+	store_step();
 }
 void store_team_frame_data()
 {
@@ -136,9 +145,8 @@ bool barrier_check(uint16_t self,int x,int y)
 		}
 	return ret;
 }
-void NPC_walk_one_step(uint16_t object,int speed)
+void NPC_walk_one_step(EVENT_OBJECT &obj,int speed)
 {
-	EVENT_OBJECT &obj=game->evtobjs[object];
 	obj.pos_x+=direction_offs[obj.direction][0]/8*speed;
 	obj.pos_y+=direction_offs[obj.direction][1]/8*speed;
 	if(obj.frames>0)

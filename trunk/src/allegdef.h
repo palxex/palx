@@ -11,8 +11,6 @@
 
 #include <alfont.h>
 
-#define set_palette(x) set_palette_range(x,0,255,FALSE);
-
 #include "adplug/emuopl.h"
 #include "adplug/rix.h"
 
@@ -42,9 +40,9 @@ public:
 };
 class sprite_prim{
 	int id;
-	std::vector<boost::shared_ptr<sprite> > sprites;	
-	int determain_smkfs(uint8_t *src);
+	std::vector<boost::shared_ptr<sprite> > sprites;
 public:
+	int determain_smkfs(uint8_t *src);
 	sprite_prim();
 	sprite_prim(int);
 	sprite_prim(cached_res &,int);
@@ -95,7 +93,7 @@ public:
 	playrix();
 	~playrix();
 	void play(int sub_song);
-	void stop();
+	void stop(int =0);
 };
 
 class voc{
