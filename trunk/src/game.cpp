@@ -10,6 +10,7 @@
 using namespace std;
 volatile uint8_t time_interrupt_occurs; 
 int mutex_paletting=0,mutex_blitting=0,mutex_int=0;
+extern int rix_fade_flag;
 namespace{
 	template<typename T>
 	inline void reunion(vector<T> &vec,uint8_t *src,const long &len)
@@ -34,6 +35,10 @@ namespace{
 	}
 	void timer_proc()
 	{
+		if(rix_fade_flag && rix->getvolume()==0){
+			rix_fade_flag=0;
+			rix->playing=false;
+		}
 		if(!mutex_int){
 			static int pal_lock=0;
 			static PALETTE pal;
