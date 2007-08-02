@@ -65,27 +65,35 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 }
 playrix::~playrix()
 {
-	playing=false;
+	remove_param_int(playrix_timer,this);
 	stop();	
 	stop_audio_stream(stream);
-	remove_param_int(playrix_timer,this);
 	delete []Buffer;
 }
-void playrix::play(int sub_song)
+void playrix::play(int sub_song,int gap)
 {
-	voice_set_volume(stream->voice,255);
 	if(subsong==sub_song){
+		voice_set_volume(stream->voice,255);
 		return;
 	}
-	voice_start(stream->voice);
 	subsong=sub_song;
-	rix.rewind(subsong);
-	
+
+	voice_set_volume(stream->voice,0);
+	rix.rewind(subsong);	
 	playing=true;
+
+	voice_ramp_volume(stream->voice, gap*1000, 255);
 }
-void playrix::stop(int stop)
+int rix_fade_flag=0;
+void playrix::stop(int gap)
 {
-	voice_ramp_volume(stream->voice, 1000, 0);
+	voice_ramp_volume(stream->voice, gap*1000, 0);
+	rix_fade_flag=1;
+}
+
+int playrix::getvolume()
+{
+	return voice_get_volume(stream->voice);
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f))

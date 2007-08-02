@@ -121,7 +121,7 @@ void process_Explore()
 				}
 				iter->trigger_script=process_script(iter->trigger_script,iter-game->evtobjs.begin());
 				//my def
-				clear_keybuf();rest(10);
+				clear_keybuf();rest(50);
 				return;
 			}
 }
@@ -190,6 +190,10 @@ __walk_npc:
 			}
 			npc_speed=2;
 			goto __walk_npc;
+		case 0x12:
+			curr_obj.pos_x=param2+scene->team_pos.toXY().x;
+			curr_obj.pos_y=param3+scene->team_pos.toXY().y;
+			break;
 		case 0x13:
 			game->evtobjs[param1].pos_x=param2;
 			game->evtobjs[param1].pos_y=param3;
@@ -275,7 +279,7 @@ __walk_npc:
 		case 0x43:
 			if(param1){
 				game->rpg.music=param1;
-				rix->play(param1);
+				rix->play(param1,param2);
 			}else
 				rix->stop();
 			break;
