@@ -96,13 +96,14 @@ void GameLoop_OneCycle(bool trigger)
 void process_Explore()
 {
 	position poses[12];
-	int &x=scene->team_pos.toXY().x,&y=scene->team_pos.toXY().y;
+	int x=scene->team_pos.toXY().x,y=scene->team_pos.toXY().y;
 	int (&off)[2]=direction_offs[game->rpg.team_direction];
 	for(int i=0;i<4;i++)
 	{
-		poses[i*3  ]=position(x+(i+1)*off[0],y+(i+1)*off[1]);
-		poses[i*3+1]=position(x             ,y+(i+1)*off[1]);
-		poses[i*3+2]=position(x+(i+1)*off[0],y             );
+		poses[i*3  ]=position(x+off[0],y+off[1]).toXYH();
+		poses[i*3+1]=position(x       ,y+off[1]*2).toXYH();
+		poses[i*3+2]=position(x+off[0]*2,y       ).toXYH();
+		x+=off[0];y+=off[1];
 	}
 	for(int i=0;i<12;i++)
 		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
@@ -120,7 +121,7 @@ void process_Explore()
 				}
 				iter->trigger_script=process_script(iter->trigger_script,iter-game->evtobjs.begin());
 				//my def
-				clear_keybuf();rest(0);
+				clear_keybuf();rest(10);
 				return;
 			}
 }
@@ -128,7 +129,7 @@ void clear_effective(int16_t p1,int16_t p2)
 {
 	redraw_everything();
 }
-extern void NPC_walk_one_step(uint16_t object,int speed);
+extern void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
@@ -140,19 +141,19 @@ void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t obj
 	switch(func){
 		case 0xB:
 			obj.direction=0;
-			NPC_walk_one_step(object,2);
+			NPC_walk_one_step(obj,2);
 			break;
 		case 0xC:
 			obj.direction=1;
-			NPC_walk_one_step(object,2);
+			NPC_walk_one_step(obj,2);
 			break;
 		case 0xD:
 			obj.direction=2;
-			NPC_walk_one_step(object,2);
+			NPC_walk_one_step(obj,2);
 			break;
 		case 0xE:
 			obj.direction=3;
-			NPC_walk_one_step(object,2);
+			NPC_walk_one_step(obj,2);
 			break;
 		case 0xF:
 			if(param1>=0)
@@ -170,7 +171,7 @@ __walk_npc:
 					obj.pos_x = param1*32+param3*16;
 					obj.pos_y = param2*16+param3*8;
 				}else
-					NPC_walk_one_step(object,npc_speed);
+					NPC_walk_one_step(obj,npc_speed);
 
 				//afterward check;MUST have,or will not match dospal exactly
 				if(obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
@@ -265,6 +266,9 @@ __walk_npc:
 			if(param1)
 				glbvar_fontcolor=param1;
 			break;
+		case 0x3f:
+			npc_speed=2;
+			goto __ride;
 		case 0x40:
 			curr_obj.trigger_method=param2;
 			break;
@@ -276,8 +280,30 @@ __walk_npc:
 				rix->stop();
 			break;
 		case 0x44:
-			GameLoop_OneCycle(false);
-			redraw_everything();
+			npc_speed=4;
+__ride:
+			{
+				position dest(param1,param2,param3);
+				int x_diff=dest.toXY().x-scene->team_pos.toXY().x,y_diff=dest.toXY().y-scene->team_pos.toXY().y;
+				while(x_diff || y_diff){
+					int direction=calc_faceto(x_diff,y_diff);
+					int x_off=npc_speed*2*(direction_offs[direction][0]/16),y_off=npc_speed*(direction_offs[direction][1]/8);
+					backup_position();
+					if(x_diff)
+						scene->team_pos.x+=x_off;
+					if(y_diff)
+						scene->team_pos.y+=y_off;
+					sync_viewport();
+					obj.direction=direction;
+					obj.pos_x+=x_off;
+					obj.pos_y+=y_off;
+					record_step();
+					GameLoop_OneCycle(false);
+					scene->move_usable_screen();
+					redraw_everything();
+					x_diff=dest.toXY().x-scene->team_pos.toXY().x,y_diff=dest.toXY().y-scene->team_pos.toXY().y;
+				}
+			}
 			break;
 		case 0x45:
 			game->rpg.battle_music=param1;
@@ -327,16 +353,10 @@ __walk_npc:
 			if(!flag_battling && param3)
 				load_team_mgo();
 			break;
-		case 0x6c:			
-			if(param1){
-				curr_obj.pos_x += param2;
-				curr_obj.pos_y += param3;
-				if(!curr_obj.frames && !curr_obj.frames_auto){
-					uint16_t *usrc=(uint16_t *)MGO.decode(curr_obj.image);
-					curr_obj.frames_auto=usrc[0]-(usrc[usrc[0]-1]==0?1:0);
-				}
-				curr_obj.curr_frame=(curr_obj.curr_frame+1)%(curr_obj.frames?curr_obj.frames:curr_obj.frames_auto);
-			}
+		case 0x6c:
+			curr_obj.pos_x+=param2;
+			curr_obj.pos_y+=param3;
+			NPC_walk_one_step(curr_obj,0);
 			break;
 		case 0x6d:
 			if(param1){
@@ -400,6 +420,11 @@ __walk_role:
 			break;
 		case 0x76:
 			scene->produce_one_screen();
+			break;
+		case 0x77:
+			rix->stop(param1);
+			if(!param2)
+				;//CD stop
 			break;
 		case 0x78:
 			flag_battling=0;
@@ -469,7 +494,7 @@ __walk_role:
 			wait(param1*10);
 			break;
 		case 0x87:
-			NPC_walk_one_step(object,0);
+			NPC_walk_one_step(obj,0);
 			break;
 		case 0x8b:
 			game->pat.read(param1);
@@ -483,6 +508,9 @@ __walk_role:
 			break;
 		case 0x93:
 			break;
+		case 0x97:
+			npc_speed=8;
+			goto __ride;
 		case 0x98:
 			load_team_mgo();
 			store_team_frame_data();

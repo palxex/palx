@@ -17,6 +17,7 @@ void playrix_timer(void *param)
 			int rel=BUFFER_SIZE*CHANNELS-plr->leaving;
 			while(plr->slen_buf<rel)
 			{
+				if(!plr->playing) return;
 				if(!plr->rix.update())
 				{
 					plr->rix.rewind(plr->subsong);
@@ -64,25 +65,27 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 }
 playrix::~playrix()
 {
+	playing=false;
 	stop();	
-	remove_param_int(playrix_timer,this);
 	stop_audio_stream(stream);
+	remove_param_int(playrix_timer,this);
 	delete []Buffer;
 }
 void playrix::play(int sub_song)
 {
-	if(subsong==sub_song)
+	voice_set_volume(stream->voice,255);
+	if(subsong==sub_song){
 		return;
+	}
 	voice_start(stream->voice);
 	subsong=sub_song;
 	rix.rewind(subsong);
 	
 	playing=true;
 }
-void playrix::stop()
+void playrix::stop(int stop)
 {
-	playing=false;
-	voice_stop(stream->voice);
+	voice_ramp_volume(stream->voice, 1000, 0);
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f))
