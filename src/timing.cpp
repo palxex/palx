@@ -11,7 +11,7 @@ void wait_key(uint8_t gap)
 {
 	clear_keybuf();
 	time_interrupt_occurs=0;
-	while(!keypressed())
+	while(!keypressed() && time_interrupt_occurs<gap)
 		rest(10);
 }
 
