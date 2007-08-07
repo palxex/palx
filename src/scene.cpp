@@ -201,9 +201,10 @@ bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)
 {
 	return *(lhs.get())<*(rhs.get());
 }
-void Scene::draw_normal_scene(int gap)
+void Scene::scanline_draw_normal_scene(int gap)
 {
 	static bitmap scanline(0,SCREEN_W,SCREEN_H);
+	perframe_proc();
 	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
 	std::set<s_list::value_type> greper(active_list.begin(),active_list.end());
 	active_list.clear();

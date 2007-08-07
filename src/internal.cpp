@@ -24,6 +24,7 @@ playrix *rix;
 Game *game;
 
 extern int scale;
+extern bool running;
 bool key_enable=true;
 
 void switch_proc()
@@ -151,7 +152,6 @@ bool process_Menu()
 
 void redraw_everything(int time_gap)
 {
-	switch_proc();
 	flag_parallel_mutex=!flag_parallel_mutex;
 	scene->clear_active();
 	if(flag_battling)
@@ -161,6 +161,6 @@ void redraw_everything(int time_gap)
 		scene->visible_NPC_movment_setdraw();
 		scene->our_team_setdraw();
 		scene->Redraw_Tiles_or_Fade_to_pic();
-		scene->draw_normal_scene(time_gap);
+		scene->scanline_draw_normal_scene(time_gap);
 	}
 }

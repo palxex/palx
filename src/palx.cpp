@@ -17,6 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+extern bool running;
+
 #pragma warning(disable: 4819)
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -28,7 +30,15 @@
 #include <cstdlib>
 using namespace std;
 
+
 int CARD=0;
+void close_button_handler(void)
+{
+	//if(!yesno_dialog()) return;
+	running=false;
+	remove_timer();
+}
+END_OF_FUNCTION(close_button_handler)
 
 int main(int argc, char *argv[])
 {
@@ -37,6 +47,8 @@ int main(int argc, char *argv[])
 
 	//allegro init
 	allegro_init();
+	LOCK_FUNCTION(close_button_handler);
+	set_close_button_callback(close_button_handler);
 	install_timer();
 	install_keyboard();
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
@@ -53,9 +65,16 @@ int main(int argc, char *argv[])
 		boost::regex_match(argv[1],what,expression);
 		strncpy(conv_buf,what[4].first,what[4].second-what[4].first);
 	}
-	Game  thegame(boost::lexical_cast<int>(conv_buf)); game=&thegame;
+	try{
+		game=new Game(boost::lexical_cast<int>(conv_buf));
+	}catch(exception &)
+	{
+		exit(0);
+	}
 	Scene normal;	scene=&normal;
 	game->load();
-	return game->run();
+	game->run();
+	delete game;
+	return 0;
 }
 END_OF_MAIN();

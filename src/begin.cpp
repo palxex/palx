@@ -22,6 +22,8 @@
 #include "timing.h"
 #include "internal.h"
 
+bool starting=false;
+
 void startup_splash()
 {
 	clear_keybuf();
@@ -65,6 +67,7 @@ void startup_splash()
 		if(add_pale>=3)
 			add_pale--;
 		if(prog_pale<=0x40){
+			perframe_proc();
 			for(int i=0;i<0xF0;i++){
 				pal[i].r=game->pat.get(0)[i].r*prog_pale/0x40;
 				pal[i].g=game->pat.get(0)[i].g*prog_pale/0x40;
@@ -79,16 +82,17 @@ void startup_splash()
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
 		for(int i=prog_pale;i<0x40;i++){
+			perframe_proc();
 			for(int j=0;j<0xF0;j++){
 				pal[j].r=game->pat.get(0)[j].r*i/0x40;
 				pal[j].g=game->pat.get(0)[j].g*i/0x40;
 				pal[j].b=game->pat.get(0)[j].b*i/0x40;
-			}
+			} 
 			set_palette(pal);
 			wait(1);
 		}
+		wait_key(90);
 	}
-	wait_key(90);
 	mutex_can_change_palette=false;
 	pal_fade_out(2);
 }
@@ -109,8 +113,8 @@ int select_scene()
 			for(int i=7;i<9;i++)
 				ttfont(cut_msg_impl("word.dat")(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
-		VKEY keygot;		
-		while(!(keygot=get_key())) delay(10);
+		extern bool running;if(!running)	throw std::exception();
+		VKEY keygot=get_key();delay(10);
 		switch(keygot){
 			case VK_UP:
 				changed=true;
@@ -142,10 +146,12 @@ int select_scene()
 	}while(!ok);
 	destroy_bitmap(cache);
 	pal_fade_out(1);
+	starting=false;
 	return save;
 }
 
 int begin_scene::operator()(Game *game){
+	starting=true;
 	::game=game;
 	RNG_num=6;
 	game->pat.read(3);

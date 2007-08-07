@@ -13,6 +13,7 @@ void setup_role_enemy_image()
 void draw_battle_scene(int enemy_team)
 {
 	bitmap battlescene(FBP.decode(game->rpg.battlefield),SCREEN_W,SCREEN_H);
+	perframe_proc();
 	
 	for(int i=0;i<=game->rpg.team_roles;i++)
 		team_images[i].getsprite(0)->blit_middle(battlescene.bmp,240,170);

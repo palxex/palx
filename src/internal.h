@@ -84,6 +84,18 @@ extern void pal_fade_in(int gap);
 extern int CARD;
 extern int mutex_int;
 extern void switch_proc();
+extern bool starting;
+#include <exception>
+#define perframe_proc() \
+{ \
+	extern bool running; \
+	if(!running) \
+		if(starting) \
+			throw std::exception(); \
+		else \
+			return; \
+	switch_proc(); \
+} \
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);

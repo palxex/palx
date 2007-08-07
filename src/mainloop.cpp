@@ -5,11 +5,10 @@
 
 #include <boost/shared_ptr.hpp>
 extern int CARD,mutex;
+bool running=true;
 namespace{
-	bool running=true;
 	void mainloop_proc()
 	{
-		switch_proc();
 		if(flag_to_load)
 			Load_Data();
 
@@ -28,7 +27,7 @@ namespace{
 		scene->visible_NPC_movment_setdraw();
 		scene->move_usable_screen();
 		scene->Redraw_Tiles_or_Fade_to_pic();
-		scene->draw_normal_scene(1);
+		scene->scanline_draw_normal_scene(1);
 		if(keygot==VK_EXPLORE)
 			process_Explore();
 		if(keygot==VK_MENU)

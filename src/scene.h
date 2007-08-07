@@ -60,7 +60,7 @@ struct Scene{
 	void move_usable_screen();
 	void get_sprites();
 	void produce_one_screen();
-	void draw_normal_scene(int);
+	void scanline_draw_normal_scene(int);
 };
 struct BattleScene{
 	fbp background;

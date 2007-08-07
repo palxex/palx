@@ -13,6 +13,7 @@ void pal_fade_out(int t)
 		if(t)
 			for(int i=0x3f;i>=3;i--)
 			{
+				perframe_proc();
 				for(int j=0;j<0x100;j++)
 				{
 					pal[j].r=game->pat.get(rpg.palette_offset)[j].r*i/0x40;
@@ -36,6 +37,7 @@ void pal_fade_in(int t)
 		if(t)
 			for(int i=4;i<=0x3f;i++)
 			{
+				perframe_proc();
 				for(int j=0;j<0x100;j++)
 				{
 					pal[j].r=game->pat.get(rpg.palette_offset)[j].r*i/0x40;
@@ -67,4 +69,8 @@ void normalize_fade()
 		pal[i].b=normalize(game->pat.get(rpg.palette_offset)[i].b);
 	}
 	set_palette(pal);
+}
+void CrossFadeOut()
+{
+	perframe_proc();
 }

@@ -54,8 +54,8 @@ int select_rpg(int ori_select,BITMAP *bmp)
 			dialog_string((std::string(word(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
-		VKEY keygot;
-		while(!(keygot=get_key())) delay(10);
+		extern bool running;if(!running)	throw std::exception();
+		VKEY keygot=get_key(); delay(10);
 		switch(keygot){
 			case VK_UP:
 				selected--;
@@ -102,6 +102,7 @@ int menu::select(int selected)
 				color=0x4E;
 			dialog_string(r->c_str(),text_x,text_y+18*i,color,true);
 		}
+		extern bool running;if(!running)	throw std::exception();
 		VKEY keygot;
 		if(ok)
 			while(!(keygot=get_key())) wait(10);
@@ -140,6 +141,7 @@ int select_item(int mask,int skip,int selected)
 		for(int r=offset*3;r<locating*3+paging*3;r++)
 			ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(buf,2+80*(r%3),33+r*16,r==locating,r==locating);
 		blit(screen,buf,0,0,0,0,SCREEN_W,SCREEN_H);
+		extern bool running;if(!running)	throw std::exception();
 		keygot=get_key();		
 		switch(keygot){
 			case VK_UP:
