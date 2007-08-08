@@ -1,6 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by pal lockheart   *
- *   palxex@Pal.Lockheart   *
+ *   PALx: A platform independent port of classic RPG PAL   *
+ *   Copyleft (C) 2006 by Pal Lockheart   *
+ *   palxex@gmail.com   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
