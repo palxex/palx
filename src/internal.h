@@ -91,7 +91,7 @@ extern bool starting;
 	extern bool running; \
 	if(!running) \
 		if(starting) \
-			throw std::exception(); \
+			throw new std::exception(); \
 		else \
 			return; \
 	switch_proc(); \
