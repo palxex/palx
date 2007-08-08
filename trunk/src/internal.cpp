@@ -35,15 +35,15 @@ void switch_proc()
 		while(mutex_paletting || mutex_blitting)
 			rest(1);
 		int &mode=CARD;
-		static PALETTE pal;
+		static PALETTE pal;static bitmap bak(NULL,SCREEN_W,SCREEN_H);
 		if(mode==GFX_AUTODETECT_WINDOWED || mode ==GFX_AUTODETECT)
 			mode=GFX_AUTODETECT_FULLSCREEN;
 		else
 			mode=GFX_AUTODETECT_WINDOWED;
-		get_palette(pal);
+		get_palette(pal);blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		vsync();
 		set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0);
-		set_palette(pal);
+		set_palette(pal);blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
 	mutex_int=0;
 }
@@ -99,7 +99,7 @@ void Load_Data()
 }
 bool process_Menu()
 {
-	static int main_select,role_select,itemuse_select,item_select,sys_select,rpg_select;
+	static int main_select=0,role_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0;
 	//show_money();
 	single_dialog(0,0,5);
 	ttfont(cut_msg_impl("word.dat")(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);

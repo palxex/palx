@@ -65,16 +65,16 @@ int main(int argc, char *argv[])
 		boost::regex_match(argv[1],what,expression);
 		strncpy(conv_buf,what[4].first,what[4].second-what[4].first);
 	}
+	boost::shared_ptr<Game> thegame;
 	try{
-		game=new Game(boost::lexical_cast<int>(conv_buf));
-	}catch(exception &)
+		thegame=boost::shared_ptr<Game>(new Game(boost::lexical_cast<int>(conv_buf)));
+	}catch(exception *)
 	{
 		exit(0);
 	}
+	game=thegame.get();
 	Scene normal;	scene=&normal;
 	game->load();
-	game->run();
-	delete game;
-	return 0;
+	return game->run();
 }
 END_OF_MAIN();

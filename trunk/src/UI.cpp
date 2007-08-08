@@ -3,6 +3,21 @@
 
 #include <boost/lexical_cast.hpp>
 
+#define SAFE_GETKEY(x) \
+	do{ \
+		while(!(x=get_key())) \
+		{ \
+			extern bool running; \
+			if(!running) \
+				if(starting) \
+					throw new std::exception(); \
+				else \
+					return -1; \
+			switch_proc(); \
+			rest(10); \
+		} \
+	}while(false)
+
 static cut_msg_impl word("word.dat");
 
 dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
@@ -54,8 +69,9 @@ int select_rpg(int ori_select,BITMAP *bmp)
 			dialog_string((std::string(word(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
-		extern bool running;if(!running)	throw std::exception();
-		VKEY keygot=get_key(); delay(10);
+		
+		VKEY keygot;
+		SAFE_GETKEY(keygot);
 		switch(keygot){
 			case VK_UP:
 				selected--;
@@ -102,10 +118,9 @@ int menu::select(int selected)
 				color=0x4E;
 			dialog_string(r->c_str(),text_x,text_y+18*i,color,true);
 		}
-		extern bool running;if(!running)	throw std::exception();
 		VKEY keygot;
 		if(ok)
-			while(!(keygot=get_key())) wait(10);
+			SAFE_GETKEY(keygot);
 		else
 			break;
 		switch(keygot){
@@ -130,19 +145,20 @@ int menu::select(int selected)
 
 int select_item(int mask,int skip,int selected)
 {
-	static int paging=8;//8 for dos
-	static bitmap buf(0,SCREEN_W,SCREEN_H);
+	static int const paging=8;static int locating=selected;//8 for dos,98 maybe 7?
+	static bitmap buf(0,SCREEN_W,SCREEN_H),bak(0,SCREEN_W,SCREEN_H);
 	dialog(9,2,33,8,18,false);//DOS ver;for item should use 98 ver.
-	bool ok;int color_selecting,key;
+	blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
+	bool ok=false;int color_selecting,key;
 	VKEY keygot;
 	do{
-		static int offset=0,pre_locate=0,locating=0;
+		static int offset=0,pre_locate=0;
 		offset=(locating/3<4?0:locating/3-4);
+		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<locating*3+paging*3;r++)
-			ttfont(word(game->rpg.objects[r].inbeing*10)).blit_to(buf,2+80*(r%3),33+r*16,r==locating,r==locating);
-		blit(screen,buf,0,0,0,0,SCREEN_W,SCREEN_H);
-		extern bool running;if(!running)	throw std::exception();
-		keygot=get_key();		
+			ttfont(word(game->rpg.items[r].item*10)).blit_to(buf,2+80*(r%3),33+(r/3*3)*16,r==locating?0xFA:0,r==locating);
+		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		SAFE_GETKEY(keygot);
 		switch(keygot){
 			case VK_UP:
 				locating-=3;
@@ -167,6 +183,8 @@ int select_item(int mask,int skip,int selected)
 				color_selecting=0x2B;
 				break;
 		}
-	}while(keygot!=VK_MENU);
-	return selected;
+		locating+=3*paging;
+		locating%=(3*paging);
+	}while(keygot!=VK_MENU && !ok);
+	return game->rpg.items[locating].item;
 }
