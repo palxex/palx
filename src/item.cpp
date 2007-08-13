@@ -18,17 +18,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef BEGIN_H
-#define BEGIN_H
+#include <algorithm>
+#include "internal.h"
+#include "game.h"
 
-/**
-	@author Pal Lockheart <palxex@gmail.com>
-*/
-class Game;
-class begin_scene{
-public:
-    int operator()(Game *);
-};
-
-#endif
-
+int compact_items()
+{
+	for(int i=0;i<0x100;i++)
+		if(game->rpg.items[i].amount==0)
+			std::copy(game->rpg.items+i+1,game->rpg.items+0x100,game->rpg.items+i);
+	return std::find(game->rpg.items,game->rpg.items,0)-game->rpg.items;
+}

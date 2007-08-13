@@ -100,6 +100,8 @@ extern bool mutex_can_change_palette;
 extern int mutex_paletting,mutex_blitting;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
+extern void show_fbp(int,int);
+extern void ShakeScreen();
 
 extern int CARD;
 extern int mutex_int;
@@ -119,5 +121,7 @@ extern bool starting;
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
+
+extern int compact_items();
 #endif
 

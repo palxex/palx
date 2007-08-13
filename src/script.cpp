@@ -115,17 +115,18 @@ void GameLoop_OneCycle(bool trigger)
 }
 void process_Explore()
 {
-	position poses[12];
+	position poses[13];
 	int x=scene->team_pos.toXY().x,y=scene->team_pos.toXY().y;
 	int (&off)[2]=direction_offs[game->rpg.team_direction];
+	poses[0]=position(x,y).toXYH();
 	for(int i=0;i<4;i++)
 	{
-		poses[i*3  ]=position(x+off[0],y+off[1]).toXYH();
-		poses[i*3+1]=position(x       ,y+off[1]*2).toXYH();
-		poses[i*3+2]=position(x+off[0]*2,y       ).toXYH();
+		poses[i*3+1]=position(x+off[0],y+off[1]).toXYH();
+		poses[i*3+2]=position(x       ,y+off[1]*2).toXYH();
+		poses[i*3+3]=position(x+off[0]*2,y       ).toXYH();
 		x+=off[0];y+=off[1];
 	}
-	for(int i=0;i<12;i++)
+	for(int i=0;i<13;i++)
 		for(evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
 			if(iter->status>0 && iter->trigger_method<=3
 				&& position(iter->pos_x,iter->pos_y).toXYH()==poses[i].toXYH()
@@ -150,6 +151,7 @@ void clear_effective(int16_t p1,int16_t p2)
 	redraw_everything();
 }
 extern void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
+
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
 	//printf("%s\n",scr_desc(func,param).c_str());
@@ -229,6 +231,16 @@ __walk_npc:
 		case 0x16:
 			curr_obj.direction=param2;
 			curr_obj.curr_frame=param3;
+			break;
+		case 0x1f:
+			compact_items();
+			{
+				RPG::ITEM *ptr=std::find(game->rpg.items,game->rpg.items+0x100,param1);
+				if(ptr==game->rpg.items+0x100)
+					ptr=std::find(game->rpg.items,game->rpg.items+0x100,0),
+					ptr->item=param1;
+				ptr->amount+=(param2==0?1:param2);
+			}
 			break;
 		case 0x24:
 			curr_obj.auto_script= param2;
@@ -348,6 +360,9 @@ __ride:
 		case 0x4a:
 			game->rpg.battlefield=param1;
 			break;
+		case 0x4d:
+			wait_for_key();
+			break;
 		case 0x50:
 			pal_fade_out(param1==0?1:param1);
 			break;
@@ -443,7 +458,7 @@ __walk_role:
 			store_team_frame_data();
 			break;
 		case 0x76:
-			scene->produce_one_screen();
+			show_fbp(param1,param2);
 			break;
 		case 0x77:
 			rix->stop(param1);
@@ -511,6 +526,14 @@ __walk_role:
 			redraw_everything();
 			mutex_can_change_palette=false;
 			break;
+		case 0x81:
+			if(param1>scene->sprites_begin-game->evtobjs.begin() && param1<scene->sprites_end-game->evtobjs.end() && curr_obj.status>0){
+				if(abs(curr_obj.pos_x-direction_offs[game->rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(curr_obj.pos_y-direction_offs[game->rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
+					if(game->rpg.scene_id>0)
+						curr_obj.trigger_method=5+game->rpg.scene_id*8;
+			}else
+				id=param3-1;
+			break;
 		case 0x82:
 			npc_speed=8;
 			goto __walk_npc;
@@ -523,6 +546,8 @@ __walk_role:
 		case 0x8b:
 			game->pat.read(param1);
 			game->rpg.palette_offset=0;
+			if(mutex_can_change_palette==0)
+				game->pat.set(game->rpg.palette_offset);
 			break;
 		case 0x8e:
 			restore_screen();
@@ -552,6 +577,16 @@ __walk_role:
 			break;
 		case 0x9f:
 			//clear_effective(1,0x48);
+			break;
+		case 0xa0:
+			clear_bitmap(screen);
+			extern bool running;
+			running=0;
+			break;
+		case 0xa5:
+			break;
+		case 0xa6:
+			backup_screen();
 			break;
 	}
 }
@@ -593,7 +628,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				if(current_dialog_lines>3){
 					show_wait_icon();current_dialog_lines=0;
 					restore_screen();
-				}else if(current_dialog_lines==0)
+				}else if(current_dialog_lines==0 && flag_pic_level==0)
 					backup_screen();
 				msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
 				if(frame_pos_flag==10){
@@ -650,10 +685,12 @@ uint16_t process_script(uint16_t id,int16_t object)
 				//printf("清屏 方式%x 延迟%x,更新角色信息:%s\n",param1,curr.param[1],curr.param[2]?"是":"否");
 				if(current_dialog_lines>0)
 					show_wait_icon(),current_dialog_lines=0;
-				if(param3)
-					stop_and_update_frame();
-				redraw_everything();
-				//restore_screen();
+				if(flag_pic_level==0){
+					if(param3)
+						stop_and_update_frame();
+					redraw_everything();
+				}else
+					restore_screen();
 				break;
 			case 6:			
 				//printf("以%d%%几率跳转到脚本%x:",param1,curr.param[1]);

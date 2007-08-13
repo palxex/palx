@@ -135,14 +135,14 @@ bool process_Menu()
 		case 0:
 			item_select=select_item(2,0,item_select);
 			{
-				uint16_t &equip_script=game->rpg.objects[item_select].script[1];
+				uint16_t &equip_script=game->rpg.objects[game->rpg.items[item_select].item].script[1];
 				process_script(equip_script,0);
 			}
 			break;
 		case 1:
 			item_select=select_item(1,0,item_select);
 			{
-				uint16_t &use_script=game->rpg.objects[item_select].script[0];
+				uint16_t &use_script=game->rpg.objects[game->rpg.items[item_select].item].script[0];
 				process_script(use_script,0);
 			}
 			break;
