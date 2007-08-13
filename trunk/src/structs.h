@@ -153,7 +153,7 @@ typedef struct rpg_def{
 		int16_t poison;
 		int16_t script;
 	}poison_stack[16][TEAMROLES];
-	struct {
+	struct ITEM{
 		int16_t item;
 		int16_t amount;
 		int16_t using_amount;
@@ -162,6 +162,12 @@ typedef struct rpg_def{
 	OBJECT	objects[600];
 	EVENT_OBJECT	evtobjs[5332];
 }RPG;
+
+template<typename T>
+bool operator==(T &i,uint16_t inv)
+{
+	return i.item==inv;
+}
 
 typedef struct{ int16_t item[9]; } SHOP;
 

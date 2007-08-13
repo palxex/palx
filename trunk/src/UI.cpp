@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include "UI.h"
 #include "timing.h"
+#include "structs.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -165,18 +166,31 @@ int menu::select(int selected)
 
 int select_item(int mask,int skip,int selected)
 {
-	static int const paging=8;static int locating=selected;//8 for dos,98 maybe 7?
+	int max=compact_items(),max_ori=max;
+
+	if(!skip)//装备中的土灵珠等
+		for(int i=0;i<=game->rpg.team_roles;i++)
+			for(int j=0xB;j<=0x10;j++)
+				if(rpg.objects[((roles*)&game->rpg.roles_properties)[j][i]].param & 1)
+//only available on gcc					game->rpg.items[max++]=(RPG::ITEM){((roles*)&game->rpg.roles_properties)[j][i],1,0};
+				{
+					RPG::ITEM it;it.item=((roles*)&game->rpg.roles_properties)[j][i];it.amount=1;it.using_amount=0;
+					game->rpg.items[max++]=it;
+				}
+
+	static int const paging=8,middle=paging/2;static int locating=selected;//8 for dos,98 maybe 7?
 	static bitmap buf(0,SCREEN_W,SCREEN_H),bak(0,SCREEN_W,SCREEN_H);
-	dialog(9,2,33,8,18,false);//DOS ver;for item should use 98 ver.
+
+	dialog(9,2,33,paging,18,false);//DOS ver;for item should use 98 ver.
 	blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
 	bool ok=false;int color_selecting,key;
 	VKEY keygot;
 	do{
 		static int offset=0,pre_locate=0;
-		offset=(locating/3<4?0:locating/3-4);
+		offset=(locating/3<middle?0:locating/3-middle);
 		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<locating*3+paging*3;r++)
-			ttfont(word(game->rpg.items[r].item*10)).blit_to(buf,2+80*(r%3),33+(r/3*3)*16,r==locating?0xFA:0,r==locating);
+			ttfont(word(game->rpg.items[r].item*10)).blit_to(buf,2+80*(r%3),33+(r/3*3)*16,r==locating?(game->rpg.objects[r].param&mask?0xFA:0x1C):0,true);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 		SAFE_GETKEY(keygot);
 		switch(keygot){
@@ -203,8 +217,13 @@ int select_item(int mask,int skip,int selected)
 				color_selecting=0x2B;
 				break;
 		}
-		locating+=3*paging;
-		locating%=(3*paging);
+		locating=(locating<0?0:(locating>max?max:locating));
 	}while(keygot!=VK_MENU && !ok);
-	return game->rpg.items[locating].item;
+
+	for(int i=max_ori;i<max;i++)
+		game->rpg.items[i].item=0,
+		game->rpg.items[i].amount=0,
+		game->rpg.items[i].using_amount=0;
+
+	return locating;
 }

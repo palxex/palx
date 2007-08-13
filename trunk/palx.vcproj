@@ -251,6 +251,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\src\item.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\src\qbrand.cpp"
 						>
 					</File>
