@@ -527,7 +527,7 @@ __walk_role:
 			mutex_can_change_palette=false;
 			break;
 		case 0x81:
-			if(param1>scene->sprites_begin-game->evtobjs.begin() && param1<scene->sprites_end-game->evtobjs.end() && curr_obj.status>0){
+			if(param1>scene->sprites_begin-game->evtobjs.begin() && param1<scene->sprites_end-game->evtobjs.begin() && curr_obj.status>0){
 				if(abs(curr_obj.pos_x-direction_offs[game->rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(curr_obj.pos_y-direction_offs[game->rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
 					if(game->rpg.scene_id>0)
 						curr_obj.trigger_method=5+game->rpg.scene_id*8;

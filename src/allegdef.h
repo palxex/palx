@@ -55,7 +55,7 @@ public:
 	void setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
-	bool blit_to(BITMAP *dest,int,int,bool =false);
+	bool blit_to(BITMAP *dest,int,int,bool =false,int =6, int =6);
 	friend bool operator<(const sprite &lhs,const sprite &rhs);
 };
 class sprite_prim{

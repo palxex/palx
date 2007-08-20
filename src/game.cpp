@@ -113,6 +113,7 @@ Game::Game(int save):rpg(::rpg)
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);
 	alfont_set_font_background(ttfont::glb_font, FALSE);
+	alfont_set_char_extra_spacing(ttfont::glb_font,1);
 	alfont_set_font_size(ttfont::glb_font,16);
 	//global setting
 	
