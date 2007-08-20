@@ -166,9 +166,9 @@ int menu::select(int selected)
 
 int select_item(int mask,int skip,int selected)
 {
-	int max=compact_items(),max_ori=max;
+	int max=compact_items(),max_ori=max,begin_y;
 
-	if(!skip)//装备中的土灵珠等
+	if(!skip)//装备中的土灵珠等}
 		for(int i=0;i<=game->rpg.team_roles;i++)
 			for(int j=0xB;j<=0x10;j++)
 				if(rpg.objects[((roles*)&game->rpg.roles_properties)[j][i]].param & 1)
@@ -177,6 +177,11 @@ int select_item(int mask,int skip,int selected)
 					RPG::ITEM it;it.item=((roles*)&game->rpg.roles_properties)[j][i];it.amount=1;it.using_amount=0;
 					game->rpg.items[max++]=it;
 				}
+	if(skip==-1)
+		begin_y=-8;
+	else
+		begin_y=33;
+	
 
 	static int const paging=8,middle=paging/2;static int locating=selected;//8 for dos,98 maybe 7?
 	static bitmap buf(0,SCREEN_W,SCREEN_H),bak(0,SCREEN_W,SCREEN_H);
@@ -189,8 +194,10 @@ int select_item(int mask,int skip,int selected)
 		static int offset=0,pre_locate=0;
 		offset=(locating/3<middle?0:locating/3-middle);
 		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
-		for(int r=offset*3;r<locating*3+paging*3;r++)
-			ttfont(word(game->rpg.items[r].item*10)).blit_to(buf,2+80*(r%3),33+(r/3*3)*16,r==locating?(game->rpg.objects[r].param&mask?0xFA:0x1C):0,true);
+		for(int r=offset*3;r<offset*3+paging*3;r++)
+			if(r<0x100 && game->rpg.items[r].item)
+				ttfont(word(game->rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==locating)?((game->rpg.objects[game->rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((game->rpg.objects[game->rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
+		game->UIpics.getsprite(69)->blit_to(buf,16+100*(locating%3)+24,begin_y+12+(locating/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 		SAFE_GETKEY(keygot);
 		switch(keygot){
@@ -207,9 +214,11 @@ int select_item(int mask,int skip,int selected)
 				locating++;
 				break;
 			case VK_PGUP:
-				locating+=3*paging;
+				locating-=middle*3;
+				break;
 			case VK_PGDN:
-				locating+=3*paging;
+				locating+=middle*3;
+				break;
 			case VK_MENU:
 				return -1;
 			case VK_EXPLORE:
@@ -217,7 +226,7 @@ int select_item(int mask,int skip,int selected)
 				color_selecting=0x2B;
 				break;
 		}
-		locating=(locating<0?0:(locating>max?max:locating));
+		locating=(locating<0?0:(locating>max-1?max-1:locating));
 	}while(keygot!=VK_MENU && !ok);
 
 	for(int i=max_ori;i<max;i++)

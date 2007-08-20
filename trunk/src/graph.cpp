@@ -74,7 +74,7 @@ bool sprite::blit_to(BITMAP *dest)
 		Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x,y-l-height);
 	return true;
 }
-bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow)
+bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 {
 	if(shadow)
 	{
@@ -90,7 +90,7 @@ bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow)
 			dst=(uint8_t *)bmp->dat;
 		}
 
-		for(int i=(y+6)*l+x+6,prei=i;i<(y+6+height)*l+x+6 && i<=dest->w*dest->h;i=prei+l,prei=i)
+		for(int i=(y+sy)*l+x+sx,prei=i;i<(y+sy+height)*l+x+sx && i<=dest->w*dest->h;i=prei+l,prei=i)
 			for(int j=0;j<width;)
 			{
 				uint8_t flag=*rle++;

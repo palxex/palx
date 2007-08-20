@@ -27,5 +27,5 @@ int compact_items()
 	for(int i=0;i<0x100;i++)
 		if(game->rpg.items[i].amount==0)
 			std::copy(game->rpg.items+i+1,game->rpg.items+0x100,game->rpg.items+i);
-	return std::find(game->rpg.items,game->rpg.items,0)-game->rpg.items;
+	return std::find(game->rpg.items,game->rpg.items+0x100,0)-game->rpg.items;
 }
