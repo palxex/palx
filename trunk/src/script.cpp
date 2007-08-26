@@ -495,6 +495,7 @@ __walk_role:
 			}
 			for(int i=0;i<(param3>0?param3:1);i++)
 			{
+				int b1=x_scrn_offset,b2=y_scrn_offset;
 				viewport_x_bak=game->rpg.viewport_x;
 				viewport_y_bak=game->rpg.viewport_y;
 				if(!param1 && !param2 && !param3){
@@ -513,13 +514,20 @@ __walk_role:
 						game->rpg.viewport_x+=param1;
 						game->rpg.viewport_y+=param2;
 					}
-					x_scrn_offset=game->rpg.viewport_x-scene->team_pos.toXY().x;
-					y_scrn_offset=game->rpg.viewport_y-scene->team_pos.toXY().y;
+					x_scrn_offset=scene->team_pos.toXY().x-game->rpg.viewport_x;
+					y_scrn_offset=scene->team_pos.toXY().y-game->rpg.viewport_y;
 				}
+				game->rpg.team[0].x=x_scrn_offset;
+				game->rpg.team[0].y=y_scrn_offset;
+				for(int t=1;t<=game->rpg.team_roles;t++){
+					game->rpg.team[t].x+=(x_scrn_offset-b1);
+					game->rpg.team[t].y+=(y_scrn_offset-b2);
+				}
+				GameLoop_OneCycle(false);
+				if(param3>=0)
+					scene->move_usable_screen();
+				redraw_everything();
 			}
-
-			GameLoop_OneCycle(false);
-			redraw_everything();
 			break;
 		case 0x80://todo:
 			GameLoop_OneCycle(false);
@@ -638,10 +646,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 					wait_key(140);
 				}else if(current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
 					dialog_string(msg,dialog_x,dialog_y,0x8C,true);
-				else{
-					draw_oneline_m_text(msg,frame_text_x,frame_text_y+current_dialog_lines*(frame_pos_flag?16:18));
-					current_dialog_lines++;
-				}
+				else
+					draw_oneline_m_text(msg,frame_text_x,frame_text_y+(current_dialog_lines++)*(frame_pos_flag?16:18));
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");

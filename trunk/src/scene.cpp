@@ -187,16 +187,16 @@ void Scene::move_usable_screen()
 	if(redraw_flag==0)
 	{
 		/*produce_one_screen();*/
-		if(abstract_x_bak!=team_pos.toXY().x || abstract_y_bak!=team_pos.toXY().y)
+		if(viewport_x_bak!=game->rpg.viewport_x || viewport_y_bak!=game->rpg.viewport_y)
 		{
-			int x1=0,x2=0,y1=0,y2=0,vx1=0,vy1=0,vx2=0,vy2=0,tx=abs(team_pos.toXY().x-abstract_x_bak),ty=abs(team_pos.toXY().y-abstract_y_bak);
-			if(team_pos.toXY().y > abstract_y_bak)
+			int x1=0,x2=0,y1=0,y2=0,vx1=0,vy1=0,vx2=0,vy2=0,tx=abs(game->rpg.viewport_x-viewport_x_bak),ty=abs(game->rpg.viewport_y-viewport_y_bak);
+			if(game->rpg.viewport_y > viewport_y_bak)
 				y1=SCREEN_H-ty,y2=SCREEN_H,	vy1=ty,vy2=0;
-			else if(team_pos.toXY().y < abstract_y_bak)
+			else if(game->rpg.viewport_y < viewport_y_bak)
 				y1=0,y2=ty,					vy1=0,vy2=ty;		
-			if(team_pos.toXY().x > abstract_x_bak)
+			if(game->rpg.viewport_x > viewport_x_bak)
 				x1=SCREEN_W-tx,x2=SCREEN_W,	vx1=tx,vx2=0;
-			else if(team_pos.toXY().x < abstract_x_bak)
+			else if(game->rpg.viewport_x < viewport_x_bak)
 				x1=0,x2=tx,					vx1=0,vx2=tx;
 
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
@@ -214,6 +214,8 @@ void Scene::get_sprites()
 }
 void Scene::produce_one_screen()
 {
+	viewport_x_bak=game->rpg.viewport_x;
+	viewport_y_bak=game->rpg.viewport_y;
 	scenemap.make_onescreen(scene_buf,game->rpg.viewport_x,game->rpg.viewport_y,game->rpg.viewport_x+SCREEN_W,game->rpg.viewport_y+SCREEN_H);
 }
 template<typename T>
