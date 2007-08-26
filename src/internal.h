@@ -115,7 +115,7 @@ extern bool starting;
 		if(starting) \
 			throw new std::exception(); \
 		else \
-			return; \
+			exit(-1); \
 	switch_proc(); \
 } \
 

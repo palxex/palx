@@ -161,6 +161,9 @@ Game::~Game(){
 	remove_int(prtscrn_proc);
 }
 
+/*/
+extern "C" __declspec(dllimport) uint32_t __stdcall GetLastError();/*/
+int GetLastError(){return 0;}//*/
 void Game::load(int id){
 	if(!id)
 		return;
@@ -168,7 +171,7 @@ void Game::load(int id){
 	rpg_to_load=id;
 	FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"rb");
 	if(!fprpg){
-		allegro_message("ºÜ±§Ç¸£¬%d.rpg²»´æÔÚ¡«",id);
+		allegro_message("sorry,%d.rpg is not exist~The ERROR CODE is %lx",id,GetLastError());
 		return;
 	}
 	scene->scenemap.change(-1);
