@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="palx" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="Debug-cb\palx" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="Resource" />
+				<Option object_output="obj\Debug\" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add library="libalfont.a" />
+					<Add library="libadplug.a" />
+					<Add library="libbinio.a" />
+					<Add library="liballeg_s.a" />
+					<Add library="libboost_regex.a" />
+					<Add library="libkernel32.a" />
+					<Add library="libuser32.a" />
+					<Add library="libgdi32.a" />
+					<Add library="libcomdlg32.a" />
+					<Add library="libole32.a" />
+					<Add library="libdinput.a" />
+					<Add library="libddraw.a" />
+					<Add library="libdxguid.a" />
+					<Add library="libwinmm.a" />
+					<Add library="libdsound.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="Release-cb\palx" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="Resource" />
+				<Option object_output="obj\Release\" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="libalfont.a" />
+					<Add library="libadplug.a" />
+					<Add library="libbinio.a" />
+					<Add library="liballeg_s.a" />
+					<Add library="libboost_regex.a" />
+					<Add library="libkernel32.a" />
+					<Add library="libuser32.a" />
+					<Add library="libgdi32.a" />
+					<Add library="libcomdlg32.a" />
+					<Add library="libole32.a" />
+					<Add library="libdinput.a" />
+					<Add library="libddraw.a" />
+					<Add library="libdxguid.a" />
+					<Add library="libwinmm.a" />
+					<Add library="libdsound.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-DALLEGRO_STATICLINK" />
+			<Add directory="PalLibrary\include" />
+		</Compiler>
+		<Linker>
+			<Add library="gdi32" />
+			<Add library="user32" />
+			<Add library="kernel32" />
+			<Add library="libalfont.a" />
+			<Add library="libadplug.a" />
+			<Add library="libbinio.a" />
+			<Add library="liballeg_s.a" />
+			<Add library="libboost_regex.a" />
+			<Add library="libkernel32.a" />
+			<Add library="libuser32.a" />
+			<Add library="libgdi32.a" />
+			<Add library="libcomdlg32.a" />
+			<Add library="libole32.a" />
+			<Add library="libdinput.a" />
+			<Add library="libddraw.a" />
+			<Add library="libdxguid.a" />
+			<Add library="libwinmm.a" />
+			<Add library="libdsound.a" />
+		</Linker>
+		<Unit filename="PalLibrary\include\config.h" />
+		<Unit filename="PalLibrary\include\grf.h" />
+		<Unit filename="PalLibrary\include\pallib.h" />
+		<Unit filename="PalLibrary\src\c-compat.cpp" />
+		<Unit filename="PalLibrary\src\grf.cpp" />
+		<Unit filename="PalLibrary\src\rle.cpp" />
+		<Unit filename="PalLibrary\src\rng.cpp" />
+		<Unit filename="PalLibrary\src\yj1.cpp" />
+		<Unit filename="PalLibrary\src\yj1s.h" />
+		<Unit filename="PalLibrary\src\yj2.cpp" />
+		<Unit filename="PalLibrary\src\yj2sd.h" />
+		<Unit filename="PalLibrary\src\yj2se.h" />
+		<Unit filename="icon.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="src\UI.cpp" />
+		<Unit filename="src\UI.h" />
+		<Unit filename="src\allegdef.h" />
+		<Unit filename="src\audio.cpp" />
+		<Unit filename="src\battle.cpp" />
+		<Unit filename="src\begin.cpp" />
+		<Unit filename="src\begin.h" />
+		<Unit filename="src\celestial.cpp" />
+		<Unit filename="src\celestial.ico" />
+		<Unit filename="src\fade.cpp" />
+		<Unit filename="src\game.cpp" />
+		<Unit filename="src\game.h" />
+		<Unit filename="src\graph.cpp" />
+		<Unit filename="src\integer.h" />
+		<Unit filename="src\internal.cpp" />
+		<Unit filename="src\internal.h" />
+		<Unit filename="src\item.cpp" />
+		<Unit filename="src\keyboard.cpp" />
+		<Unit filename="src\mainloop.cpp" />
+		<Unit filename="src\message.cpp" />
+		<Unit filename="src\palx.cpp" />
+		<Unit filename="src\playrng.cpp" />
+		<Unit filename="src\qbrand.cpp" />
+		<Unit filename="src\resource.cpp" />
+		<Unit filename="src\resource.h" />
+		<Unit filename="src\scene.cpp" />
+		<Unit filename="src\scene.h" />
+		<Unit filename="src\script.cpp" />
+		<Unit filename="src\structs.h" />
+		<Unit filename="src\team.cpp" />
+		<Unit filename="src\timing.cpp" />
+		<Unit filename="src\timing.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
