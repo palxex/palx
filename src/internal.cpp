@@ -85,8 +85,9 @@ void Load_Data()
 	redraw_flag=0;
 	x_scrn_offset=0xA0*scale;
 	y_scrn_offset=0x70*scale;
-	scene->team_pos.toXY().x=game->rpg.viewport_x+x_scrn_offset;
-	scene->team_pos.toXY().y=game->rpg.viewport_y+y_scrn_offset;
+	//罢,罢,想加这个功能惹出一堆事
+	//scene->team_pos.toXY().x=game->rpg.viewport_x+x_scrn_offset;
+	//scene->team_pos.toXY().y=game->rpg.viewport_y+y_scrn_offset;
 	game->rpg.scene_id=map_toload;
 	if(flag_to_load&4){
 		//load evtobjs
