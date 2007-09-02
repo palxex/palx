@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "internal.h"
 #include "structs.h"
@@ -231,6 +230,9 @@ __walk_npc:
 		case 0x16:
 			curr_obj.direction=param2;
 			curr_obj.curr_frame=param3;
+			break;
+        case 0x1a:
+            game->rpg.role_prop_tables[param1][param3]=param2;
 			break;
 		case 0x1f:
 			compact_items();
@@ -618,7 +620,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 		backup=create_bitmap(SCREEN_W,SCREEN_H);
 	static char *msg,colon[3];static int i=sprintf(colon,msges(0xc94,0xc96));
 	EVENT_OBJECT &obj=game->evtobjs[object];
-	uint16_t next_id=id;	
+	uint16_t next_id=id;
 	current_dialog_lines = 0;
 	glbvar_fontcolor  = 0x4F;
 	font_color_yellow = 0x2D;
@@ -712,7 +714,7 @@ uint16_t process_script(uint16_t id,int16_t object)
 				}else
 					restore_screen();
 				break;
-			case 6:			
+			case 6:
 				//printf("以%d%%几率跳转到脚本%x:",param1,curr.param[1]);
 				if(rnd0()*100<param1){
 					//printf("成功\n");
@@ -818,7 +820,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 			process_script(param1,param2?param2:object);
 			break;
 		case 6:
-			//时间关系，不再模拟QB7的随机函数				
+			//时间关系，不再模拟QB7的随机函数
 			//printf("以%d%%几率跳转到脚本%x:",param1,param2);
 			if(rnd0()*100<param1)
 				//printf("成功\n");
