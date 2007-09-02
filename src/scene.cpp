@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "scene.h"
 #include "internal.h"
@@ -125,6 +124,8 @@ void Scene::calc_team_walking(int key)
 		}
 	}
 	stop_and_update_frame();
+	team_pos.x=game->rpg.viewport_x+x_scrn_offset;
+	team_pos.y=game->rpg.viewport_y+y_scrn_offset;
 }
 void Scene::our_team_setdraw()
 {
@@ -193,14 +194,14 @@ void Scene::move_usable_screen()
 			if(game->rpg.viewport_y > viewport_y_bak)
 				y1=SCREEN_H-ty,y2=SCREEN_H,	vy1=ty,vy2=0;
 			else if(game->rpg.viewport_y < viewport_y_bak)
-				y1=0,y2=ty,					vy1=0,vy2=ty;		
+				y1=0,y2=ty,					vy1=0,vy2=ty;
 			if(game->rpg.viewport_x > viewport_x_bak)
 				x1=SCREEN_W-tx,x2=SCREEN_W,	vx1=tx,vx2=0;
 			else if(game->rpg.viewport_x < viewport_x_bak)
 				x1=0,x2=tx,					vx1=0,vx2=tx;
 
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
-			
+
 			short &vx=game->rpg.viewport_x,&vy=game->rpg.viewport_y;
  			scenemap.make_onescreen(scene_buf,vx,vy+y1,vx+SCREEN_W,vy+y2);
 			scenemap.make_onescreen(scene_buf,vx+x1,vy,vx+x2,vy+SCREEN_H);

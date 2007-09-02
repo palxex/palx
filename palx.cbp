@@ -12,6 +12,7 @@
 				<Option object_output="obj\Debug\" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="29" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -39,6 +40,7 @@
 				<Option object_output="obj\Release\" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="26" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -110,7 +112,6 @@
 		<Unit filename="src\begin.cpp" />
 		<Unit filename="src\begin.h" />
 		<Unit filename="src\celestial.cpp" />
-		<Unit filename="src\celestial.ico" />
 		<Unit filename="src\fade.cpp" />
 		<Unit filename="src\game.cpp" />
 		<Unit filename="src\game.h" />

@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "begin.h"
 #include "UI.h"
@@ -51,7 +50,7 @@ void startup_splash()
 	BITMAP *scrn_buf=create_bitmap(SCREEN_W,SCREEN_H*2);
 	int prog_lines=200,prog_pale=0,prog_goose=0,begin_pale=40,add_pale=16;
 	VKEY keygot;
-	do{		
+	do{
 		blit(cat,scrn_buf,0,std::max(prog_lines--,0),0,0,SCREEN_W,SCREEN_H);
 		for(int i=0;i<9;i++)
 			if(poses[i][0]-2*i>-40)
@@ -88,7 +87,7 @@ void startup_splash()
 				pal[j].r=game->pat.get(0)[j].r*i/0x40;
 				pal[j].g=game->pat.get(0)[j].g*i/0x40;
 				pal[j].b=game->pat.get(0)[j].b*i/0x40;
-			} 
+			}
 			set_palette(pal);
 			wait(1);
 		}
@@ -163,7 +162,7 @@ int begin_scene::operator()(Game *game){
 
 	//ÔÆ¹Èº×·å
 	startup_splash();
-	
+
 	MGO.clear();
 	FBP.clear();
 	RNG.clear();

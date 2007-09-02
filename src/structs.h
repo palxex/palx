@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #ifndef SSS_STRUCTS_H
 #define SSS_STRUCTS_H
@@ -64,7 +63,7 @@ typedef struct script_def{
 	int16_t param[3];
 }SCRIPT;
 
-//typedef struct 
+//typedef struct
 
 enum DIRECTION{WEST,NORTH,EAST,SOUTH};
 enum ROLE{LEE,LINGR,YUERU,WUHOU,GAI,ANU};
@@ -148,7 +147,10 @@ typedef struct rpg_def{
 		int16_t level;
 		int16_t count;
 	}roles_exp[8][ALLROLES];
-	ROLES_PROP roles_properties;
+	union{
+	    ROLES_PROP roles_properties;
+	    roles role_prop_tables[sizeof(ROLES_PROP)/sizeof(roles)];
+	};
 	struct {
 		int16_t poison;
 		int16_t script;

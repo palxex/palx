@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "game.h"
 
@@ -28,7 +27,7 @@
 #include "begin.h"
 
 using namespace std;
-volatile uint8_t time_interrupt_occurs; 
+volatile uint8_t time_interrupt_occurs;
 int mutex_paletting=0,mutex_blitting=0,mutex_int=0;
 extern int rix_fade_flag;
 namespace{
@@ -109,14 +108,14 @@ Game::Game(int save):rpg(::rpg)
 	char fontpath[100];
 	sprintf(fontpath,"%s%s",getenv("WINDIR"),"\\fonts\\mingliu.ttc");
 	ttfont::glb_font=alfont_load_font(fontpath);
-	alfont_set_language(ttfont::glb_font, "cht");	
+	alfont_set_language(ttfont::glb_font, "cht");
 	alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
 	//alfont_text_mode(-1);
 	alfont_set_font_background(ttfont::glb_font, FALSE);
 	alfont_set_char_extra_spacing(ttfont::glb_font,1);
 	alfont_set_font_size(ttfont::glb_font,16);
 	//global setting
-	
+
 	LOCK_VARIABLE(time_interrupt_occurs);
 	install_int(timer_proc,10);
 

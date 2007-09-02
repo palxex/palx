@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "UI.h"
 #include "timing.h"
@@ -56,7 +55,7 @@ dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
 		else if(i==1+rows)
 				ti=2;
 		else
-			ti=1; 
+			ti=1;
 		border[ti][0]->blit_to(screen,x,y+len,shadow);
 		for(;j<columns;j++)
 			border[ti][1]->blit_to(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
@@ -85,12 +84,12 @@ int select_rpg(int ori_select,BITMAP *bmp)
 	std::vector<std::string> menu_items;
 	blit(bmp,cache,0,0,0,0,SCREEN_W,SCREEN_H);
 	do{
-		for(int r=0;r<5;r++){			
+		for(int r=0;r<5;r++){
 			single_dialog(0xB4,4+0x26*r,6,cache);
 			dialog_string((std::string(word(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
-		
+
 		VKEY keygot;
 		SAFE_GETKEY(keygot);
 		switch(keygot){
@@ -181,7 +180,7 @@ int select_item(int mask,int skip,int selected)
 		begin_y=-8;
 	else
 		begin_y=33;
-	
+
 
 	static int const paging=8,middle=paging/2;static int locating=selected;//8 for dos,98 maybe 7?
 	static bitmap buf(0,SCREEN_W,SCREEN_H),bak(0,SCREEN_W,SCREEN_H);

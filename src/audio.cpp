@@ -1,11 +1,11 @@
 /***************************************************************************
- *   PALx: A platform independent port of classic RPG PAL   *
- *   Copyleft (C) 2006 by Pal Lockheart   *
- *   palxex@gmail.com   *
+ *   PALx: A platform independent port of classic RPG PAL                  *
+ *   Copyleft (C) 2006 by Pal Lockheart                                    *
+ *   palxex@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version 3 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -14,9 +14,8 @@
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   along with this program; if not, If not, see                          *
+ *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
 
@@ -29,7 +28,7 @@ void playrix_timer(void *param)
 {
 	playrix *plr=reinterpret_cast<playrix*>(param);
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
-	if (plr->playing && p) 
+	if (plr->playing && p)
 	{
 		if(plr->leaving<BUFFER_SIZE*CHANNELS)
 		{
@@ -78,7 +77,7 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 	LOCK_VARIABLE(subsong);
 	LOCK_FUNCTION(playrix_timer);
 	install_param_int(playrix_timer,this,14);
-	
+
 	BufferLength = SAMPLE_RATE * CHANNELS * 3;
 	Buffer = buf = new short [BufferLength];
 	memset(buf, 0, sizeof(short) * BufferLength);
@@ -86,7 +85,7 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 playrix::~playrix()
 {
 	remove_param_int(playrix_timer,this);
-	stop();	
+	stop();
 	stop_audio_stream(stream);
 	delete []Buffer;
 }
@@ -99,7 +98,7 @@ void playrix::play(int sub_song,int gap)
 	subsong=sub_song;
 
 	voice_set_volume(stream->voice,0);
-	rix.rewind(subsong);	
+	rix.rewind(subsong);
 	playing=true;
 
 	voice_ramp_volume(stream->voice, gap*1000, 255);
