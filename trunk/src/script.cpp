@@ -469,6 +469,16 @@ __walk_role:
 			flag_battling=0;
 			Load_Data();
 			break;
+		case 0x79:
+			{
+				bool in=false;
+				for(int i=0;i<=game->rpg.team_roles;i++)
+					if(game->rpg.roles_properties.name[i]==param1)
+						in=true,i=5;
+				if(in)
+					id=param2-1;
+			}
+			break;
 		case 0x7a:
 			role_speed=4;
 			goto __walk_role;
@@ -620,7 +630,8 @@ uint16_t process_script(uint16_t id,int16_t object)
 	dialog_y = 8;
 	frame_text_x = 0x2C;
 	frame_text_y = 0x1A;
-	while(id)
+	bool ok=true;
+	while(id && ok)
 	{
 		SCRIPT &curr=game->scripts[id];
 		const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
@@ -628,9 +639,10 @@ uint16_t process_script(uint16_t id,int16_t object)
 		switch(curr.func)
 		{
 			case 0:
-				id = next_id;
+				id = next_id-1;
 				//printf("停止执行\n");
-				goto exit;
+				ok=false;
+				break;
 			case -1:
 				//printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
 				if(current_dialog_lines>3){
@@ -651,18 +663,20 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			case 1:
 				//printf("停止执行，将调用地址替换为下一条命令\n");
-				id++;
-				goto exit;
+				ok=false;
+				break;
 			case 2:
 				//printf("停止执行，将调用地址替换为脚本%x:",param1);
 				if(curr.param[1]==0){
 					//printf("成功\n");
-					id = param1;
-					goto exit;
+					id = param1-1;
+					ok=false;
+					break;
 				}else if(obj.scr_jmp_count++<curr.param[1]){
 					//printf("第%x次成功\n",obj.scr_jmp_count);
-					id = param1;
-					goto exit;
+					id = param1-1;
+					ok=false;
+					break;
 				}else{
 					//printf("过期失效\n");
 					obj.scr_jmp_count = 0;
