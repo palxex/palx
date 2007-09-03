@@ -28,3 +28,11 @@ int compact_items()
 			std::copy(game->rpg.items+i+1,game->rpg.items+0x100,game->rpg.items+i);
 	return std::find(game->rpg.items,game->rpg.items+0x100,0)-game->rpg.items;
 }
+void add_goods_to_list(int goods,int num)
+{
+    RPG::ITEM *ptr=std::find(game->rpg.items,game->rpg.items+0x100,goods);
+    if (ptr==game->rpg.items+0x100)
+        ptr=std::find(game->rpg.items,game->rpg.items+0x100,0),
+        ptr->item=goods;
+    ptr->amount+=num;
+}
