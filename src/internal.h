@@ -97,6 +97,7 @@ extern bool barrier_check(uint16_t self,int x,int y);
 
 extern bool mutex_can_change_palette;
 extern int mutex_paletting,mutex_blitting;
+extern int shake_times,shake_grade;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
 extern void show_fbp(int,int);
@@ -106,17 +107,7 @@ extern int CARD;
 extern int mutex_int;
 extern void switch_proc();
 extern bool starting;
-#include <exception>
-#define perframe_proc() \
-{ \
-	extern bool running; \
-	if(!running) \
-		if(starting) \
-			throw new std::exception(); \
-		else \
-			exit(-1); \
-	switch_proc(); \
-} \
+extern void perframe_proc();
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
