@@ -46,6 +46,18 @@ extern int scale;
 extern bool running;
 bool key_enable=true;
 
+#include <exception>
+void perframe_proc()
+{
+	extern bool running;
+	if(!running)
+		if(starting)
+			throw new std::exception();
+		else
+			exit(-1);
+	switch_proc();
+	ShakeScreen();
+}
 void switch_proc()
 {
 	mutex_int=1;

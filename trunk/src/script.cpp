@@ -377,6 +377,16 @@ __walk_npc:
         else
             id=param2-1;
         break;
+    case 0x33:
+        //not implemented
+        break;
+    case 0x34:
+        //not implemented
+        break;
+    case 0x35:
+        shake_times=param1;
+        shake_grade=(param2?param2:4);
+        break;
     case 0x36://Set RNG
         RNG.clear();
         RNG_num=param1;
@@ -586,7 +596,7 @@ __walk_role:
         }
         break;
     case 0x73:
-        clear_effective(param1,param2);
+        clear_effective(param1?param1:1,param2);
         break;
     case 0x75:
         game->rpg.team[0].role=(param1-1<0?0:param1-1);
