@@ -25,6 +25,7 @@ extern bool running;
 #include "scene.h"
 #include "game.h"
 #include "pallib.h"
+#include "begin.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -67,14 +68,19 @@ int main(int argc, char *argv[])
 	}
 	boost::shared_ptr<Game> thegame;
 	try{
-		thegame=boost::shared_ptr<Game>(new Game(boost::lexical_cast<int>(conv_buf)));
-	}catch(exception *)
-	{
-		exit(0);
+		res::init_resource();
+        //load save
+        int save=boost::lexical_cast<int>(conv_buf);
+        if(save!=0 || (save=begin_scene()()))
+            rpg_to_load=save;
+        else
+            map_toload=1;
+        Scene normal;	scene=&normal;
+        res::load();
+        res::run();
+	}catch(exception *){
 	}
-	game=thegame.get();
-	Scene normal;	scene=&normal;
-	game->load();
-	return game->run();
+    res::destroy_resource();
+	return 0;
 }
 END_OF_MAIN();

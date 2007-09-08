@@ -24,15 +24,15 @@
 int compact_items()
 {
 	for(int i=0;i<0x100;i++)
-		if(game->rpg.items[i].amount==0)
-			std::copy(game->rpg.items+i+1,game->rpg.items+0x100,game->rpg.items+i);
-	return std::find(game->rpg.items,game->rpg.items+0x100,0)-game->rpg.items;
+		if(res::rpg.items[i].amount==0)
+			std::copy(res::rpg.items+i+1,res::rpg.items+0x100,res::rpg.items+i);
+	return std::find(res::rpg.items,res::rpg.items+0x100,0)-res::rpg.items;
 }
 void add_goods_to_list(int goods,int num)
 {
-    RPG::ITEM *ptr=std::find(game->rpg.items,game->rpg.items+0x100,goods);
-    if (ptr==game->rpg.items+0x100)
-        ptr=std::find(game->rpg.items,game->rpg.items+0x100,0),
+    RPG::ITEM *ptr=std::find(res::rpg.items,res::rpg.items+0x100,goods);
+    if (ptr==res::rpg.items+0x100)
+        ptr=std::find(res::rpg.items,res::rpg.items+0x100,0),
         ptr->item=goods;
     ptr->amount+=num;
 }

@@ -63,17 +63,17 @@ inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 {
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return;
 	if(sprites[x][y][h][0].valid && sprites[x][y][h][1].valid){
-		sprites[x][y][h][0].image->blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
+		sprites[x][y][h][0].image->blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 		if(sprites[x][y][h][1].valid)
-			sprites[x][y][h][1].image->blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
+			sprites[x][y][h][1].image->blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 		return;
 	}
 	int index=(_buf[1]&0x10)<<4|_buf[0],index2=(_buf[3]&0x10)<<4|_buf[2];
 	bool throu=(_buf[1]&0x20)?true:false,throu2=(_buf[3]&0x20)?true:false;
 	int layer=_buf[1]&0xf,layer2=_buf[3]&0xf;
-	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
+	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 	if(index2)
-		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu2,layer2).blit_to(dest,x*32+h*16-16-game->rpg.viewport_x,y*16+h*8-8-game->rpg.viewport_y);
+		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu2,layer2).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 }
 void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
@@ -82,7 +82,7 @@ void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,in
 		for(int x=source_x/32;x<dest_x/32+1;x++)
 			for(int h=0;h<2;h++)
 				make_tile(mapbuf+y*0x200+x*8+h*4,x,y,h,bmp);
-	blit(bmp,dest,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,source_x-game->rpg.viewport_x,source_y-game->rpg.viewport_y,dest_x-source_x,dest_y-source_y);
+	blit(bmp,dest,source_x-res::rpg.viewport_x,source_y-res::rpg.viewport_y,source_x-res::rpg.viewport_x,source_y-res::rpg.viewport_y,dest_x-source_x,dest_y-source_y);
 }
 void palmap::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
 {
@@ -90,7 +90,7 @@ void palmap::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
 	blit(bmp,bmp,sx,sy,dx,dy,bmp->w,bmp->h);
 }
 
-Scene::Scene():scene_buf(create_bitmap(SCREEN_W,SCREEN_H)),team_pos(game->rpg.viewport_x+x_scrn_offset,game->rpg.viewport_y+y_scrn_offset)
+Scene::Scene():scene_buf(create_bitmap(SCREEN_W,SCREEN_H)),team_pos(res::rpg.viewport_x+x_scrn_offset,res::rpg.viewport_y+y_scrn_offset)
 {}
 Scene::~Scene()
 {}
@@ -104,11 +104,11 @@ void Scene::clear_active()
 }
 void Scene::calc_team_walking(int key)
 {
-	int16_t &direction=game->rpg.team_direction;
+	int16_t &direction=res::rpg.team_direction;
 	abstract_x_bak=team_pos.toXY().x;
 	abstract_y_bak=team_pos.toXY().y;
-	viewport_x_bak=game->rpg.viewport_x;
-	viewport_y_bak=game->rpg.viewport_y;
+	viewport_x_bak=res::rpg.viewport_x;
+	viewport_y_bak=res::rpg.viewport_y;
 	if(key>=VK_DOWN && key<=VK_RIGHT && key_enable){
 		direction=key-3;
 		position target=team_pos+position(direction_offs[direction][0],direction_offs[direction][1]);
@@ -116,22 +116,22 @@ void Scene::calc_team_walking(int key)
 			target.toXY().x>=0 && target.toXY().x<=coordinate_x_max+x_scrn_offset &&
 			target.toXY().y>=0 && target.toXY().y<=coordinate_y_max+y_scrn_offset)
 		{
-			game->rpg.viewport_x+=direction_offs[direction][0];
-			game->rpg.viewport_y+=direction_offs[direction][1];
+			res::rpg.viewport_x+=direction_offs[direction][0];
+			res::rpg.viewport_y+=direction_offs[direction][1];
 			team_pos.toXY()=target;
 			team_walk_one_step();
 			return;
 		}
 	}
 	stop_and_update_frame();
-	team_pos.x=game->rpg.viewport_x+x_scrn_offset;
-	team_pos.y=game->rpg.viewport_y+y_scrn_offset;
+	team_pos.x=res::rpg.viewport_x+x_scrn_offset;
+	team_pos.y=res::rpg.viewport_y+y_scrn_offset;
 }
 void Scene::our_team_setdraw()
 {
-	for(int i=0;i<=game->rpg.team_roles+game->rpg.team_followers;i++){
-		s_list::value_type it=boost::shared_ptr<sprite>(mgos[team_mgos[i]].getsprite(game->rpg.team[i].frame)->clone());
-		it->setXYL(game->rpg.team[i].x,game->rpg.team[i].y+game->rpg.layer+10,game->rpg.layer+6);
+	for(int i=0;i<=res::rpg.team_roles+res::rpg.team_followers;i++){
+		s_list::value_type it=boost::shared_ptr<sprite>(mgos[team_mgos[i]].getsprite(res::rpg.team[i].frame)->clone());
+		it->setXYL(res::rpg.team[i].x,res::rpg.team[i].y+res::rpg.layer+10,res::rpg.layer+6);
 		active_list.push_back(it);
 	}
 }
@@ -139,12 +139,12 @@ void Scene::visible_NPC_movment_setdraw()
 {
 	int t=0;
 	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++,t++)
-		if(i->pos_x-game->rpg.viewport_x>-64 && i->pos_x-game->rpg.viewport_x<0x180 &&
-		   i->pos_y-game->rpg.viewport_y>0   && i->pos_y-game->rpg.viewport_y<0x148 &&
+		if(i->pos_x-res::rpg.viewport_x>-64 && i->pos_x-res::rpg.viewport_x<0x180 &&
+		   i->pos_y-res::rpg.viewport_y>0   && i->pos_y-res::rpg.viewport_y<0x148 &&
 		   i->image && i->status && i->vanish_time==0)
 		{
 			s_list::value_type it=boost::shared_ptr<sprite>(mgos[npc_mgos[t]].getsprite(i->direction*i->frames+i->curr_frame)->clone());
-			it->setXYL(i->pos_x-game->rpg.viewport_x,i->pos_y-game->rpg.viewport_y+i->layer*8+9,i->layer*8+2);
+			it->setXYL(i->pos_x-res::rpg.viewport_x,i->pos_y-res::rpg.viewport_y+i->layer*8+9,i->layer*8+2);
 			active_list.push_back(it);
 		}
 }
@@ -155,8 +155,8 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 	{
 	case 0:
 		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
-			for(int vx=(game->rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(game->rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
-				for(int vy=(game->rpg.viewport_y+masker->y-masker->height)/16-1,vh=(game->rpg.viewport_y+masker->y)%16/8;vy<=(game->rpg.viewport_y+masker->y)/16+1;vy++)
+			for(int vx=(res::rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(res::rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
+				for(int vy=(res::rpg.viewport_y+masker->y-masker->height)/16-1,vh=(res::rpg.viewport_y+masker->y)%16/8;vy<=(res::rpg.viewport_y+masker->y)/16+1;vy++)
 					for(int x=vx-1,y=vy;x<=vx+1 && y>=0;x++)
 						for(int h=0;h<2;h++)
 						{
@@ -164,12 +164,12 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 							tile &tile1=scenemap.gettile(x,y,h,1);
 							if(tile0.valid && tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
 								s_list::value_type it=boost::shared_ptr<sprite>(tile0.image.get()->clone());
-								it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile0.layer*8-game->rpg.viewport_y,tile0.layer*8);
+								it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+tile0.layer*8-res::rpg.viewport_y,tile0.layer*8);
 								redraw_list.push_back(it);
 							}
 							if(tile1.valid && tile1.layer>0 && 16*(y+tile1.layer)+8*h+8>=masker->y){
 								s_list::value_type it=boost::shared_ptr<sprite>(tile1.image.get()->clone());
-								it->setXYL(32*x+16*h-game->rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-game->rpg.viewport_y,tile1.layer*8+1);
+								it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-res::rpg.viewport_y,tile1.layer*8+1);
 								redraw_list.push_back(it);
 							}
 						}
@@ -188,21 +188,21 @@ void Scene::move_usable_screen()
 	if(redraw_flag==0)
 	{
 		/*produce_one_screen();*/
-		if(viewport_x_bak!=game->rpg.viewport_x || viewport_y_bak!=game->rpg.viewport_y)
+		if(viewport_x_bak!=res::rpg.viewport_x || viewport_y_bak!=res::rpg.viewport_y)
 		{
-			int x1=0,x2=0,y1=0,y2=0,vx1=0,vy1=0,vx2=0,vy2=0,tx=abs(game->rpg.viewport_x-viewport_x_bak),ty=abs(game->rpg.viewport_y-viewport_y_bak);
-			if(game->rpg.viewport_y > viewport_y_bak)
+			int x1=0,x2=0,y1=0,y2=0,vx1=0,vy1=0,vx2=0,vy2=0,tx=abs(res::rpg.viewport_x-viewport_x_bak),ty=abs(res::rpg.viewport_y-viewport_y_bak);
+			if(res::rpg.viewport_y > viewport_y_bak)
 				y1=SCREEN_H-ty,y2=SCREEN_H,	vy1=ty,vy2=0;
-			else if(game->rpg.viewport_y < viewport_y_bak)
+			else if(res::rpg.viewport_y < viewport_y_bak)
 				y1=0,y2=ty,					vy1=0,vy2=ty;
-			if(game->rpg.viewport_x > viewport_x_bak)
+			if(res::rpg.viewport_x > viewport_x_bak)
 				x1=SCREEN_W-tx,x2=SCREEN_W,	vx1=tx,vx2=0;
-			else if(game->rpg.viewport_x < viewport_x_bak)
+			else if(res::rpg.viewport_x < viewport_x_bak)
 				x1=0,x2=tx,					vx1=0,vx2=tx;
 
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
 
-			short &vx=game->rpg.viewport_x,&vy=game->rpg.viewport_y;
+			short &vx=res::rpg.viewport_x,&vy=res::rpg.viewport_y;
  			scenemap.make_onescreen(scene_buf,vx,vy+y1,vx+SCREEN_W,vy+y2);
 			scenemap.make_onescreen(scene_buf,vx+x1,vy,vx+x2,vy+SCREEN_H);
 		}
@@ -215,9 +215,9 @@ void Scene::get_sprites()
 }
 void Scene::produce_one_screen()
 {
-	viewport_x_bak=game->rpg.viewport_x;
-	viewport_y_bak=game->rpg.viewport_y;
-	scenemap.make_onescreen(scene_buf,game->rpg.viewport_x,game->rpg.viewport_y,game->rpg.viewport_x+SCREEN_W,game->rpg.viewport_y+SCREEN_H);
+	viewport_x_bak=res::rpg.viewport_x;
+	viewport_y_bak=res::rpg.viewport_y;
+	scenemap.make_onescreen(scene_buf,res::rpg.viewport_x,res::rpg.viewport_y,res::rpg.viewport_x+SCREEN_W,res::rpg.viewport_y+SCREEN_H);
 }
 template<typename T>
 bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)

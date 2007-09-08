@@ -28,6 +28,8 @@
 
 #include <algorithm>
 
+using namespace res;
+
 extern int scale;
 
 extern int process_Battle(uint16_t,uint16_t);
@@ -49,10 +51,10 @@ void backup_screen()
 
 inline void sync_viewport()
 {
-    viewport_x_bak=game->rpg.viewport_x;
-    viewport_y_bak=game->rpg.viewport_y;
-    game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-    game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+    viewport_x_bak=rpg.viewport_x;
+    viewport_y_bak=rpg.viewport_y;
+    rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+    rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
 }
 inline void backup_position()
 {
@@ -72,7 +74,7 @@ void GameLoop_OneCycle(bool trigger)
     if (!mutex_can_change_palette)
     {
         if (trigger)
-            for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+            for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
                 if (absdec(iter->vanish_time)==0)
                     if (iter->status>0 && iter->trigger_method>=4)
                     {
@@ -87,7 +89,7 @@ void GameLoop_OneCycle(bool trigger)
                                 redraw_everything();
                             }
                             uint16_t &triggerscript=iter->trigger_script;
-                            triggerscript=process_script(triggerscript,(int16_t)(iter-game->evtobjs.begin()));
+                            triggerscript=process_script(triggerscript,(int16_t)(iter-evtobjs.begin()));
                         }
                     }
                     else if (iter->status<0) //&& in the screen
@@ -95,11 +97,11 @@ void GameLoop_OneCycle(bool trigger)
                         iter->status=abs(iter->status);
                         //step==0
                     }
-        for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+        for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
         {
             if (iter->status!=0)
                 if (uint16_t &autoscript=iter->auto_script)
-                    autoscript=process_autoscript(autoscript,(int16_t)(iter-game->evtobjs.begin()));
+                    autoscript=process_autoscript(autoscript,(int16_t)(iter-evtobjs.begin()));
             if (iter->status==2 && iter->image>0 && trigger
                     && abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
             {
@@ -122,7 +124,7 @@ void process_Explore()
 {
     position poses[13];
     int x=scene->team_pos.toXY().x,y=scene->team_pos.toXY().y;
-    int (&off)[2]=direction_offs[game->rpg.team_direction];
+    int (&off)[2]=direction_offs[rpg.team_direction];
     poses[0]=position(x,y).toXYH();
     for (int i=0;i<4;i++)
     {
@@ -133,7 +135,7 @@ void process_Explore()
         y+=off[1];
     }
     for (int i=0;i<13;i++)
-        for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&game->rpg.scene_id==map_toload;++iter)
+        for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
             if (iter->status>0 && iter->trigger_method<=3
                     && position(iter->pos_x,iter->pos_y).toXYH()==poses[i].toXYH()
                     && iter->trigger_method*6-4>i)
@@ -141,12 +143,12 @@ void process_Explore()
                 if (iter->curr_frame < iter->frames*4 )
                 {
                     iter->curr_frame=0;
-                    iter->direction=(game->rpg.team_direction+2)&3;
-                    for (int t=0;t<=game->rpg.team_roles;t++)//跟随者不用转？
-                        game->rpg.team[t].frame=game->rpg.team_direction*3;
+                    iter->direction=(rpg.team_direction+2)&3;
+                    for (int t=0;t<=rpg.team_roles;t++)//跟随者不用转？
+                        rpg.team[t].frame=rpg.team_direction*3;
                     redraw_everything(0);
                 }
-                iter->trigger_script=process_script(iter->trigger_script,iter-game->evtobjs.begin());
+                iter->trigger_script=process_script(iter->trigger_script,iter-evtobjs.begin());
                 //my def
                 clear_keybuf();
                 rest(50);
@@ -163,9 +165,9 @@ void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t obj
 {
     //printf("%s\n",scr_desc(func,param).c_str());
     int16_t &param1=param[0],&param2=param[1],&param3=param[2];
-    EVENT_OBJECT &obj=game->evtobjs[object];
-#define curr_obj (param1<0?obj:game->evtobjs[param1])
-    int role=game->rpg.team[(object>=0&&object<=4)?object:0].role;
+    EVENT_OBJECT &obj=evtobjs[object];
+#define curr_obj (param1<0?obj:evtobjs[param1])
+    int role=rpg.team[(object>=0&&object<=4)?object:0].role;
     char addition[100];
     memset(addition,0,sizeof(addition));
     int npc_speed,role_speed;
@@ -231,16 +233,16 @@ __walk_npc:
         curr_obj.pos_y=param3+scene->team_pos.toXY().y;
         break;
     case 0x13:
-        game->evtobjs[param1].pos_x=param2;
-        game->evtobjs[param1].pos_y=param3;
+        evtobjs[param1].pos_x=param2;
+        evtobjs[param1].pos_y=param3;
         break;
     case 0x14:
         obj.curr_frame=param1;
         obj.direction=0;
         break;
     case 0x15:
-        game->rpg.team_direction=param1;
-        game->rpg.team[param3].frame=param1*3+param2;
+        rpg.team_direction=param1;
+        rpg.team[param3].frame=param1*3+param2;
         break;
     case 0x16:
         curr_obj.direction=param2;
@@ -253,60 +255,60 @@ __walk_npc:
         //not implemented
         break;
     case 0x19:
-        game->rpg.role_prop_tables[param1][param3>0?param3-1:role]+=param2;
+        rpg.role_prop_tables[param1][param3>0?param3-1:role]+=param2;
         break;
     case 0x1a:
         if (param3<=0)
             ;//battle time;
         else
-            game->rpg.role_prop_tables[param1][param3-1]=param2;
+            rpg.role_prop_tables[param1][param3-1]=param2;
         break;
     case 0x1b:
-        for (int i=(param1?0:object);i<=(param1?game->rpg.team_roles:object);i++)
-            if (game->rpg.roles_properties.HP[i]>0)
+        for (int i=(param1?0:object);i<=(param1?rpg.team_roles:object);i++)
+            if (rpg.roles_properties.HP[i]>0)
             {
-                game->rpg.roles_properties.HP[i]+=param2;
-                if (game->rpg.roles_properties.HP[i]<0)
-                    game->rpg.roles_properties.HP[i]=0;
-                if (game->rpg.roles_properties.HP[i]>game->rpg.roles_properties.HP_max[i])
-                    game->rpg.roles_properties.HP[i]=game->rpg.roles_properties.HP_max[i];
+                rpg.roles_properties.HP[i]+=param2;
+                if (rpg.roles_properties.HP[i]<0)
+                    rpg.roles_properties.HP[i]=0;
+                if (rpg.roles_properties.HP[i]>rpg.roles_properties.HP_max[i])
+                    rpg.roles_properties.HP[i]=rpg.roles_properties.HP_max[i];
             }
         break;
     case 0x1c:
-        for (int i=(param1?0:object);i<=(param1?game->rpg.team_roles:object);i++)
-            if (game->rpg.roles_properties.HP[i]>0)
+        for (int i=(param1?0:object);i<=(param1?rpg.team_roles:object);i++)
+            if (rpg.roles_properties.HP[i]>0)
             {
-                game->rpg.roles_properties.MP[i]+=param2;
-                if (game->rpg.roles_properties.MP[i]<0)
-                    game->rpg.roles_properties.MP[i]=0;
-                if (game->rpg.roles_properties.MP[i]>game->rpg.roles_properties.MP_max[i])
-                    game->rpg.roles_properties.MP[i]=game->rpg.roles_properties.MP_max[i];
+                rpg.roles_properties.MP[i]+=param2;
+                if (rpg.roles_properties.MP[i]<0)
+                    rpg.roles_properties.MP[i]=0;
+                if (rpg.roles_properties.MP[i]>rpg.roles_properties.MP_max[i])
+                    rpg.roles_properties.MP[i]=rpg.roles_properties.MP_max[i];
             }
         break;
     case 0x1d:
-        for (int i=(param1?0:object);i<=(param1?game->rpg.team_roles:object);i++)
-            if (game->rpg.roles_properties.HP[i]>0)
+        for (int i=(param1?0:object);i<=(param1?rpg.team_roles:object);i++)
+            if (rpg.roles_properties.HP[i]>0)
             {
-                game->rpg.roles_properties.HP[i]+=param2;
-                if (game->rpg.roles_properties.HP[i]<0)
-                    game->rpg.roles_properties.HP[i]=0;
-                if (game->rpg.roles_properties.HP[i]>game->rpg.roles_properties.HP_max[i])
-                    game->rpg.roles_properties.HP[i]=game->rpg.roles_properties.HP_max[i];
-                game->rpg.roles_properties.MP[i]+=param2;
-                if (game->rpg.roles_properties.MP[i]<0)
-                    game->rpg.roles_properties.MP[i]=0;
-                if (game->rpg.roles_properties.MP[i]>game->rpg.roles_properties.MP_max[i])
-                    game->rpg.roles_properties.MP[i]=game->rpg.roles_properties.MP_max[i];
+                rpg.roles_properties.HP[i]+=param2;
+                if (rpg.roles_properties.HP[i]<0)
+                    rpg.roles_properties.HP[i]=0;
+                if (rpg.roles_properties.HP[i]>rpg.roles_properties.HP_max[i])
+                    rpg.roles_properties.HP[i]=rpg.roles_properties.HP_max[i];
+                rpg.roles_properties.MP[i]+=param2;
+                if (rpg.roles_properties.MP[i]<0)
+                    rpg.roles_properties.MP[i]=0;
+                if (rpg.roles_properties.MP[i]>rpg.roles_properties.MP_max[i])
+                    rpg.roles_properties.MP[i]=rpg.roles_properties.MP_max[i];
             }
         break;
     case 0x1e:
-        if (param1<0 && game->rpg.coins<-param1)
+        if (param1<0 && rpg.coins<-param1)
         {
             id=param2-1;
             break;
         }
         else
-            game->rpg.coins+=param1;
+            rpg.coins+=param1;
         break;
     case 0x1f:
         compact_items();
@@ -323,10 +325,10 @@ __walk_npc:
         break;
     case 0x23:
         for (int i=(param2?param2:0xB);i<=(param2?param2:0x10);i++)
-            if(game->rpg.role_prop_tables[i][param1])
+            if(rpg.role_prop_tables[i][param1])
             {
-                add_goods_to_list(game->rpg.role_prop_tables[i][param1],1);
-                game->rpg.role_prop_tables[i][param1]=0;
+                add_goods_to_list(rpg.role_prop_tables[i][param1],1);
+                rpg.role_prop_tables[i][param1]=0;
             }
         break;
     case 0x24:
@@ -454,7 +456,7 @@ __walk_npc:
     case 0x43:
         if (param1)
         {
-            game->rpg.music=param1;
+            rpg.music=param1;
             rix->play(param1,param2);
         }
         else
@@ -488,7 +490,7 @@ __ride:
         }
         break;
     case 0x45:
-        game->rpg.battle_music=param1;
+        rpg.battle_music=param1;
         break;
     case 0x46:
         scene->team_pos.toXYH().x=param1;
@@ -501,10 +503,10 @@ __ride:
         voc(VOC.decode(param1)).play();
         break;
     case 0x49:
-        game->evtobjs[param1!=-1?param1:object].status=param2;
+        evtobjs[param1!=-1?param1:object].status=param2;
         break;
     case 0x4a:
-        game->rpg.battlefield=param1;
+        rpg.battlefield=param1;
         break;
     case 0x4d:
         wait_for_key();
@@ -520,21 +522,21 @@ __ride:
         obj.vanish_time=(param1?param1:0x320);
         break;
     case 0x53:
-        game->rpg.palette_offset=0;
+        rpg.palette_offset=0;
         break;
     case 0x54:
-        game->rpg.palette_offset=0x180;
+        rpg.palette_offset=0x180;
         break;
     case 0x59:
-        if (param1>0 && game->rpg.scene_id!=param1)
+        if (param1>0 && rpg.scene_id!=param1)
         {
             map_toload=param1;
             flag_to_load|=0xC;
-            game->rpg.layer=0;
+            rpg.layer=0;
         }
         break;
     case 0x65:
-        game->rpg.roles_properties.avator[param1]=param2;
+        rpg.roles_properties.avator[param1]=param2;
         if (!flag_battling && param3)
             load_team_mgo();
         break;
@@ -547,20 +549,20 @@ __ride:
         if (param1)
         {
             if (param2)
-                game->scenes[param1].enter_script=param2;
+                scenes[param1].enter_script=param2;
             if (param3)
-                game->scenes[param1].leave_script=param3;
+                scenes[param1].leave_script=param3;
             if (!param2 && !param3)
-                game->scenes[param1].enter_script=0,
-                                                  game->scenes[param1].leave_script=0;
+                scenes[param1].enter_script=0,
+                                                  scenes[param1].leave_script=0;
         }
         break;
     case 0x6e:
         backup_position();
         sync_viewport();
-        game->rpg.viewport_x+=param1;
-        game->rpg.viewport_y+=param2;
-        game->rpg.layer=param3*8;
+        rpg.viewport_x+=param1;
+        rpg.viewport_y+=param2;
+        rpg.layer=param3*8;
         if (param1||param2)
         {
             team_walk_one_step();
@@ -568,7 +570,7 @@ __ride:
         }
         break;
     case 0x6f:
-        if (game->evtobjs[param1].status==param2)
+        if (evtobjs[param1].status==param2)
         {
             obj.status=param2;
             //printf(addition,"成功");
@@ -583,10 +585,10 @@ __walk_role:
             while ((x_diff=scene->team_pos.x-(param1*32+param3*16)) && (y_diff=scene->team_pos.y-(param2*16+param3*8)))
             {
                 backup_position();
-                game->rpg.team_direction=calc_faceto(-x_diff,-y_diff);
+                rpg.team_direction=calc_faceto(-x_diff,-y_diff);
                 scene->team_pos.toXY().x += role_speed*(x_diff<0 ? 2 : -2);
                 scene->team_pos.toXY().y += role_speed*(y_diff<0 ? 1 : -1);
-                game->rpg.team_direction=calc_faceto(scene->team_pos.x-abstract_x_bak,scene->team_pos.y-abstract_y_bak);
+                rpg.team_direction=calc_faceto(scene->team_pos.x-abstract_x_bak,scene->team_pos.y-abstract_y_bak);
                 sync_viewport();
                 team_walk_one_step();
                 GameLoop_OneCycle(false);
@@ -599,10 +601,10 @@ __walk_role:
         clear_effective(param1?param1:1,param2);
         break;
     case 0x75:
-        game->rpg.team[0].role=(param1-1<0?0:param1-1);
-        game->rpg.team[1].role=(param2-1<0?0:param2-1);
-        game->rpg.team[2].role=(param3-1<0?0:param3-1);
-        game->rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;
+        rpg.team[0].role=(param1-1<0?0:param1-1);
+        rpg.team[1].role=(param2-1<0?0:param2-1);
+        rpg.team[2].role=(param3-1<0?0:param3-1);
+        rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;
         load_team_mgo();
         //call    setup_our_team_data_things
         store_team_frame_data();
@@ -622,8 +624,8 @@ __walk_role:
     case 0x79:
     {
         bool in=false;
-        for (int i=0;i<=game->rpg.team_roles;i++)
-            if (game->rpg.roles_properties.name[i]==param1)
+        for (int i=0;i<=rpg.team_roles;i++)
+            if (rpg.roles_properties.name[i]==param1)
                 in=true,i=5;
         if (in)
             id=param2-1;
@@ -652,20 +654,20 @@ __walk_role:
         {
             x_scrn_offset=0xA0*scale;
             y_scrn_offset=0x70*scale;
-            game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-            game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+            rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+            rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
         }
         for (int i=0;i<(param3>0?param3:1);i++)
         {
             int b1=x_scrn_offset,b2=y_scrn_offset;
-            viewport_x_bak=game->rpg.viewport_x;
-            viewport_y_bak=game->rpg.viewport_y;
+            viewport_x_bak=rpg.viewport_x;
+            viewport_y_bak=rpg.viewport_y;
             if (!param1 && !param2 && !param3)
             {
                 x_scrn_offset=0xA0*scale;
                 y_scrn_offset=0x70*scale;
-                game->rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-                game->rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+                rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+                rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
                 scene->produce_one_screen();
                 param3=-1;
             }
@@ -673,24 +675,24 @@ __walk_role:
             {
                 if (param3<0)
                 {
-                    game->rpg.viewport_x=param1*32-0xA0*scale;
-                    game->rpg.viewport_y=param2*16-0x70*scale;
+                    rpg.viewport_x=param1*32-0xA0*scale;
+                    rpg.viewport_y=param2*16-0x70*scale;
                     scene->produce_one_screen();
                 }
                 else
                 {
-                    game->rpg.viewport_x+=param1;
-                    game->rpg.viewport_y+=param2;
+                    rpg.viewport_x+=param1;
+                    rpg.viewport_y+=param2;
                 }
-                x_scrn_offset=scene->team_pos.toXY().x-game->rpg.viewport_x;
-                y_scrn_offset=scene->team_pos.toXY().y-game->rpg.viewport_y;
+                x_scrn_offset=scene->team_pos.toXY().x-rpg.viewport_x;
+                y_scrn_offset=scene->team_pos.toXY().y-rpg.viewport_y;
             }
-            game->rpg.team[0].x=x_scrn_offset;
-            game->rpg.team[0].y=y_scrn_offset;
-            for (int t=1;t<=game->rpg.team_roles;t++)
+            rpg.team[0].x=x_scrn_offset;
+            rpg.team[0].y=y_scrn_offset;
+            for (int t=1;t<=rpg.team_roles;t++)
             {
-                game->rpg.team[t].x+=(x_scrn_offset-b1);
-                game->rpg.team[t].y+=(y_scrn_offset-b2);
+                rpg.team[t].x+=(x_scrn_offset-b1);
+                rpg.team[t].y+=(y_scrn_offset-b2);
             }
             GameLoop_OneCycle(false);
             if (param3>=0)
@@ -704,11 +706,11 @@ __walk_role:
         mutex_can_change_palette=false;
         break;
     case 0x81:
-        if (param1>scene->sprites_begin-game->evtobjs.begin() && param1<scene->sprites_end-game->evtobjs.begin() && curr_obj.status>0)
+        if (param1>scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0)
         {
-            if (abs(curr_obj.pos_x-direction_offs[game->rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(curr_obj.pos_y-direction_offs[game->rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
-                if (game->rpg.scene_id>0)
-                    curr_obj.trigger_method=5+game->rpg.scene_id*8;
+            if (abs(curr_obj.pos_x-direction_offs[rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(curr_obj.pos_y-direction_offs[rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
+                if (rpg.scene_id>0)
+                    curr_obj.trigger_method=5+rpg.scene_id*8;
         }
         else
             id=param3-1;
@@ -723,10 +725,10 @@ __walk_role:
         NPC_walk_one_step(obj,0);
         break;
     case 0x8b:
-        game->pat.read(param1);
-        game->rpg.palette_offset=0;
+        pat.read(param1);
+        rpg.palette_offset=0;
         if (mutex_can_change_palette==0)
-            game->pat.set(game->rpg.palette_offset);
+            pat.set(rpg.palette_offset);
         break;
     case 0x8e:
         restore_screen();
@@ -759,8 +761,7 @@ __walk_role:
         break;
     case 0xa0:
         clear_bitmap(screen);
-        extern bool running;
-        running=0;
+        throw;
         break;
     case 0xa5:
         break;
@@ -779,7 +780,7 @@ uint16_t process_script(uint16_t id,int16_t object)
         backup=create_bitmap(SCREEN_W,SCREEN_H);
     static char *msg,colon[3];
     static int i=sprintf(colon,msges(0xc94,0xc96));
-    EVENT_OBJECT &obj=game->evtobjs[object];
+    EVENT_OBJECT &obj=evtobjs[object];
     uint16_t next_id=id;
     current_dialog_lines = 0;
     glbvar_fontcolor  = 0x4F;
@@ -795,7 +796,7 @@ uint16_t process_script(uint16_t id,int16_t object)
     bool ok=true;
     while (id && ok)
     {
-        SCRIPT &curr=game->scripts[id];
+        SCRIPT &curr=scripts[id];
         const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
         //printf("独占脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)curr.param[1],(uint16_t)curr.param[2]);
         switch (curr.func)
@@ -806,7 +807,7 @@ uint16_t process_script(uint16_t id,int16_t object)
             ok=false;
             break;
         case -1:
-            //printf("显示对话 `%s`\n",cut_msg(game->rpg.msgs[param1],game->rpg.msgs[param1+1]));
+            //printf("显示对话 `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
             if (current_dialog_lines>3)
             {
                 show_wait_icon();
@@ -815,7 +816,7 @@ uint16_t process_script(uint16_t id,int16_t object)
             }
             else if (current_dialog_lines==0 && flag_pic_level==0)
                 backup_screen();
-            msg=msges(game->msg_idxes[param1],game->msg_idxes[param1+1]);
+            msg=msges(msg_idxes[param1],msg_idxes[param1+1]);
             if (frame_pos_flag==10)
             {
                 frame_text_x-=strlen(msg)/2*8;
@@ -965,8 +966,8 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
 {
     if (id==0)
         return 0;
-    SCRIPT &curr=game->scripts[id];
-    EVENT_OBJECT &obj=game->evtobjs[object];
+    SCRIPT &curr=scripts[id];
+    EVENT_OBJECT &obj=evtobjs[object];
     const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
     //printf("触发场景:%s,触发对象:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
     //printf("自动脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);

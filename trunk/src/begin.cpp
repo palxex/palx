@@ -22,12 +22,10 @@
 #include "timing.h"
 #include "internal.h"
 
-bool starting=false;
-
 void startup_splash()
 {
 	clear_keybuf();
-	game->pat.read(1);
+	res::pat.read(1);
 	BITMAP *cat=create_bitmap(SCREEN_W,SCREEN_H*2);
 	bitmap(FBP.decode(0x26),320,200).blit_to(cat,0,0,0,0);
 	bitmap(FBP.decode(0x27),320,200).blit_to(cat,0,0,0,200);
@@ -69,9 +67,9 @@ void startup_splash()
 		if(prog_pale<=0x40){
 			perframe_proc();
 			for(int i=0;i<0xF0;i++){
-				pal[i].r=game->pat.get(0)[i].r*prog_pale/0x40;
-				pal[i].g=game->pat.get(0)[i].g*prog_pale/0x40;
-				pal[i].b=game->pat.get(0)[i].b*prog_pale/0x40;
+				pal[i].r=res::pat.get(0)[i].r*prog_pale/0x40;
+				pal[i].g=res::pat.get(0)[i].g*prog_pale/0x40;
+				pal[i].b=res::pat.get(0)[i].b*prog_pale/0x40;
 			}
 			set_palette(pal);
 		}
@@ -84,9 +82,9 @@ void startup_splash()
 		for(int i=prog_pale;i<0x40;i++){
 			perframe_proc();
 			for(int j=0;j<0xF0;j++){
-				pal[j].r=game->pat.get(0)[j].r*i/0x40;
-				pal[j].g=game->pat.get(0)[j].g*i/0x40;
-				pal[j].b=game->pat.get(0)[j].b*i/0x40;
+				pal[j].r=res::pat.get(0)[j].r*i/0x40;
+				pal[j].g=res::pat.get(0)[j].g*i/0x40;
+				pal[j].b=res::pat.get(0)[j].b*i/0x40;
 			}
 			set_palette(pal);
 			wait(1);
@@ -99,7 +97,7 @@ void startup_splash()
 
 int select_scene()
 {
-	game->pat.read(0);
+	res::pat.read(0);
 	bitmap(FBP.decode(60),320,200).blit_to(screen,0,0,0,0);
 	rix->play(4);
 	pal_fade_in(1);
@@ -113,8 +111,7 @@ int select_scene()
 			for(int i=7;i<9;i++)
 				ttfont(cut_msg_impl("word.dat")(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
-		extern bool running;if(!running)	throw std::exception();
-		VKEY keygot=get_key();delay(10);
+		VKEY keygot;SAFE_GETKEY(keygot);
 		switch(keygot){
 			case VK_UP:
 				changed=true;
@@ -146,16 +143,13 @@ int select_scene()
 	}while(!ok);
 	destroy_bitmap(cache);
 	pal_fade_out(1);
-	starting=false;
 	return save;
 }
 
-int begin_scene::operator()(Game *game){
-	starting=true;
-	::game=game;
+int begin_scene::operator()(){
 	RNG_num=6;
-	game->pat.read(3);
-	game->pat.set(rpg.palette_offset);
+	res::pat.read(3);
+	res::pat.set(res::rpg.palette_offset);
 	play_RNG(0,999,25);
 	wait_key(180);
 	pal_fade_out(1);
