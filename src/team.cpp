@@ -47,9 +47,9 @@ int load_mgo(int id)
 void load_team_mgo()
 {
 	team_mgos.clear();
-	for(int i=0;i<=game->rpg.team_roles;i++)
+	for(int i=0;i<=res::rpg.team_roles;i++)
 	{
-		int id=game->rpg.roles_properties.avator[game->rpg.team[i].role];
+		int id=res::rpg.roles_properties.avator[res::rpg.team[i].role];
 		team_mgos[i]=load_mgo(id);
 	};
 }
@@ -63,20 +63,20 @@ void load_NPC_mgo()
 void store_step()
 {
 	/*
-	memcpy(game->rpg.team_track+sizeof(RPG::track),game->rpg.team_track,4*sizeof(RPG::track));
+	memcpy(res::rpg.team_track+sizeof(RPG::track),res::rpg.team_track,4*sizeof(RPG::track));
 	/*///
-	game->rpg.team_track[4]=game->rpg.team_track[3];
-	game->rpg.team_track[3]=game->rpg.team_track[2];
-	game->rpg.team_track[2]=game->rpg.team_track[1];
-	game->rpg.team_track[1]=game->rpg.team_track[0];
+	res::rpg.team_track[4]=res::rpg.team_track[3];
+	res::rpg.team_track[3]=res::rpg.team_track[2];
+	res::rpg.team_track[2]=res::rpg.team_track[1];
+	res::rpg.team_track[1]=res::rpg.team_track[0];
 	//*/
 }
 void record_step()
 {
 	store_step();
-	game->rpg.team_track[0].x=abstract_x_bak;
-	game->rpg.team_track[0].y=abstract_y_bak;
-	game->rpg.team_track[0].direction=game->rpg.team_direction;
+	res::rpg.team_track[0].x=abstract_x_bak;
+	res::rpg.team_track[0].y=abstract_y_bak;
+	res::rpg.team_track[0].direction=res::rpg.team_direction;
 }
 void calc_trace_frames()
 {
@@ -91,41 +91,41 @@ void calc_trace_frames()
 }
 void store_team_frame_data()
 {
-	game->rpg.team[0].frame=(game->rpg.roles_properties.walk_frames[game->rpg.team[0].role]==4? game->rpg.team_direction*4+this_step_frame : game->rpg.team_direction*3+step_frame_leader);
-	game->rpg.team[0].x=x_scrn_offset;
-	game->rpg.team[0].y=y_scrn_offset;
-	game->rpg.team_track[0].direction=game->rpg.team_direction;
-	game->rpg.team_track[0].x=abstract_x_bak;
-	game->rpg.team_track[0].y=abstract_y_bak;
+	res::rpg.team[0].frame=(res::rpg.roles_properties.walk_frames[res::rpg.team[0].role]==4? res::rpg.team_direction*4+this_step_frame : res::rpg.team_direction*3+step_frame_leader);
+	res::rpg.team[0].x=x_scrn_offset;
+	res::rpg.team[0].y=y_scrn_offset;
+	res::rpg.team_track[0].direction=res::rpg.team_direction;
+	res::rpg.team_track[0].x=abstract_x_bak;
+	res::rpg.team_track[0].y=abstract_y_bak;
 
-	for(int i=1;i<=game->rpg.team_roles;i++)
+	for(int i=1;i<=res::rpg.team_roles;i++)
 	{
-		game->rpg.team[i].x=game->rpg.team_track[1].x-game->rpg.viewport_x;
-		game->rpg.team[i].y=game->rpg.team_track[1].y-game->rpg.viewport_y;
+		res::rpg.team[i].x=res::rpg.team_track[1].x-res::rpg.viewport_x;
+		res::rpg.team[i].y=res::rpg.team_track[1].y-res::rpg.viewport_y;
 		if(i==2)
 		{
-			game->rpg.team[i].y+=8;
-			game->rpg.team[i].x+=(game->rpg.team_track[1].direction&1?-16:16);
+			res::rpg.team[i].y+=8;
+			res::rpg.team[i].x+=(res::rpg.team_track[1].direction&1?-16:16);
 		}else{
-			game->rpg.team[i].x-=direction_offs[game->rpg.team_track[1].direction][0];
-			game->rpg.team[i].y-=direction_offs[game->rpg.team_track[1].direction][1];
+			res::rpg.team[i].x-=direction_offs[res::rpg.team_track[1].direction][0];
+			res::rpg.team[i].y-=direction_offs[res::rpg.team_track[1].direction][1];
 		}
-		if(barrier_check(0,game->rpg.team[i].x+game->rpg.viewport_x,game->rpg.team[i].y+game->rpg.viewport_y))
-			game->rpg.team[i].x=game->rpg.team_track[1].x-game->rpg.viewport_x,
-			game->rpg.team[i].y=game->rpg.team_track[1].y-game->rpg.viewport_y;
-		game->rpg.team[i].frame=(game->rpg.roles_properties.walk_frames[game->rpg.team[i].role]==4? game->rpg.team_track[2].direction*4+this_step_frame : game->rpg.team_track[2].direction*3+step_frame_follower);
+		if(barrier_check(0,res::rpg.team[i].x+res::rpg.viewport_x,res::rpg.team[i].y+res::rpg.viewport_y))
+			res::rpg.team[i].x=res::rpg.team_track[1].x-res::rpg.viewport_x,
+			res::rpg.team[i].y=res::rpg.team_track[1].y-res::rpg.viewport_y;
+		res::rpg.team[i].frame=(res::rpg.roles_properties.walk_frames[res::rpg.team[i].role]==4? res::rpg.team_track[2].direction*4+this_step_frame : res::rpg.team_track[2].direction*3+step_frame_follower);
 	}
-	for(int i=1;i<=game->rpg.team_followers;i++)
+	for(int i=1;i<=res::rpg.team_followers;i++)
 	{
-		game->rpg.team[game->rpg.team_roles+i].x=game->rpg.team_track[i+game->rpg.team_roles].x-game->rpg.viewport_x;
-		game->rpg.team[game->rpg.team_roles+i].y=game->rpg.team_track[i+game->rpg.team_roles].y-game->rpg.viewport_y;
-		game->rpg.team[game->rpg.team_roles+i].frame=game->rpg.team_track[i+game->rpg.team_roles].direction*3+step_frame_follower;
+		res::rpg.team[res::rpg.team_roles+i].x=res::rpg.team_track[i+res::rpg.team_roles].x-res::rpg.viewport_x;
+		res::rpg.team[res::rpg.team_roles+i].y=res::rpg.team_track[i+res::rpg.team_roles].y-res::rpg.viewport_y;
+		res::rpg.team[res::rpg.team_roles+i].frame=res::rpg.team_track[i+res::rpg.team_roles].direction*3+step_frame_follower;
 	}
 }
 void team_walk_one_step()
 {
-	scene->team_pos.toXY().x=game->rpg.viewport_x+x_scrn_offset;
-	scene->team_pos.toXY().y=game->rpg.viewport_y+y_scrn_offset;
+	scene->team_pos.toXY().x=res::rpg.viewport_x+x_scrn_offset;
+	scene->team_pos.toXY().y=res::rpg.viewport_y+y_scrn_offset;
 	if(scene->team_pos.toXY().x!=abstract_x_bak || scene->team_pos.toXY().y!=abstract_y_bak)
 		calc_trace_frames();
 	else
@@ -135,11 +135,11 @@ void team_walk_one_step()
 }
 void stop_and_update_frame()
 {
-	game->rpg.team[0].frame=game->rpg.team_direction*(game->rpg.roles_properties.walk_frames[game->rpg.team[0].role]? game->rpg.roles_properties.walk_frames[game->rpg.team[0].role] : 3);
-	for(int i=1;i<=game->rpg.team_roles;i++)
-		game->rpg.team[i].frame=game->rpg.team_track[2].direction*(game->rpg.roles_properties.walk_frames[game->rpg.team[i].role]? game->rpg.roles_properties.walk_frames[game->rpg.team[i].role] : 3);
-	for(int i=1;i<=game->rpg.team_followers;i++)
-		game->rpg.team[game->rpg.team_roles+i].frame=game->rpg.team_track[i+2].direction*3;
+	res::rpg.team[0].frame=res::rpg.team_direction*(res::rpg.roles_properties.walk_frames[res::rpg.team[0].role]? res::rpg.roles_properties.walk_frames[res::rpg.team[0].role] : 3);
+	for(int i=1;i<=res::rpg.team_roles;i++)
+		res::rpg.team[i].frame=res::rpg.team_track[2].direction*(res::rpg.roles_properties.walk_frames[res::rpg.team[i].role]? res::rpg.roles_properties.walk_frames[res::rpg.team[i].role] : 3);
+	for(int i=1;i<=res::rpg.team_followers;i++)
+		res::rpg.team[res::rpg.team_roles+i].frame=res::rpg.team_track[i+2].direction*3;
 	this_step_frame&=2,this_step_frame^=2;
 }
 
@@ -159,7 +159,7 @@ bool barrier_check(uint16_t self,int x,int y)
 {
 	bool ret= scene->scenemap.gettile(x/32,y/16,x%32?1:0,0).blocked;
 	for(std::vector<EVENT_OBJECT>::iterator it=scene->sprites_begin;it<scene->sprites_end;it++)
-		if(it-game->evtobjs.begin()!=self && it->status>1 && abs(it->pos_x-x)+abs(it->pos_y-y)*2<16){
+		if(it-res::evtobjs.begin()!=self && it->status>1 && abs(it->pos_x-x)+abs(it->pos_y-y)*2<16){
 			ret=ret||true;break;
 		}
 	return ret;

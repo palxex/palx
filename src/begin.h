@@ -26,7 +26,7 @@
 class Game;
 class begin_scene{
 public:
-    int operator()(Game *);
+    int operator()();
 };
 
 #endif

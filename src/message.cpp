@@ -46,7 +46,7 @@ void show_wait_icon()
 {
 	keepon_delay=true;
 	if(frame_pos_flag)
-		game->message_handles.getsprite(icon)->blit_to(screen,icon_x,icon_y);
+		res::message_handles.getsprite(icon)->blit_to(screen,icon_x,icon_y);
 	wait_for_key();
 	current_dialog_lines=0;
 }

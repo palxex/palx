@@ -51,10 +51,7 @@ void perframe_proc()
 {
 	extern bool running;
 	if(!running)
-		if(starting)
-			throw new std::exception();
-		else
-			exit(-1);
+		throw new std::exception();
 	switch_proc();
 	ShakeScreen();
 }
@@ -86,10 +83,10 @@ void Load_Data()
 	}
 	if(flag_to_load&0x20){
 		//load rpg
-		game->load(rpg_to_load);
+		res::load(rpg_to_load);
 	}
-	else if(game->rpg.scene_id!=map_toload){
-		game->rpg.wave_grade=0;
+	else if(res::rpg.scene_id!=map_toload){
+		res::rpg.wave_grade=0;
 		wave_progression=0;
 		//save previous scene's event objects,not needed in this policy
 	}
@@ -97,19 +94,19 @@ void Load_Data()
 	x_scrn_offset=0xA0*scale;
 	y_scrn_offset=0x70*scale;
 	//罢,罢,想加这个功能惹出一堆事
-	//scene->team_pos.toXY().x=game->rpg.viewport_x+x_scrn_offset;
-	//scene->team_pos.toXY().y=game->rpg.viewport_y+y_scrn_offset;
-	game->rpg.scene_id=map_toload;
+	//scene->team_pos.toXY().x=res::rpg.viewport_x+x_scrn_offset;
+	//scene->team_pos.toXY().y=res::rpg.viewport_y+y_scrn_offset;
+	res::rpg.scene_id=map_toload;
 	if(flag_to_load&4){
 		//load evtobjs
-		scene->sprites_begin=game->evtobjs.begin()+game->scenes[game->rpg.scene_id].prev_evtobjs+1;
-		scene->sprites_end  =game->evtobjs.begin()+game->scenes[game->rpg.scene_id+1].prev_evtobjs+1;
+		scene->sprites_begin=res::evtobjs.begin()+res::scenes[res::rpg.scene_id].prev_evtobjs+1;
+		scene->sprites_end  =res::evtobjs.begin()+res::scenes[res::rpg.scene_id+1].prev_evtobjs+1;
 		for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 			if(i->image)
 				i->frames_auto=sprite_prim().determain_smkfs(MGO.decode(i->image));
 	}
 	//load map & npc
-	scene->scenemap.change(game->scenes[game->rpg.scene_id].id);
+	scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
 	scene->get_sprites();
 	scene->produce_one_screen();
 	if(flag_to_load&1){
@@ -118,14 +115,14 @@ void Load_Data()
 	if(flag_to_load&8){
 		//enter a new scene;
 		flag_to_load&=2;key_enable=false;
-		uint16_t &enterscript=game->scenes[game->rpg.scene_id].enter_script;
+		uint16_t &enterscript=res::scenes[res::rpg.scene_id].enter_script;
 		enterscript=process_script(enterscript,0);
-		if(game->rpg.scene_id!=map_toload)
+		if(res::rpg.scene_id!=map_toload)
 			Load_Data();
 	}
 	if(flag_to_load&2){
 		//play music
-		rix->play(game->rpg.music);
+		rix->play(res::rpg.music);
 	}
 	flag_to_load=0;
 }
@@ -147,14 +144,14 @@ bool process_Menu()
 		case 0:
 			item_select=select_item(2,0,item_select);
 			{
-				uint16_t &equip_script=game->rpg.objects[game->rpg.items[item_select].item].script[1];
+				uint16_t &equip_script=res::rpg.objects[res::rpg.items[item_select].item].script[1];
 				process_script(equip_script,0);
 			}
 			break;
 		case 1:
 			item_select=select_item(1,0,item_select);
 			{
-				uint16_t &use_script=game->rpg.objects[game->rpg.items[item_select].item].script[0];
+				uint16_t &use_script=res::rpg.objects[res::rpg.items[item_select].item].script[0];
 				process_script(use_script,0);
 			}
 			break;
@@ -166,12 +163,12 @@ bool process_Menu()
 		case 0:
 			if(rpg_select=select_rpg(rpg_to_load))
 				rpg_to_load=rpg_select,
-				game->save(rpg_to_load);
+				res::save(rpg_to_load);
 			break;
 		case 1:
 			if(rpg_select=select_rpg(rpg_to_load))
 				rpg_to_load=rpg_select,
-				game->load(rpg_to_load);
+				res::load(rpg_to_load);
 			else
 				return true;
 			break;

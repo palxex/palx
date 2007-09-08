@@ -32,8 +32,6 @@ class Game;
 extern Scene *scene;
 extern BattleScene *battle_scene;
 extern playrix *rix;
-extern Game *game;
-extern RPG rpg;
 
 extern bool flag_battling;
 
@@ -106,11 +104,23 @@ extern void ShakeScreen();
 extern int CARD;
 extern int mutex_int;
 extern void switch_proc();
-extern bool starting;
 extern void perframe_proc();
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
+
+
+#define SAFE_GETKEY(x) \
+	do{ \
+		while(!(x=get_key())) \
+		{ \
+			extern bool running; \
+			if(!running) \
+				throw new std::exception(); \
+			switch_proc(); \
+			rest(10); \
+		} \
+	}while(false)
 
 extern int compact_items();
 #endif

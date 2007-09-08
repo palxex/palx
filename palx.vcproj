@@ -145,7 +145,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alleg_s.lib alfont.lib adplug.lib binio.lib user32.lib gdi32.lib winmm.lib ole32.lib dxguid.lib dinput.lib dsound.lib ddraw.lib"
+				AdditionalDependencies="alleg_s.lib alfont.lib adplug.lib binio.lib winmm.lib ddraw.lib dsound.lib dinput.lib dxguid.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""

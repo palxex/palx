@@ -58,12 +58,14 @@ namespace{
 	END_OF_FUNCTION(mainloop_proc);
 }
 
-int Game::run(){
-	//游戏主循环10fps,画面100fps,音乐70fps。
-	while(running){
-		rest(1);
-		if(time_interrupt_occurs>=10)
-			mainloop_proc(),time_interrupt_occurs=0;
-	}
-	return 0;
+namespace res{
+    int run(){
+        //游戏主循环10fps,画面100fps,音乐70fps。
+        while(running){
+            rest(1);
+            if(time_interrupt_occurs>=10)
+                mainloop_proc(),time_interrupt_occurs=0;
+        }
+        return 0;
+    }
 }

@@ -29,30 +29,30 @@
 #include "allegdef.h"
 #include "internal.h"
 
-class Game{
-public:
-	palette pat;
-	RPG &rpg;
+namespace res{
+	extern palette pat;
+	extern RPG rpg;
 	//data
-	std::vector<SHOP> shops;
-	std::vector<MONSTER> monsters;
-	std::vector<ENEMYTEAM> enemyteams;
-	std::vector<MAGIC> magics;
-	std::vector<BATTLE_FIELD> battlefields;
-	std::vector<UPGRADE_LEARN> learns;
-	sprite_prim UIpics;
-	sprite_prim discharge_effects;
-	sprite_prim message_handles;
-	ENEMY_POSES enemyposes;
-	std::vector<UPGRADE_EXP> upgradexp;
+	extern std::vector<SHOP> shops;
+	extern std::vector<MONSTER> monsters;
+	extern std::vector<ENEMYTEAM> enemyteams;
+	extern std::vector<MAGIC> magics;
+	extern std::vector<BATTLE_FIELD> battlefields;
+	extern std::vector<UPGRADE_LEARN> learns;
+	extern sprite_prim UIpics;
+	extern sprite_prim discharge_effects;
+	extern sprite_prim message_handles;
+	extern ENEMY_POSES enemyposes;
+	extern std::vector<UPGRADE_EXP> upgradexp;
 
 	//sss
-	std::vector<EVENT_OBJECT> evtobjs;
-	std::vector<SCENE>   scenes;
-	std::vector<int32_t> msg_idxes;
-	std::vector<SCRIPT>  scripts;
-	Game(int = 0);
-	~Game();
+	extern std::vector<EVENT_OBJECT> evtobjs;
+	extern std::vector<SCENE>   scenes;
+	extern std::vector<int32_t> msg_idxes;
+	extern std::vector<SCRIPT>  scripts;
+
+	void init_resource();
+	void destroy_resource();
 	void load(int id=rpg_to_load);
 	void save(int id);
 	int run();

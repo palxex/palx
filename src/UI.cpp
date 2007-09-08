@@ -23,21 +23,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#define SAFE_GETKEY(x) \
-	do{ \
-		while(!(x=get_key())) \
-		{ \
-			extern bool running; \
-			if(!running) \
-				if(starting) \
-					throw new std::exception(); \
-				else \
-					return -1; \
-			switch_proc(); \
-			rest(10); \
-		} \
-	}while(false)
-
 static cut_msg_impl word("word.dat");
 
 dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
@@ -45,7 +30,7 @@ dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
 	rows--;columns--;
 	for(int i=0;i<3;i++)
 		for(int j=0;j<3;j++)
-			border[i][j]=game->UIpics.getsprite(i*3+j+style);
+			border[i][j]=res::UIpics.getsprite(i*3+j+style);
 	int len=0;
 	for(int i=0;i<2+rows;i++)
 	{
@@ -68,7 +53,7 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp)
 {
 	int i=0;
 	for(i=0;i<3;i++)
-		border[i]=game->UIpics.getsprite(44+i);
+		border[i]=res::UIpics.getsprite(44+i);
 	border[0]->blit_to(bmp,x,y,true);
 	for(i=0;i<len;i++)
 		border[1]->blit_to(bmp,x+border[0]->width+i*border[1]->width,y,true);
@@ -168,13 +153,13 @@ int select_item(int mask,int skip,int selected)
 	int max=compact_items(),max_ori=max,begin_y;
 
 	if(!skip)//装备中的土灵珠等}
-		for(int i=0;i<=game->rpg.team_roles;i++)
+		for(int i=0;i<=res::rpg.team_roles;i++)
 			for(int j=0xB;j<=0x10;j++)
-				if(rpg.objects[((roles*)&game->rpg.roles_properties)[j][i]].param & 1)
-//only available on gcc					game->rpg.items[max++]=(RPG::ITEM){((roles*)&game->rpg.roles_properties)[j][i],1,0};
+				if(res::rpg.objects[((roles*)&res::rpg.roles_properties)[j][i]].param & 1)
+//only available on gcc					res::rpg.items[max++]=(RPG::ITEM){((roles*)&res::rpg.roles_properties)[j][i],1,0};
 				{
-					RPG::ITEM it;it.item=((roles*)&game->rpg.roles_properties)[j][i];it.amount=1;it.using_amount=0;
-					game->rpg.items[max++]=it;
+					RPG::ITEM it;it.item=((roles*)&res::rpg.roles_properties)[j][i];it.amount=1;it.using_amount=0;
+					res::rpg.items[max++]=it;
 				}
 	if(skip==-1)
 		begin_y=-8;
@@ -194,9 +179,9 @@ int select_item(int mask,int skip,int selected)
 		offset=(locating/3<middle?0:locating/3-middle);
 		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
-			if(r<0x100 && game->rpg.items[r].item)
-				ttfont(word(game->rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==locating)?((game->rpg.objects[game->rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((game->rpg.objects[game->rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
-		game->UIpics.getsprite(69)->blit_to(buf,16+100*(locating%3)+24,begin_y+12+(locating/3-offset)*18+11,true,3,2);
+			if(r<0x100 && res::rpg.items[r].item)
+				ttfont(word(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==locating)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
+		res::UIpics.getsprite(69)->blit_to(buf,16+100*(locating%3)+24,begin_y+12+(locating/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 		SAFE_GETKEY(keygot);
 		switch(keygot){
@@ -229,9 +214,9 @@ int select_item(int mask,int skip,int selected)
 	}while(keygot!=VK_MENU && !ok);
 
 	for(int i=max_ori;i<max;i++)
-		game->rpg.items[i].item=0,
-		game->rpg.items[i].amount=0,
-		game->rpg.items[i].using_amount=0;
+		res::rpg.items[i].item=0,
+		res::rpg.items[i].amount=0,
+		res::rpg.items[i].using_amount=0;
 
 	return locating;
 }
