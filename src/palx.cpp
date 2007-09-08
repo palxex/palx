@@ -68,7 +68,8 @@ int main(int argc, char *argv[])
 	}
 	boost::shared_ptr<Game> thegame;
 	try{
-		res::init_resource();
+	    using namespace res;
+		init_resource();
         //load save
         int save=boost::lexical_cast<int>(conv_buf);
         if(save!=0 || (save=begin_scene()()))
@@ -76,8 +77,8 @@ int main(int argc, char *argv[])
         else
             map_toload=1;
         Scene normal;	scene=&normal;
-        res::load();
-        res::run();
+        load();
+        run();
 	}catch(exception *){
 	}
     res::destroy_resource();
