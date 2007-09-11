@@ -191,9 +191,9 @@ void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t obj
         break;
     case 0xF:
         if (param1>=0)
-            curr_obj.direction=param1;
+            obj.direction=param1;
         if (param2>=0)
-            curr_obj.curr_frame=param2;
+            obj.curr_frame=param2;
         break;
     case 0x10:
         npc_speed=3;

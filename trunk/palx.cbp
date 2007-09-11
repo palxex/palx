@@ -39,6 +39,7 @@
 				<Option object_output="obj\Release\" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="0 320 200 x" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
