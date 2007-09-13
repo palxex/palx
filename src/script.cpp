@@ -31,6 +31,7 @@
 using namespace res;
 
 extern int scale;
+extern bool prelimit_OK=false;
 
 extern int process_Battle(uint16_t,uint16_t);
 
@@ -245,6 +246,8 @@ __walk_npc:
         rpg.team[param3].frame=param1*3+param2;
         break;
     case 0x16:
+		if(param1==0)
+			break;
         curr_obj.direction=param2;
         curr_obj.curr_frame=param3;
         break;
@@ -332,9 +335,13 @@ __walk_npc:
             }
         break;
     case 0x24:
+		if(param1==0)
+			break;
         curr_obj.auto_script= param2;
         break;
     case 0x25:
+		if(param1==0)
+			break;
         curr_obj.trigger_script= param2;
         break;
     case 0x26:
@@ -397,6 +404,20 @@ __walk_npc:
     case 0x37:
         play_RNG(param1,param2>0?param2:999,param3>0?param3:16);
         break;
+	case 0x38:
+		if(scenes[rpg.scene_id].leave_script && !flag_battling)
+			scenes[rpg.scene_id].leave_script = process_script(scenes[rpg.scene_id].leave_script,0);
+		else{
+			prelimit_OK=false;
+			id = param1 -1;
+		}
+		break;
+	case 0x39:
+        //not implemented
+		break;
+	case 0x3a:
+        //not implemented
+		break;
     case 0x3b:
         frame_pos_flag=0;
         frame_text_x=0x50;
@@ -451,8 +472,16 @@ __walk_npc:
         npc_speed=2;
         goto __ride;
     case 0x40:
+		if(param1==0)
+			break;
         curr_obj.trigger_method=param2;
         break;
+	case 0x41:
+		prelimit_OK=false;
+		break;
+	case 0x42:
+        //not implemented
+		break;
     case 0x43:
         if (param1)
         {
@@ -502,6 +531,9 @@ __ride:
     case 0x47:
         voc(VOC.decode(param1)).play();
         break;
+	case 0x48: //lost script...
+        //not implemented
+		break;
     case 0x49:
         evtobjs[param1!=-1?param1:object].status=param2;
         break;
@@ -649,56 +681,59 @@ __walk_role:
         curr_obj.pos_x+=param2;
         curr_obj.pos_y+=param3;
         break;
-    case 0x7f:
-        if (param1==0 && param2==0 && param3==-1)
-        {
-            x_scrn_offset=0xA0*scale;
-            y_scrn_offset=0x70*scale;
-            rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-            rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
-        }
-        for (int i=0;i<(param3>0?param3:1);i++)
-        {
-            int b1=x_scrn_offset,b2=y_scrn_offset;
-            viewport_x_bak=rpg.viewport_x;
-            viewport_y_bak=rpg.viewport_y;
-            if (!param1 && !param2 && !param3)
-            {
-                x_scrn_offset=0xA0*scale;
-                y_scrn_offset=0x70*scale;
-                rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-                rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
-                scene->produce_one_screen();
-                param3=-1;
-            }
-            else
-            {
-                if (param3<0)
-                {
-                    rpg.viewport_x=param1*32-0xA0*scale;
-                    rpg.viewport_y=param2*16-0x70*scale;
-                    scene->produce_one_screen();
-                }
-                else
-                {
-                    rpg.viewport_x+=param1;
-                    rpg.viewport_y+=param2;
-                }
-                x_scrn_offset=scene->team_pos.toXY().x-rpg.viewport_x;
-                y_scrn_offset=scene->team_pos.toXY().y-rpg.viewport_y;
-            }
-            rpg.team[0].x=x_scrn_offset;
-            rpg.team[0].y=y_scrn_offset;
-            for (int t=1;t<=rpg.team_roles;t++)
-            {
-                rpg.team[t].x+=(x_scrn_offset-b1);
-                rpg.team[t].y+=(y_scrn_offset-b2);
-            }
-            GameLoop_OneCycle(false);
-            if (param3>=0)
-                scene->move_usable_screen();
-            redraw_everything();
-        }
+	case 0x7f:
+		{
+			if (param1==0 && param2==0 && param3==-1)
+			{
+				x_scrn_offset=0xA0*scale;
+				y_scrn_offset=0x70*scale;
+				rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+				rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+			}
+			int t=param3;
+			for (int i=0;i<(t>0?t:1);i++)
+			{
+				int b1=x_scrn_offset,b2=y_scrn_offset;
+				viewport_x_bak=rpg.viewport_x;
+				viewport_y_bak=rpg.viewport_y;
+				if (!param1 && !param2 && !param3)
+				{
+					x_scrn_offset=0xA0*scale;
+					y_scrn_offset=0x70*scale;
+					rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+					rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
+					scene->produce_one_screen();
+					t=-1;
+				}
+				else
+				{
+					if (param3<0)
+					{
+						rpg.viewport_x=param1*32-0xA0*scale;
+						rpg.viewport_y=param2*16-0x70*scale;
+						scene->produce_one_screen();
+					}
+					else
+					{
+						rpg.viewport_x+=param1;
+						rpg.viewport_y+=param2;
+					}
+					x_scrn_offset=scene->team_pos.toXY().x-rpg.viewport_x;
+					y_scrn_offset=scene->team_pos.toXY().y-rpg.viewport_y;
+				}
+				rpg.team[0].x=x_scrn_offset;
+				rpg.team[0].y=y_scrn_offset;
+				for (int t=1;t<=rpg.team_roles;t++)
+				{
+					rpg.team[t].x+=(x_scrn_offset-b1);
+					rpg.team[t].y+=(y_scrn_offset-b2);
+				}
+				GameLoop_OneCycle(false);
+				if (param3>=0)
+					scene->move_usable_screen();
+				redraw_everything();
+			}
+		}
         break;
     case 0x80://todo:
         GameLoop_OneCycle(false);
@@ -706,7 +741,7 @@ __walk_role:
         mutex_can_change_palette=false;
         break;
     case 0x81:
-        if (param1>scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0)
+        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0)
         {
             if (abs(curr_obj.pos_x-direction_offs[rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(curr_obj.pos_y-direction_offs[rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
                 if (rpg.scene_id>0)
@@ -745,6 +780,10 @@ __walk_role:
         load_team_mgo();
         store_team_frame_data();
         break;
+	case 0x9a:
+		for(int i=param1;i<=param2;i++)
+			evtobjs[i].status=param3;
+		break;
     case 0x9b:
         scene->produce_one_screen();
         break;
@@ -780,6 +819,7 @@ uint16_t process_script(uint16_t id,int16_t object)
         backup=create_bitmap(SCREEN_W,SCREEN_H);
     static char *msg,colon[3];
     static int i=sprintf(colon,msges(0xc94,0xc96));
+	prelimit_OK=true;
     EVENT_OBJECT &obj=evtobjs[object];
     uint16_t next_id=id;
     current_dialog_lines = 0;
