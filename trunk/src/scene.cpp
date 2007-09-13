@@ -144,11 +144,11 @@ void Scene::visible_NPC_movment_setdraw()
 		   i->image && i->status && i->vanish_time==0)
 		{
 			int frame=i->curr_frame;
-			if(i->frames==3)
+			/*if(i->frames==3)
 				if(i->curr_frame==2)
 					frame=0;
 				else if(frame==3)
-					frame=2;
+					frame=2;*/
 			s_list::value_type it=boost::shared_ptr<sprite>(mgos[npc_mgos[t]].getsprite(i->direction*i->frames+frame)->clone());
 			it->setXYL(i->pos_x-res::rpg.viewport_x,i->pos_y-res::rpg.viewport_y+i->layer*8+9,i->layer*8+2);
 			active_list.push_back(it);

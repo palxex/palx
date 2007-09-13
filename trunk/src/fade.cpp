@@ -123,6 +123,17 @@ void CrossFadeOut(int u,int times,int gap,bitmap &buf)
 	}
 	buf.blit_to(screen,0,0,0,0);
 }
+void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter)
+{}
+
+void palette_fade()
+{/*
+	PALETTE pal;
+	pal[0].r=res::pat.get(rpg.palette_offset)[0].r;
+	pal[0].g=res::pat
+	for(int i=1;i<0x100;i++)
+		pal[i].r=res::pat.get(rpg.palette_offset)[i].r>res::*/
+}
 
 void show_fbp(int pic,int gap)
 {

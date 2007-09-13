@@ -98,6 +98,12 @@ extern int mutex_paletting,mutex_blitting;
 extern int shake_times,shake_grade;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
+extern void palette_fade();
+class bitmap;
+extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);
+extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);
+extern void CrossFadeOut(int u,int times,int gap,bitmap &buf);
+extern void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void show_fbp(int,int);
 extern void ShakeScreen();
 
@@ -109,6 +115,7 @@ extern void perframe_proc();
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
 
+extern bool prelimit_OK;
 
 #define SAFE_GETKEY(x) \
 	do{ \
