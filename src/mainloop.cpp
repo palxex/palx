@@ -28,8 +28,7 @@ bool running=true;
 namespace{
 	void mainloop_proc()
 	{
-		if(flag_to_load)
-			Load_Data();
+		Load_Data();
 
 		//Parse Key
 		VKEY keygot=get_key_lowlevel();
