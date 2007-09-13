@@ -47,6 +47,7 @@ void restore_screen()
 }
 void backup_screen()
 {
+	save_bitmap("t.bmp",screen,res::pat.get(rpg.palette_offset));
     blit(screen,backup,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 
@@ -650,7 +651,7 @@ __walk_role:
             ;//CD stop
         break;
     case 0x78:
-        flag_battling=0;
+        flag_battling=false;
         Load_Data();
         break;
     case 0x79:
@@ -773,6 +774,10 @@ __walk_role:
         break;
     case 0x93:
         break;
+	case 0x94:
+		if(evtobjs[param1].status == param2)
+			id = param3 -1;
+		break;
     case 0x97:
         npc_speed=8;
         goto __ride;

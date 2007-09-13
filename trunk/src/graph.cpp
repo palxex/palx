@@ -173,7 +173,7 @@ void palette::read(uint32_t i)
 	bool fx;long len;
 	myRGB *buf=(myRGB *)PAT.decode(i,0,fx,len);
 	RGB   *p=(RGB*)pat;
-	for(int t=0;t<len/3;t++)
+	for(int t=0;t<(i==0 || i==5?512:256);t++)
 		p[t].r=buf[t].r,
 		p[t].g=buf[t].g,
 		p[t].b=buf[t].b;
