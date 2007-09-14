@@ -110,6 +110,7 @@ class playrix
 public:
 	bool playing;
 	int getvolume();
+	void clear();
 	playrix();
 	~playrix();
 	void play(int sub_song,int =0);

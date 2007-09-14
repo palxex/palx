@@ -809,6 +809,9 @@ __walk_role:
         clear_bitmap(screen);
         throw;
         break;
+	case 0xa3:
+		rix->play(param2);
+		break;
     case 0xa5:
         break;
     case 0xa6:

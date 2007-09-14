@@ -91,8 +91,10 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song,int gap)
 {
-	if(!sub_song)
+	if(!sub_song){
+		stop();
 		return;
+	}
 	if(subsong==sub_song){
 		voice_set_volume(stream->voice,255);
 		return;
@@ -116,7 +118,10 @@ int playrix::getvolume()
 {
 	return voice_get_volume(stream->voice);
 }
-
+void playrix::clear()
+{
+	memset(Buffer,0,BufferLength*2);
+}
 voc::voc(uint8_t *f):spl(load_voc_mem(f))
 {}
 
