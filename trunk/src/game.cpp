@@ -77,6 +77,7 @@ namespace res{
 		if(rix_fade_flag && rix->getvolume()==0){
 			rix_fade_flag=0;
 			rix->playing=false;
+			rix->clear();
 		}
 		if(!mutex_int){
 			static int pal_lock=0;
