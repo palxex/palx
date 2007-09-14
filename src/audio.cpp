@@ -91,6 +91,8 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song,int gap)
 {
+	if(!sub_song)
+		return;
 	if(subsong==sub_song){
 		voice_set_volume(stream->voice,255);
 		return;
