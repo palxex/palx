@@ -95,10 +95,10 @@ void GameLoop_OneCycle(bool trigger)
                         }
                     }
                     else if (iter->status<0) //&& in the screen
-                    {
-                        iter->status=abs(iter->status);
-                        //step==0
-                    }
+						if(iter->pos_x<rpg.viewport_x || iter->pos_x>rpg.viewport_x+320 || iter->pos_y<rpg.viewport_y || iter->pos_y>rpg.viewport_y+220){
+							iter->status=abs(iter->status);
+							iter->curr_frame=0;
+						}
         for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
         {
             if (iter->status!=0)
@@ -646,9 +646,11 @@ __walk_role:
         show_fbp(param1,param2);
         break;
     case 0x77:
-        rix->stop(param1);
+		rix->stop(param1>0?param1:1);
         if (!param2)
             ;//CD stop
+		if(!flag_battling)
+			rpg.music=0;
         break;
     case 0x78:
         flag_battling=false;

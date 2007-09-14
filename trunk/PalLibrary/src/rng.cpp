@@ -45,7 +45,7 @@
 #include "pallib.h"
 using namespace Pal::Tools;
 
-int Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
+errno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 {
 	sint32 ptr = 0, dst_ptr = 0;
 	uint8 data;
@@ -250,7 +250,7 @@ static uint16 encode_3(uint16 *&start, uint16 *&data, uint8 *&dest)
 	return len;
 }
 
-int Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& Destination, uint32& Length)
+errno_t Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& Destination, uint32& Length)
 {
 	sint32 len = 0, status = 0;
 	uint16* data = (uint16*)CurFrame;
@@ -365,6 +365,7 @@ int Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& De
 		free(dst);
 		return ENOMEM;
 	}
+	Destination = pNewData;
 	Length = len;
 	return 0;
 }
