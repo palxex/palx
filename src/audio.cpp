@@ -92,7 +92,12 @@ playrix::~playrix()
 void playrix::play(int sub_song,int gap)
 {
 	if(!sub_song){
+		subsong=sub_song;
+		rix.rewind(subsong);
 		stop();
+		playing=false;
+		leaving=slen_buf=0;
+		clear();
 		return;
 	}
 	if(subsong==sub_song){
@@ -121,6 +126,7 @@ int playrix::getvolume()
 void playrix::clear()
 {
 	memset(Buffer,0,BufferLength*2);
+	buf=Buffer;
 }
 voc::voc(uint8_t *f):spl(load_voc_mem(f))
 {}

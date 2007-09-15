@@ -541,9 +541,22 @@ __ride:
     case 0x4a:
         rpg.battlefield=param1;
         break;
+	case 0x4b:
+        //not implemented
+		break;
+	case 0x4c://gogogo
+        //not implemented
+		break;
     case 0x4d:
         wait_for_key();
         break;
+	case 0x4e:
+        flag_to_load|=0x20;
+		rpg.scene_id=0;
+		break;
+	case 0x4f:
+        //not implemented
+		break;
     case 0x50:
         pal_fade_out(param1==0?1:param1);
         break;
@@ -560,6 +573,18 @@ __ride:
     case 0x54:
         rpg.palette_offset=0x180;
         break;
+	case 0x55:
+        //not implemented
+		break;
+	case 0x56:
+        //not implemented
+		break;
+	case 0x57:
+        //not implemented
+		break;
+	case 0x58:
+        //not implemented
+		break;
     case 0x59:
         if (param1>0 && rpg.scene_id!=param1)
         {
@@ -684,6 +709,9 @@ __walk_role:
         curr_obj.pos_x+=param2;
         curr_obj.pos_y+=param3;
         break;
+	case 0x7e:
+		curr_obj.layer=param2;
+		break;
 	case 0x7f:
 		{
 			if (param1==0 && param2==0 && param3==-1)
