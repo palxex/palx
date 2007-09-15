@@ -28,7 +28,10 @@ bool running=true;
 namespace{
 	void mainloop_proc()
 	{
-		Load_Data();
+		static bool first=true;
+		if(first)
+			Load_Data();
+		first=false;
 
 		//Parse Key
 		VKEY keygot=get_key_lowlevel();

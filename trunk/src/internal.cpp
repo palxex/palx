@@ -104,11 +104,11 @@ void Load_Data()
 		for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 			if(i->image)
 				i->frames_auto=sprite_prim().determain_smkfs(MGO.decode(i->image));
-	}
 	//load map & npc
 	scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
 	scene->get_sprites();
 	scene->produce_one_screen();
+	}
 	if(flag_to_load&1){
 		load_team_mgo();
 	}
