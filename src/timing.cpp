@@ -23,7 +23,7 @@
 void wait(uint8_t gap)
 {
 	time_interrupt_occurs=0;
-	rest(gap*10);
+	rest(gap*8);
 }
 
 extern bool running;
@@ -37,6 +37,7 @@ void wait_key(uint8_t gap)
 
 void wait_for_key()
 {
+	clear_keybuf();
 	while(!keypressed() && running)
 		rest(10);
 	clear_keybuf();

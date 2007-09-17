@@ -30,7 +30,7 @@ void play_RNG(int begin,int end,int gap)
 	RNG.setdecoder(olddecoder);
 	BITMAP *cache=create_bitmap(320,200);
 	blit(screen,cache,0,0,0,0,cache->w,cache->h);
-	for(int i=begin;i<std::min(total_clips,end);i++){
+	for(int i=begin;i<=std::min(total_clips-1,end);i++){
 		perframe_proc();
 		Pal::Tools::DecodeRNG(RNG.decode(RNG_num,i),cache->dat);
 		blit(cache,screen,0,0,0,0,cache->w,cache->h);
