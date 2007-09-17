@@ -24,11 +24,14 @@
 #define SAMPLE_RATE	48000
 #define CHANNELS	1
 
+bool begin=false;
 void playrix_timer(void *param)
 {
 	playrix *plr=reinterpret_cast<playrix*>(param);
+	if(voice_get_volume(plr->stream->voice)==0)
+		begin=false;
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
-	if (plr->playing && p)
+	if (begin && p)
 	{
 		if(plr->leaving<BUFFER_SIZE*CHANNELS)
 		{
@@ -36,7 +39,6 @@ void playrix_timer(void *param)
 			int rel=BUFFER_SIZE*CHANNELS-plr->leaving;
 			while(plr->slen_buf<rel)
 			{
-				if(!plr->playing) return;
 				if(!plr->rix.update())
 				{
 					plr->rix.rewind(plr->subsong);
@@ -62,7 +64,7 @@ void playrix_timer(void *param)
 }
 END_OF_FUNCTION(playrix_timer);
 
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0),playing(false)
+playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0)
 {
 	rix.load(std::string("mus.mkf"), CProvider_Filesystem());
 	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
@@ -81,6 +83,8 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 	BufferLength = SAMPLE_RATE * CHANNELS * 3;
 	Buffer = buf = new short [BufferLength];
 	memset(buf, 0, sizeof(short) * BufferLength);
+
+	voice_set_volume(stream->voice,0);
 }
 playrix::~playrix()
 {
@@ -91,42 +95,28 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song,int gap)
 {
+	begin=false;
 	if(!sub_song){
 		subsong=sub_song;
-		rix.rewind(subsong);
 		stop();
-		playing=false;
-		leaving=slen_buf=0;
-		clear();
-		return;
-	}
-	if(subsong==sub_song){
-		voice_set_volume(stream->voice,255);
 		return;
 	}
 	subsong=sub_song;
 
-	voice_set_volume(stream->voice,0);
 	rix.rewind(subsong);
-	playing=true;
+	//opl.init();
+	memset(Buffer, 0, sizeof(short) * BufferLength);
+	buf=Buffer;
+	leaving=slen_buf=0;
+	memset(stream->samp,0,sizeof(stream->samp));
 
+	begin=true;
+	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, gap*1000, 255);
 }
-int rix_fade_flag=0;
 void playrix::stop(int gap)
 {
 	voice_ramp_volume(stream->voice, gap*1000, 0);
-	rix_fade_flag=1;
-}
-
-int playrix::getvolume()
-{
-	return voice_get_volume(stream->voice);
-}
-void playrix::clear()
-{
-	memset(Buffer,0,BufferLength*2);
-	buf=Buffer;
 }
 voc::voc(uint8_t *f):spl(load_voc_mem(f))
 {}

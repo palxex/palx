@@ -108,9 +108,6 @@ class playrix
 	volatile int tune,subsong;
 	friend void playrix_timer(void *);
 public:
-	bool playing;
-	int getvolume();
-	void clear();
 	playrix();
 	~playrix();
 	void play(int sub_song,int =0);
