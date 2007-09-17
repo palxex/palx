@@ -47,7 +47,6 @@ void restore_screen()
 }
 void backup_screen()
 {
-	save_bitmap("t.bmp",screen,res::pat.get(rpg.palette_offset));
     blit(screen,backup,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 
