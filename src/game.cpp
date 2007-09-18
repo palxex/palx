@@ -174,13 +174,15 @@ namespace res{
     void load(int id){
         if(!id)
             return;
-        flag_to_load=0x12;
-        rpg_to_load=id;
+        pat.read(0);
         FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"rb");
         if(!fprpg){
-            allegro_message("sorry,%d.rpg is not exist~The ERROR CODE is %lx",id,GetLastError());
+			pat.set(rpg.palette_offset);
+			map_toload=(rpg.scene_id?rpg.scene_id:1);
             return;
         }
+        flag_to_load=0x12;
+        rpg_to_load=id;
         scene->scenemap.change(-1);
         fread(&rpg,sizeof(RPG),1,fprpg);
         rpg.viewport_x-=0xA0*(scale-1);
@@ -209,7 +211,6 @@ namespace res{
         //F.clear();
         //FIRE.clear();
         //MGO.clear();
-        pat.read(0);
         pal_fade_out(1);
     }
     void save(int id){
