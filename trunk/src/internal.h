@@ -130,5 +130,6 @@ extern bool prelimit_OK;
 	}while(false)
 
 extern int compact_items();
+extern void learnmagic(bool flag_dialog,int magic,int role);
 #endif
 

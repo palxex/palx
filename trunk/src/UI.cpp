@@ -103,50 +103,72 @@ int select_rpg(int ori_select,BITMAP *bmp)
 }
 
 menu::menu(int x,int y,int menus,int begin,int chars)
-	:menu_dialog(0,x,y,menus,chars,false),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
+	:menu_dialog(0,x,y,menus,chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8),
+	 color_selecting(0xFA),got(-1)
 {
 	for(int i=begin;i<begin+menus;i++)
 		menu_items.push_back(std::string(word(i*10,(i+1)*10)));
 }
-int menu::select(int selected)
+menu::menu(int x,int y,std::vector<std::string> &strs,int chars)
+	:menu_dialog(0,x,y,strs.size(),chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8),
+	 color_selecting(0xFA),got(-1)
 {
-	selected=(selected>=0?selected:0);
-	int color_selecting=0xFA;
-	int key=0,ok=-1,color;
-	do{
-		int i=0;
-		for(std::vector<std::string>::iterator r=menu_items.begin();r!=menu_items.end();r++,i++)
-		{
-			if(i==selected)
-				color=color_selecting;
-			else
-				color=0x4E;
-			dialog_string(r->c_str(),text_x,text_y+18*i,color,true);
-		}
-		VKEY keygot;
-		if(ok)
-			SAFE_GETKEY(keygot);
+	menu_items.swap(strs);
+}
+void menu::draw()
+{
+	static int color=0;
+	int i=0;
+	for(std::vector<std::string>::iterator r=menu_items.begin();r!=menu_items.end();r++,i++)
+	{
+		if(i==selected)
+			color=color_selecting;
 		else
+			color=0x4E;
+	dialog_string(r->c_str(),text_x,text_y+18*i,color,true);
+	}
+}
+int menu::select()
+{
+	VKEY keygot;
+	if(got)
+		SAFE_GETKEY(keygot);
+	else
+		return 0;
+	switch(keygot){
+		case VK_UP:
+			selected--;
 			break;
-		switch(keygot){
-			case VK_UP:
-				selected--;
-				break;
-			case VK_DOWN:
-				selected++;
-				break;
-			case VK_MENU:
-				return -1;
-			case VK_EXPLORE:
-				ok=1;key=0;
-				color_selecting=0x2B;
-				break;
-		}
-		selected+=(int)menu_items.size();
-		selected%=menu_items.size();
-	}while(ok--);
+		case VK_DOWN:
+			selected++;
+			break;
+		case VK_MENU:
+			return -1;
+		case VK_EXPLORE:
+			got=1;
+			color_selecting=0x2B;
+			break;
+	}
+	selected+=(int)menu_items.size();
+	selected%=menu_items.size();
+}
+int menu::operator()(int _selected)
+{
+	selected=(_selected>=0?_selected:0);
+	prev_action();
+	do{
+		draw();
+		int s=select();
+		if(s==0)
+			break;
+		else if(s==-1)
+			return -1;
+	}while(got--);
+	post_action();
 	return selected;
 }
+void menu::prev_action(){}
+void menu::post_action(){}
 
 int select_item(int mask,int skip,int selected)
 {

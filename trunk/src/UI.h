@@ -45,9 +45,17 @@ class menu
 	dialog menu_dialog;
 	std::vector<std::string> menu_items;
 	int text_x,text_y;
+	int got;
+	int selected;
+	int color_selecting;
 public:
 	menu(int x,int y,int menus,int begin,int chars);
-	int select(int selected=0);
+	menu(int x,int y,std::vector<std::string> &strs,int chars);
+	int operator()(int selected=0);
+	virtual void prev_action();
+	virtual void post_action();
+	virtual void draw();
+	virtual int select();
 };
 
 class single_dialog

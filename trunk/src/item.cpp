@@ -36,3 +36,23 @@ void add_goods_to_list(int goods,int num)
         ptr->item=goods;
     ptr->amount+=num;
 }
+
+struct comp_sele
+{
+	int pos;
+	int16_t r;
+	comp_sele(int p,int16_t rhs):pos(p),r(rhs){}
+	bool operator()(roles &lhs)
+	{
+		return lhs[pos]==r;
+	}
+};
+
+void learnmagic(bool flag_dialog,int magic,int role)
+{
+	if(std::find_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,comp_sele(role,magic)))
+		return;
+	*std::find_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,comp_sele(role,0))[role]=magic;
+	if(flag_dialog)
+		;//
+}
