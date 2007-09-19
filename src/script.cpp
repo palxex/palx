@@ -573,7 +573,7 @@ __ride:
         rpg.palette_offset=0x180;
         break;
 	case 0x55:
-        //not implemented
+        learnmagic(false,param1,object);
 		break;
 	case 0x56:
         //not implemented
@@ -847,10 +847,10 @@ __walk_role:
     }
 }
 
+cut_msg_impl msges;
+cut_msg_impl objs("word.dat");
 uint16_t process_script(uint16_t id,int16_t object)
 {
-    static cut_msg_impl msges;
-    static cut_msg_impl objs("word.dat");
     static int _t_=atexit(destroyit);
     if (!backup)
         backup=create_bitmap(SCREEN_W,SCREEN_H);
