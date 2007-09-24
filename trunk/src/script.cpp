@@ -345,10 +345,10 @@ __walk_npc:
         curr_obj.trigger_script= param2;
         break;
     case 0x26:
-        //not implemented
+        shop(param1);
         break;
     case 0x27:
-        //not implemented
+        hockshop();
         break;
     case 0x28:
         //not implemented

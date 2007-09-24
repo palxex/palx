@@ -88,34 +88,4 @@ struct BattleScene{
 	void draw();
 };
 
-
-class cut_msg_impl
-{
-	FILE *fp;
-	char *glb_buf;
-	char buf[100];
-public:
-	cut_msg_impl(const char *fname="m.msg")
-		:fp(fopen(fname,"rb"))
-	{
-		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);
-		glb_buf=new char[len];
-		fread(glb_buf,len,1,fp);
-		fclose(fp);
-	}
-	~cut_msg_impl()
-	{
-		delete[] glb_buf;
-	}
-	char *operator()(int start,int end=-1)
-	{
-		if(end==-1)
-			end=start+10;
-		assert(end>start);assert(start>=0);
-		memset(buf,0,sizeof(buf));
-		memcpy(buf,glb_buf+start,end-start);
-		return buf;
-	}
-};
-
 #endif

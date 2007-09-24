@@ -131,6 +131,7 @@
 		<Unit filename="src\scene.cpp" />
 		<Unit filename="src\scene.h" />
 		<Unit filename="src\script.cpp" />
+		<Unit filename="src\shop.cpp" />
 		<Unit filename="src\structs.h" />
 		<Unit filename="src\team.cpp" />
 		<Unit filename="src\timing.cpp" />

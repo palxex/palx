@@ -128,11 +128,11 @@ void Load_Data()
 }
 bool process_Menu()
 {
-	static int main_select=0,role_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0;
+	static int main_select=0,role_select=0,magic_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0;
 	//show_money();
 	single_dialog(0,0,5);
 	ttfont(cut_msg_impl("word.dat")(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);
-	switch(main_select=menu(3,37,4,3,2)(main_select))
+	switch(main_select=menu(3,37,4,3,2)(&single_menu(),main_select))
 	{
 	case 0:
 		break;
@@ -140,19 +140,18 @@ bool process_Menu()
 		{
 			if(res::rpg.team_roles)
 			{
-				extern cut_msg_impl objs;
 				std::vector<std::string> names;
 				for(int i=0;i<=res::rpg.team_roles;i++)
 					names.push_back(objs(res::rpg.roles_properties.name[res::rpg.team[i].role]*10));
-				role_select=menu(0x2c,0x40,names,3)(role_select);
+				role_select=menu(0x2c,0x40,names,3)(&single_menu(),role_select);
 			}
 			else
 				role_select=res::rpg.team[0].role;
-			//select_thurgies();
+			magic_select=select_theurgy(role_select,1,magic_select);
 		}
 		break;
 	case 2:
-		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2)(itemuse_select))
+		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2)(&single_menu(),itemuse_select))
 		{
 		case 0:
 			item_select=select_item(2,0,item_select);
@@ -171,7 +170,7 @@ bool process_Menu()
 		}
 		break;
 	case 3:
-		switch(sys_select=menu(0x28,0x3c,5,0xB,4)(sys_select))
+		switch(sys_select=menu(0x28,0x3c,5,0xB,4)(&single_menu(),sys_select))
 		{
 		case 0:
 			if(rpg_select=select_rpg(rpg_to_load))

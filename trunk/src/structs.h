@@ -290,5 +290,15 @@ typedef struct{
 				return toXY().x==rhs.x && toXY().y==rhs.y;
 		}
 	};
+struct rolemagic_select
+{
+	int pos;
+	int16_t r;
+	rolemagic_select(int p,int16_t rhs):pos(p),r(rhs){}
+	bool operator()(roles &lhs)
+	{
+		return lhs[pos]==r;
+	}
+};
 #endif
 
