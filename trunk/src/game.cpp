@@ -117,16 +117,6 @@ namespace res{
             y_scrn_offset*=scale;
 
 
-        alfont_init();
-        char fontpath[100];
-        sprintf(fontpath,"%s%s",getenv("WINDIR"),"\\fonts\\mingliu.ttc");
-        ttfont::glb_font=alfont_load_font(fontpath);
-        alfont_set_language(ttfont::glb_font, "cht");
-        alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
-        //alfont_text_mode(-1);
-        alfont_set_font_background(ttfont::glb_font, FALSE);
-        alfont_set_char_extra_spacing(ttfont::glb_font,1);
-        alfont_set_font_size(ttfont::glb_font,16);
         //global setting
 
         LOCK_VARIABLE(time_interrupt_occurs);

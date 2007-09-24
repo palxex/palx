@@ -56,6 +56,16 @@ int main(int argc, char *argv[])
 	set_gfx_mode(CARD,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
 	set_color_depth(8);
 
+        alfont_init();
+        char fontpath[100];
+        sprintf(fontpath,"%s%s",getenv("WINDIR"),"\\fonts\\mingliu.ttc");
+        ttfont::glb_font=alfont_load_font(fontpath);
+        alfont_set_language(ttfont::glb_font, "chinese");
+        alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
+        //alfont_text_mode(-1);
+        alfont_set_font_background(ttfont::glb_font, FALSE);
+        alfont_set_char_extra_spacing(ttfont::glb_font,1);
+        alfont_set_font_size(ttfont::glb_font,16);
 	randomize();
 	playrix player;				rix=&player;
 
