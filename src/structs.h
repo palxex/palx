@@ -66,7 +66,7 @@ typedef struct script_def{
 //typedef struct
 
 enum DIRECTION{WEST,NORTH,EAST,SOUTH};
-enum ROLE{LEE,LINGR,YUERU,WUHOU,GAI,ANU};
+enum ROLE{LEE,LINGR,YUERU,WUHOU,ANU,GAI};
 
 typedef int16_t roles[ALLROLES];
 typedef struct {

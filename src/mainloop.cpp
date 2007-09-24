@@ -29,7 +29,7 @@ namespace{
 	void mainloop_proc()
 	{
 		static bool first=true;
-		if(first)
+		if(first || flag_to_load)
 			Load_Data();
 		first=false;
 
@@ -37,8 +37,11 @@ namespace{
 		VKEY keygot=get_key_lowlevel();
 
 		GameLoop_OneCycle(true);
-		if(flag_to_load)
+		if(flag_to_load){
 			Load_Data();
+			keygot=get_key_lowlevel();
+			GameLoop_OneCycle(true);
+		}
 
 		//clear scene back
 		scene->clear_scanlines();

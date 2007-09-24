@@ -53,6 +53,6 @@ int process_Battle(uint16_t enemy_team,uint16_t script_escape)
 		if(res::enemyteams[enemy_team].enemy[i]>0)
 			enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].inbeing);
 	draw_battle_scene(enemy_team);while(!keypressed()) wait(10);
-	rix->play(res::rpg.music);
+	rix->play(res::rpg.music);flag_to_load|=3;
 	return 0;
 }
