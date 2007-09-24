@@ -102,39 +102,56 @@ int select_rpg(int ori_select,BITMAP *bmp)
 	return selected;
 }
 
-menu::menu(int x,int y,int menus,int begin,int chars)
-	:menu_dialog(0,x,y,menus,chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8),
-	 color_selecting(0xFA),got(-1)
+menu::menu(int x,int y,int menus,int begin,int chars,int style,bool shadow)
+	:menu_dialog(style,x,y,menus,chars,shadow),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
 		menu_items.push_back(std::string(word(i*10,(i+1)*10)));
 }
-menu::menu(int x,int y,std::vector<std::string> &strs,int chars)
-	:menu_dialog(0,x,y,strs.size(),chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8),
-	 color_selecting(0xFA),got(-1)
+menu::menu(int x,int y,std::vector<std::string> &strs,int chars,int length,int style)
+:menu_dialog(style,x,y,length==-1?strs.size():length,chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	menu_items.swap(strs);
 }
-void menu::draw()
+int menu::operator()(menu_tmp *con,int _selected)
+{
+	return con->select(this,_selected);
+}
+int single_menu::select(menu *abs,int _selected)
+{
+	selected=(_selected>=0?_selected:0);
+	prev_action(abs);
+	do{
+		draw(abs);
+		int s=keyloop(abs);
+		if(s==-2)
+			break;
+		else if(s==-1)
+			return -1;
+	}while(got--);
+	post_action(abs);
+	return selected;
+}
+void single_menu::draw(menu *abs)
 {
 	static int color=0;
 	int i=0;
-	for(std::vector<std::string>::iterator r=menu_items.begin();r!=menu_items.end();r++,i++)
+	for(std::vector<std::string>::iterator r=abs->menu_items.begin();r!=abs->menu_items.end();r++,i++)
 	{
 		if(i==selected)
 			color=color_selecting;
 		else
 			color=0x4E;
-	dialog_string(r->c_str(),text_x,text_y+18*i,color,true);
+	dialog_string(r->c_str(),abs->text_x,abs->text_y+18*i,color,true);
 	}
 }
-int menu::select()
+int single_menu::keyloop(menu *abs)
 {
 	VKEY keygot;
 	if(got)
 		SAFE_GETKEY(keygot);
 	else
-		return 0;
+		return -2;
 	switch(keygot){
 		case VK_UP:
 			selected--;
@@ -149,31 +166,29 @@ int menu::select()
 			color_selecting=0x2B;
 			break;
 	}
-	selected+=(int)menu_items.size();
-	selected%=menu_items.size();
+	selected+=(int)abs->menu_items.size();
+	selected%=abs->menu_items.size();
 }
-int menu::operator()(int _selected)
+void single_menu::prev_action(menu *){}
+void single_menu::post_action(menu *){}
+
+int multi_menu::select(menu *abs,int _selected)
 {
-	selected=(_selected>=0?_selected:0);
-	prev_action();
+	selected=((_selected<=max && _selected>=0)?_selected:0);
+	prev_action(abs);int s;
 	do{
-		draw();
-		int s=select();
-		if(s==0)
-			break;
-		else if(s==-1)
+		draw(abs);
+		s=keyloop(abs);
+		if(s==-1)
 			return -1;
-	}while(got--);
-	post_action();
+	}while(!got);
+	post_action(abs);
 	return selected;
 }
-void menu::prev_action(){}
-void menu::post_action(){}
-
-int select_item(int mask,int skip,int selected)
+void multi_menu::prev_action(menu *abs)
 {
-	int max=compact_items(),max_ori=max,begin_y;
-
+	max=compact_items();
+	max_ori=max;
 	if(!skip)//装备中的土灵珠等}
 		for(int i=0;i<=res::rpg.team_roles;i++)
 			for(int j=0xB;j<=0x10;j++)
@@ -187,58 +202,83 @@ int select_item(int mask,int skip,int selected)
 		begin_y=-8;
 	else
 		begin_y=33;
-
-
-	static int const paging=8,middle=paging/2;static int locating=selected;//8 for dos,98 maybe 7?
-	static bitmap buf(0,SCREEN_W,SCREEN_H),bak(0,SCREEN_W,SCREEN_H);
-
-	dialog(9,2,33,paging,18,false);//DOS ver;for item should use 98 ver.
 	blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
-	bool ok=false;int color_selecting,key;
-	VKEY keygot;
-	do{
-		static int offset=0,pre_locate=0;
-		offset=(locating/3<middle?0:locating/3-middle);
-		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
-		for(int r=offset*3;r<offset*3+paging*3;r++)
-			if(r<0x100 && res::rpg.items[r].item)
-				ttfont(word(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==locating)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
-		res::UIpics.getsprite(69)->blit_to(buf,16+100*(locating%3)+24,begin_y+12+(locating/3-offset)*18+11,true,3,2);
-		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
-		SAFE_GETKEY(keygot);
-		switch(keygot){
-			case VK_UP:
-				locating-=3;
-				break;
-			case VK_DOWN:
-				locating+=3;
-				break;
-			case VK_LEFT:
-				locating--;
-				break;
-			case VK_RIGHT:
-				locating++;
-				break;
-			case VK_PGUP:
-				locating-=middle*3;
-				break;
-			case VK_PGDN:
-				locating+=middle*3;
-				break;
-			case VK_MENU:
-				return -1;
-			case VK_EXPLORE:
-				ok=1;key=0;
-				color_selecting=0x2B;
-				break;
-		}
-		locating=(locating<0?0:(locating>max-1?max-1:locating));
-	}while(keygot!=VK_MENU && !ok);
-
+}
+void multi_menu::post_action(menu *abs)
+{
 	for(int i=max_ori;i<max;i++)
 		res::rpg.items[i].item=0,
 		res::rpg.items[i].amount=0,
 		res::rpg.items[i].using_amount=0;
+}
+void multi_menu::draw(menu *abs)
+{
+		static int offset=0;
+		offset=(selected/3<middle?0:selected/3-middle);
+		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
+		for(int r=offset*3;r<offset*3+paging*3;r++)
+			if(r<0x100 && res::rpg.items[r].item)
+				ttfont(word(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
+		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
+		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+}
+int multi_menu::keyloop(menu *abs)
+{
+	VKEY keygot;
+	SAFE_GETKEY(keygot);
+		switch(keygot){
+			case VK_UP:
+				selected-=3;
+				break;
+			case VK_DOWN:
+				selected+=3;
+				break;
+			case VK_LEFT:
+				selected--;
+				break;
+			case VK_RIGHT:
+				selected++;
+				break;
+			case VK_PGUP:
+				selected-=middle*3;
+				break;
+			case VK_PGDN:
+				selected+=middle*3;
+				break;
+			case VK_MENU:
+				return -1;
+			case VK_EXPLORE:
+				got=1;
+				color_selecting=0x2B;
+				break;
+		}
+		return selected=(selected<0?0:(selected>max-1?max-1:selected));
+}
+int select_item(int mask,int skip,int selected)
+{
+	return menu(2,33,8,0,18,9,false)(&multi_menu(mask,skip),selected);
+}
 
-	return locating;
+struct magic_menu:public multi_menu
+{
+	int role;
+	magic_menu(int _role,int _mask):multi_menu(_mask,0),role(_role){}
+	void prev_action(menu *){
+		max=0x20-std::count_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,0));
+		blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
+		begin_y=33;
+	}
+	void draw(menu *){
+		int offset=(selected/3<middle?0:selected/3-middle);
+		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
+		for(int r=offset*3;r<offset*3+paging*3;r++)
+			if(r<0x20 && res::rpg.role_prop_tables[0x20+r][role])
+				ttfont(word(res::rpg.role_prop_tables[0x20+r][role]*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0x4E:0x18),true);
+		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
+		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+	}
+};
+int select_theurgy(int role,int mask,int selected)
+{
+	return menu(2,33,8,0,18,9,false)(&magic_menu(role,mask),selected);
 }

@@ -17,32 +17,19 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include <algorithm>
-#include "internal.h"
-#include "game.h"
+#include "UI.h"
 
-int compact_items()
+class Shop:public single_menu
 {
-	for(int i=0;i<0x100;i++)
-		if(res::rpg.items[i].amount==0)
-			std::copy(res::rpg.items+i+1,res::rpg.items+0x100,res::rpg.items+i);
-	return std::find(res::rpg.items,res::rpg.items+0x100,0)-res::rpg.items;
-}
-void add_goods_to_list(int goods,int num)
+	
+};
+void shop(int num)
 {
-    RPG::ITEM *ptr=std::find(res::rpg.items,res::rpg.items+0x100,goods);
-    if (ptr==res::rpg.items+0x100)
-        ptr=std::find(res::rpg.items,res::rpg.items+0x100,0),
-        ptr->item=goods;
-    ptr->amount+=num;
+	std::vector<std::string> items;
+	for(int i=0;i<9;i++)
+		if(res::shops[num].item[i])
+			items.push_back(objs(res::shops[num].item[i]*10));
+	menu(0x7a,8,items,5,9,9)(&single_menu(),0);
 }
-
-
-void learnmagic(bool flag_dialog,int magic,int role)
-{
-	if(std::find_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,magic))!=res::rpg.role_prop_tables+0x40)
-		return;
-	*std::find_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,0))[role]=magic;
-	if(flag_dialog)
-		;//
-}
+void hockshop()
+{}

@@ -104,7 +104,8 @@ class playrix
 	AUDIOSTREAM *stream;
 	short 		*Buffer, *buf;
 	volatile long leaving;
-	volatile long 	slen,slen_buf, BufferLength;
+	volatile long 	slen,slen_buf;
+	const volatile int BufferLength;
 	volatile int tune,subsong;
 	friend void playrix_timer(void *);
 public:
