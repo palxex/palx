@@ -131,7 +131,7 @@ bool process_Menu()
 	static int main_select=0,role_select=0,magic_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0;
 	//show_money();
 	single_dialog(0,0,5);
-	ttfont(cut_msg_impl("word.dat")(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);
+	ttfont(objs(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);
 	switch(main_select=menu(3,37,4,3,2)(&single_menu(),main_select))
 	{
 	case 0:

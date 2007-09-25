@@ -847,8 +847,8 @@ __walk_role:
     }
 }
 
-cut_msg_impl msges;
-cut_msg_impl objs("word.dat");
+cut_msg_impl msges("m.txt");
+cut_msg_impl objs("word.txt");
 uint16_t process_script(uint16_t id,int16_t object)
 {
     static int _t_=atexit(destroyit);
