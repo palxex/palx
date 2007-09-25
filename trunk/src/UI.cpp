@@ -23,8 +23,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-static cut_msg_impl word("word.dat");
-
 dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
 {
 	rows--;columns--;
@@ -71,7 +69,7 @@ int select_rpg(int ori_select,BITMAP *bmp)
 	do{
 		for(int r=0;r<5;r++){
 			single_dialog(0xB4,4+0x26*r,6,cache);
-			dialog_string((std::string(word(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
+			dialog_string((std::string(objs(0x1AE,0x1B2))+boost::lexical_cast<std::string>((selected-1)/5*5+r+1)).c_str(),0xBE,14+0x26*r,r==(selected-1)%5?0xFA:0,r==(selected-1)%5,cache);
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
 
@@ -106,7 +104,7 @@ menu::menu(int x,int y,int menus,int begin,int chars,int style,bool shadow)
 	:menu_dialog(style,x,y,menus,chars,shadow),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
-		menu_items.push_back(std::string(word(i*10,(i+1)*10)));
+		menu_items.push_back(std::string(objs(i*10,(i+1)*10)));
 }
 menu::menu(int x,int y,std::vector<std::string> &strs,int chars,int length,int style)
 :menu_dialog(style,x,y,length==-1?strs.size():length,chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
@@ -218,7 +216,7 @@ void multi_menu::draw(menu *abs)
 		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
 			if(r<0x100 && res::rpg.items[r].item)
-				ttfont(word(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
+				ttfont(objs(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
 		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
@@ -273,7 +271,7 @@ struct magic_menu:public multi_menu
 		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
 			if(r<0x20 && res::rpg.role_prop_tables[0x20+r][role])
-				ttfont(word(res::rpg.role_prop_tables[0x20+r][role]*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0x4E:0x18),true);
+				ttfont(objs(res::rpg.role_prop_tables[0x20+r][role]*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0x4E:0x18),true);
 		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
