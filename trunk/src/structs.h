@@ -127,8 +127,8 @@ typedef struct rpg_def{
 	int16_t reserved;
 	int16_t gourd_value;
 	int16_t layer;//?
-	int16_t chase_speed;
-	int16_t no_chase_cycles;
+	int16_t chase_range;
+	int16_t chasespeed_change_cycles;
 	int16_t team_followers;
 	int16_t reserved_[3];
 	int32_t coins;

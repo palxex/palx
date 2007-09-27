@@ -47,6 +47,7 @@ void playrix_timer(void *param)
 				plr->slen = SAMPLE_RATE / plr->rix.getrefresh();
 				plr->opl.update(plr->buf, plr->slen);
 				for(int t=0;t<plr->slen * CHANNELS;t++)
+					*plr->buf*=1,
 					*plr->buf++^=0x8000;
 				plr->slen_buf+=plr->slen * CHANNELS;
 			 }
