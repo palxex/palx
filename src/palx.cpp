@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         char fontpath[100];
         sprintf(fontpath,"%s%s",getenv("WINDIR"),"\\fonts\\mingliu.ttc");
         ttfont::glb_font=alfont_load_font(fontpath);
-        alfont_set_language(ttfont::glb_font, "chs");
+        alfont_set_language(ttfont::glb_font, "chinese");
         alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
         //alfont_text_mode(-1);
         alfont_set_font_background(ttfont::glb_font, FALSE);

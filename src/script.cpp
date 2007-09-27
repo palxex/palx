@@ -119,6 +119,8 @@ void GameLoop_OneCycle(bool trigger)
                 scene->move_usable_screen();
             }
         }
+		if(!--rpg.chasespeed_change_cycles)
+			rpg.chase_range=1;
     }
 }
 void process_Explore()
@@ -544,7 +546,36 @@ __ride:
         //not implemented
 		break;
 	case 0x4c://gogogo
-        //not implemented
+		{
+			npc_speed=0;
+			int guard_field=(param1?param1:8);
+			int chase_speed=(param2?param2:4);
+			if(rpg.chase_range){
+				int x_off=obj.pos_x-scene->team_pos.toXY().x,y_off=obj.pos_y-scene->team_pos.toXY().y;
+				position pos(obj.pos_x,obj.pos_y);pos.toXYH();pos.toXY();
+				if(abs(x_off)+2*abs(y_off)<guard_field*32*rpg.chase_range){
+					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(rnd0()?-1:1),y_off?-y_off:(rnd0()?-1:1));
+					if(param3)
+						obj.direction=d,
+						npc_speed=chase_speed;
+					else if(!barrier_check(object,obj.pos_x+direction_offs[d][0],obj.pos_y+direction_offs[d][1])){
+						if(barrier_check(0,obj.pos_x,obj.pos_y,false)){
+							allegro_message("Hei,you are on the volcano(%x,%x), NPC #%X!",obj.pos_x,obj.pos_y,object);
+							obj.status=0;
+						}
+						obj.direction=d;
+						npc_speed=chase_speed;
+					}else
+						obj.pos_x=pos.x,obj.pos_y=pos.y;
+					if(!param3)
+						for(int D=WEST;D<=SOUTH;D++)
+							if(barrier_check(0,obj.pos_x+=direction_offs[D][0]/4,obj.pos_y+=direction_offs[D][1]/4,false))
+								obj.pos_x=pos.x,obj.pos_y=pos.y;
+				}
+			}else
+				obj.direction=(obj.direction+flag_parallel_mutex)&3;
+			NPC_walk_one_step(obj,npc_speed);
+		}
 		break;
     case 0x4d:
         wait_for_key();
@@ -592,6 +623,13 @@ __ride:
             rpg.layer=0;
         }
         break;
+	case 0x62:
+		rpg.chasespeed_change_cycles=param1;
+		rpg.chase_range=0;
+		break;
+	case 0x63:
+		rpg.chasespeed_change_cycles=param1;
+		rpg.chase_range=3;
     case 0x65:
         rpg.roles_properties.avator[param1]=param2;
         if (!flag_battling && param3)
@@ -847,8 +885,8 @@ __walk_role:
     }
 }
 
-cut_msg_impl msges("m.txt");
-cut_msg_impl objs("word.txt");
+cut_msg_impl msges("m.msg");
+cut_msg_impl objs("word.dat");
 uint16_t process_script(uint16_t id,int16_t object)
 {
     static int _t_=atexit(destroyit);
