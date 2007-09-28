@@ -1,9 +1,9 @@
 /*
  * PAL library GRF format base class
  * 
- * Author: Lou Yihua <louyihua@21cn.com>
+ * Author: Yihua Lou <louyihua@21cn.com>
  *
- * Copyright 2007 Lou Yihua
+ * Copyright 2007 Yihua Lou
  *
  * This file is part of PAL library.
  *
@@ -38,7 +38,7 @@
  * 你应该已经和库一起收到一份GNU次通用公共许可证的拷贝。如果还没有，写信给
  * 自由软件基金会：51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
-
+/*
 #include <io.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -89,7 +89,7 @@ static inline errno_t _icheckpath(const char* pszFilePath, char*& pszPath)
 			// 没有足够的内存用于分配缓冲区
 			free(newpath);
 			return ENOMEM;
-		}	
+		}
 
 		// 检查路径的每一层
 		for(pch = newpath; ; pch++)
@@ -111,7 +111,7 @@ static inline errno_t _icheckpath(const char* pszFilePath, char*& pszPath)
 				return ENOENT;
 			}
 
-			// 该层可达，或者已经创建了该层目录
+			// 该层可达
 			*(pch + 1) = ch1;
 
 			// 是否已经检查到传入路径的结尾
@@ -146,6 +146,62 @@ static inline errno_t _icheckpath(const char* pszFilePath, char*& pszPath)
 			return 0;
 		}
 	}
+}
+
+static inline errno_t _ibuildpath(const char* pszFilePath)
+{
+	size_t pathlen;
+	char* newpath;
+
+	if (pszFilePath != NULL && (pathlen = strlen(pszFilePath)) > 0)
+	{
+		char* curpath;
+		char* pch;
+
+		// 对传入的路径进行检查
+		if ((newpath = (char*)malloc(pathlen + 1)) == NULL)
+			return ENOMEM;
+		strcpy(newpath, pszFilePath);
+
+		// 取当前工作目录以备用
+		if ((curpath = getcwd(NULL, 0)) == NULL)
+		{
+			// 没有足够的内存用于分配缓冲区
+			free(newpath);
+			return ENOMEM;
+		}
+
+		// 检查路径的每一层
+		for(pch = newpath; *pch != '\0'; pch++)
+		{
+			char ch0 = *pch;
+
+			// 遇到的不是路径分隔符或结束符，则继续下一个字符
+			if (ch0 != '\\' && ch0 != '/')
+				continue;
+
+			// 将路径暂时限定到当前检查的位置
+			*pch = '\0';
+
+			// 检查该层是否可达，不可达则尝试创建
+			if (chdir(newpath) != 0 && mkdir(newpath) != 0)
+			{
+				errno_t err = errno;
+				free(curpath);
+				free(newpath);
+				return err;
+			}
+
+			// 该层可达，或者已经创建了该层目录
+			*pch = ch0;
+		}
+
+		// 重新将当前目录设置为之前的目录
+		chdir(curpath);
+		free(curpath);
+		free(newpath);
+	}
+	return 0;
 }
 
 static errno_t _iGRFseekfile(GRFFILE* stream, const char* name)
@@ -231,8 +287,7 @@ errno_t Pal::Tools::GRF::GRFopen(const char* grffile, const char* base, bool cre
 		return err;
 	}
 	//取文件长度
-	if (lseek(fd, 0, SEEK_END) == -1 ||
-		(flen = tell(fd)) == -1)
+	if (lseek(fd, 0, SEEK_END) == -1 || (flen = tell(fd)) == -1)
 	{
 		err = errno;
 		close(fd);
@@ -274,15 +329,15 @@ errno_t Pal::Tools::GRF::GRFopen(const char* grffile, const char* base, bool cre
 		uint32 len;
 
 		//判断格式并分配空间
-		if (read(fd, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER) ||
-			strcmp(hdr.Signature, "GRF") != 0 || lseek(fd, 0, SEEK_SET) == -1)
+		if (lseek(fd, 0, SEEK_SET) == -1 ||
+			read(fd, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER) ||
+			strcmp(hdr.Signature, "GRF") != 0)
 		{
-			err = errno;
 			close(fd);
 			free(_base);
-			return err;
+			return EILSEQ;
 		}
-		len = hdr.DataOffset == 0 ? hdr.FileLength : hdr.DataOffset;
+		len = (hdr.DataOffset == 0) ? hdr.FileLength : hdr.DataOffset;
 		if ((ptr = malloc(len)) == NULL)
 		{
 			err = errno;
@@ -291,7 +346,7 @@ errno_t Pal::Tools::GRF::GRFopen(const char* grffile, const char* base, bool cre
 			return err;
 		}
 		//读取内容
-		if ((uint32)read(fd, ptr, len) < len)
+		if (lseek(fd, 0, SEEK_SET) == -1 || (uint32)read(fd, ptr, len) < len)
 		{
 			err = errno;
 			free(ptr);
@@ -334,7 +389,6 @@ errno_t Pal::Tools::GRF::GRFclose(GRFFILE* stream)
 
 	if (stream == NULL)
 		return EINVAL;
-	GRFflush(stream);
 	if (stream->base)
 		free(stream->base);
 	if (stream->pie)
@@ -435,7 +489,7 @@ errno_t Pal::Tools::GRF::GRFenumname(GRFFILE* stream, const char* prevname, char
 	}
 	else
 	{
-		memcpy(name, ptr->EntryPath, stream->ieptr->PathLength);
+		memcpy(name, ptr->EntryPath, ptr->PathLength);
 		name[ptr->PathLength] = '\0';
 		nextname = name;
 		return 0;
@@ -580,11 +634,13 @@ errno_t Pal::Tools::GRF::GRFappendfile(GRFFILE* stream, const char* name)
 	else
 		stream->pie = ptr;
 	//设置值
+	hdr = (GRF_HEADER*)stream->pie;
 	stream->ieptr = (INDEX_ENTRY*)((uint8*)stream->pie + hdr->FileLength);
 	stream->ieptr->Offset = stream->ieptr->Length = 0;
 	stream->ieptr->ResourceType = GRF_RESOURCE_TYPE_NONE;
 	stream->ieptr->CompressAlgorithm= GRF_COMPRESS_ALGORITHM_NONE;
 	stream->ieptr->PathLength = (uint16)len;
+	memcpy(stream->ieptr->EntryPath, name, len);
 	hdr->FileLength += sizeof(INDEX_ENTRY) + (uint32)len;
 	hdr->EntryCount++;
 	stream->flag |= GRF_FLAG_MODIFIED;
@@ -668,6 +724,7 @@ errno_t Pal::Tools::GRF::GRFrenamefile(GRFFILE* stream, const char* oldname, con
 	//调整分配的空间
 	len = ((GRF_HEADER*)stream->pie)->FileLength;
 	len0 = len - len1 + len2;
+	count = (size_t)((uint8*)stream->ieptr - (uint8*)stream->pie);
 	if ((buf = realloc(stream->pie, len0)) == NULL)
 	{
 		stream->error = ENOMEM;
@@ -677,11 +734,13 @@ errno_t Pal::Tools::GRF::GRFrenamefile(GRFFILE* stream, const char* oldname, con
 		stream->pie = buf;
 
 	//为新名字移出空间
+	stream->ieptr = (INDEX_ENTRY*)((uint8*)stream->pie + count);
 	ptr = stream->ieptr + 1;
 	count = len - len1 - (size_t)((uint8*)ptr - (uint8*)stream->pie);
 	memmove((uint8*)ptr + len2, (uint8*)ptr + len1, count);
 	//复制新名字
 	memcpy(ptr, newname, len2);
+	stream->ieptr->PathLength = (uint16)len2;
 	((GRF_HEADER*)stream->pie)->FileLength = (uint32)len0;
 	stream->flag |= GRF_FLAG_MODIFIED;
 
@@ -763,6 +822,7 @@ errno_t Pal::Tools::GRF::GRFsetfileattr(GRFFILE* stream, const char* name, int a
 		stream->error = ERANGE;
 		return ERANGE;
 	}
+	stream->flag |= GRF_FLAG_MODIFIED;
 
 	return 0;
 }
@@ -790,8 +850,8 @@ errno_t Pal::Tools::GRF::GRFseekfile(GRFFILE* stream, const char* name)
 		if (lseek(stream->fd, stream->ieptr->Offset, SEEK_SET) == -1)
 		{
 			stream->ieptr = ptr;
-			stream->error = ENOENT;
-			return ENOENT;
+			stream->error = errno;
+			return stream->error;
 		}
 		else
 		{
@@ -991,14 +1051,19 @@ errno_t Pal::Tools::GRF::GRFPackage(const char* pszGRF, const char* pszBasePath,
 	else
 	{
 		//检查 GRF 文件
-		if (read(fdold, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER) ||
-			memcmp(hdr.Signature, "GRF", 4) != 0 ||
-			hdr.DataOffset != 0 || hdr.EntryCount == 0)
+		if (read(fdold, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER))
 		{
 			err = errno;
 			close(fdold);
 			free(name);
 			return err;
+		}
+		if (memcmp(hdr.Signature, "GRF", 4) != 0 ||
+			hdr.DataOffset != 0 || hdr.EntryCount == 0)
+		{
+			close(fdold);
+			free(name);
+			return EILSEQ;
 		}
 		else
 			hdr.DataOffset = hdr.FileLength;
@@ -1112,7 +1177,7 @@ errno_t Pal::Tools::GRF::GRFPackage(const char* pszGRF, const char* pszBasePath,
 	return flag ? 0 : err;
 }
 
-errno_t Pal::Tools::GRF::GRFExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile)
+errno_t Pal::Tools::GRF::GRFExtract(const char* pszGRF, const char* pszNewFile, const char* pszBasePath)
 {
 	int fdold, fdnew;
 	size_t pathlen;
@@ -1140,17 +1205,20 @@ errno_t Pal::Tools::GRF::GRFExtract(const char* pszGRF, const char* pszBasePath,
 	else
 	{
 		//检查 GRF 文件
-		if (read(fdold, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER) ||
-			memcmp(hdr.Signature, "GRF", 4) != 0 ||
-			hdr.DataOffset == 0 || hdr.EntryCount == 0)
+		if (read(fdold, &hdr, sizeof(GRF_HEADER)) < sizeof(GRF_HEADER))
 		{
 			err = errno;
 			close(fdold);
 			free(name);
 			return err;
 		}
-		else
-			hdr.DataOffset = hdr.FileLength;
+		if (memcmp(hdr.Signature, "GRF", 4) != 0 ||
+			hdr.DataOffset == 0 || hdr.EntryCount == 0)
+		{
+			close(fdold);
+			free(name);
+			return EILSEQ;
+		}
 	}
 	//创建新的 GRF 文件
 	if ((fdnew = open(pszNewFile, O_CREAT | O_TRUNC | O_BINARY | O_RDWR, S_IREAD | S_IWRITE)) == -1)
@@ -1219,6 +1287,9 @@ errno_t Pal::Tools::GRF::GRFExtract(const char* pszGRF, const char* pszBasePath,
 			flag = false;
 			break;
 		}
+		//创建新路径
+		if (_ibuildpath(name) != 0)
+			continue;
 		//打开数据文件
 		if ((fddat = open(name, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, S_IREAD | S_IWRITE)) == -1)
 			continue;
@@ -1274,3 +1345,4 @@ errno_t Pal::Tools::GRF::GRFExtract(const char* pszGRF, const char* pszBasePath,
 	free(name);
 	return flag ? 0 : err;
 }
+*/

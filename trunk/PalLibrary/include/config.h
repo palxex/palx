@@ -13,31 +13,35 @@
 
 #if	defined(__GNUC__) && !defined(_STDEXT)
 #	define	_STDEXT	__gnu_cxx
-#	if	defined(__MINGW32__)
-#		define errno_t int
-#	else
-#		define errno_t error_t
-#	endif
 #endif
-
 
 #ifndef	uint8
-typedef	unsigned char	uint8;
+typedef	unsigned char		uint8;
 #endif
 #ifndef	uint16
-typedef	unsigned short	uint16;
+typedef	unsigned short		uint16;
 #endif
 #ifndef	uint32
-typedef	unsigned int	uint32;
+typedef	unsigned long		uint32;
+#endif
+#ifndef	uint64
+typedef	unsigned long long	uint64;
 #endif
 #ifndef	sint8
-typedef	signed char		sint8;
+typedef	signed char			sint8;
 #endif
 #ifndef	sint16
-typedef	signed short	sint16;
+typedef	signed short		sint16;
 #endif
 #ifndef	sint32
-typedef	signed int		sint32;
+typedef	signed long			sint32;
+#endif
+#ifndef	sint64
+typedef	signed long long	sint64;
+#endif
+
+#ifndef	palerrno_t
+typedef	int	palerrno_t;
 #endif
 
 #ifndef	NULL

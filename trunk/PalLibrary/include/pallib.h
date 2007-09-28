@@ -1,9 +1,9 @@
 /*
  * PAL library common include file
  * 
- * Author: Lou Yihua <louyihua@21cn.com>
+ * Author: Yihua Lou <louyihua@21cn.com>
  *
- * Copyright 2006 - 2007 Lou Yihua
+ * Copyright 2006 - 2007 Yihua Lou
  *
  * This file is part of PAL library.
  *
@@ -48,7 +48,15 @@
 #include <errno.h>
 
 #include "config.h"
-#include "grf.h"
+//#include "grf.h"
+
+#define	PAL_OK					0
+#define	PAL_OUT_OF_MEMORY		ENOMEM
+#define	PAL_INVALID_PARAMETER	EINVAL
+#define	PAL_INVALID_DATA		1024
+#define	PAL_EMPTY_POINTER		1025
+#define	PAL_NOT_ENOUGH_SPACE	1026
+#define	PAL_INVALID_FORMAT		1027
 
 #if	defined(__cplusplus)
 
@@ -56,12 +64,61 @@ namespace Pal
 {
 	namespace Tools
 	{
-		errno_t DecodeYJ1(const void* Source, void*& Destination, uint32& Length);
-		errno_t EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length);
-		errno_t DecodeYJ2(const void* Source, void*& Destination, uint32& Length);
-		errno_t EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible = true);
-		errno_t DecodeRNG(const void* Source, void* PrevFrame);
-		errno_t EncodeRNG(const void* PrevFrame, const void* CurFrame, void*& Destination, uint32& Length);
+
+		/* 　函数：DecodeRleCallback
+		   　功能：控制每个像素的绘制
+		   　参数：srcVal ---------- 源数据值，为 -1 时表示“透明”
+				   pOutVal --------- 目的数据
+				   pUserData ------- 用户数据
+		   返回值：返回 true 表示由函数处理过，返回 false 表示采用默认行为
+		*/
+		typedef	bool (*PDECODERLECALLBACK)(int srcVal, uint8* pOutVal, void* pUserData);
+
+		palerrno_t DecodeRle(const void* pSrcRle,			// 指向 RLE 图像的源指针
+							 void* pDest,					// 指向目标填充区域的指针
+							 int nDestWidth,				// 目标区域的宽度（像素）
+							 int nDestHeight,				// 目标区域的高度（像素）
+							 int x,							// 绘制 RLE 图像的左上角（像素）
+							 int y,							// 绘制 RLE 图像的右上角（像素）
+							 PDECODERLECALLBACK pCallback,	// 用户定义的回调函数，用于处理绘制
+							 void* pUserData);				// 用户定义的数据，该数据被传递至回调函数
+
+		/* 　函数：EncodeRleCallback
+		   　功能：控制每个像素的绘制
+		   　参数：srcVal ---------- 源数据值
+			       x --------------- 当前点的横坐标
+				   y --------------- 当前点的纵坐标
+				   pUserData ------- 用户数据
+		   返回值：返回 true 表示该点透明，返回 false 该点不透明
+		*/
+		typedef	bool (*PENCODERLECALLBACK)(uint8 srcVal, int x, int y, void* pUserData);
+
+		palerrno_t EncodeRle(const void* pSrc,				// 指向源图像的源指针
+							 int nSrcWidth,					// 源图像的宽度（像素）
+							 int nSrcHeight,				// 源图像的高度（像素）
+							 void* pDestRle,				// 指向目标 RLE 数据的指针，当为 NULL 时表示只计算长度
+							 uint32& nDestLen,				// 输入时为目标区域的最大长度，输出时为实际填充的长度（仅成功编码时）
+							 PENCODERLECALLBACK pCallback,	// 用户定义的回调函数，用于处理绘制
+							 void* pUserData);				// 用户定义的数据，该数据被传递至回调函数
+
+		palerrno_t DecodeMov(const void* pSrcMov,		// 指向编码后数据的指针
+							 void* pDestFrame,			// 指向目的图像数据的指针
+							 int nDestWidth,			// 目的图像的宽度（像素）
+							 int nDestHeight);			// 目的图像的高度（像素）
+		palerrno_t EncodeMov(const void* pSrcFrame,		// 需要编码的帧
+							 const void* pBaseFrame,	// 参考帧
+							 int nSrcWidth,				// 帧宽度（像素）
+							 int nSrcHeight,			// 帧高度（像素）
+							 void* pDestMov,			// 目的指针，当为 NULL 时表示只计算长度
+							 uint32& nDestLen);			// 输入时为目标区域的最大长度，输出时为实际填充的长度（仅成功编码时）
+
+		palerrno_t DecodeYJ1(const void* Source, void*& Destination, uint32& Length);
+		palerrno_t EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length);
+		palerrno_t DecodeYJ2(const void* Source, void*& Destination, uint32& Length);
+		palerrno_t EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible = true);
+		palerrno_t DecodeRNG(const void* Source, void* PrevFrame);
+		palerrno_t EncodeRNG(const void* PrevFrame, const void* CurFrame, void*& Destination, uint32& Length);
+/*
 		errno_t DecodeRLE(const void* Rle, void* Destination, sint32 Stride, sint32 Width, sint32 Height, sint32 x, sint32 y);
 		errno_t EncodeRLE(const void* Source, const void *Base, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
 		errno_t EncodeRLE(const void* Source, uint8 TransparentColor, sint32 Stride, sint32 Width, sint32 Height, void*& Destination, uint32& Length);
@@ -114,8 +171,9 @@ namespace Pal
 			errno_t GRFgetattr(GRFFILE* stream, int attr, void* value);
 
 			errno_t GRFPackage(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
-			errno_t GRFExtract(const char* pszGRF, const char* pszBasePath, const char* pszNewFile);
+			errno_t GRFExtract(const char* pszGRF, const char* pszNewFile, const char* pszBasePath);
 		}
+*/
 	}
 }
 

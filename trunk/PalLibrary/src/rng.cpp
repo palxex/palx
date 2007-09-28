@@ -1,9 +1,9 @@
 /*
  * PAL RNG format library
  * 
- * Author: Lou Yihua <louyihua@21cn.com>
+ * Author: Yihua Lou <louyihua@21cn.com>
  *
- * Copyright 2006 - 2007 Lou Yihua
+ * Copyright 2006 - 2007 Yihua Lou
  *
  * This file is part of PAL library.
  *
@@ -45,7 +45,7 @@
 #include "pallib.h"
 using namespace Pal::Tools;
 
-errno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
+palerrno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 {
 	sint32 ptr = 0, dst_ptr = 0;
 	uint8 data;
@@ -55,7 +55,7 @@ errno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 	uint8* dest = (uint8*)PrevFrame;
 
 	if (Source == NULL || PrevFrame == NULL)
-		return EINVAL;
+		return PAL_EMPTY_POINTER;
 
 	while(1)
 	{
@@ -65,7 +65,7 @@ errno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 		case 0x00:
 		case 0x13:
 			//0x1000411b
-			return 0;
+			return PAL_OK;
 		case 0x01:
 		case 0x05:
 			break;
@@ -161,7 +161,7 @@ errno_t Pal::Tools::DecodeRNG(const void* Source, void* PrevFrame)
 			break;
 		}
 	}
-	return 0;
+	return PAL_OK;
 }
 
 static uint16 encode_1(uint16 *&start, uint16 *&data, uint8 *&dest)
@@ -250,7 +250,7 @@ static uint16 encode_3(uint16 *&start, uint16 *&data, uint8 *&dest)
 	return len;
 }
 
-errno_t Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& Destination, uint32& Length)
+palerrno_t Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*& Destination, uint32& Length)
 {
 	sint32 len = 0, status = 0;
 	uint16* data = (uint16*)CurFrame;
@@ -262,9 +262,9 @@ errno_t Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*
 	void* pNewData;
 
 	if (PrevFrame == NULL || CurFrame == NULL)
-		return EINVAL;
+		return PAL_EMPTY_POINTER;
 	if ((dst = dest = (uint8*)malloc(0x10000)) == NULL)
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 
 	while(data < end)
 	{
@@ -363,9 +363,9 @@ errno_t Pal::Tools::EncodeRNG(const void *PrevFrame, const void *CurFrame, void*
 	if ((pNewData = realloc(dst, len)) == NULL)
 	{
 		free(dst);
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	Destination = pNewData;
 	Length = len;
-	return 0;
+	return PAL_OK;
 }
