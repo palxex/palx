@@ -95,7 +95,7 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song,int gap)
 {
-	begin=false;
+	begin=false;return;
 	if(!sub_song){
 		subsong=sub_song;
 		stop();

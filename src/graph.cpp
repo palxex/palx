@@ -60,17 +60,18 @@ void sprite::blit_middle(BITMAP *dest,int x,int y)
 	this->l=0;
 	blit_to(dest);
 }
+bool do_nothing(int srcVal, uint8* pOutVal, void* pUserData){return false;}
 bool sprite::blit_to(BITMAP *dest)
 {
 	if(!dest->dat)
 	{
 		BITMAP *buf2=create_bitmap(dest->w,dest->h);
 		blit(dest,buf2,0,0,0,0,dest->w,dest->h);
-		Pal::Tools::DecodeRLE(buf,buf2->dat,dest->w,dest->w,dest->h,x,y-l-height);
+		Pal::Tools::DecodeRle(buf,buf2->dat,dest->w,dest->h,x,y-l-height,do_nothing,NULL);
 		blit(buf2,dest,0,0,0,0,dest->w,dest->h);
 		destroy_bitmap(buf2);
 	}else
-		Pal::Tools::DecodeRLE(buf,dest->dat,dest->w,dest->w,dest->h,x,y-l-height);
+		Pal::Tools::DecodeRle(buf,dest->dat,dest->w,dest->h,x,y-l-height,do_nothing,NULL);
 	return true;
 }
 bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)

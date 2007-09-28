@@ -1,9 +1,9 @@
 /*
  * PAL DOS compress format (YJ_1) library
  * 
- * Author: Lou Yihua <louyihua@21cn.com>
+ * Author: Yihua Lou <louyihua@21cn.com>
  *
- * Copyright 2006 - 2007 Lou Yihua
+ * Copyright 2006 - 2007 Yihua Lou
  *
  * This file is part of PAL library.
  *
@@ -145,7 +145,7 @@ static inline uint16 get_count(const void* src, uint32& bitptr, PYJ_1_BLOCKHEADE
 		return header->LZSSRepeatTable[0];
 }
 
-int Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length)
+palerrno_t Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length)
 {
 	PYJ_1_FILEHEADER hdr = (PYJ_1_FILEHEADER)Source;
 	uint8* src = (uint8*)Source;
@@ -155,9 +155,9 @@ int Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length
 	TreeNode* node;
 
 	if (Source == NULL)
-		return EINVAL;
+		return PAL_EMPTY_POINTER;
 	if (hdr->Signature != '1_JY')
-		return EILSEQ;
+		return PAL_INVALID_DATA;
 
 	do
 	{
@@ -166,7 +166,7 @@ int Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length
 		uint8* flag = (uint8*)src + 16 + tree_len;
 
 		if ((node = root = new TreeNode [tree_len + 1]) == NULL)
-			return ENOMEM;
+			return PAL_OUT_OF_MEMORY;
 		root[0].leaf = false;
 		root[0].value = 0;
 		root[0].left = root + 1;
@@ -189,7 +189,7 @@ int Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length
 	if ((Destination = malloc(hdr->UncompressedLength)) == NULL)
 	{
 		delete [] root;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	Length = hdr->UncompressedLength;
 	dest = (uint8*)Destination;
@@ -246,7 +246,7 @@ int Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32& Length
 		src = ((uint8*)header) + header->CompressedLength;
 	}
 	delete [] root;
-	return 0;
+	return PAL_OK;
 }
 
 static inline uint16 get_bit_count(uint32 word)
@@ -830,7 +830,7 @@ static void set_count(void* dest, uint32& ptr, uint32 match_len, PYJ_1_BLOCKHEAD
 		}
 }
 
-int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length)
+palerrno_t Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length)
 {
 	YJ_1_FILEHEADER hdr;
 	PYJ_1_BLOCKHEADER header;
@@ -850,7 +850,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 	TreeNode*	leaf[0x100];
 
 	if (Source == NULL || SourceLength == 0)
-		return EINVAL;
+		return PAL_EMPTY_POINTER;
 
 	hdr.Signature = '1_JY';
 	hdr.UncompressedLength = srclen;
@@ -863,24 +863,24 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 	memset(code, 0, 0x100 * 0x10 * sizeof(sint16));
 	memset(leaf, 0, 0x100 * sizeof(TreeNode*));
 	if ((bfreq = new uint32 * [hdr.BlockCount]) == NULL)
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	if ((block = new uint8 * [hdr.BlockCount]) == NULL)
 	{
 		delete [] bfreq;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	if ((cb_len = new uint32 [hdr.BlockCount]) == NULL)
 	{
 		delete [] block;
 		delete [] bfreq;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	if ((lz_len = new uint32 [hdr.BlockCount]) == NULL)
 	{
 		delete [] cb_len;
 		delete [] block;
 		delete [] bfreq;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	if ((header = new YJ_1_BLOCKHEADER [hdr.BlockCount]) == NULL)
 	{
@@ -888,7 +888,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 		delete [] cb_len;
 		delete [] block;
 		delete [] bfreq;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 
 	for(sint32 i = 0; i < hdr.BlockCount; i++)
@@ -912,7 +912,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 			delete [] cb_len;
 			delete [] block;
 			delete [] bfreq;
-			return ENOMEM;
+			return PAL_OUT_OF_MEMORY;
 		}
 		if ((block[i] = new uint8 [0xa000]) == NULL)
 		{
@@ -927,7 +927,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 			delete [] cb_len;
 			delete [] block;
 			delete [] bfreq;
-			return ENOMEM;
+			return PAL_OUT_OF_MEMORY;
 		}
 		memset(bfreq[i], 0, 0x100 * sizeof(sint32));
 		cb_len[i] = lz_analysize(base, (uint16*)block[i], header[i].UncompressedLength, bfreq[i]);
@@ -950,7 +950,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 			delete [] cb_len;
 			delete [] block;
 			delete [] bfreq;
-			return ENOMEM;
+			return PAL_OUT_OF_MEMORY;
 		}
 		memcpy(block[i], base, cb_len[i]);
 		delete [] base;
@@ -968,7 +968,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 		delete [] cb_len;
 		delete [] block;
 		delete [] bfreq;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	traverse_tree(root, 0, tree_nodes);
 	hdr.HuffmanTreeLength = tree_nodes >> 1;
@@ -1005,7 +1005,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 		delete [] cb_len;
 		delete [] block;
 		delete [] bfreq;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	memcpy(dest, &hdr, sizeof(YJ_1_FILEHEADER));
 	dest += sizeof(YJ_1_FILEHEADER);
@@ -1151,7 +1151,7 @@ int Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*& Destin
 	delete [] bfreq;
 	Destination = pNewData;
 	Length = length;
-	return 0;
+	return PAL_OK;
 }
 
-#include "yj1s.h"
+//#include "yj1s.h"

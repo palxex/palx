@@ -149,20 +149,8 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\c-compat.cpp"
+				RelativePath=".\src\mov.cpp"
 				>
-			</File>
-			<File
-				RelativePath=".\src\grf.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						EnablePREfast="false"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\rle.cpp"
@@ -177,19 +165,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\yj1s.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\yj2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\yj2sd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\yj2se.h"
 				>
 			</File>
 		</Filter>
@@ -200,10 +176,6 @@
 			>
 			<File
 				RelativePath=".\include\config.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\grf.h"
 				>
 			</File>
 			<File

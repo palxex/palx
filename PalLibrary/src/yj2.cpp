@@ -1,9 +1,9 @@
 /*
  * PAL WIN95 compress format (YJ_2) library
  * 
- * Author: Lou Yihua <louyihua@21cn.com>
+ * Author: Yihua Lou <louyihua@21cn.com>
  *
- * Copyright 2006 - 2007 Lou Yihua
+ * Copyright 2006 - 2007 Yihua Lou
  *
  * This file is part of PAL library.
  *
@@ -245,7 +245,7 @@ static inline void bit(void* data, uint32 pos, bool set)
 	}
 }
 
-errno_t Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Length)
+palerrno_t Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Length)
 {
 	uint32 len = 0, ptr = 0;
 	uint8* src = (uint8*)Source + 4;
@@ -254,16 +254,16 @@ errno_t Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Le
 	TreeNode* node;
 
 	if (Source == NULL)
-		return EINVAL;
+		return PAL_EMPTY_POINTER;
 
 	if (!build_tree(tree))
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 
 	if ((Destination = malloc(*((uint32*)Source))) == NULL)
 	{
 		delete [] tree.list;
 		delete [] tree.node;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	Length = *((uint32*)Source);
 	dest = (uint8*)Destination;
@@ -318,10 +318,10 @@ errno_t Pal::Tools::DecodeYJ2(const void* Source, void*& Destination, uint32& Le
 	}
 	delete [] tree.list;
 	delete [] tree.node;
-	return 0;
+	return PAL_OK;
 }
 
-errno_t Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible)
+palerrno_t Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& Destination, uint32& Length, bool bCompatible)
 {
 	uint32 len = 0, ptr, pos, top, srclen = SourceLength;
 	sint32 head[0x100], _prev[0x2000];
@@ -336,16 +336,16 @@ errno_t Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& De
 	void* pNewData;
 
 	if (Source == NULL)
-		return EINVAL;
+		return PAL_EMPTY_POINTER;
 
 	if (!build_tree(tree))
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 
 	if ((pNewData = malloc(SourceLength + 260)) == NULL)
 	{
 		delete [] tree.list;
 		delete [] tree.node;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	dest = (uint8*)pNewData + 4;
 
@@ -468,7 +468,7 @@ errno_t Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& De
 		free(pNewData);
 		delete [] tree.list;
 		delete [] tree.node;
-		return ENOMEM;
+		return PAL_OUT_OF_MEMORY;
 	}
 	*((uint32*)Destination) = srclen;
 	Length = len;
@@ -476,8 +476,8 @@ errno_t Pal::Tools::EncodeYJ2(const void* Source, uint32 SourceLength, void*& De
 	delete [] tree.list;
 	delete [] tree.node;
 
-	return 0;
+	return PAL_OK;
 }
 
-#include "yj2sd.h"
-#include "yj2se.h"
+//#include "yj2sd.h"
+//#include "yj2se.h"

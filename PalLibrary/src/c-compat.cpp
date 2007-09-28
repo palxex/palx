@@ -1,5 +1,5 @@
 //”√”⁄ºÊ»› C ”Ô—‘
-
+/*
 #include "pallib.h"
 
 extern "C" errno_t decodeyj1(const void* Source, void** Destination, uint32* Length)
@@ -264,3 +264,4 @@ extern "C" errno_t grfextract(const char* pszGRF, const char* pszBasePath, const
 {
 	return Pal::Tools::GRF::GRFExtract(pszGRF, pszBasePath, pszNewFile);
 }
+*/
