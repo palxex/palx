@@ -102,7 +102,7 @@ class playrix
 	CEmuopl 	opl;
 	CrixPlayer 	rix;
 	AUDIOSTREAM *stream;
-	unsigned short 		*Buffer, *buf;
+	short 		*Buffer, *buf;
 	volatile long leaving;
 	volatile long 	slen,slen_buf;
 	const volatile int BufferLength;
