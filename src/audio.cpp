@@ -25,12 +25,15 @@
 #define CHANNELS	1
 
 bool begin=false;
+int voc_begin=0;
 void playrix_timer(void *param)
 {
 	playrix *plr=reinterpret_cast<playrix*>(param);
 	if(voice_get_volume(plr->stream->voice)==0)
 		begin=false;
-	short *p = (short*)get_audio_stream_buffer(plr->stream);
+	if (!voice_check(voc_begin))
+		destroy_sample(voice_check(voc_begin));
+	unsigned short *p = (unsigned short*)get_audio_stream_buffer(plr->stream);
 	if (begin && p)
 	{
 		if(plr->leaving<BUFFER_SIZE*CHANNELS)
@@ -45,7 +48,7 @@ void playrix_timer(void *param)
 					continue;
 				}
 				plr->slen = SAMPLE_RATE / plr->rix.getrefresh();
-				plr->opl.update(plr->buf, plr->slen);
+				plr->opl.update((signed short*)plr->buf, plr->slen);
 				for(int t=0;t<plr->slen * CHANNELS;t++)
 					*plr->buf*=1,
 					*plr->buf++^=0x8000;
@@ -81,8 +84,8 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 	LOCK_FUNCTION(playrix_timer);
 	install_param_int(playrix_timer,this,14);
 
-	Buffer = buf = new short [BufferLength];
-	memset(buf, 0, sizeof(short) * BufferLength);
+	Buffer = buf = new unsigned short [BufferLength];
+	memset(buf, 0, sizeof(unsigned short) * BufferLength);
 
 	voice_set_volume(stream->voice,0);
 }
@@ -95,7 +98,7 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song,int gap)
 {
-	begin=false;return;
+	begin=false;
 	if(!sub_song){
 		subsong=sub_song;
 		stop();
@@ -105,7 +108,7 @@ void playrix::play(int sub_song,int gap)
 
 	rix.rewind(subsong);
 	//opl.init();
-	memset(Buffer, 0, sizeof(short) * BufferLength);
+	memset(Buffer, 0, sizeof(unsigned short) * BufferLength);
 	buf=Buffer;
 	leaving=slen_buf=0;
 	memset(stream->samp,0,sizeof(stream->samp));
@@ -121,10 +124,6 @@ void playrix::stop(int gap)
 voc::voc(uint8_t *f):spl(load_voc_mem(f))
 {}
 
-voc::~voc()
-{
-	destroy_sample(spl);
-}
 
 SAMPLE *voc::load_voc_mem(uint8_t *src)
 {
@@ -228,5 +227,5 @@ getout:
 
 void voc::play()
 {
-	play_sample(spl,255,128,1000,0);
+	voc_begin=play_sample(spl,255,128,1000,0);
 }

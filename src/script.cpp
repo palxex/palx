@@ -912,8 +912,8 @@ uint16_t process_script(uint16_t id,int16_t object)
     while (id && ok)
     {
         SCRIPT &curr=scripts[id];
-        const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
-        //printf("独占脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)curr.param[1],(uint16_t)curr.param[2]);
+		const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
+        //printf("独占脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
         switch (curr.func)
         {
         case 0:
@@ -950,14 +950,14 @@ uint16_t process_script(uint16_t id,int16_t object)
             break;
         case 2:
             //printf("停止执行，将调用地址替换为脚本%x:",param1);
-            if (curr.param[1]==0)
+            if (param2==0)
             {
                 //printf("成功\n");
                 id = param1-1;
                 ok=false;
                 break;
             }
-            else if (obj.scr_jmp_count++<curr.param[1])
+            else if (++obj.scr_jmp_count<param2)
             {
                 //printf("第%x次成功\n",obj.scr_jmp_count);
                 id = param1-1;
@@ -972,13 +972,13 @@ uint16_t process_script(uint16_t id,int16_t object)
             break;
         case 3:
             //printf("跳转到脚本%x:",param1);
-            if (curr.param[1]==0)
+            if (param2==0)
             {
                 //printf("成功\n");
                 id = param1;
                 continue;
             }
-            else if (obj.scr_jmp_count++<curr.param[1])
+            else if (++obj.scr_jmp_count<param2)
             {
                 //printf("第%x次成功\n",obj.scr_jmp_count);
                 id = param1;
@@ -991,11 +991,11 @@ uint16_t process_script(uint16_t id,int16_t object)
             }
             break;
         case 4:
-            //printf("调用脚本%x %x\n",param1,curr.param[1]);
-            process_script(param1,curr.param[1]?curr.param[1]:object);
+            //printf("调用脚本%x %x\n",param1,param2);
+            process_script(param1,param2?param2:object);
             break;
         case 5:
-            //printf("清屏 方式%x 延迟%x,更新角色信息:%s\n",param1,curr.param[1],curr.param[2]?"是":"否");
+            //printf("清屏 方式%x 延迟%x,更新角色信息:%s\n",param1,param2,param3?"是":"否");
             if (current_dialog_lines>0)
                 show_wait_icon(),current_dialog_lines=0;
             if (flag_pic_level==0)
@@ -1008,18 +1008,23 @@ uint16_t process_script(uint16_t id,int16_t object)
                 restore_screen();
             break;
         case 6:
-            //printf("以%d%%几率跳转到脚本%x:",param1,curr.param[1]);
+            //printf("以%d%%几率跳转到脚本%x:",param1,param2);
             if (rnd0()*100<param1)
             {
                 //printf("成功\n");
-                id = curr.param[1];
+				if(!param2){
+					ok=false;
+					id--;
+					break;
+				}
+                id = param2;
                 continue;
             }
             else
                 //printf("失败\n");
                 break;
         case 7:
-            //printf("开战 第%x组敌人 胜利脚本%x 逃跑脚本%x\n",param1,curr.param[1],curr.param[2]);
+            //printf("开战 第%x组敌人 胜利脚本%x 逃跑脚本%x\n",param1,param2,param3);
             if (current_dialog_lines>0)
                 show_wait_icon();
             i=process_Battle(param1,param3);
@@ -1079,8 +1084,6 @@ exit:
 }
 uint16_t process_autoscript(uint16_t id,int16_t object)
 {
-    if (id==0)
-        return 0;
     SCRIPT &curr=scripts[id];
     EVENT_OBJECT &obj=evtobjs[object];
     const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
@@ -1098,7 +1101,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
             //printf("成功\n");
             id = param1 - 1;
         }
-        else if (obj.scr_jmp_count_auto++<param2)
+        else if (++obj.scr_jmp_count_auto<param2)
         {
             //printf("第%x次成功\n",obj.scr_jmp_count_auto);
             id = param1 - 1;
@@ -1114,7 +1117,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
         if (param2==0)
             //printf("成功\n");
             id = process_autoscript(param1,object) - 1;
-        else if (obj.scr_jmp_count_auto++<param2)
+        else if (++obj.scr_jmp_count_auto<param2)
             //printf("第%x次成功\n",obj.scr_jmp_count_auto);
             id = process_autoscript(param1,object) - 1;
         else
@@ -1126,15 +1129,14 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
         process_script(param1,param2?param2:object);
         break;
     case 6:
-        //时间关系，不再模拟QB7的随机函数
         //printf("以%d%%几率跳转到脚本%x:",param1,param2);
-        if (rnd0()*100<param1)
+        if (rnd0()*100<param1 && param2)
             //printf("成功\n");
             id = process_autoscript(param2,object) - 1;
         break;
     case 9:
         //printf("自动脚本空闲第%x循环:\n",++obj.scr_jmp_count_auto);
-        if (obj.scr_jmp_count_auto++<param1)
+        if (++obj.scr_jmp_count_auto<param1)
             id--;
         else
             obj.scr_jmp_count_auto = 0;

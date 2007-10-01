@@ -31,14 +31,16 @@ void setup_role_enemy_image()
 
 void draw_battle_scene(int enemy_team)
 {
+	static struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},{234,170},{270,146}},{{160,184},{204,175},{246,160},{278,144}}};
 	bitmap battlescene(FBP.decode(res::rpg.battlefield),SCREEN_W,SCREEN_H);
 	perframe_proc();
+	int enemies=4-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,0)-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,-1);
 
-	for(int i=0;i<=res::rpg.team_roles;i++)
-		team_images[i].getsprite(0)->blit_middle(battlescene.bmp,240,170);
-	for(int i=0;i<1;i++)
+	for(int i=res::rpg.team_roles;i>=0;i--)
+		team_images[i].getsprite(0)->blit_middle(battlescene.bmp,role_poses[res::rpg.team_roles][i].x,role_poses[res::rpg.team_roles][i].y-team_images[i].getsprite(0)->height/2);
+	for(int i=4;i>=0;i--)
 		if(res::enemyteams[enemy_team].enemy[i]>0)
-			enemy_images[i].getsprite(0)->blit_to(battlescene.bmp,res::enemyposes.pos[i][5].x,res::enemyposes.pos[i][5].y);
+			enemy_images[i].getsprite(0)->blit_to(battlescene.bmp,res::enemyposes.pos[i][enemies].x-enemy_images[i].getsprite(0)->width/2,res::enemyposes.pos[i][enemies].y-enemy_images[i].getsprite(0)->height);
 
 	battlescene.blit_to(screen,0,0,0,0);
 }
