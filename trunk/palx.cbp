@@ -40,7 +40,6 @@
 				<Option object_output="obj\Release\" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="5" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -92,13 +91,10 @@
 		<Unit filename="PalLibrary\include\config.h" />
 		<Unit filename="PalLibrary\include\grf.h" />
 		<Unit filename="PalLibrary\include\pallib.h" />
-		<Unit filename="PalLibrary\src\c-compat.cpp" />
-		<Unit filename="PalLibrary\src\grf.cpp" />
 		<Unit filename="PalLibrary\src\rle.cpp" />
 		<Unit filename="PalLibrary\src\rng.cpp" />
 		<Unit filename="PalLibrary\src\yj1.cpp" />
 		<Unit filename="PalLibrary\src\yj1s.h" />
-		<Unit filename="PalLibrary\src\yj2.cpp" />
 		<Unit filename="PalLibrary\src\yj2sd.h" />
 		<Unit filename="PalLibrary\src\yj2se.h" />
 		<Unit filename="icon.rc">
