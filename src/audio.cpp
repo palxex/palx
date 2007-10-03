@@ -24,15 +24,22 @@
 #define SAMPLE_RATE	44100
 #define CHANNELS	1
 
+#define MAX_VOICES 10
+
 bool begin=false;
-int voc_begin=0;
+int voices[MAX_VOICES];int vocs=0;
 void playrix_timer(void *param)
 {
 	playrix *plr=reinterpret_cast<playrix*>(param);
 	if(voice_get_volume(plr->stream->voice)==0)
 		begin=false;
-	if (!voice_check(voc_begin))
-		destroy_sample(voice_check(voc_begin));
+	int f=0;
+	for(int i=0;i<vocs;i++)
+		if (!voice_check(voices[i])){
+			destroy_sample(voice_check(voices[i]));
+			std::copy(voices+i+1,voices+MAX_VOICES,voices+i);
+			vocs--;
+		}
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
 	if (begin && p)
 	{
@@ -234,5 +241,5 @@ getout:
 
 void voc::play()
 {
-	voc_begin=play_sample(spl,255,128,1000,0);
+	voices[vocs++]=play_sample(spl,255,128,1000,0);
 }
