@@ -809,11 +809,13 @@ __walk_role:
         mutex_can_change_palette=false;
         break;
     case 0x81:
-        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0)
+        prelimit_OK=false;
+        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0
+            && abs(evtobjs[param1].pos_x-direction_offs[rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(evtobjs[param1].pos_y-direction_offs[rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
         {
-            if (abs(curr_obj.pos_x-direction_offs[rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(curr_obj.pos_y-direction_offs[rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
-                if (rpg.scene_id>0)
-                    curr_obj.trigger_method=5+rpg.scene_id*8;
+            if(param2>0)
+                evtobjs[param1].trigger_method=5+param2;
+            prelimit_OK=true;
         }
         else
             id=param3-1;
