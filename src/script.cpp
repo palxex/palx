@@ -487,8 +487,8 @@ __walk_npc:
     case 0x43:
         if (param1)
         {
-            rpg.music=param1;
-            rix->play(param1,param2);
+            if(rpg.music!=param1)
+                rix->play(rpg.music=param1,param2);
         }
         else
             rix->stop();
