@@ -94,7 +94,7 @@ void GameLoop_OneCycle(bool trigger)
                         }
                     }
                     else if (iter->status<0) //&& in the screen
-						if(iter->pos_x<rpg.viewport_x || iter->pos_x>rpg.viewport_x+320 || iter->pos_y<rpg.viewport_y || iter->pos_y>rpg.viewport_y+220){
+						if(iter->pos_x<rpg.viewport_x || iter->pos_x>rpg.viewport_x+320*scale || iter->pos_y<rpg.viewport_y || iter->pos_y>rpg.viewport_y+220*scale){
 							iter->status=abs(iter->status);
 							iter->curr_frame=0;
 						}
@@ -560,7 +560,7 @@ __ride:
 						npc_speed=chase_speed;
 					else if(!barrier_check(object,obj.pos_x+direction_offs[d][0],obj.pos_y+direction_offs[d][1])){
 						if(barrier_check(0,obj.pos_x,obj.pos_y,false)){
-							allegro_message("Hei,you are on the volcano(%x,%x), NPC #%X!",obj.pos_x,obj.pos_y,object);
+							//allegro_message("Hei,you are on the volcano(%x,%x), NPC #%X!",obj.pos_x,obj.pos_y,object);
 							obj.status=0;
 						}
 						obj.direction=d;
@@ -937,7 +937,7 @@ uint16_t process_script(uint16_t id,int16_t object)
             if (frame_pos_flag==10)
             {
                 frame_text_x-=strlen(msg)/2*8;
-                single_dialog(frame_text_x,frame_text_y,strlen(msg)/2);
+                single_dialog(frame_text_x,frame_text_y,strlen(msg)/2,bitmap(screen)).to_screen();
                 dialog_string(msg,frame_text_x+10,frame_text_y+10,0,false);
                 wait_key(140);
             }

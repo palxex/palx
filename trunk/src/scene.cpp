@@ -139,8 +139,8 @@ void Scene::visible_NPC_movment_setdraw()
 {
 	int t=0;
 	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++,t++)
-		if(i->pos_x-res::rpg.viewport_x>-64 && i->pos_x-res::rpg.viewport_x<0x180 &&
-		   i->pos_y-res::rpg.viewport_y>0   && i->pos_y-res::rpg.viewport_y<0x148 &&
+		if(i->pos_x-res::rpg.viewport_x>-64*scale && i->pos_x-res::rpg.viewport_x<0x180*scale &&
+		   i->pos_y-res::rpg.viewport_y>0   && i->pos_y-res::rpg.viewport_y<0x148*scale &&
 		   i->image && i->status && i->vanish_time==0)
 		{
 			int frame=i->curr_frame;
