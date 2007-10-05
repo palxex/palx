@@ -27,6 +27,10 @@ bitmap::bitmap(const uint8_t *src,int width,int height):
 	if(src)
 		memcpy(bmp->dat,src,width*height);
 }
+bitmap::bitmap(BITMAP *b):bmp(create_bitmap(b->w,b->h))
+{
+    blit(b,bmp,0,0,0,0,b->w,b->h);
+}
 bitmap::~bitmap()
 {
 	destroy_bitmap(bmp);

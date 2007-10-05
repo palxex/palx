@@ -23,7 +23,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
+dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow,BITMAP *bmp)
 {
 	rows--;columns--;
 	for(int i=0;i<3;i++)
@@ -39,15 +39,15 @@ dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow)
 				ti=2;
 		else
 			ti=1;
-		border[ti][0]->blit_to(screen,x,y+len,shadow);
+		border[ti][0]->blit_to(bmp,x,y+len,shadow);
 		for(;j<columns;j++)
-			border[ti][1]->blit_to(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
-		border[ti][2]->blit_to(screen,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
+			border[ti][1]->blit_to(bmp,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
+		border[ti][2]->blit_to(bmp,x+border[ti][0]->width+j*border[ti][1]->width,y+len,shadow);
 		len+=border[ti][1]->height;
 	}
 }
 
-single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp)
+single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp):cache(bmp)
 {
 	int i=0;
 	for(i=0;i<3;i++)
@@ -56,6 +56,10 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp)
 	for(i=0;i<len;i++)
 		border[1]->blit_to(bmp,x+border[0]->width+i*border[1]->width,y,true);
 	border[2]->blit_to(bmp,x+border[0]->width+i*border[1]->width,y,true);
+}
+void single_dialog::to_screen()
+{
+    blit(cache,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 
 int select_rpg(int ori_select,BITMAP *bmp)
@@ -101,15 +105,17 @@ int select_rpg(int ori_select,BITMAP *bmp)
 }
 
 menu::menu(int x,int y,int menus,int begin,int chars,int style,bool shadow)
-	:menu_dialog(style,x,y,menus,chars,shadow),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
+	:bak(screen),menu_dialog(style,x,y,menus,chars,shadow,bak),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
 		menu_items.push_back(std::string(objs(i*10,(i+1)*10)));
+	blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 menu::menu(int x,int y,std::vector<std::string> &strs,int chars,int length,int style)
-:menu_dialog(style,x,y,length==-1?strs.size():length,chars,true),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
+:bak(screen),menu_dialog(style,x,y,length==-1?strs.size():length,chars,true,bak),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	menu_items.swap(strs);
+	blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 int menu::operator()(menu_tmp *con,int _selected)
 {
@@ -140,8 +146,9 @@ void single_menu::draw(menu *abs)
 			color=color_selecting;
 		else
 			color=0x4E;
-	dialog_string(r->c_str(),abs->text_x,abs->text_y+18*i,color,true);
+        dialog_string(r->c_str(),abs->text_x,abs->text_y+18*i,color,true,abs->bak);
 	}
+	blit(abs->bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 int single_menu::keyloop(menu *abs)
 {
@@ -167,8 +174,14 @@ int single_menu::keyloop(menu *abs)
 	selected+=(int)abs->menu_items.size();
 	selected%=abs->menu_items.size();
 }
-void single_menu::prev_action(menu *){}
-void single_menu::post_action(menu *){}
+void single_menu::prev_action(menu *abs)
+{
+	blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
+}
+void single_menu::post_action(menu *abs)
+{
+    blit(abs->bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+}
 
 int multi_menu::select(menu *abs,int _selected)
 {
@@ -200,7 +213,7 @@ void multi_menu::prev_action(menu *abs)
 		begin_y=-8;
 	else
 		begin_y=33;
-	blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
+	blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 void multi_menu::post_action(menu *abs)
 {
@@ -213,7 +226,7 @@ void multi_menu::draw(menu *abs)
 {
 		static int offset=0;
 		offset=(selected/3<middle?0:selected/3-middle);
-		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
+		blit(abs->bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
 			if(r<0x100 && res::rpg.items[r].item)
 				ttfont(objs(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
@@ -261,14 +274,14 @@ struct magic_menu:public multi_menu
 {
 	int role;
 	magic_menu(int _role,int _mask):multi_menu(_mask,0),role(_role){}
-	void prev_action(menu *){
+	void prev_action(menu *abs){
 		max=0x20-std::count_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,0));
-		blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
+		blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		begin_y=33;
 	}
-	void draw(menu *){
+	void draw(menu *abs){
 		int offset=(selected/3<middle?0:selected/3-middle);
-		blit(bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
+		blit(abs->bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
 			if(r<0x20 && res::rpg.role_prop_tables[0x20+r][role])
 				ttfont(objs(res::rpg.role_prop_tables[0x20+r][role]*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0x4E:0x18),true);

@@ -31,18 +31,18 @@
 extern void show_wait_icon();
 extern void dialog_string(const char *str,int x,int y,int color,bool shadow,BITMAP *bmp=screen);
 extern void draw_oneline_m_text(char *str,int x,int y);
-
 class dialog
 {
 	sprite *border[3][3];
 public:
-	dialog(int style,int x,int y,int rows,int columns,bool =true);
+	dialog(int style,int x,int y,int rows,int columns,bool =true,BITMAP * =screen);
 	friend struct menu;
 };
 
 struct menu_tmp;
 struct menu
 {
+    bitmap bak;
 	dialog menu_dialog;
 	std::vector<std::string> menu_items;
 	int text_x,text_y;
@@ -74,8 +74,8 @@ struct single_menu:public menu_tmp
 struct multi_menu:public menu_tmp
 {
 	int mask,skip,max,max_ori,begin_y,paging,middle;
-	bitmap bak,buf;
-	multi_menu(int _mask,int _skip,int _paging=8):menu_tmp(),mask(_mask),skip(_skip),paging(_paging),middle(paging/2),bak(0,SCREEN_W,SCREEN_H),buf(0,SCREEN_W,SCREEN_H){got=0;}
+	bitmap buf;
+	multi_menu(int _mask,int _skip,int _paging=8):menu_tmp(),mask(_mask),skip(_skip),paging(_paging),middle(paging/2),buf(0,SCREEN_W,SCREEN_H){got=0;}
 	void prev_action(menu*);
 	void post_action(menu*);
 	void draw(menu*);
@@ -86,8 +86,10 @@ struct multi_menu:public menu_tmp
 class single_dialog
 {
 	sprite *border[3];
+	BITMAP *cache;
 public:
 	single_dialog(int x,int y,int len,BITMAP *bmp=screen);
+	void to_screen();
 };
 
 class cut_msg_impl

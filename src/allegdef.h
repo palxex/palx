@@ -38,9 +38,10 @@ protected:
 	BITMAP *bmp;
 public:
 	bitmap(const uint8_t *,int,int);
+	bitmap(BITMAP *);
 	virtual ~bitmap();
 	operator BITMAP *(){return bmp;}
-	bool blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
+	bool blit_to(BITMAP *dest,int source_x=0,int source_y=0,int dest_x=0,int dest_y=0);
 	friend void draw_battle_scene(int);
 };
 class sprite{
