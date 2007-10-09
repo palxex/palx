@@ -102,15 +102,15 @@ void Scene::clear_active()
 {
 	active_list.clear();
 }
-void Scene::calc_team_walking(int key)
+void Scene::calc_team_walking()
 {
 	int16_t &direction=res::rpg.team_direction;
 	abstract_x_bak=team_pos.toXY().x;
 	abstract_y_bak=team_pos.toXY().y;
 	viewport_x_bak=res::rpg.viewport_x;
 	viewport_y_bak=res::rpg.viewport_y;
-	if(key>=VK_DOWN && key<=VK_RIGHT && key_enable){
-		direction=key-3;
+	if(x_off && y_off && key_enable){
+		direction=calc_faceto(x_off,y_off);
 		position target=team_pos+position(direction_offs[direction][0],direction_offs[direction][1]);
 		if(!barrier_check(0,target.toXY().x,target.toXY().y)&&
 			target.toXY().x>=0 && target.toXY().x<=coordinate_x_max+x_scrn_offset &&

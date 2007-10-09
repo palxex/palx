@@ -51,6 +51,6 @@ public:
 	void clear();
 	void clear(int n,int n2);
 };
-extern cached_res ABC,VOC,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT;
+extern cached_res ABC,VOC,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;
 
 #endif

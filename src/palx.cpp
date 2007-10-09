@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
 	set_close_button_callback(close_button_handler);
 	install_timer();
 	install_keyboard();
+	keyboard_lowlevel_callback = key_watcher;
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	set_gfx_mode(CARD,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
 	set_color_depth(8);

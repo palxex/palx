@@ -78,6 +78,7 @@ void switch_proc()
 void Load_Data()
 {
 	flag_battling=false;
+	x_off=0,y_off=0;
 	if(flag_to_load&0x10){
 		//load sfx; this task has been not needed since we didn't be limited by 640K.
 	}

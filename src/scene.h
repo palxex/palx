@@ -72,7 +72,7 @@ struct Scene{
 	~Scene();
 	void clear_scanlines();
 	void clear_active();
-	void calc_team_walking(int key);
+	void calc_team_walking();
 	void our_team_setdraw();
 	void visible_NPC_movment_setdraw();
 	void Redraw_Tiles_or_Fade_to_pic();

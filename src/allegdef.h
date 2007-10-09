@@ -127,4 +127,5 @@ public:
 enum VKEY { VK_NONE=0,VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE,VK_PRINTSCREEN};
 VKEY get_key(bool =true);
 VKEY get_key_lowlevel();
+void key_watcher(int scancode);
 #endif

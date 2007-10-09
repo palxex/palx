@@ -58,12 +58,12 @@ void playrix_timer(void *param)
 				plr->opl.update((signed short*)plr->buf, plr->slen);
 				for(int t=0;t<plr->slen * CHANNELS;t++)
 				{
-				    int tmp = (int)(*plr->buf) * 2;
-                    if (tmp > 32767)
-                        tmp = 0x7fff;
-                    else if (tmp < -32768)
-                        tmp = -32768;
-                    *plr->buf = (short)(tmp & 0xffffL);
+				    if (*plr->buf >= 16384)
+                        *plr->buf = 32767;
+                    else if (*plr->buf <= -16384)
+                        *plr->buf = -32768;
+                    else
+                        *plr->buf *= 2;
                     *plr->buf++^=0x8000;
 				}
 				plr->slen_buf+=plr->slen * CHANNELS;

@@ -46,7 +46,7 @@ namespace{
 		//clear scene back
 		scene->clear_scanlines();
 		scene->clear_active();
-		scene->calc_team_walking(keygot);
+		scene->calc_team_walking();
 		scene->our_team_setdraw();
 		scene->visible_NPC_movment_setdraw();
 		scene->move_usable_screen();
@@ -58,7 +58,9 @@ namespace{
 			running=process_Menu();
 
 		flag_parallel_mutex=!flag_parallel_mutex;
-
+		
+		if(flag_to_load)
+			first=true;
 	}
 	END_OF_FUNCTION(mainloop_proc);
 }
