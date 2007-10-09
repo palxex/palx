@@ -92,7 +92,7 @@ void draw_oneline_m_text(char *str,int x,int y)
 			default:
 				strncpy(word,str+i,2);
 				dialog_string(word,text_x,y,glbvar_fontcolor,true);
-				if(get_key_lowlevel()==VK_EXPLORE)
+				if(get_key()==VK_EXPLORE)
 					keepon_delay=false;
 				if(keepon_delay)
 					wait(delay_centisecond);

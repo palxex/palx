@@ -76,6 +76,7 @@ extern void randomize();
 extern float rnd0();
 
 extern int scale;
+extern int x_off,y_off;
 
 extern void Load_Data();
 extern void GameLoop_OneCycle(bool);

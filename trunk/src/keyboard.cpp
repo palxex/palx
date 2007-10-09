@@ -19,6 +19,23 @@
  ***************************************************************************/
 #include "allegdef.h"
 
+int scancode_translate(int allegro_scancode)
+{
+	static class __scancode_map{
+		std::map<int,int> mymap;
+	public:
+		__scancode_map(){
+			mymap[KEY_UP]=0x48;
+		}
+		int operator[](int n){
+			return mymap[n];
+		}
+	}scancode_map;
+	return scancode_map[allegro_scancode];
+}
+
+int mykey[256];
+
 VKEY get_key(bool clear)
 {
 	VKEY keygot=VK_NONE;
@@ -93,21 +110,20 @@ VKEY get_key(bool clear)
 	}
 	return keygot;
 }
+int make_layer(int key)
+{
+	if(2<=key && key<=3)
+		return 4-key;
+	return 0;
+}
+extern int x_off,y_off;
 VKEY get_key_lowlevel()
 {
 	VKEY keygot=VK_NONE;
-	if(key[KEY_ESC] || key[KEY_INSERT])// || key[KEY_ALT] || key[KEY_ALTGR])
+	if(key[KEY_ESC] || key[KEY_INSERT])// || mykey[KEY_ALT] || mykey[KEY_ALTGR])
 		keygot = VK_MENU;
 	else if(key[KEY_ENTER] || key[KEY_SPACE] || key[KEY_LCONTROL] || key[KEY_RCONTROL])
 		keygot = VK_EXPLORE;
-	else if(key[KEY_LEFT])
-		keygot = VK_LEFT;
-    else if(key[KEY_UP])
-		keygot = VK_UP;
-	else if(key[KEY_RIGHT])
-		keygot = VK_RIGHT;
-	else if(key[KEY_DOWN])
-		keygot = VK_DOWN;
 	/*else if
 		case KEY_PGUP:
 			keygot = VK_PGUP;
@@ -151,5 +167,60 @@ VKEY get_key_lowlevel()
 		if(clear)
 			clear_keybuf();
 	}*/
+	int key_updown=0,key_leftright=0;
+	int up=make_layer(mykey[KEY_UP]),down=make_layer(mykey[KEY_DOWN]),left=make_layer(mykey[KEY_LEFT]),right=make_layer(mykey[KEY_RIGHT]);
+	if(!up && !down)
+		key_updown=0,
+		key_leftright=(left>right?-1:(right>left?1:0));
+	if(!left && !right)
+		key_leftright=0,
+		key_updown=(up>down?-1:(down>up?1:0));
+
+	if(up==2)
+		key_updown=-1,key_leftright=0;
+	if(down==2)
+		key_updown=1,key_leftright=0;
+	if(left==2)
+		key_updown=0,key_leftright=-1;
+	if(right==2)
+		key_updown=0,key_leftright=1;
+
+	if(!right && key_leftright==1)
+		key_leftright=0;
+	if(!left && key_leftright==-1)
+		key_leftright=0;
+	if(!down && key_updown==1)
+		key_updown=0;
+	if(!up && key_updown==-1)
+		key_updown=0;
+
+	x_off=((key_updown<0||key_leftright>0)?1:((key_updown>0||key_leftright<0)?-1:0));
+	y_off=((key_updown>0||key_leftright>0)?1:((key_updown<0||key_leftright<0)?-1:0));
+
+	/*for(int i=0;i<127;i++)
+		if(mykey[i]==3)
+			mykey[i]=0;*/
 	return keygot;
 }
+
+void key_watcher(int scancode)
+{
+	/*memset(mykey,0,sizeof(mykey));
+	for(int i=0;i<127;i++)
+		if(key[i])
+			mykey[i]=2;
+	mykey[scancode&0x7f]=(scancode>127?3:2);*/
+	int mykey_prev[256];memcpy(mykey_prev,mykey,sizeof(mykey));
+	int &key=mykey[scancode&0x7f],&prev_key=mykey_prev[scancode&0x7f];
+	if(scancode<127)
+		if(prev_key<2)
+			key=2;
+		else
+			key=3;
+	else
+		if(prev_key<2)
+			key=0;
+		else
+			key=1;
+}
+END_OF_FUNCTION(key_watcher);

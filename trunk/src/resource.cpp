@@ -25,6 +25,17 @@
 using namespace boost;
 using namespace Pal::Tools;
 namespace{
+	uint8_t *denone(FILE *fp,long &len)
+	{
+		int32_t length;
+		fseek(fp,0,SEEK_END);
+		length=ftell(fp);
+		rewind(fp);
+		uint8_t *buf=new uint8_t[length];
+		fread(buf,length,1,fp);
+		len=length;
+		return buf;
+	}
 	uint8_t *demkf_t(FILE *fp,int n,long &len)
 	{
 		int32_t offset=n*4,length;
@@ -77,6 +88,7 @@ namespace{
 		return shared_array<uint8_t>(deyj1(src,len));
 	}
 }
+decoder_func de_none		=bind(denone,_1,_4);
 decoder_func de_mkf			=bind(demkf_t,_1,_2,_4);
 decoder_func de_mkf_yj1		=bind(deyj1,	bind(demkf,		_1,_2,_4),_4);
 decoder_func de_mkf_mkf_yj1	=bind(deyj1,	bind(demkf_impl,bind(demkf,_1,_2,_4),_3,_4),_4);

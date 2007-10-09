@@ -70,6 +70,7 @@ inline int16_t absdec(int16_t &s)
     return s0;
 }
 typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
+int x_off=0,y_off=0;
 void GameLoop_OneCycle(bool trigger)
 {
     if (!mutex_can_change_palette)
@@ -83,6 +84,7 @@ void GameLoop_OneCycle(bool trigger)
                         {
                             if (iter->frames)
                             {
+								x_off=0,y_off=0;
                                 clear_keybuf();
                                 stop_and_update_frame();
                                 iter->curr_frame=0;
