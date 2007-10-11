@@ -30,6 +30,7 @@
 #include "internal.h"
 
 namespace res{
+    extern SETUP_DEF setup;
 	extern palette pat;
 	extern RPG rpg;
 	//data

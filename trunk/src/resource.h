@@ -48,6 +48,7 @@ public:
 	uint8_t *decode(int,int,bool& =_decoded,long& =_len);
 	uint8_t *decode(int,bool& ,long& =_len);
 	uint8_t *decode(int,long& =_len);
+	uint8_t *decode(long& =_len);
 	void clear();
 	void clear(int n,int n2);
 };

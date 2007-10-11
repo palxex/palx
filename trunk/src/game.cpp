@@ -32,6 +32,7 @@ int scale=1;
 namespace res{
 	palette pat;
 	RPG rpg;
+	SETUP_DEF setup;
 	//data
 	std::vector<SHOP> shops;
 	std::vector<MONSTER> monsters;
@@ -128,6 +129,8 @@ namespace res{
         long len=0;
         EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
         SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
+        reunion(setup,      SETUP.decode(len), len);
+
         reunion(evtobjs,	SSS.decode(0,len), len);
         reunion(scenes,		SSS.decode(1,len), len);
         reunion(rpg.objects,SSS.decode(2,len), len);
