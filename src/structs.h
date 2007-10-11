@@ -261,6 +261,25 @@ typedef struct{
 	int16_t level;
 	int16_t exp;
 }UPGRADE_EXP;
+typedef struct
+{
+unsigned short int key_left;
+unsigned short int key_up;
+unsigned short int key_right;
+unsigned short int key_down;//以上均为键盘扫描码
+struct
+{
+unsigned short int SB: 1; //1表示设置了“声霸卡”
+unsigned short int MIDI: 1; //1表示设置了“MIDI”
+unsigned short int CD: 1; //1表示设置了“CD”
+unsigned short int : 13;
+} sound_config;
+unsigned short int enable_sfx; //1表示开启音效
+unsigned short int sb_irq; //声霸卡的IRQ，取值范围2-11
+unsigned short int sb_ioport; //声霸卡的I/O基址
+unsigned short int midi_ioport; //MPU401 MIDI口的I/O基址
+unsigned short int use_files_on_CD;
+}SETUP_DEF;
 #pragma pack()
 
 	struct position{

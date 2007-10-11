@@ -137,6 +137,11 @@ uint8_t *cached_res::decode(int n,long &length)
 	bool c;
 	return decode(n,0,c,length);
 }
+uint8_t *cached_res::decode(long &length)
+{
+    bool c;
+    return decode(0,0,c,length);
+}
 void cached_res::clear(){
 	for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;
 	cache.clear();
@@ -162,3 +167,4 @@ cached_res F("f.mkf"   ,de_mkf_yj1);
 cached_res FIRE("fire.mkf",de_mkf_yj1);
 cached_res MGO("mgo.mkf" ,de_mkf_yj1);
 cached_res PAT("pat.mkf" ,de_mkf);
+cached_res SETUP("setup.dat",de_none);

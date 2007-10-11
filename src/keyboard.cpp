@@ -18,6 +18,8 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
+#include "game.h"
+#include <stack>
 
 int scancode_translate(int allegro_scancode)
 {
@@ -25,16 +27,24 @@ int scancode_translate(int allegro_scancode)
 		std::map<int,int> mymap;
 	public:
 		__scancode_map(){
-			mymap[KEY_UP]=0x48;
+			mymap[0x48]=KEY_UP;
+			mymap[0x4b]=KEY_LEFT;
+			mymap[0x4d]=KEY_RIGHT;
+			mymap[0x50]=KEY_DOWN;
 		}
 		int operator[](int n){
-			return mymap[n];
+		    if(mymap.find(n)!=mymap.end())
+                return mymap[n];
+            else
+                return -1;
 		}
 	}scancode_map;
 	return scancode_map[allegro_scancode];
 }
 
 int mykey[256];
+int mykey_lowlevel[256];
+std::stack<int> keys;
 
 VKEY get_key(bool clear)
 {
@@ -117,6 +127,7 @@ int make_layer(int key)
 	return 0;
 }
 extern int x_off,y_off;
+void reproduct_key();
 VKEY get_key_lowlevel()
 {
 	VKEY keygot=VK_NONE;
@@ -167,6 +178,7 @@ VKEY get_key_lowlevel()
 		if(clear)
 			clear_keybuf();
 	}*/
+	/*reproduct_key();
 	int key_updown=0,key_leftright=0;
 	int up=make_layer(mykey[KEY_UP]),down=make_layer(mykey[KEY_DOWN]),left=make_layer(mykey[KEY_LEFT]),right=make_layer(mykey[KEY_RIGHT]);
 	if(!up && !down)
@@ -195,11 +207,15 @@ VKEY get_key_lowlevel()
 		key_updown=0;
 
 	x_off=((key_updown<0||key_leftright>0)?1:((key_updown>0||key_leftright<0)?-1:0));
-	y_off=((key_updown>0||key_leftright>0)?1:((key_updown<0||key_leftright<0)?-1:0));
+	y_off=((key_updown>0||key_leftright>0)?1:((key_updown<0||key_leftright<0)?-1:0));*/
 
-	/*for(int i=0;i<127;i++)
-		if(mykey[i]==3)
-			mykey[i]=0;*/
+	if(!keys.empty())
+	{
+		x_off=((keys.top()==scancode_translate(res::setup.key_left)||keys.top()==scancode_translate(res::setup.key_down))?-1:((keys.top()==scancode_translate(res::setup.key_right)||keys.top()==scancode_translate(res::setup.key_up))?1:0));
+		y_off=((keys.top()==scancode_translate(res::setup.key_down)||keys.top()==scancode_translate(res::setup.key_right))?1:((keys.top()==scancode_translate(res::setup.key_left)||keys.top()==scancode_translate(res::setup.key_up))?-1:0));
+	}
+	else
+		x_off=0,y_off=0;
 	return keygot;
 }
 
@@ -209,18 +225,40 @@ void key_watcher(int scancode)
 	for(int i=0;i<127;i++)
 		if(key[i])
 			mykey[i]=2;
-	mykey[scancode&0x7f]=(scancode>127?3:2);*/
-	int mykey_prev[256];memcpy(mykey_prev,mykey,sizeof(mykey));
-	int &key=mykey[scancode&0x7f],&prev_key=mykey_prev[scancode&0x7f];
-	if(scancode<127)
-		if(prev_key<2)
-			key=2;
-		else
-			key=3;
-	else
-		if(prev_key<2)
-			key=0;
-		else
-			key=1;
+	if(scancode<127 && mykey[scancode]==2)	return;*/
+	if(scancode>127){
+		std::stack<int> another;
+		for(int i=0;i<keys.size();){
+			if(keys.top()!=(scancode&0x7f))
+				another.push(keys.top());
+			keys.pop();
+		}
+		for(int i=0;i<another.size();){
+			keys.push(another.top());
+			another.pop();
+		}
+	}else
+		if(keys.empty() || keys.top()!=scancode)
+			keys.push(scancode);
+	mykey_lowlevel[scancode&0x7f]=(scancode>127?2:1);
 }
 END_OF_FUNCTION(key_watcher);
+void reproduct_key()
+{
+	for(int i=0;i<127;i++)
+	{
+		int &key=mykey[i],&scan_key=mykey_lowlevel[i];
+		if(scan_key==0)
+			key=0;
+		else if(scan_key==1)
+			if(key<2)
+				key=2;
+			else
+				key=2;
+		else
+			if(key<2)
+				key=0;
+			else
+				key=1;
+	}
+}
