@@ -27,16 +27,16 @@ int scancode_translate(int allegro_scancode)
 		std::map<int,int> mymap;
 	public:
 		__scancode_map(){
-			mymap[0x48]=KEY_UP;
-			mymap[0x4b]=KEY_LEFT;
-			mymap[0x4d]=KEY_RIGHT;
-			mymap[0x50]=KEY_DOWN;
+			mymap[KEY_UP]=0x48;
+			mymap[KEY_LEFT]=0x4b;
+			mymap[KEY_RIGHT]=0x4d;
+			mymap[KEY_DOWN]=0x50;
 		}
 		int operator[](int n){
 		    if(mymap.find(n)!=mymap.end())
                 return mymap[n];
             else
-                return -1;
+                return 0;
 		}
 	}scancode_map;
 	return scancode_map[allegro_scancode];
@@ -211,8 +211,8 @@ VKEY get_key_lowlevel()
 
 	if(!keys.empty())
 	{
-		x_off=((keys.top()==scancode_translate(res::setup.key_left)||keys.top()==scancode_translate(res::setup.key_down))?-1:((keys.top()==scancode_translate(res::setup.key_right)||keys.top()==scancode_translate(res::setup.key_up))?1:0));
-		y_off=((keys.top()==scancode_translate(res::setup.key_down)||keys.top()==scancode_translate(res::setup.key_right))?1:((keys.top()==scancode_translate(res::setup.key_left)||keys.top()==scancode_translate(res::setup.key_up))?-1:0));
+		x_off=((keys.top()==res::setup.key_left||keys.top()==res::setup.key_down)?-1:((keys.top()==res::setup.key_right||keys.top()==res::setup.key_up)?1:0));
+		y_off=((keys.top()==res::setup.key_down||keys.top()==res::setup.key_right)?1:((keys.top()==res::setup.key_left||keys.top()==res::setup.key_up)?-1:0));
 	}
 	else
 		x_off=0,y_off=0;
@@ -226,6 +226,7 @@ void key_watcher(int scancode)
 		if(key[i])
 			mykey[i]=2;
 	if(scancode<127 && mykey[scancode]==2)	return;*/
+	scancode=(scancode&0x80)|scancode_translate(scancode&0x7f);
 	if(scancode>127){
 		std::stack<int> another;
 		for(int i=0;i<keys.size();){
@@ -238,7 +239,7 @@ void key_watcher(int scancode)
 			another.pop();
 		}
 	}else
-		if(keys.empty() || keys.top()!=scancode)
+		if(keys.empty() || keys.top()!=scancode && scancode)
 			keys.push(scancode);
 	mykey_lowlevel[scancode&0x7f]=(scancode>127?2:1);
 }
