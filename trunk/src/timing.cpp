@@ -20,13 +20,14 @@
 #include "timing.h"
 #include "allegdef.h"
 
+extern bool running;
 void wait(uint8_t gap)
 {
 	time_interrupt_occurs=0;
 	rest(gap*8);
 }
 
-extern bool running;
+
 void wait_key(uint8_t gap)
 {
 	clear_keybuf();

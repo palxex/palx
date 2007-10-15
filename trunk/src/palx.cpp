@@ -17,7 +17,7 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-extern bool running;
+
 
 #pragma warning(disable: 4819)
 #include <boost/lexical_cast.hpp>
