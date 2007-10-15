@@ -876,7 +876,7 @@ __walk_role:
         break;
     case 0xa0:
         clear_bitmap(screen);
-        throw;
+        running=false;
         break;
 	case 0xa3:
 		rix->play(param2);

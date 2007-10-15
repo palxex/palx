@@ -97,14 +97,14 @@ void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter)
 	uint8_t *d=(uint8_t*)(((BITMAP*)dst)->dat)+gap, *s=(uint8_t*)(((BITMAP*)jitter)->dat)+gap;
 	do
 		*d=((*s)&0x0F)|((*s)&0xF0);
-	while(time-- && (d+=6) && (s+=6));
+	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h & s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
 }
 void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter)
 {
 	uint8_t *d=(uint8_t*)(((BITMAP*)dst)->dat)+gap, *s=(uint8_t*)(((BITMAP*)jitter)->dat)+gap;
 	do
 		*d=((*s)>(*d)? (*d)+1 : ((*s)<(*d)? (*d)-1 : (*d)));
-	while(time-- && (d+=6) && (s+=6));
+	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h & s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
 }
 void CrossFadeOut(int u,int times,int gap,bitmap &buf)
 {
@@ -142,7 +142,7 @@ void show_fbp(int pic,int gap)
 	if(pic>0)
 		bitmap(FBP.decode(pic),320,200).blit_to(buf,0,0,0,0);
 	if(gap)
-		CrossFadeOut(0x29B0,0x5F,gap,buf);
+		;//CrossFadeOut(0x29B0,0x5F,gap,buf);
 	buf.blit_to(screen,0,0,0,0);
 }
 int shake_times=0,shake_grade=0;
