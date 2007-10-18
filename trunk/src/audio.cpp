@@ -30,7 +30,7 @@ bool begin=false;
 int voices[MAX_VOICES];int vocs=0;
 void playrix_timer(void *param)
 {
-	playrix *plr=reinterpret_cast<playrix*>(param);
+	playrix * const plr=reinterpret_cast<playrix*>(param);
 	if(voice_get_volume(plr->stream->voice)==0)
 		begin=false;
 	int f=0;
