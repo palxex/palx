@@ -82,7 +82,7 @@ void playrix_timer(void *param)
 }
 END_OF_FUNCTION(playrix_timer);
 
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0),BufferLength(SAMPLE_RATE * CHANNELS * 3)
+playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0),BufferLength(SAMPLE_RATE * CHANNELS * 10)
 {
 	rix.load(std::string("mus.mkf"), CProvider_Filesystem());
 	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);

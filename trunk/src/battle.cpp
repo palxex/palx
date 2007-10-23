@@ -21,6 +21,9 @@
 #include "game.h"
 #include "timing.h"
 
+using namespace res;
+
+
 class battle{
 	int enemy_team,script_escape;
 	std::map<int,sprite_prim> team_images;
@@ -49,6 +52,15 @@ class battle{
 public:
 	battle(int team,int script):enemy_team(team),script_escape(script)
 	{
+		//确保我方没有开战即死
+		for(int i=0;i<=rpg.team_roles;i++)
+			if(rpg.roles_properties.HP[rpg.team[i].role]<=0)
+				rpg.roles_properties.HP[rpg.team[i].role]=1;
+
+		//清除上战物品使用记录
+		for(int i=0;i<=99;i++);
+
+
 		rix->play(res::rpg.battle_music);
 		flag_battling=true;
 		for(int i=0;i<=res::rpg.team_roles;i++)

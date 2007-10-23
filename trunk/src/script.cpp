@@ -703,7 +703,7 @@ __walk_role:
         rpg.team[2].role=(param3-1<0?0:param3-1);
         rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;
         load_team_mgo();
-        //call    setup_our_team_data_things
+        setup_our_team_data_things();
         store_team_frame_data();
         break;
     case 0x76:

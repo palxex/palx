@@ -126,6 +126,7 @@ void Load_Data()
 		rix->play(res::rpg.music);
 	}
 	flag_to_load=0;
+	setup_our_team_data_things();
 }
 bool process_Menu()
 {
@@ -207,4 +208,14 @@ void redraw_everything(int time_gap)
 		scene->Redraw_Tiles_or_Fade_to_pic();
 		scene->scanline_draw_normal_scene(time_gap);
 	}
+}
+
+void setup_our_team_data_things()
+{
+	//清除物品使用记录
+	for(int i=0;i<0x100;i++)
+		res::rpg.items[i].using_amount=0;
+
+	//清除装备记录
+
 }
