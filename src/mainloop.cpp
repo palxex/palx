@@ -45,13 +45,18 @@ namespace{
 
 		//clear scene back
 		scene->clear_scanlines();
-		scene->clear_active();
-		scene->calc_team_walking();
-		scene->our_team_setdraw();
-		scene->visible_NPC_movment_setdraw();
+
+		sprite_queue sprites;
+		sprites.clear_active();
+		sprites.calc_team_walking();
+		sprites.our_team_setdraw();
+		sprites.visible_NPC_movment_setdraw();
+
 		scene->move_usable_screen();
-		scene->Redraw_Tiles_or_Fade_to_pic();
-		scene->scanline_draw_normal_scene(1);
+
+		sprites.Redraw_Tiles_or_Fade_to_pic();
+
+		scene->scanline_draw_normal_scene(sprites,1);
 		if(keygot==VK_EXPLORE)
 			process_Explore();
 		if(keygot==VK_MENU)

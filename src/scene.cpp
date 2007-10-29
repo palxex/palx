@@ -98,36 +98,36 @@ void Scene::clear_scanlines()
 {
 	//clear_bitmap(screen);
 }
-void Scene::clear_active()
+void sprite_queue::clear_active()
 {
 	active_list.clear();
 }
-void Scene::calc_team_walking()
+void sprite_queue::calc_team_walking()
 {
 	int16_t &direction=res::rpg.team_direction;
-	abstract_x_bak=team_pos.toXY().x;
-	abstract_y_bak=team_pos.toXY().y;
+	abstract_x_bak=scene->team_pos.toXY().x;
+	abstract_y_bak=scene->team_pos.toXY().y;
 	viewport_x_bak=res::rpg.viewport_x;
 	viewport_y_bak=res::rpg.viewport_y;
 	if(x_off && y_off && key_enable){
 		direction=calc_faceto(x_off,y_off);
-		position target=team_pos+position(direction_offs[direction][0],direction_offs[direction][1]);
+		position target=scene->team_pos+position(direction_offs[direction][0],direction_offs[direction][1]);
 		if(!barrier_check(0,target.toXY().x,target.toXY().y)&&
 			target.toXY().x>=0 && target.toXY().x<=coordinate_x_max+x_scrn_offset &&
 			target.toXY().y>=0 && target.toXY().y<=coordinate_y_max+y_scrn_offset)
 		{
 			res::rpg.viewport_x+=direction_offs[direction][0];
 			res::rpg.viewport_y+=direction_offs[direction][1];
-			team_pos.toXY()=target;
+			scene->team_pos.toXY()=target;
 			team_walk_one_step();
 			return;
 		}
 	}
 	stop_and_update_frame();
-	team_pos.x=res::rpg.viewport_x+x_scrn_offset;
-	team_pos.y=res::rpg.viewport_y+y_scrn_offset;
+	scene->team_pos.x=res::rpg.viewport_x+x_scrn_offset;
+	scene->team_pos.y=res::rpg.viewport_y+y_scrn_offset;
 }
-void Scene::our_team_setdraw()
+void sprite_queue::our_team_setdraw()
 {
 	for(int i=0;i<=res::rpg.team_roles+res::rpg.team_followers;i++){
 		s_list::value_type it=boost::shared_ptr<sprite>(mgos[team_mgos[i]].getsprite(res::rpg.team[i].frame)->clone());
@@ -135,10 +135,10 @@ void Scene::our_team_setdraw()
 		active_list.push_back(it);
 	}
 }
-void Scene::visible_NPC_movment_setdraw()
+void sprite_queue::visible_NPC_movment_setdraw()
 {
 	int t=0;
-	for(std::vector<EVENT_OBJECT>::iterator i=sprites_begin;i!=sprites_end;i++,t++)
+	for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++,t++)
 		if(i->pos_x-res::rpg.viewport_x>-64*scale && i->pos_x-res::rpg.viewport_x<0x180*scale &&
 		   i->pos_y-res::rpg.viewport_y>0   && i->pos_y-res::rpg.viewport_y<0x148*scale &&
 		   i->image && i->status && i->vanish_time==0)
@@ -155,7 +155,7 @@ void Scene::visible_NPC_movment_setdraw()
 			active_list.push_back(it);
 		}
 }
-void Scene::Redraw_Tiles_or_Fade_to_pic()
+void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 {
 	s_list redraw_list;s_list::value_type masker;
 	switch(redraw_flag)
@@ -167,8 +167,8 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 					for(int x=vx-1,y=vy;x<=vx+1 && y>=0;x++)
 						for(int h=0;h<2;h++)
 						{
-							tile &tile0=scenemap.gettile(x,y,h,0);
-							tile &tile1=scenemap.gettile(x,y,h,1);
+							tile &tile0=scene->scenemap.gettile(x,y,h,0);
+							tile &tile1=scene->scenemap.gettile(x,y,h,1);
 							if(tile0.valid && tile0.layer>0 && 16*(y+tile0.layer)+8*h+8>=masker->y){
 								s_list::value_type it=boost::shared_ptr<sprite>(tile0.image.get()->clone());
 								it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+tile0.layer*8-res::rpg.viewport_y,tile0.layer*8);
@@ -189,6 +189,15 @@ void Scene::Redraw_Tiles_or_Fade_to_pic()
 		redraw_flag=1;
 		break;
 	}
+}
+void sprite_queue::flush(bitmap &scanline)
+{
+	std::set<s_list::value_type> greper(active_list.begin(),active_list.end());
+	active_list.clear();
+	std::copy(greper.begin(),greper.end(),back_inserter(active_list));
+	std::sort(active_list.begin(),active_list.end());
+	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
+		(*i)->blit_to(scanline);
 }
 void Scene::move_usable_screen()
 {
@@ -231,17 +240,12 @@ bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)
 {
 	return *(lhs.get())<*(rhs.get());
 }
-void Scene::scanline_draw_normal_scene(int gap)
+void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap)
 {
-	static bitmap scanline(0,SCREEN_W,SCREEN_H);
 	perframe_proc();
+	static bitmap scanline(0,SCREEN_W,SCREEN_H);
 	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
-	std::set<s_list::value_type> greper(active_list.begin(),active_list.end());
-	active_list.clear();
-	std::copy(greper.begin(),greper.end(),back_inserter(active_list));
-	std::sort(active_list.begin(),active_list.end());
-	for(s_list::iterator i=active_list.begin();i!=active_list.end();i++)
-		(*i)->blit_to(scanline);
+	sprites.flush(scanline);
 	blit(scanline,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	pal_fade_in(gap);
 }
