@@ -198,15 +198,15 @@ bool process_Menu()
 void redraw_everything(int time_gap)
 {
 	flag_parallel_mutex=!flag_parallel_mutex;
-	scene->clear_active();
 	if(flag_battling)
 		;
 	else{
 		rest(100);
-		scene->visible_NPC_movment_setdraw();
-		scene->our_team_setdraw();
-		scene->Redraw_Tiles_or_Fade_to_pic();
-		scene->scanline_draw_normal_scene(time_gap);
+		sprite_queue sprites;
+		sprites.visible_NPC_movment_setdraw();
+		sprites.our_team_setdraw();
+		sprites.Redraw_Tiles_or_Fade_to_pic();
+		scene->scanline_draw_normal_scene(sprites,time_gap);
 	}
 }
 

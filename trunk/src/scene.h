@@ -61,25 +61,29 @@ public:
 	void change(int p);
 };
 
-struct Scene{
-	palmap scenemap;
-	BITMAP *scene_buf;
-	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
+class sprite_queue{
 	typedef std::vector<boost::shared_ptr<sprite> > s_list;
 	s_list active_list;
-	position team_pos;
-	Scene();
-	~Scene();
-	void clear_scanlines();
+public:
 	void clear_active();
 	void calc_team_walking();
 	void our_team_setdraw();
 	void visible_NPC_movment_setdraw();
 	void Redraw_Tiles_or_Fade_to_pic();
+	void flush(bitmap &);
+};
+struct Scene{
+	palmap scenemap;
+	BITMAP *scene_buf;
+	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
+	position team_pos;
+	Scene();
+	~Scene();
+	void clear_scanlines();
 	void move_usable_screen();
 	void get_sprites();
 	void produce_one_screen();
-	void scanline_draw_normal_scene(int);
+	void scanline_draw_normal_scene(sprite_queue&,int);
 };
 struct BattleScene{
 	fbp background;
