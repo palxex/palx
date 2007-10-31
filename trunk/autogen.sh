@@ -12,3 +12,4 @@ autoconf
 
 echo "Now you are ready to run ./configure."
 echo "You can also run  ./configure --help for extra features to enable/disable."
+

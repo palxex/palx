@@ -93,7 +93,7 @@ namespace res{
 			time_interrupt_occurs++;
 			mutux_setpalette=true;
 		}
-		rest(0);
+		rest(1);
 	}
 	END_OF_FUNCTION(timer_proc);
 	void prtscrn_proc()
@@ -106,7 +106,7 @@ namespace res{
 			sprintf(filename,"ScrnShot\\%d.bmp",i++);
 			save_bitmap(filename,screen,pal);
 		}
-		rest(0);
+		rest(1);
 	}
 	END_OF_FUNCTION(prtscrn_proc);
 
@@ -117,8 +117,6 @@ namespace res{
             x_scrn_offset*=scale;
             y_scrn_offset*=scale;
 
-
-        //global setting
 
         LOCK_VARIABLE(time_interrupt_occurs);
         install_int(timer_proc,10);

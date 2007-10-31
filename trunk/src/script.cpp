@@ -31,7 +31,7 @@
 using namespace res;
 
 extern int scale;
-extern bool prelimit_OK=false;
+bool prelimit_OK=false;
 
 extern int process_Battle(uint16_t,uint16_t);
 
