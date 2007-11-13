@@ -78,20 +78,20 @@ namespace res{
 		if(!mutex_int){
 			static int pal_lock=0;
 			static PALETTE pal;
-			mutux_setpalette=false;
+			mutex_paletting=false;
 			if(pal_lock++==10){
-				get_palette_range(pal,0xF6,0xFF);
+				get_palette(pal);
 				RGB temp=pal[0xF6];
 				memcpy(pal+0xF6,pal+0xF7,6);
 				pal[0xF8]=temp;
 				temp=pal[0xF9];
 				memcpy(pal+0xF9,pal+0xFA,0x12);
 				pal[0xFE]=temp;
-				set_palette_range(pal,0xF6,0xFF,1);
+				set_palette(pal);
 				pal_lock=0;
 			};
 			time_interrupt_occurs++;
-			mutux_setpalette=true;
+			mutex_paletting=true;
 		}
 		rest(1);
 	}

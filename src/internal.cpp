@@ -32,8 +32,6 @@ bool flag_parallel_mutex=false;
 int redraw_flag=0;
 int flag_pic_level=0;
 
-bool mutux_setpalette=false;
-
 int RPG_screen_wave_grade=0;
 int wave_progression=0;
 
