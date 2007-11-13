@@ -53,8 +53,6 @@ extern int flag_pic_level;
 
 extern int dialog_type;
 
-extern bool mutux_setpalette;
-
 extern uint32_t current_dialog_lines;
 extern uint32_t glbvar_fontcolor;
 extern uint32_t font_color_yellow;
