@@ -6,14 +6,10 @@ AC_INIT(palx, 0.3, palxex@gmail.com)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 
-
-dnl Detect the canonical host and target build environment
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
-
-# Checks for programs.
+dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AM_PROG_CC_C_O
 
 dnl Check for Allegro Installed
 AM_PATH_ALLEGRO(4.2.1)
@@ -37,6 +33,21 @@ AC_FUNC_MEMCMP
 AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_CHECK_FUNCS([atexit getcwd memmove memset select])
+
+dnl check for pkg-config
+AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+
+dnl adplug
+adplug_LIBS="`$PKG_CONFIG adplug --libs`"
+adplug_CFLAGS="`$PKG_CONFIG adplug --cflags`"
+AC_SUBST(adplug_LIBS)
+AC_SUBST(adplug_CFLAGS)
+
+dnl freetype2
+freetype2_LIBS="`$PKG_CONFIG freetype2 --libs`"
+freetype2_CFLAGS="`$PKG_CONFIG freetype2 --cflags`"
+AC_SUBST(freetype2_LIBS)
+AC_SUBST(freetype2_CFLAGS)
 
 dnl Some stuff for the icon.
 case "$target" in

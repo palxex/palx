@@ -1,9 +1,8 @@
 ## for automake to generate Makefile.in
 noinst_PROGRAMS = palx
-palx_SOURCES = UI.cpp      fade.cpp      keyboard.cpp  playrng.cpp   script.cpp audio.cpp   game.cpp      mainloop.cpp  qbrand.cpp    team.cpp battle.cpp  graph.cpp     message.cpp   resource.cpp  timing.cpp begin.cpp   internal.cpp  palx.cpp      scene.cpp item.cpp shop.cpp celestial.cpp ../PalLibrary/src/yj1.cpp ../PalLibrary/src/rle.cpp ../PalLibrary/src/rng.cpp
-palx_LDADD = -lalfont -ladplug -lbinio $(allegro_LIBS) $(BOOST_REGEX_LIB)
-INCLUDES= -I$(top_srcdir)/PalLibrary/include
-AM_CPPFLAGS = -DALLEGRO_STATICLINK -mtune=pentium -O2 -ffast-math -fomit-frame-pointer
+palx_SOURCES = UI.cpp      fade.cpp      keyboard.cpp  playrng.cpp   script.cpp audio.cpp   game.cpp      mainloop.cpp  qbrand.cpp    team.cpp battle.cpp  graph.cpp     message.cpp   resource.cpp  timing.cpp begin.cpp   internal.cpp  palx.cpp      scene.cpp item.cpp shop.cpp celestial.cpp ../PalLibrary/src/yj1.cpp ../PalLibrary/src/rle.cpp ../PalLibrary/src/rng.cpp ../alfont/alfont.c
+palx_LDADD = $(adplug_LIBS) $(allegro_LIBS) $(BOOST_REGEX_LIB) $(freetype2_LIBS)
+palx_CPPFLAGS= -I$(top_srcdir)/PalLibrary/include -I$(top_srcdir)/alfont $(allegro_CFLAGS) $(adplug_CFLAGS) $(freetype2_CFLAGS)
 
 if HAVE_WINDRES
 palx_LDADD += palx_ico.o
