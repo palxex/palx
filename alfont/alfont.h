@@ -11,7 +11,7 @@
 
 
 //#define ALFONT_WINDOWS   //When compiling in WINDOWS,please uncomment this line.
-#define ALFONT_DOS 	 //When compiling in DOS,please uncomment this line. 
+#define ALFONT_ICONV 	 //When compiling in DOS,please uncomment this line. 
 //#define ALFONT_LINUX 	 //When compiling in LINUX,please uncomment this line.
 
 
@@ -22,7 +22,7 @@
 #ifdef ALFONT_WINDOWS	//run in WINDOWS
 #define Encode_Code "chinese-traditional"
 #endif
-#ifdef ALFONT_DOS	    //run in DOS
+#ifdef ALFONT_ICONV	    //run in DOS
 #define Encode_Code "BIG5"
 #endif
 #ifdef ALFONT_LINUX		//run in LINUX

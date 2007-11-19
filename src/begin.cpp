@@ -109,7 +109,7 @@ int select_scene()
 		static bool changed=true;
 		if(changed)
 			for(int i=7;i<9;i++)
-				ttfont(objs(i*10,i*10+10)).blit_to(screen,0x70,0x54+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
+				ttfont(objs(i*10,i*10+10)).blit_to(screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
 		VKEY keygot;SAFE_GETKEY(keygot);
 		switch(keygot){
