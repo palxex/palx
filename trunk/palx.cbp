@@ -69,24 +69,20 @@
 			<Add directory="PalLibrary\include" />
 		</Compiler>
 		<Linker>
+			<Add library="adplug" />
+			<Add library="binio" />
+			<Add library="alleg_s" />
+			<Add library="boost_regex" />
 			<Add library="gdi32" />
 			<Add library="user32" />
 			<Add library="kernel32" />
-			<Add library="libalfont.a" />
-			<Add library="libadplug.a" />
-			<Add library="libbinio.a" />
-			<Add library="liballeg_s.a" />
-			<Add library="libboost_regex.a" />
-			<Add library="libkernel32.a" />
-			<Add library="libuser32.a" />
-			<Add library="libgdi32.a" />
-			<Add library="libcomdlg32.a" />
-			<Add library="libole32.a" />
-			<Add library="libdinput.a" />
-			<Add library="libddraw.a" />
-			<Add library="libdxguid.a" />
-			<Add library="libwinmm.a" />
-			<Add library="libdsound.a" />
+			<Add library="comdlg32" />
+			<Add library="ole32" />
+			<Add library="dinput" />
+			<Add library="ddraw" />
+			<Add library="dxguid" />
+			<Add library="winmm" />
+			<Add library="dsound" />
 		</Linker>
 		<Unit filename="PalLibrary\include\config.h" />
 		<Unit filename="PalLibrary\include\grf.h" />
@@ -97,6 +93,10 @@
 		<Unit filename="PalLibrary\src\yj1s.h" />
 		<Unit filename="PalLibrary\src\yj2sd.h" />
 		<Unit filename="PalLibrary\src\yj2se.h" />
+		<Unit filename="alfont\alfont.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="alfont\alfont.h" />
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

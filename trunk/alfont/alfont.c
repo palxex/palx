@@ -17,7 +17,7 @@
 #include <alfont.h>
 #include <ft2build.h>
 
-#ifdef ALFONT_DOS	//run in DOS
+#ifdef ALFONT_ICONV	//run in DOS
 #include <iconv.h>
 #else			//run in Other
 #include <locale.h>
@@ -603,7 +603,7 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
   int first_flag=TRUE; //First Char flag
   BITMAP *masked_bmp; //the masked bmp used by Font hollow
   
-  #ifdef ALFONT_DOS
+  #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
   char *sin, *sout;
@@ -626,7 +626,7 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
 	if (f->type==2) {
 		curr_uformat=get_uformat();
 
-		#ifdef ALFONT_DOS
+		#ifdef ALFONT_ICONV
 		if ((c_pt = iconv_open("UTF-16LE", f->language)) != (iconv_t)-1) {
   			
 			fromlen  = strlen(s) + 1;
@@ -740,7 +740,7 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
   //Font Code Convert
 
   if (f->type==1) {
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open(f->language, "UTF-16LE")) == (iconv_t)-1) {
      	lpszW = (char *)s_pointer;
   	}
@@ -771,7 +771,7 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
   else if(f->type==2) {
   	curr_uformat=get_uformat();
   	
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open("UTF-16LE", f->language)) == (iconv_t)-1) {	
      	lpszW = (char *)s_pointer;
   	}
@@ -1685,7 +1685,7 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
 	free(s_pointer);
   }
   
-  #ifndef ALFONT_DOS
+  #ifndef ALFONT_ICONV
   setlocale(LC_CTYPE,"");
   #endif
   
@@ -1714,7 +1714,7 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
   int curr_uformat;
   int first_flag=TRUE; //First Char flag
   BITMAP *masked_bmp; //the masked bmp used by Font hollow
-  #ifdef ALFONT_DOS
+  #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
   char *sin, *sout;
@@ -1737,7 +1737,7 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
 	if (f->type==2) {
 		curr_uformat=get_uformat();
 
-		#ifdef ALFONT_DOS
+		#ifdef ALFONT_ICONV
 		if ((c_pt = iconv_open("UTF-16LE", f->language)) != (iconv_t)-1) {
   			
 			fromlen  = strlen(s) + 1;
@@ -1852,7 +1852,7 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
 
   if (f->type==1) {
   	
-	#ifdef ALFONT_DOS
+	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open(f->language, "UTF-16LE")) == (iconv_t)-1) {
      	lpszW = (char *)s_pointer;
   	}
@@ -1883,7 +1883,7 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
   else if(f->type==2) {
   	curr_uformat=get_uformat();
   	
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open("UTF-16LE", f->language)) == (iconv_t)-1) {	
      	lpszW = (char *)s_pointer;
   	}
@@ -2489,7 +2489,7 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
 	free(s_pointer);
   }
   
-  #ifndef ALFONT_DOS
+  #ifndef ALFONT_ICONV
   setlocale(LC_CTYPE,"");
   #endif
 
@@ -2516,7 +2516,7 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
   int curr_uformat;
   int total_length = 0, character, last_glyph_index;
   int glyph_index;
-  #ifdef ALFONT_DOS
+  #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
   char *sin, *sout;
@@ -2539,7 +2539,7 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
 	if (f->type==2) {
 		curr_uformat=get_uformat();
 
-		#ifdef ALFONT_DOS
+		#ifdef ALFONT_ICONV
 		if ((c_pt = iconv_open("UTF-16LE", f->language)) != (iconv_t)-1) {
   			
 			fromlen  = strlen(str) + 1;
@@ -2655,7 +2655,7 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
 
   if (f->type==1) {
   	
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open(f->language, "UTF-16LE")) == (iconv_t)-1) {
      	lpszW = (char *)str_pointer;
   	}
@@ -2686,7 +2686,7 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
   else if(f->type==2) {
   	curr_uformat=get_uformat();
   	
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open("UTF-16LE", f->language)) == (iconv_t)-1) {	
      	lpszW = (char *)str_pointer;
   	}
@@ -2782,7 +2782,7 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
 	free(str_pointer);
   }
 
-  #ifndef ALFONT_DOS
+  #ifndef ALFONT_ICONV
   setlocale(LC_CTYPE,"");
   #endif
 
@@ -2803,7 +2803,7 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
   int curr_uformat;
   int string_count=0;
-  #ifdef ALFONT_DOS
+  #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
   char *sin, *sout;
@@ -2826,7 +2826,7 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
 	if (f->type==2) {
 		curr_uformat=get_uformat();
 
-		#ifdef ALFONT_DOS
+		#ifdef ALFONT_ICONV
 		if ((c_pt = iconv_open("UTF-16LE", f->language)) != (iconv_t)-1) {
   			
 			fromlen  = strlen(str) + 1;
@@ -2941,7 +2941,7 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
 
   
   if (f->type==1) {
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open(f->language, "UTF-16LE")) == (iconv_t)-1) {
      	lpszW = (char *)str_pointer;
      	string_count = strlen(lpszW);
@@ -2974,7 +2974,7 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
   else if(f->type==2) {
   	curr_uformat=get_uformat();
   	
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open("UTF-16LE", f->language)) == (iconv_t)-1) {	
      	lpszW = (char *)str_pointer;
      	string_count = strlen(lpszW);
@@ -3036,7 +3036,7 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
 	free(str_pointer);
   }
   
-  #ifndef ALFONT_DOS
+  #ifndef ALFONT_ICONV
   setlocale(LC_CTYPE,"");
   #endif
   
@@ -3057,7 +3057,7 @@ int alfont_ugetc(ALFONT_FONT *f, const char *s) {
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
   int character;
   int curr_uformat;
-  #ifdef ALFONT_DOS
+  #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
   char *sin, *sout;
@@ -3080,7 +3080,7 @@ int alfont_ugetc(ALFONT_FONT *f, const char *s) {
 	if (f->type==2) {
 		curr_uformat=get_uformat();
 
-		#ifdef ALFONT_DOS
+		#ifdef ALFONT_ICONV
 		if ((c_pt = iconv_open("UTF-16LE", f->language)) != (iconv_t)-1) {
   			
 			fromlen  = strlen(s) + 1;
@@ -3196,7 +3196,7 @@ int alfont_ugetc(ALFONT_FONT *f, const char *s) {
   
   if (f->type==1) {
   	
-	#ifdef ALFONT_DOS
+	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open(f->language, "UTF-16LE")) == (iconv_t)-1) {
      	lpszW = (char *)s_pointer;
   	}
@@ -3225,7 +3225,7 @@ int alfont_ugetc(ALFONT_FONT *f, const char *s) {
   else if(f->type==2) {
   	curr_uformat=get_uformat();
   	
-  	#ifdef ALFONT_DOS
+  	#ifdef ALFONT_ICONV
 	if ((c_pt = iconv_open("UTF-16LE", f->language)) == (iconv_t)-1) {	
      	lpszW = (char *)s_pointer;
   	}
@@ -3280,7 +3280,7 @@ int alfont_ugetc(ALFONT_FONT *f, const char *s) {
 	free(s_pointer);
   }
 
-  #ifndef ALFONT_DOS
+  #ifndef ALFONT_ICONV
   setlocale(LC_CTYPE,"");
   #endif
 
@@ -3301,7 +3301,7 @@ int alfont_need_uconvert(ALFONT_FONT *f, const char *str) {
   int nLen;
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
   int curr_uformat;
-  #ifdef ALFONT_DOS
+  #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
   char *sin, *sout;
@@ -3324,7 +3324,7 @@ int alfont_need_uconvert(ALFONT_FONT *f, const char *str) {
 	if (f->type==2) {
 		curr_uformat=get_uformat();
 
-		#ifdef ALFONT_DOS
+		#ifdef ALFONT_ICONV
 		if ((c_pt = iconv_open("UTF-16LE", f->language)) != (iconv_t)-1) {
   			
 			fromlen  = strlen(str) + 1;
@@ -3453,7 +3453,7 @@ int alfont_need_uconvert(ALFONT_FONT *f, const char *str) {
 	free(str_pointer);
   }
   
-  #ifndef ALFONT_DOS
+  #ifndef ALFONT_ICONV
   setlocale(LC_CTYPE,"");
   #endif
 
