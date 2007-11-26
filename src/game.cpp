@@ -78,7 +78,7 @@ namespace res{
 		if(!mutex_int){
 			static int pal_lock=0;
 			static PALETTE pal;
-			mutex_paletting=false;
+			mutex_paletting=true;
 			if(pal_lock++==10){
 				get_palette(pal);
 				RGB temp=pal[0xF6];
@@ -91,7 +91,7 @@ namespace res{
 				pal_lock=0;
 			};
 			time_interrupt_occurs++;
-			mutex_paletting=true;
+			mutex_paletting=false;
 		}
 		rest(1);
 	}
