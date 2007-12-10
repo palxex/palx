@@ -21,7 +21,6 @@
 
 #pragma warning(disable: 4819)
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 #include "scene.h"
 #include "game.h"
 #include "pallib.h"
@@ -35,10 +34,12 @@ using namespace std;
 #define FONT_PATH getenv("WINDIR")
 #define FONT_FILE "\\fonts\\mingliu.ttc"
 #define LOCALE "chinese"
+#define PATH_SEP '\\'
 #else
 #define FONT_PATH ""
 #define FONT_FILE "mingliu.ttc"
 #define LOCALE "BIG5"
+#define PATH_SEP '/'
 #endif
 
 int CARD=0;
@@ -81,10 +82,8 @@ int main(int argc, char *argv[])
 
 	char conv_buf[16]="0";
 	if(argc>=2){
-		boost::regex expression("(([[:alpha:]]:)(.+)\\Q\\\\E)?(\\d+)(.rpg|.RPG)?");
-		boost::cmatch what;
-		boost::regex_match(argv[1],what,expression);
-		strncpy(conv_buf,what[4].first,what[4].second-what[4].first);
+		strcpy(conv_buf,strrchr(argv[1],PATH_SEP));
+		*strchr(conv_buf,'.')=0;
 	}
 	boost::shared_ptr<Game> thegame;
 	try{
