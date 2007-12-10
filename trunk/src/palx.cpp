@@ -81,10 +81,11 @@ int main(int argc, char *argv[])
 	playrix player;				rix=&player;
 
 	char conv_buf[16]="0";
-	if(argc>=2){
-		strcpy(conv_buf,strrchr(argv[1],PATH_SEP));
+	if(argc>=2 && strrchr(argv[1],PATH_SEP)){
+		strcpy(conv_buf,strrchr(argv[1],PATH_SEP)+1);
 		*strchr(conv_buf,'.')=0;
-	}
+	}else
+        strcpy(conv_buf,argv[1]);
 	boost::shared_ptr<Game> thegame;
 	try{
 	    using namespace res;

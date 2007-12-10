@@ -13,8 +13,10 @@ AM_PROG_CC_C_O
 
 dnl Check for Allegro Installed
 AM_PATH_ALLEGRO(4.2.1)
+
+dnl Check for boost lib
 AX_BOOST_BASE([1.33])
-AX_BOOST_REGEX
+#AX_BOOST_REGEX
 
 # Checks for header files.
 AC_HEADER_STDC
