@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="gb2312"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="palx"
 	ProjectGUID="{DAEE1A58-97BF-4C36-9A5B-733D800D4792}"
 	RootNamespace="palx"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -42,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
+				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALFONT_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -50,7 +51,7 @@
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName="$(IntDir)\vc80.pdb"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -64,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alld.lib alfontdll.lib adplugd.lib biniod.lib"
+				AdditionalDependencies="alleg.lib adplug.lib binio.lib freetype235MT.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				IgnoreAllDefaultLibraries="false"
@@ -72,6 +73,8 @@
 				GenerateDebugInformation="true"
 				AssemblyDebug="0"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -91,9 +94,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -126,12 +126,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALLEGRO_STATICLINK"
+				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -145,7 +145,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alleg_s.lib alfont.lib adplug.lib binio.lib winmm.lib ddraw.lib dsound.lib dinput.lib dxguid.lib"
+				AdditionalDependencies="alleg.lib adplug.lib binio.lib freetype235MT.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -156,6 +156,8 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -175,9 +177,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -211,6 +210,10 @@
 			<Filter
 				Name="alleg"
 				>
+				<File
+					RelativePath=".\alfont\alfont.c"
+					>
+				</File>
 				<File
 					RelativePath=".\src\audio.cpp"
 					>
@@ -378,6 +381,10 @@
 				<Filter
 					Name="define"
 					>
+					<File
+						RelativePath=".\alfont\alfont.h"
+						>
+					</File>
 					<File
 						RelativePath=".\src\allegdef.h"
 						>

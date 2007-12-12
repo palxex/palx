@@ -84,8 +84,7 @@ int main(int argc, char *argv[])
 	if(argc>=2 && strrchr(argv[1],PATH_SEP)){
 		strcpy(conv_buf,strrchr(argv[1],PATH_SEP)+1);
 		*strchr(conv_buf,'.')=0;
-	}else
-        strcpy(conv_buf,argv[1]);
+	}
 	boost::shared_ptr<Game> thegame;
 	try{
 	    using namespace res;

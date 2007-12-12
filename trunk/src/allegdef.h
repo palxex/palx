@@ -28,7 +28,7 @@
 #include "pallib.h"
 #include "resource.h"
 
-#include <alfont.h>
+#include "alfont.h"
 #define set_palette(x) set_palette_range(x,0,255,FALSE)
 
 #include "adplug/emuopl.h"
