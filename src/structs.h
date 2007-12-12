@@ -159,17 +159,12 @@ typedef struct rpg_def{
 		int16_t item;
 		int16_t amount;
 		int16_t using_amount;
+		bool operator==(int t){ return item==t;}
 	}items[0x100];
 	SCENE	scenes[300];
 	OBJECT	objects[600];
 	EVENT_OBJECT	evtobjs[5332];
 }RPG;
-
-template<typename T>
-bool operator==(T &i,uint16_t inv)
-{
-	return i.item==inv;
-}
 
 typedef struct{ int16_t item[9]; } SHOP;
 
