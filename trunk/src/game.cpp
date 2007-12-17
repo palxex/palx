@@ -166,7 +166,7 @@ namespace res{
         if(!id)
             return;
         pat.read(0);
-        FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"rb");
+        FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".RPG").str().c_str(),"rb");
         if(!fprpg){
 			pat.set(rpg.palette_offset);
 			map_toload=(rpg.scene_id?rpg.scene_id:1);
@@ -205,7 +205,7 @@ namespace res{
         pal_fade_out(1);
     }
     void save(int id){
-        FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".rpg").str().c_str(),"wb");
+        FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".RPG").str().c_str(),"wb");
         copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
         copy(scenes.begin()+1,scenes.end(),rpg.scenes);
         fwrite(&rpg,sizeof(RPG),1,fprpg);

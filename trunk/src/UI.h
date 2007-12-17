@@ -98,7 +98,7 @@ class cut_msg_impl
 	char *glb_buf;
 	char buf[100];
 public:
-	cut_msg_impl(const char *fname="m.msg")
+	cut_msg_impl(const char *fname="M.MSG")
 		:fp(fopen(fname,"rb"))
 	{
 		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);

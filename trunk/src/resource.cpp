@@ -152,19 +152,19 @@ void cached_res::clear(int n, int n2){
 	cache.erase(iter);
 }
 
-cached_res ABC("abc.mkf" ,de_mkf_yj1);
-cached_res MIDI("midi.mkf",de_mkf);
-cached_res VOC("voc.mkf" ,de_mkf);
-cached_res MAP("map.mkf" ,de_mkf_yj1);
-cached_res GOP("gop.mkf" ,de_mkf_smkf);
-cached_res RNG("rng.mkf" ,de_mkf_mkf_yj1);
-cached_res DATA("data.mkf",de_mkf);
-cached_res SSS("sss.mkf" ,de_mkf);
-cached_res BALL("ball.mkf",de_mkf_smkf);
-cached_res RGM("rgm.mkf" ,de_mkf);
-cached_res FBP("fbp.mkf" ,de_mkf_yj1);
-cached_res F("f.mkf"   ,de_mkf_yj1);
-cached_res FIRE("fire.mkf",de_mkf_yj1);
-cached_res MGO("mgo.mkf" ,de_mkf_yj1);
-cached_res PAT("pat.mkf" ,de_mkf);
-cached_res SETUP("setup.dat",de_none);
+cached_res ABC("ABC.MKF" ,de_mkf_yj1);
+cached_res MIDI("MIDI.MKF",de_mkf);
+cached_res VOC("VOC.MKF" ,de_mkf);
+cached_res MAP("MAP.MKF" ,de_mkf_yj1);
+cached_res GOP("GOP.MKF" ,de_mkf_smkf);
+cached_res RNG("RNG.MKF" ,de_mkf_mkf_yj1);
+cached_res DATA("DATA.MKF",de_mkf);
+cached_res SSS("SSS.MKF" ,de_mkf);
+cached_res BALL("BALL.MKF",de_mkf_smkf);
+cached_res RGM("RGM.MKF" ,de_mkf);
+cached_res FBP("FBP.MKF" ,de_mkf_yj1);
+cached_res F("F.MKF"   ,de_mkf_yj1);
+cached_res FIRE("FIRE.MKF",de_mkf_yj1);
+cached_res MGO("MGO.MKF" ,de_mkf_yj1);
+cached_res PAT("PAT.MKF" ,de_mkf);
+cached_res SETUP("SETUP.MKF",de_none);
