@@ -37,7 +37,7 @@ using namespace std;
 #define PATH_SEP '\\'
 #else
 #define FONT_PATH ""
-#define FONT_FILE "mingliu.ttc"
+#define FONT_FILE "/usr/share/fonts/truetype/arphic/uming.ttf"
 #define LOCALE "BIG5"
 #define PATH_SEP '/'
 #endif
