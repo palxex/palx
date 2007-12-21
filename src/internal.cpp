@@ -51,7 +51,7 @@ void perframe_proc()
 	if(!running)
 		throw new std::exception();
 	switch_proc();
-	ShakeScreen();
+	shake_screen();
 }
 void switch_proc()
 {
@@ -71,6 +71,7 @@ void switch_proc()
 		set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0);
 		set_palette(pal);blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
+	flush_screen();
 	mutex_int=0;
 }
 void Load_Data()

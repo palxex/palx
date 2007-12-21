@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alleg.lib adplug.lib binio.lib freetype235MT.lib"
+				AdditionalDependencies="alleg.lib adplugd.lib biniod.lib freetype235MT.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				IgnoreAllDefaultLibraries="false"
@@ -387,6 +387,10 @@
 					</File>
 					<File
 						RelativePath=".\src\allegdef.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\battle.h"
 						>
 					</File>
 					<File

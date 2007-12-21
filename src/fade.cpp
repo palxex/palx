@@ -118,8 +118,10 @@ void CrossFadeOut(int u,int times,int gap,bitmap &buf)
 			crossFade_assimilate(fadegap[arg],u,buf,dst);
 		else
 			crossFade_desault(fadegap[arg],u,buf,dst);
-		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		crossFade_F(fadegap[arg],u,buf,dst);
 		delay(gap);
+		perframe_proc();
+		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
 	buf.blit_to(screen,0,0,0,0);
 }
@@ -146,8 +148,17 @@ void show_fbp(int pic,int gap)
 	buf.blit_to(screen,0,0,0,0);
 }
 int shake_times=0,shake_grade=0;
-void ShakeScreen()
+void shake_screen()
 {
+#undef screen
     if(--shake_times<0x10)
-        blit(screen,screen,0,shake_grade=shake_grade*15/16,0,0,SCREEN_W,SCREEN_H);
+        blit(fakescreen,screen,0,shake_grade=shake_grade*15/16,0,0,SCREEN_W,SCREEN_H);
+}
+void flush_screen()
+{
+#undef screen
+    blit(fakescreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+}
+void wave_screen(bitmap &buffer,int grade,int height)
+{
 }

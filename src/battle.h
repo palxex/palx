@@ -17,26 +17,25 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "resource.h"
-#include "pallib.h"
-#include "timing.h"
-#include "internal.h"
+#ifndef BATTLE_H
+#define BATTLE_H
+class battle{
+	int enemy_team,script_escape;
+	std::map<int,sprite_prim> team_images;
+	std::map<int,sprite_prim> enemy_images;
+	std::map<int,sprite_prim> magic_images;
 
-int RNG_num;
-void play_RNG(int begin,int end,int gap)
-{
-	decoder_func olddecoder=RNG.setdecoder(de_mkf);
-	int total_clips=((uint32_t *)RNG.decode(RNG_num))[0]/4-2;
-	RNG.setdecoder(olddecoder);
-	BITMAP *cache=create_bitmap(320,200);
-	blit(screen,cache,0,0,0,0,cache->w,cache->h);
-	for(int i=begin;i<=std::min(total_clips-1,end);i++){
-		Pal::Tools::DecodeRNG(RNG.decode(RNG_num,i),cache->dat);
-		blit(cache,screen,0,0,0,0,cache->w,cache->h);
-		pal_fade_in(1);
-		wait(100/gap);
-		perframe_proc();
-	}
-}
+	int stage_blow_away;
 
+	void setup_role_enemy_image();
+	void draw(int delay,int time);
+public:
+	static int max_blow_away;
+	int magic_wave;
 
+	battle(int team,int script);
+	~battle();
+	int process();
+};
+
+#endif //BATTLE_H

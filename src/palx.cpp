@@ -51,6 +51,7 @@ void close_button_handler(void)
 }
 END_OF_FUNCTION(close_button_handler)
 
+BITMAP *fakescreen;
 int main(int argc, char *argv[])
 {
 	//boost::program_options提取参数,boost::regex抽取存档。
@@ -67,6 +68,8 @@ int main(int argc, char *argv[])
 	set_gfx_mode(CARD,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
 	set_color_depth(8);
 
+	bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
+
         alfont_init();
         char fontpath[100];
         sprintf(fontpath,"%s%s",FONT_PATH,FONT_FILE);
@@ -81,10 +84,12 @@ int main(int argc, char *argv[])
 	playrix player;				rix=&player;
 
 	char conv_buf[16]="0";
-	if(argc>=2 && strrchr(argv[1],PATH_SEP)){
-		strcpy(conv_buf,strrchr(argv[1],PATH_SEP)+1);
-		*strchr(conv_buf,'.')=0;
-	}
+	if(argc>=2)
+		if(strrchr(argv[1],PATH_SEP)){
+			strcpy(conv_buf,strrchr(argv[1],PATH_SEP)+1);
+			*strchr(conv_buf,'.')=0;
+		}else
+			strcpy(conv_buf,argv[1]);
 	boost::shared_ptr<Game> thegame;
 	try{
 	    using namespace res;

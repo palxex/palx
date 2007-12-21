@@ -242,10 +242,10 @@ bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)
 }
 void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap)
 {
-	perframe_proc();
 	static bitmap scanline(0,SCREEN_W,SCREEN_H);
 	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
 	sprites.flush(scanline);
 	blit(scanline,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	pal_fade_in(gap);
+	perframe_proc();
 }

@@ -167,4 +167,4 @@ cached_res F("F.MKF"   ,de_mkf_yj1);
 cached_res FIRE("FIRE.MKF",de_mkf_yj1);
 cached_res MGO("MGO.MKF" ,de_mkf_yj1);
 cached_res PAT("PAT.MKF" ,de_mkf);
-cached_res SETUP("SETUP.MKF",de_none);
+cached_res SETUP("SETUP.DAT",de_none);

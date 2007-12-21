@@ -23,8 +23,9 @@
 #include "scene.h"
 #include "timing.h"
 #include "UI.h"
+#include "battle.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
 
 #include <algorithm>
 
@@ -636,6 +637,9 @@ __ride:
         rpg.roles_properties.avator[param1]=param2;
         if (!flag_battling && param3)
             load_team_mgo();
+        break;
+    case 0x6b:
+		battle::max_blow_away=0;
         break;
     case 0x6c:
         curr_obj.pos_x+=param2;
