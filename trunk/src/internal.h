@@ -108,7 +108,9 @@ extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void CrossFadeOut(int u,int times,int gap,bitmap &buf);
 extern void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void show_fbp(int,int);
-extern void ShakeScreen();
+extern void shake_screen();
+extern void flush_screen();
+extern void wave_screen(bitmap &buffer,int grade,int height);
 
 extern int CARD;
 extern int mutex_int;
@@ -134,5 +136,8 @@ extern bool prelimit_OK;
 
 extern int compact_items();
 extern void learnmagic(bool flag_dialog,int magic,int role);
+
+struct BITMAP;
+extern BITMAP *fakescreen;
 #endif
 

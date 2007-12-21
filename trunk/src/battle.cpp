@@ -20,23 +20,25 @@
 #include "internal.h"
 #include "game.h"
 #include "timing.h"
+#include "battle.h"
 
 using namespace res;
 
+int battle::max_blow_away=0;
 
-class battle{
-	int enemy_team,script_escape;
-	std::map<int,sprite_prim> team_images;
-	std::map<int,sprite_prim> enemy_images;
-	std::map<int,sprite_prim> magic_images;
+void battle::setup_role_enemy_image()
+{
+}
 
-	void setup_role_enemy_image()
+static struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},{234,170},{270,146}},{{160,184},{204,175},{246,160},{278,144}}};
+	
+void battle::draw(int delay,int time)
+{
+	stage_blow_away+=rnd0()*max_blow_away;
+
+	for(int i=1;i<=time;i++)
 	{
-	}
 
-	void draw()
-	{
-		static struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},{234,170},{270,146}},{{160,184},{204,175},{246,160},{278,144}}};
 		bitmap battlescene(FBP.decode(res::rpg.battlefield),SCREEN_W,SCREEN_H);
 		perframe_proc();
 		int enemies=4-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,0)-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,-1);
@@ -49,41 +51,39 @@ class battle{
 
 		battlescene.blit_to(screen,0,0,0,0);
 	}
-public:
-	battle(int team,int script):enemy_team(team),script_escape(script)
-	{
-		//确保我方没有开战即死
-		for(int i=0;i<=rpg.team_roles;i++)
-			if(rpg.roles_properties.HP[rpg.team[i].role]<=0)
-				rpg.roles_properties.HP[rpg.team[i].role]=1;
+}
+battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0)
+{
+	//确保我方没有开战即死
+	for(int i=0;i<=rpg.team_roles;i++)
+		if(rpg.roles_properties.HP[rpg.team[i].role]<=0)
+			rpg.roles_properties.HP[rpg.team[i].role]=1;
 
-		//清除上战物品使用记录
-		for(int i=0;i<=99;i++);
+	//清除上战物品使用记录
+	for(int i=0;i<=99;i++);
 
-
-		rix->play(res::rpg.battle_music);
-		flag_battling=true;
-		for(int i=0;i<=res::rpg.team_roles;i++)
-			team_images[i]=sprite_prim(F,res::rpg.roles_properties.battle_avator[res::rpg.team[i].role]);
-		for(int i=0;i<5;i++)
-			if(res::enemyteams[enemy_team].enemy[i]>0)
-				enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].inbeing);
-	}
-	~battle()
-	{
-		flag_to_load|=3;
-	}
-	int process()
-	{
-		VKEY keygot;
-		do{
-			draw();
-			wait(10);
-			SAFE_GETKEY(keygot);
-		}while(keygot==VK_NONE);
-		return 0;
-	}
-};
+	rix->play(res::rpg.battle_music);
+	flag_battling=true;
+	for(int i=0;i<=res::rpg.team_roles;i++)
+		team_images[i]=sprite_prim(F,res::rpg.roles_properties.battle_avator[res::rpg.team[i].role]);
+	for(int i=0;i<5;i++)
+		if(res::enemyteams[enemy_team].enemy[i]>0)
+			enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].inbeing);
+}
+battle::~battle()
+{
+	flag_to_load|=3;
+}
+int battle::process()
+{
+	VKEY keygot;
+	do{
+		draw(0,1);
+		wait(10);
+		SAFE_GETKEY(keygot);
+	}while(keygot==VK_NONE);
+	return 0;
+}
 
 int process_Battle(uint16_t enemy_team,uint16_t script_escape)
 {

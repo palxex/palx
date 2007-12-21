@@ -34,6 +34,8 @@
 #include "adplug/emuopl.h"
 #include "adplug/rix.h"
 
+#define screen fakescreen
+
 class bitmap{
 protected:
 	BITMAP *bmp;
