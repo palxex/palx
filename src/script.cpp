@@ -400,6 +400,8 @@ __walk_npc:
     case 0x35:
         shake_times=param1;
         shake_grade=(param2?param2:4);
+		if(!shake_times)
+			shake_screen();
         break;
     case 0x36://Set RNG
         RNG.clear();

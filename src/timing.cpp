@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "timing.h"
 #include "allegdef.h"
+#include "internal.h"
 
 extern bool running;
 void wait(uint8_t gap)
@@ -30,7 +31,7 @@ void wait(uint8_t gap)
 
 void wait_key(uint8_t gap)
 {
-	clear_keybuf();
+	clear_keybuf();flush_screen();
 	time_interrupt_occurs=0;
 	while(!keypressed() && time_interrupt_occurs<gap && running)
 		rest(10);
@@ -38,7 +39,7 @@ void wait_key(uint8_t gap)
 
 void wait_for_key()
 {
-	clear_keybuf();
+	clear_keybuf();flush_screen();
 	while(!keypressed() && running)
 		rest(10);
 	clear_keybuf();
