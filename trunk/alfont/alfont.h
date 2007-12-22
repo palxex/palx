@@ -13,7 +13,7 @@
 //#define ALFONT_WINDOWS   //When compiling in WINDOWS,please uncomment this line.
 //#define ALFONT_ICONV 	 //When compiling in DOS,please uncomment this line.
 //#define ALFONT_LINUX 	 //When compiling in LINUX,please uncomment this line.
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #	define ALFONT_WINDOWS
 #else
 #	define ALFONT_ICONV

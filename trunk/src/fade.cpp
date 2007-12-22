@@ -152,7 +152,8 @@ void shake_screen()
 {
 #undef screen
     if(--shake_times<0x10)
-        blit(fakescreen,screen,0,shake_grade=shake_grade*15/16,0,0,SCREEN_W,SCREEN_H);
+		shake_grade*=(15.0/16);
+    blit(fakescreen,screen,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
 }
 void flush_screen()
 {

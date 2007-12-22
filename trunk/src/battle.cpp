@@ -31,14 +31,13 @@ void battle::setup_role_enemy_image()
 }
 
 static struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},{234,170},{270,146}},{{160,184},{204,175},{246,160},{278,144}}};
-	
+
 void battle::draw(int delay,int time)
 {
 	stage_blow_away+=rnd0()*max_blow_away;
 
 	for(int i=1;i<=time;i++)
 	{
-
 		bitmap battlescene(FBP.decode(res::rpg.battlefield),SCREEN_W,SCREEN_H);
 		perframe_proc();
 		int enemies=4-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,0)-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,-1);
