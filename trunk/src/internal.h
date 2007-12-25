@@ -111,6 +111,7 @@ extern void show_fbp(int,int);
 extern void shake_screen();
 extern void flush_screen();
 extern void wave_screen(bitmap &buffer,int grade,int height);
+extern int wave_progression;
 
 extern int CARD;
 extern int mutex_int;

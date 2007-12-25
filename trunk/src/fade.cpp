@@ -97,14 +97,14 @@ void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter)
 	uint8_t *d=(uint8_t*)(((BITMAP*)dst)->dat)+gap, *s=(uint8_t*)(((BITMAP*)jitter)->dat)+gap;
 	do
 		*d=((*s)&0x0F)|((*s)&0xF0);
-	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h & s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
+	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h && s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
 }
 void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter)
 {
 	uint8_t *d=(uint8_t*)(((BITMAP*)dst)->dat)+gap, *s=(uint8_t*)(((BITMAP*)jitter)->dat)+gap;
 	do
 		*d=((*s)>(*d)? (*d)+1 : ((*s)<(*d)? (*d)-1 : (*d)));
-	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h & s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
+	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h && s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
 }
 void CrossFadeOut(int u,int times,int gap,bitmap &buf)
 {
@@ -160,6 +160,22 @@ void flush_screen()
 #undef screen
     blit(fakescreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
+struct calc_waving
+{
+	int result[32];
+	calc_waving(int grade)
+	{
+		int ac=0,st=60+8,stt=8;
+		for(int i=0;i<16;i++)
+			result[i]=(st-=stt)*grade/256,
+			result[i+16]=-result[i];
+	}
+};
 void wave_screen(bitmap &buffer,int grade,int height)
 {
+	static int index=0;
+	calc_waving calc(grade);
+	for(int i=0,t=index-1;i<height;i++)
+		blit(buffer,buffer,i,calc.result[t=(t+1)%32],0,0,320,1);
+	index=(index+1)%32;
 }

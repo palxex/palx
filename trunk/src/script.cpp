@@ -700,6 +700,10 @@ __walk_role:
             }
         }
         break;
+	case 0x71:
+		rpg.wave_grade=param1;
+		wave_progression=param2;
+		break;
     case 0x73:
         clear_effective(param1?param1:1,param2);
         break;
