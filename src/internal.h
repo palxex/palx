@@ -101,6 +101,7 @@ extern int mutex_paletting,mutex_blitting;
 extern int shake_times,shake_grade;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
+extern void fade_inout(int);
 extern void palette_fade();
 class bitmap;
 extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);

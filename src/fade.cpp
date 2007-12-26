@@ -24,7 +24,7 @@
 
 using namespace res;
 
-bool mutex_can_change_palette=false;
+bool mutex_can_change_palette=true;
 void pal_fade_out(int t)
 {
 	if(!mutex_can_change_palette)
@@ -70,6 +70,30 @@ void pal_fade_in(int t)
 			}
 			set_palette(res::pat.get(rpg.palette_offset));
 	}
+}
+void fade_inout(int t)
+{
+	int arg=t?t:1;
+	clear_keybuf();
+	mutex_can_change_palette=false;
+
+	PALETTE pal;
+	int begin=(arg>0?0:0x40),end=(arg>0?0x40:0);
+	for(int i=begin,mul_t=arg;i!=end;i+=arg)
+	{
+		perframe_proc();
+		for(int j=0;j<0x100;j++)
+		{
+			pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
+			pal[j].g=res::pat.get(rpg.palette_offset)[j].g*i/0x40;
+			pal[j].b=res::pat.get(rpg.palette_offset)[j].b*i/0x40;
+		}
+		set_palette(pal);
+		GameLoop_OneCycle(false);
+		redraw_everything(0);
+		mul_t+=arg;
+	}
+	mutex_can_change_palette=true;
 }
 uint8_t normalize(uint8_t i)
 {
@@ -167,7 +191,7 @@ struct calc_waving
 	{
 		int ac=0,st=60+8,stt=8;
 		for(int i=0;i<16;i++)
-			result[i]=(st-=stt)*grade/256,
+			result[i]=(ac+=(st-=stt))*grade/256,
 			result[i+16]=-result[i];
 	}
 };
@@ -176,6 +200,6 @@ void wave_screen(bitmap &buffer,int grade,int height)
 	static int index=0;
 	calc_waving calc(grade);
 	for(int i=0,t=index-1;i<height;i++)
-		blit(buffer,buffer,i,calc.result[t=(t+1)%32],0,0,320,1);
+		blit(buffer,buffer,calc.result[t=(t+1)%32],i,0,i,320,1);
 	index=(index+1)%32;
 }
