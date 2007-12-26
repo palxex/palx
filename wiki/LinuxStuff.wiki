@@ -13,4 +13,10 @@ after
 ./configure
 make
 }}}
-copy src/palx to the pal game's directory, (note: lowcase all file's filename!) and play now:)
+copy src/palx to the pal game's directory, (note: use the follow script all file's filename!) and play now:)
+{{{
+for i in *;
+do
+	mv $i `echo $i|tr [:lower:] [:upper:]`
+done;
+}}}

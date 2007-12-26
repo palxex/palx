@@ -854,6 +854,7 @@ __walk_role:
         //clear_effective(1,0x41);
         break;
     case 0x93:
+		fade_inout(param1);
         break;
 	case 0x94:
 		if(evtobjs[param1].status == param2)

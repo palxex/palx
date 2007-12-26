@@ -68,7 +68,6 @@ int main(int argc, char *argv[])
 	set_gfx_mode(CARD,argc>=4?boost::lexical_cast<int>(argv[2]):320,argc>=4?boost::lexical_cast<int>(argv[3]):200,0,0);
 	set_color_depth(8);
 
-	bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
 
         alfont_init();
         char fontpath[100];
@@ -92,6 +91,7 @@ int main(int argc, char *argv[])
 			strcpy(conv_buf,argv[1]);
 	boost::shared_ptr<Game> thegame;
 	try{
+		bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
 	    using namespace res;
 		init_resource();
         //load save
@@ -103,9 +103,10 @@ int main(int argc, char *argv[])
         Scene normal;	scene=&normal;
         load();
         run();
+		destroy_resource();
 	}catch(exception *){
+		allegro_exit();
 	}
-    res::destroy_resource();
 	return 0;
 }
 END_OF_MAIN();

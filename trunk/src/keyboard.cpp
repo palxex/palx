@@ -20,10 +20,7 @@
 #include "allegdef.h"
 #include "game.h"
 #include <stack>
-
-int scancode_translate(int allegro_scancode)
-{
-	static class __scancode_map{
+ class __scancode_map{
 		std::map<int,int> mymap;
 	public:
 		__scancode_map(){
@@ -38,7 +35,10 @@ int scancode_translate(int allegro_scancode)
             else
                 return 0;
 		}
-	}scancode_map;
+	};
+int scancode_translate(int allegro_scancode)
+{
+	static __scancode_map scancode_map;
 	return scancode_map[allegro_scancode];
 }
 

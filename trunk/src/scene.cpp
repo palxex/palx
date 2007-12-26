@@ -242,7 +242,7 @@ bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)
 }
 void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap)
 {
-	static bitmap scanline(0,SCREEN_W,SCREEN_H);
+	bitmap scanline(0,SCREEN_W,SCREEN_H);
 	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
 	if((res::rpg.wave_grade+=wave_progression)>0 && res::rpg.wave_grade<0x100)
 		wave_screen(scanline,res::rpg.wave_grade,200);
