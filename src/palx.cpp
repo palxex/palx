@@ -51,7 +51,7 @@ void close_button_handler(void)
 }
 END_OF_FUNCTION(close_button_handler)
 
-BITMAP *fakescreen;
+BITMAP *fakescreen,*backbuf;
 int main(int argc, char *argv[])
 {
 	//boost::program_options提取参数,boost::regex抽取存档。
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 	boost::shared_ptr<Game> thegame;
 	try{
 		bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
+		bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;
 	    using namespace res;
 		init_resource();
         //load save

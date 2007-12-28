@@ -36,19 +36,15 @@ bool prelimit_OK=false;
 
 extern int process_Battle(uint16_t,uint16_t);
 
-BITMAP *backup=0;
-void destroyit()
-{
-    destroy_bitmap(backup);
-}
+extern BITMAP *backbuf;
 void restore_screen()
 {
-    blit(backup,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+    blit(backbuf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
     flag_pic_level=0;
 }
 void backup_screen()
 {
-    blit(screen,backup,0,0,0,0,SCREEN_W,SCREEN_H);
+    blit(screen,backbuf,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 
 inline void sync_viewport()
@@ -783,7 +779,7 @@ __walk_role:
 		{
 			bool in=false;
 			for (int i=0;i<=rpg.team_roles;i++)
-				if (rpg.roles_properties.name[i]==param1)
+				if (rpg.roles_properties.name[rpg.team[i].role]==param1)
 					in=true,i=5;
 			if (in)
 				id=param2-1;
@@ -1013,9 +1009,6 @@ cut_msg_impl msges("M.MSG");
 cut_msg_impl objs("WORD.DAT");
 uint16_t process_script(uint16_t id,int16_t object)
 {
-    static int _t_=atexit(destroyit);
-    if (!backup)
-        backup=create_bitmap(SCREEN_W,SCREEN_H);
     static char *msg,colon[3];
     static int i=sprintf(colon,msges(0xc94,0xc96));
 	prelimit_OK=true;
