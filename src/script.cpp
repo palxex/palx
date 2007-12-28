@@ -257,10 +257,10 @@ __walk_npc:
         curr_obj.curr_frame=param3;
         break;
     case 0x17:
-        //not implemented
+        //arm rel,not implemented
         break;
     case 0x18:
-        //not implemented
+        //arm rel,not implemented
         break;
     case 0x19:
         rpg.role_prop_tables[param1][param3>0?param3-1:role]+=param2;
@@ -323,13 +323,13 @@ __walk_npc:
         add_goods_to_list(param1,param2==0?1:param2);
         break;
     case 0x20:
-        //not implemented
+        //item rel,not implemented
         break;
     case 0x21:
-        //not implemented
+        //battle rel,not implemented
         break;
     case 0x22:
-        //not implemented
+        //battle rel,not implemented
         break;
     case 0x23:
         for (int i=(param2?param2:0xB);i<=(param2?param2:0x10);i++)
@@ -589,7 +589,7 @@ __ride:
         flag_to_load|=0x20;
 		rpg.scene_id=0;
 		break;
-	case 0x4f:
+	case 0x4f://fade red
         //not implemented
 		break;
     case 0x50:
@@ -628,6 +628,30 @@ __ride:
             rpg.layer=0;
         }
         break;
+	case 0x5a:
+		//not implemented
+		break;
+	case 0x5b:
+		//not implemented
+		break;
+	case 0x5c:
+		//not implemented
+		break;
+	case 0x5d:
+		//not implemented
+		break;
+	case 0x5e:
+		//not implemented
+		break;
+	case 0x5f:
+		//not implemented
+		break;
+	case 0x60:
+		//not implemented
+		break;
+	case 0x61:
+		//not implemented
+		break;
 	case 0x62:
 		rpg.chasespeed_change_cycles=param1;
 		rpg.chase_range=0;
@@ -635,11 +659,30 @@ __ride:
 	case 0x63:
 		rpg.chasespeed_change_cycles=param1;
 		rpg.chase_range=3;
+		break;
+	case 0x64:
+		//not implemented
+		break;
     case 0x65:
         rpg.roles_properties.avator[param1]=param2;
         if (!flag_battling && param3)
             load_team_mgo();
         break;
+	case 0x66:
+		//not implemented
+		break;
+	case 0x67:
+		//not implemented
+		break;
+	case 0x68:
+		//not implemented
+		break;
+	case 0x69:
+		//not implemented
+		break;
+	case 0x6a:
+		//not implemented
+		break;
     case 0x6b:
 		battle::max_blow_away=0;
         break;
@@ -657,7 +700,7 @@ __ride:
                 scenes[param1].leave_script=param3;
             if (!param2 && !param3)
                 scenes[param1].enter_script=0,
-                                                  scenes[param1].leave_script=0;
+                scenes[param1].leave_script=0;
         }
         break;
     case 0x6e:
@@ -704,9 +747,15 @@ __walk_role:
 		rpg.wave_grade=param1;
 		wave_progression=param2;
 		break;
+	case 0x72://lost, replace mgo
+		//not implemented
+		break;
     case 0x73:
-        clear_effective(param1?param1:1,param2);
+        clear_effective(param1?param1:1,param2);//not implement yet
         break;
+	case 0x74:
+		//not implemented
+		break;
     case 0x75:
         rpg.team[0].role=(param1-1<0?0:param1-1);
         rpg.team[1].role=(param2-1<0?0:param2-1);
@@ -731,15 +780,15 @@ __walk_role:
         Load_Data();
         break;
     case 0x79:
-    {
-        bool in=false;
-        for (int i=0;i<=rpg.team_roles;i++)
-            if (rpg.roles_properties.name[i]==param1)
-                in=true,i=5;
-        if (in)
-            id=param2-1;
-    }
-    break;
+		{
+			bool in=false;
+			for (int i=0;i<=rpg.team_roles;i++)
+				if (rpg.roles_properties.name[i]==param1)
+					in=true,i=5;
+			if (in)
+				id=param2-1;
+		}
+		break;
     case 0x7a:
         role_speed=4;
         goto __walk_role;
@@ -835,21 +884,55 @@ __walk_role:
     case 0x82:
         npc_speed=8;
         goto __walk_npc;
+	case 0x83://find obj in dist
+		//not implemented
+		break;
+	case 0x84://place obj
+		//not implemented
+		break;
     case 0x85:
         wait(param1*10);
         break;
+	case 0x86://equip?
+		//not implemented
+		break;
     case 0x87:
         NPC_walk_one_step(obj,0);
         break;
+	case 0x88:
+		//not implemented
+		break;
+	case 0x89:
+		//not implemented
+		break;
+	case 0x8a:
+		//not implemented
+		break;
     case 0x8b:
         pat.read(param1);
         rpg.palette_offset=0;
         if (mutex_can_change_palette==0)
             pat.set(rpg.palette_offset);
         break;
+	case 0x8c://fade to color
+		//not implemented
+		break;
+	case 0x8d://level up
+		//not implemented
+		break;
     case 0x8e:
         restore_screen();
         break;
+	case 0x8f:
+		rpg.coins/=2;
+		break;
+	case 0x90:
+		if(param1>0)
+			rpg.objects[param1].script[param3]=param2;
+		break;
+	case 0x91:
+		//not implemented
+		break;
     case 0x92:
         //clear_effective(1,0x41);
         break;
@@ -860,6 +943,13 @@ __walk_role:
 		if(evtobjs[param1].status == param2)
 			id = param3 -1;
 		break;
+	case 0x95:
+		if(rpg.scene_id==param1)
+			id=param2-1;
+		break;
+	case 0x96:
+		//not implemented
+		break;
     case 0x97:
         npc_speed=8;
         goto __ride;
@@ -867,6 +957,13 @@ __walk_role:
         load_team_mgo();
         store_team_frame_data();
         break;
+	case 0x99:
+		if(param1<0){
+			rpg.scenes[res::rpg.scene_id].id=param2;
+			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+		}else
+			rpg.scenes[param1].id=param2;
+		break;
 	case 0x9a:
 		for(int i=param1;i<=param2;i++)
 			evtobjs[i].status=param3;
@@ -874,6 +971,9 @@ __walk_role:
     case 0x9b:
         scene->produce_one_screen();
         break;
+	case 0x9c:
+		//not implemented
+		break;
     case 0x9d:
         //clear_effective(2,0x4E);
         //clear_effective(1,0x2A);
@@ -889,8 +989,17 @@ __walk_role:
         clear_bitmap(screen);
         running=false;
         break;
+	case 0xa1:
+		//not implemented
+		break;
+	case 0xa2:
+		//not implemented
+		break;
 	case 0xa3:
 		rix->play(param2);
+		break;
+	case 0xa4:
+		//not implemented
 		break;
     case 0xa5:
         break;
