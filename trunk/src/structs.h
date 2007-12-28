@@ -54,7 +54,24 @@ const int ALLROLES=6,TEAMROLES=5;
 typedef struct object_def{
 	int16_t inbeing;
 	int16_t attrib;
-	uint16_t script[3];
+	union{
+		uint16_t script[3];
+		struct{
+			uint16_t other_dead,self_hurt,reserved;
+		}role_script;
+		struct{
+			uint16_t use,equip,chuck;
+		}item_script;
+		struct{
+			uint16_t post,occur,reserved;
+		}magic_script;
+		struct{
+			uint16_t after,before,occur;
+		}enemy_script;
+		struct{
+			uint16_t to_role,reserved,to_enemy;
+		}poison_script;
+	};
 	int16_t param;
 }OBJECT;
 

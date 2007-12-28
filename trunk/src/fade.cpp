@@ -93,7 +93,7 @@ void fade_inout(int t)
 		redraw_everything(0);
 		mul_t+=arg;
 	}
-	mutex_can_change_palette=true;
+	mutex_can_change_palette=false;
 }
 uint8_t normalize(uint8_t i)
 {

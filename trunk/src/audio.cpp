@@ -26,7 +26,7 @@
 
 #define MAX_VOICES 10
 
-bool begin=false;
+bool begin=false,once=false;
 int voices[MAX_VOICES];int vocs=0;
 void playrix_timer(void *param)
 {
@@ -51,6 +51,8 @@ void playrix_timer(void *param)
 			{
 				if(!plr->rix.update())
 				{
+					if(once)
+						plr->stop();
 					plr->rix.rewind(plr->subsong);
 					continue;
 				}
@@ -110,9 +112,10 @@ playrix::~playrix()
 	stop_audio_stream(stream);
 	delete []Buffer;
 }
-void playrix::play(int sub_song,int gap)
+void playrix::play(int sub_song,int times)
 {
 	begin=false;
+	once=(times==1);
 	if(!sub_song){
 		subsong=sub_song;
 		stop();
@@ -129,7 +132,7 @@ void playrix::play(int sub_song,int gap)
 
 	begin=true;
 	voice_set_volume(stream->voice,1);
-	voice_ramp_volume(stream->voice, gap*1000, 255);
+	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
 }
 void playrix::stop(int gap)
 {
