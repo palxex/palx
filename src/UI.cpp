@@ -65,7 +65,7 @@ void single_dialog::to_screen()
 int select_rpg(int ori_select,BITMAP *bmp)
 {
 	int selected=ori_select;
-	BITMAP *cache=create_bitmap(SCREEN_W,SCREEN_H);
+	bitmap cache(0,SCREEN_W,SCREEN_H);
 	selected=(selected>=1?selected:1);
 	int ok=1;
 	std::vector<std::string> menu_items;
@@ -100,7 +100,6 @@ int select_rpg(int ori_select,BITMAP *bmp)
 		}
 		selected=(selected<=1?1:selected);
 	}while(ok);
-	destroy_bitmap(cache);
 	return selected;
 }
 

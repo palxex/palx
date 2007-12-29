@@ -90,9 +90,7 @@ void palmap::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
 	blit(bmp,bmp,sx,sy,dx,dy,bmp->w,bmp->h);
 }
 
-Scene::Scene():scene_buf(create_bitmap(SCREEN_W,SCREEN_H)),team_pos(res::rpg.viewport_x+x_scrn_offset,res::rpg.viewport_y+y_scrn_offset)
-{}
-Scene::~Scene()
+Scene::Scene():scene_buf(0,SCREEN_W,SCREEN_H),team_pos(res::rpg.viewport_x+x_scrn_offset,res::rpg.viewport_y+y_scrn_offset)
 {}
 void Scene::clear_scanlines()
 {
@@ -216,6 +214,7 @@ void Scene::move_usable_screen()
 			else if(res::rpg.viewport_x < viewport_x_bak)
 				x1=0,x2=tx,					vx1=0,vx2=tx;
 
+            clear_bitmap(scene_buf);
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
 
 			short &vx=res::rpg.viewport_x,&vy=res::rpg.viewport_y;

@@ -74,11 +74,10 @@ public:
 };
 struct Scene{
 	palmap scenemap;
-	BITMAP *scene_buf;
+	bitmap scene_buf;
 	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
 	position team_pos;
 	Scene();
-	~Scene();
 	void clear_scanlines();
 	void move_usable_screen();
 	void get_sprites();

@@ -38,7 +38,8 @@ void battle::draw(int delay,int time)
 
 	for(int i=1;i<=time;i++)
 	{
-		bitmap battlescene(FBP.decode(res::rpg.battlefield),SCREEN_W,SCREEN_H);
+		bitmap fbp(FBP.decode(res::rpg.battlefield),320,200);
+		bitmap battlescene(0,SCREEN_W,SCREEN_H);fbp.blit_to(battlescene);
 		perframe_proc();
 		int enemies=4-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,0)-std::count(res::enemyteams[enemy_team].enemy,res::enemyteams[enemy_team].enemy+5,-1);
 
