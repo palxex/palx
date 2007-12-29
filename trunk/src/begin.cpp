@@ -26,7 +26,7 @@ void startup_splash()
 {
 	clear_keybuf();
 	res::pat.read(1);
-	BITMAP *cat=create_bitmap(SCREEN_W,SCREEN_H*2);
+	bitmap cat(0,SCREEN_W,SCREEN_H*2);
 	bitmap(FBP.decode(0x26),320,200).blit_to(cat,0,0,0,0);
 	bitmap(FBP.decode(0x27),320,200).blit_to(cat,0,0,0,200);
 
@@ -45,7 +45,7 @@ void startup_splash()
 	memset(pal,0,0xF0*sizeof(RGB));
 	set_palette(pal);
 
-	BITMAP *scrn_buf=create_bitmap(SCREEN_W,SCREEN_H*2);
+	bitmap scrn_buf(0,SCREEN_W,SCREEN_H*2);
 	int prog_lines=200,prog_pale=0,prog_goose=0,begin_pale=40,add_pale=16;
 	VKEY keygot;
 	do{
@@ -74,8 +74,6 @@ void startup_splash()
 			set_palette(pal);
 		}
 	}while((keygot=get_key())!=VK_EXPLORE);
-	destroy_bitmap(scrn_buf);
-	destroy_bitmap(cat);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
