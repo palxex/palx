@@ -155,8 +155,11 @@ int calc_faceto(int x_diff,int y_diff)
 		return 0;
 	return -1;
 }
+bool no_barrier=false;
 bool barrier_check(uint16_t self,int x,int y,bool check)
 {
+    if(no_barrier)
+        return false;
 	bool ret= scene->scenemap.gettile(x/32,y/16,x%32?1:0,0).blocked;
 	if(check)
 		for(std::vector<EVENT_OBJECT>::iterator it=scene->sprites_begin;it<scene->sprites_end;it++)
@@ -170,7 +173,7 @@ void NPC_walk_one_step(EVENT_OBJECT &obj,int speed)
 	obj.pos_x+=direction_offs[obj.direction][0]/8*speed;
 	obj.pos_y+=direction_offs[obj.direction][1]/8*speed;
 	if(obj.frames>0)
-		obj.curr_frame=(obj.curr_frame+1)%obj.frames;
+		obj.curr_frame=(obj.curr_frame+1)%(obj.frames==3?4:obj.frames);
 	else if(obj.frames_auto>0)
 		obj.curr_frame=(obj.curr_frame+1)%obj.frames_auto;
 }

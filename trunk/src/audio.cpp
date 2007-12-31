@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "allegdef.h"
 
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 630
 
 #define SAMPLE_RATE	44100
 #define CHANNELS	1
@@ -30,68 +30,52 @@ bool begin=false,once=false;
 int voices[MAX_VOICES];int vocs=0;
 void playrix_timer(void *param)
 {
-	playrix * const plr=reinterpret_cast<playrix*>(param);
-	if(voice_get_volume(plr->stream->voice)==0)
-		begin=false;
-	int f=0;
 	for(int i=0;i<vocs;i++)
 		if (!voice_check(voices[i])){
 			destroy_sample(voice_check(voices[i]));
 			std::copy(voices+i+1,voices+MAX_VOICES,voices+i);
 			vocs--;
 		}
+
+	playrix * const plr=reinterpret_cast<playrix*>(param);
+		
+	if(voice_get_volume(plr->stream->voice)==0){
+		begin=false;
+	}
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
 	if (begin && p)
 	{
-		if(plr->leaving<BUFFER_SIZE*CHANNELS)
+		//update
+		if(!plr->rix.update())
+			plr->rix.rewind(plr->subsong),
+			plr->rix.update();
+		plr->opl.update(plr->Buffer, plr->sample_len);
+		short *buf=plr->Buffer;
+		//volume x2
+		for(int t=0;t<plr->sample_len;t++)
 		{
-			plr->slen_buf=0;
-			int rel=BUFFER_SIZE*CHANNELS-plr->leaving;
-			while(plr->slen_buf<rel)
-			{
-				if(!plr->rix.update())
-				{
-					if(once)
-						plr->stop();
-					plr->rix.rewind(plr->subsong);
-					continue;
-				}
-				plr->slen = SAMPLE_RATE / 70;//rix specified
-				plr->opl.update((signed short*)plr->buf, plr->slen);
-				for(int t=0;t<plr->slen * CHANNELS;t++)
-				{
-				    if (*plr->buf >= 16384)
-                        *plr->buf = 32767;
-                    else if (*plr->buf <= -16384)
-                        *plr->buf = -32768;
-                    else
-                        *plr->buf *= 2;
-                    *plr->buf++^=0x8000;
-				}
-				plr->slen_buf+=plr->slen * CHANNELS;
-			 }
-			 plr->buf=plr->Buffer;
-			 plr->leaving+=plr->slen_buf;
-			 plr->buf+=plr->leaving%(BUFFER_SIZE*CHANNELS);
-			 plr->tune=0;
-		 }
-		 plr->leaving-=BUFFER_SIZE*CHANNELS;
-		 memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
-		 memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,plr->leaving*2);
-		 free_audio_stream_buffer(plr->stream);
+			if (*buf >= 16384)
+				*buf = 32767;
+			else if (*buf <= -16384)
+				*buf = -32768;
+			else
+				*buf *= 2;
+			*buf++^=0x8000;
+		}
+		memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
+		free_audio_stream_buffer(plr->stream);
 	}
 	rest(0);
 }
 END_OF_FUNCTION(playrix_timer);
 
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tune(0),Buffer(0),stream(0),BufferLength(SAMPLE_RATE * CHANNELS * 10)
+playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),stream(0)
 {
 	rix.load(std::string("MUS.MKF"), CProvider_Filesystem());
-	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
 	LOCK_VARIABLE(Buffer);
 	LOCK_VARIABLE(leaving);
-	LOCK_VARIABLE(slen);
-	LOCK_VARIABLE(slen_buf);
+	LOCK_VARIABLE(sample_len);
+	LOCK_VARIABLE(sample_len_buf);
 	LOCK_VARIABLE(tune);
 	LOCK_VARIABLE(stream);
 	LOCK_VARIABLE(opl);
@@ -100,9 +84,7 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),leaving(0),tu
 	LOCK_FUNCTION(playrix_timer);
 	install_param_int(playrix_timer,this,14);
 
-	Buffer = buf = new short [BufferLength];
-	memset(buf, 0, sizeof(short) * BufferLength);
-
+	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
 	voice_set_volume(stream->voice,0);
 }
 playrix::~playrix()
@@ -110,7 +92,6 @@ playrix::~playrix()
 	remove_param_int(playrix_timer,this);
 	stop();
 	stop_audio_stream(stream);
-	delete []Buffer;
 }
 void playrix::play(int sub_song,int times)
 {
@@ -125,14 +106,10 @@ void playrix::play(int sub_song,int times)
 
 	rix.rewind(subsong);
 	//opl.init();
-	memset(Buffer, 0, sizeof(short) * BufferLength);
-	buf=Buffer;
-	leaving=slen_buf=0;
-	memset(stream->samp,0,sizeof(stream->samp));
 
-	begin=true;
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
+	begin=true;
 }
 void playrix::stop(int gap)
 {

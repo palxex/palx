@@ -70,7 +70,7 @@ typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
 int x_off=0,y_off=0;
 void GameLoop_OneCycle(bool trigger)
 {
-    if (!mutex_can_change_palette)
+    if (!mutex_can_change_palette && !no_barrier)
     {
         if (trigger)
             for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
@@ -81,13 +81,13 @@ void GameLoop_OneCycle(bool trigger)
                         {
                             if (iter->frames)
                             {
-								x_off=0,y_off=0;
                                 clear_keybuf();
                                 stop_and_update_frame();
                                 iter->curr_frame=0;
                                 iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
                                 redraw_everything();
                             }
+							x_off=0,y_off=0;
                             uint16_t &triggerscript=iter->trigger_script;
                             triggerscript=process_script(triggerscript,(int16_t)(iter-evtobjs.begin()));
                         }
@@ -880,11 +880,28 @@ __walk_role:
     case 0x82:
         npc_speed=8;
         goto __walk_npc;
-	case 0x83://find obj in dist
-		//not implemented
-		break;
+	case 0x83:
+        prelimit_OK=false;
+        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0
+			&& abs(evtobjs[param1].pos_x-obj.pos_x)+abs(evtobjs[param1].pos_y-obj.pos_y)*2<param2*32+16)
+        {
+            prelimit_OK=true;
+        }
+        else
+            id=param3-1;
+        break;
 	case 0x84://place obj
-		//not implemented
+		prelimit_OK=false;
+        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin()
+			&& param3?!barrier_check(0,scene->team_pos.toXY().x+direction_offs[rpg.team_direction][0],scene->team_pos.toXY().y+direction_offs[rpg.team_direction][1],false):true)
+        {
+			curr_obj.pos_x=scene->team_pos.toXY().x+direction_offs[rpg.team_direction][0];
+			curr_obj.pos_y=scene->team_pos.toXY().y+direction_offs[rpg.team_direction][1];
+			curr_obj.status=param2;
+            prelimit_OK=true;
+        }
+        else
+            id=param3-1;
 		break;
     case 0x85:
         wait(param1*10);
@@ -1119,7 +1136,7 @@ uint16_t process_script(uint16_t id,int16_t object)
             {
                 if (param3)
                     stop_and_update_frame();
-                redraw_everything();
+				redraw_everything(param2?param2:1);
             }
             else
                 restore_screen();

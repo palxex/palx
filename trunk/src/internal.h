@@ -95,6 +95,7 @@ extern void stop_and_update_frame();
 extern void store_team_frame_data();
 extern int calc_faceto(int x_diff,int y_diff);
 extern bool barrier_check(uint16_t self,int x,int y,bool =true);
+extern bool no_barrier;
 
 extern bool mutex_can_change_palette;
 extern int mutex_paletting,mutex_blitting;

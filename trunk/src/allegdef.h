@@ -106,11 +106,9 @@ class playrix
 	CEmuopl 	opl;
 	CrixPlayer 	rix;
 	AUDIOSTREAM *stream;
-	short 		*Buffer, *buf;
-	volatile long leaving;
-	volatile long 	slen,slen_buf;
-	const volatile int BufferLength;
-	volatile int tune,subsong;
+	volatile int subsong;
+	static const int sample_len=630;
+	short 		Buffer[sample_len*2];
 	friend void playrix_timer(void *);
 public:
 	playrix();

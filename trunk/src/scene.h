@@ -52,8 +52,8 @@ struct tile{
 class palmap:public scene_map{
 	boost::multi_array<tile,4> sprites;
 	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
-public:
 	void make_tile(uint8_t*,int,int,int,BITMAP*);
+public:
 	void make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 	void blit_to(BITMAP *dest,int sx,int sy,int dx,int dy);
 	tile &gettile(int x,int y,int h,int l);
