@@ -27,7 +27,6 @@
 using namespace std;
 volatile uint8_t time_interrupt_occurs;
 int mutex_paletting=0,mutex_blitting=0,mutex_int=0;
-extern int rix_fade_flag;
 int scale=1;
 namespace res{
 	palette pat;
@@ -96,19 +95,6 @@ namespace res{
 		rest(1);
 	}
 	END_OF_FUNCTION(timer_proc);
-	void prtscrn_proc()
-	{
-		if(key[KEY_PRTSCR] || key[KEY_P]){
-			static PALETTE pal;
-			static char filename[30];
-			static int i=0;
-			get_palette(pal);
-			sprintf(filename,"ScrnShot\\%d.bmp",i++);
-			save_bitmap(filename,screen,pal);
-		}
-		rest(1);
-	}
-	END_OF_FUNCTION(prtscrn_proc);
 
     void init_resource()
     {
@@ -120,8 +106,6 @@ namespace res{
 
         LOCK_VARIABLE(time_interrupt_occurs);
         install_int(timer_proc,10);
-
-        install_int(prtscrn_proc,100);
 
         //load sss&data
         long len=0;
@@ -156,7 +140,6 @@ namespace res{
     }
     void destroy_resource(){
         remove_int(timer_proc);
-        remove_int(prtscrn_proc);
     }
 
     /*/
@@ -206,10 +189,31 @@ namespace res{
     }
     void save(int id){
         FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".RPG").str().c_str(),"wb");
+		rpg.save_times=1;
         copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
         copy(scenes.begin()+1,scenes.end(),rpg.scenes);
+
+		int viewport_x=rpg.viewport_x,viewport_y=rpg.viewport_y;
+		rpg.viewport_x+=0xA0*(scale-1),rpg.viewport_y+=0x70*(scale-1);
+
+		RPG::position real_team[TEAMROLES];
+		copy(rpg.team,rpg.team+TEAMROLES,real_team);
+		for(int i=0;i<5;i++)
+			rpg.team[i].x-=0xA0*(scale-1),
+			rpg.team[i].y-=0x70*(scale-1);
+
+		RPG::track real_track[TEAMROLES];
+		copy(rpg.team_track,rpg.team_track+TEAMROLES,real_track);
+		for(int i=0;i<5;i++)
+			rpg.team_track[i].x-=0xA0*(scale-1),
+			rpg.team_track[i].y-=0x70*(scale-1);
+
         fwrite(&rpg,sizeof(RPG),1,fprpg);
         fclose(fprpg);
+
+		rpg.viewport_x=viewport_x,rpg.viewport_y=viewport_y;
+		copy(real_team,real_team+TEAMROLES,rpg.team);
+		copy(real_track,real_track+TEAMROLES,rpg.team_track);
     }
 
 }

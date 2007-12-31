@@ -79,7 +79,7 @@ void fade_inout(int t)
 
 	PALETTE pal;
 	int begin=(arg>0?0:0x40),end=(arg>0?0x40:0);
-	for(int i=begin,mul_t=arg;i!=end;i+=arg)
+	for(int i=begin;i!=end;i+=arg)
 	{
 		perframe_proc();
 		for(int j=0;j<0x100;j++)
@@ -91,9 +91,8 @@ void fade_inout(int t)
 		set_palette(pal);
 		GameLoop_OneCycle(false);
 		redraw_everything(0);
-		mul_t+=arg;
 	}
-	mutex_can_change_palette=false;
+	mutex_can_change_palette=true;
 }
 uint8_t normalize(uint8_t i)
 {

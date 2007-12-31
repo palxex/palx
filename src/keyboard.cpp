@@ -128,6 +128,7 @@ int make_layer(int key)
 }
 extern int x_off,y_off;
 void reproduct_key();
+int examine_mutex=0;
 VKEY get_key_lowlevel()
 {
 	VKEY keygot=VK_NONE;
@@ -209,6 +210,7 @@ VKEY get_key_lowlevel()
 	x_off=((key_updown<0||key_leftright>0)?1:((key_updown>0||key_leftright<0)?-1:0));
 	y_off=((key_updown>0||key_leftright>0)?1:((key_updown<0||key_leftright<0)?-1:0));*/
 
+	examine_mutex=1;
 	if(!keys.empty())
 	{
 		x_off=((keys.top()==res::setup.key_left||keys.top()==res::setup.key_down)?-1:((keys.top()==res::setup.key_right||keys.top()==res::setup.key_up)?1:0));
@@ -216,9 +218,10 @@ VKEY get_key_lowlevel()
 	}
 	else
 		x_off=0,y_off=0;
+	examine_mutex=0;
 	return keygot;
 }
-
+void keyhook(int);
 void key_watcher(int scancode)
 {
 	/*memset(mykey,0,sizeof(mykey));
@@ -226,8 +229,10 @@ void key_watcher(int scancode)
 		if(key[i])
 			mykey[i]=2;
 	if(scancode<127 && mykey[scancode]==2)	return;*/
+	keyhook(scancode);
 	scancode=(scancode&0x80)|scancode_translate(scancode&0x7f);
 	if(scancode>127){
+		while(examine_mutex) rest(1);
 		std::stack<int> another;
 		for(int i=0;i<keys.size();){
 			if(keys.top()!=(scancode&0x7f))
@@ -262,4 +267,20 @@ void reproduct_key()
 			else
 				key=1;
 	}
+}
+
+extern bool no_barrier;
+void keyhook(int)
+{
+	if(key[KEY_PRTSCR] || key[KEY_P]){
+		static PALETTE pal;
+		static char filename[30];
+		static int i=0;
+		get_palette(pal);
+		sprintf(filename,"ScrnShot\\%d.bmp",i++);
+		save_bitmap(filename,screen,pal);
+	}
+	if(key[KEY_F3])
+        no_barrier=!no_barrier;
+	//rest(1);
 }

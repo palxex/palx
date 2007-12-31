@@ -61,7 +61,18 @@ void palmap::change(int p){
 }
 inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 {
-	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return;
+	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) {
+        //*/
+        //城光接天?- -
+        _buf=MAP.decode(t,0);
+	    getsprite(0,0,0,0,GOP.decode(t,(_buf[1]&0x10)<<4|_buf[0]),(_buf[1]&0x20)?true:false,_buf[1]&0xf).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
+	    /*/
+	    //黑云覆地~
+	    bitmap black(0,32,16);clear_bitmap(black);
+	    black.blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
+	    //*/
+	    return;
+	}
 	if(sprites[x][y][h][0].valid && sprites[x][y][h][1].valid){
 		sprites[x][y][h][0].image->blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 		if(sprites[x][y][h][1].valid)
@@ -78,8 +89,8 @@ inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
 	uint8_t *mapbuf=MAP.decode(t,0);
-	for(int y=source_y/16;y<dest_y/16+2;y++)
-		for(int x=source_x/32;x<dest_x/32+2;x++)
+	for(int y=source_y/16-1;y<dest_y/16+2;y++)
+		for(int x=source_x/32-1;x<dest_x/32+2;x++)
 			for(int h=0;h<2;h++)
 				make_tile(mapbuf+y*0x200+x*8+h*4,x,y,h,bmp);
 	blit(bmp,dest,source_x-res::rpg.viewport_x,source_y-res::rpg.viewport_y,source_x-res::rpg.viewport_x,source_y-res::rpg.viewport_y,dest_x-source_x,dest_y-source_y);
@@ -111,17 +122,18 @@ void sprite_queue::calc_team_walking()
 		direction=calc_faceto(x_off,y_off);
 		position target=scene->team_pos+position(direction_offs[direction][0],direction_offs[direction][1]);
 		if(!barrier_check(0,target.toXY().x,target.toXY().y)&&
-			target.toXY().x>=0 && target.toXY().x<=coordinate_x_max+x_scrn_offset &&
-			target.toXY().y>=0 && target.toXY().y<=coordinate_y_max+y_scrn_offset)
+			target.toXY().x>=0 && target.toXY().x<=2048 &&
+			target.toXY().y>=0 && target.toXY().y<=2048)
 		{
 			res::rpg.viewport_x+=direction_offs[direction][0];
 			res::rpg.viewport_y+=direction_offs[direction][1];
 			scene->team_pos.toXY()=target;
 			team_walk_one_step();
 			return;
-		}
-	}
-	stop_and_update_frame();
+		}else
+            stop_and_update_frame();
+	}else
+        stop_and_update_frame();
 	scene->team_pos.x=res::rpg.viewport_x+x_scrn_offset;
 	scene->team_pos.y=res::rpg.viewport_y+y_scrn_offset;
 }
@@ -143,8 +155,8 @@ void sprite_queue::visible_NPC_movment_setdraw()
 		{
 			int frame=i->curr_frame;
 			if(i->frames==3){
-				//if(i->curr_frame==2)
-				//	frame=0;
+				if(i->curr_frame==2)
+					frame=0;
 				if(frame==3)
 					frame=2;
 			}
@@ -214,7 +226,6 @@ void Scene::move_usable_screen()
 			else if(res::rpg.viewport_x < viewport_x_bak)
 				x1=0,x2=tx,					vx1=0,vx2=tx;
 
-            clear_bitmap(scene_buf);
   			scenemap.blit_to(scene_buf,vx1,vy1,vx2,vy2);
 
 			short &vx=res::rpg.viewport_x,&vy=res::rpg.viewport_y;

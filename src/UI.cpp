@@ -184,8 +184,8 @@ void single_menu::post_action(menu *abs)
 
 int multi_menu::select(menu *abs,int _selected)
 {
-	selected=((_selected<=max && _selected>=0)?_selected:0);
 	prev_action(abs);int s;
+	selected=((_selected<=max && _selected>=0)?_selected:0);
 	do{
 		draw(abs);
 		s=keyloop(abs);
