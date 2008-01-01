@@ -47,5 +47,5 @@ void wait_for_key()
 
 void delay(uint8_t gap)
 {
-	rest(gap);
+	rest(gap*10);
 }

@@ -42,7 +42,7 @@ void pal_fade_out(int t)
 					pal[j].b=res::pat.get(rpg.palette_offset)[j].b*i/0x40;
 				}
 				set_palette(pal);
-				delay(t*10);
+				delay(t);
 			}
 		memset(&pal,0,sizeof(PALETTE));
 		set_palette(pal);
@@ -66,7 +66,7 @@ void pal_fade_in(int t)
 					pal[j].b=res::pat.get(rpg.palette_offset)[j].b*i/0x40;
 				}
 				set_palette(pal);
-				delay(t*10);
+				delay(t);
 			}
 			set_palette(res::pat.get(rpg.palette_offset));
 	}
@@ -92,7 +92,7 @@ void fade_inout(int t)
 		GameLoop_OneCycle(false);
 		redraw_everything(0);
 	}
-	mutex_can_change_palette=true;
+	mutex_can_change_palette=(arg<0);
 }
 uint8_t normalize(uint8_t i)
 {
@@ -115,38 +115,44 @@ void normalize_fade()
 	set_palette(pal);
 }
 int fadegap[6]={0,3,1,5,2,4};
-void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter)
+void crossFade_assimilate(int gap,int time,bitmap &src,bitmap &dst)
 {
-	uint8_t *d=(uint8_t*)(((BITMAP*)dst)->dat)+gap, *s=(uint8_t*)(((BITMAP*)jitter)->dat)+gap;
+	BITMAP *srcbmp(src),*dstbmp(dst);
+	uint8_t *dstbegin=(uint8_t*)(dstbmp->dat),*srcbegin=(uint8_t*)(srcbmp->dat);
+	uint8_t *srcptr=srcbegin+gap, *dstptr=dstbegin+gap;
 	do
-		*d=((*s)&0x0F)|((*s)&0xF0);
-	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h && s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
+		*srcptr=((*srcptr)&0x0F)|((*dstptr)&0xF0);
+	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
 }
-void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter)
+void crossFade_desault(int gap,int time,bitmap &src,bitmap &dst)
 {
-	uint8_t *d=(uint8_t*)(((BITMAP*)dst)->dat)+gap, *s=(uint8_t*)(((BITMAP*)jitter)->dat)+gap;
+	BITMAP *srcbmp(src),*dstbmp(dst);
+	uint8_t *dstbegin=(uint8_t*)(dstbmp->dat),*srcbegin=(uint8_t*)(srcbmp->dat);
+	uint8_t *srcptr=srcbegin+gap, *dstptr=dstbegin+gap;
 	do
-		*d=((*s)>(*d)? (*d)+1 : ((*s)<(*d)? (*d)-1 : (*d)));
-	while(time-- && (d+=6) && (s+=6) && d<(uint8_t*)(((BITMAP*)dst)->dat)+((BITMAP*)dst)->w*((BITMAP*)dst)->h && s<(uint8_t*)(((BITMAP*)jitter)->dat)+((BITMAP*)jitter)->w*((BITMAP*)jitter)->h);
+		*srcptr=((*dstptr)>(*srcptr)? (*srcptr)+1 : ((*dstptr)<(*srcptr)? (*srcptr)-1 : (*srcptr)));
+	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
 }
-void CrossFadeOut(int u,int times,int gap,bitmap &buf)
+void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 {
-	bitmap dst(NULL,SCREEN_W,SCREEN_H);
-	blit(screen,dst,0,0,0,0,SCREEN_W,SCREEN_H);
+    bitmap &dst(const_cast<bitmap &>(_src));
+	bitmap src(NULL,SCREEN_W,SCREEN_H);
+	blit(screen,src,0,0,0,0,SCREEN_W,SCREEN_H);
 	for(int i=0;i<times;i++)
 	{
-		perframe_proc();
+		save_bitmap("pal1.bmp",src,_current_palette);
+		save_bitmap("pal2.bmp",dst,_current_palette);
 		int arg=i%6;
-		if(i<6)
-			crossFade_assimilate(fadegap[arg],u,buf,dst);
+		if(i<=6)
+			crossFade_assimilate(fadegap[arg],u,src,dst);
 		else
-			crossFade_desault(fadegap[arg],u,buf,dst);
-		crossFade_F(fadegap[arg],u,buf,dst);
+			crossFade_desault(fadegap[arg],u,src,dst);
+		crossFade_F(fadegap[arg],u,src,dst);
 		delay(gap);
 		perframe_proc();
-		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		blit(src,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
-	buf.blit_to(screen,0,0,0,0);
+	dst.blit_to(screen,0,0,0,0);
 }
 void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter)
 {}
@@ -194,11 +200,11 @@ struct calc_waving
 			result[i+16]=-result[i];
 	}
 };
-void wave_screen(bitmap &buffer,int grade,int height)
+void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height)
 {
 	static int index=0;
 	calc_waving calc(grade);
-	for(int i=0,t=index-1;i<height;i++)
-		blit(buffer,buffer,calc.result[t=(t+1)%32],i,0,i,320,1);
+	for(int i=0,t=index-1;i<height*scale;i++)
+		blit(buffer,dst,calc.result[t=(t+1)%32],i,0,i,SCREEN_W,1);
 	index=(index+1)%32;
 }

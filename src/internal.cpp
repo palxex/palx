@@ -194,7 +194,7 @@ bool process_Menu()
 	return true;
 }
 
-void redraw_everything(int time_gap)
+void redraw_everything(int time_gap,BITMAP *dst)
 {
 	flag_parallel_mutex=!flag_parallel_mutex;
 	if(flag_battling)
@@ -205,7 +205,7 @@ void redraw_everything(int time_gap)
 		sprites.visible_NPC_movment_setdraw();
 		sprites.our_team_setdraw();
 		sprites.Redraw_Tiles_or_Fade_to_pic();
-		scene->scanline_draw_normal_scene(sprites,time_gap);
+		scene->scanline_draw_normal_scene(sprites,time_gap,dst);
 	}
 }
 

@@ -25,6 +25,7 @@
 using namespace res;
 
 int battle::max_blow_away=0;
+battle *battle::thebattle=NULL;
 
 void battle::setup_role_enemy_image()
 {
@@ -69,9 +70,12 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	for(int i=0;i<5;i++)
 		if(res::enemyteams[enemy_team].enemy[i]>0)
 			enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].inbeing);
+	
+	thebattle=this;
 }
 battle::~battle()
 {
+	thebattle=NULL;
 	flag_to_load|=3;
 }
 int battle::process()
