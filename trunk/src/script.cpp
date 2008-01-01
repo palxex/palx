@@ -159,7 +159,17 @@ void process_Explore()
 }
 void clear_effective(int16_t p1,int16_t p2)
 {
-    redraw_everything();
+	int during=(p1?p1:88);
+	int unknown;
+	if(flag_battling){
+		//battle::get()->draw()//?
+		unknown=0x2364;
+	}else{
+		scene->produce_one_screen();
+		redraw_everything(0,backbuf);
+		unknown=0x29AC;
+	}
+	CrossFadeOut(unknown,during,p2,(bitmap)backbuf);
 }
 extern void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
 extern void add_goods_to_list(int,int);
@@ -747,7 +757,7 @@ __walk_role:
 		//not implemented
 		break;
     case 0x73:
-        clear_effective(param1?param1:1,param2);//not implement yet
+        clear_effective(param2,param1>0?param1:1);//not implement yet
         break;
 	case 0x74:
 		//not implemented

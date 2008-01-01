@@ -250,16 +250,17 @@ bool operator<(boost::shared_ptr<T> &lhs,boost::shared_ptr<T> &rhs)
 {
 	return *(lhs.get())<*(rhs.get());
 }
-void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap)
+void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap,BITMAP *dst)
 {
 	bitmap scanline(0,SCREEN_W,SCREEN_H);
-	blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
 	if((res::rpg.wave_grade+=wave_progression)>0 && res::rpg.wave_grade<0x100)
-		wave_screen(scanline,res::rpg.wave_grade,200);
-	else
+		wave_screen(scene_buf,scanline,res::rpg.wave_grade,200);
+	else{
+		blit(scene_buf,scanline,0,0,0,0,SCREEN_W,SCREEN_H);
 		res::rpg.wave_grade=0,wave_progression=0;
+	}
 	sprites.flush(scanline);
-	blit(scanline,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+	blit(scanline,dst,0,0,0,0,SCREEN_W,SCREEN_H);
 	pal_fade_in(gap);
 	perframe_proc();
 }

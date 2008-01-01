@@ -20,6 +20,8 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 class battle{
+	static battle *thebattle;
+
 	int enemy_team,script_escape;
 	std::map<int,sprite_prim> team_images;
 	std::map<int,sprite_prim> enemy_images;
@@ -30,6 +32,13 @@ class battle{
 	void setup_role_enemy_image();
 	void draw(int delay,int time);
 public:
+	static battle *get(){
+		if(thebattle)
+			return thebattle;
+		else
+			throw;
+	}
+
 	static int max_blow_away;
 	int magic_wave;
 

@@ -87,7 +87,6 @@ extern uint16_t process_autoscript(uint16_t script,int16_t object);
 extern void load_team_mgo();
 extern void load_NPC_mgo();
 extern void setup_our_team_data_things();
-extern void redraw_everything(int gap=1);
 extern void record_step();
 extern void calc_trace_frames();
 extern void team_walk_one_step();
@@ -107,12 +106,12 @@ extern void palette_fade();
 class bitmap;
 extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);
-extern void CrossFadeOut(int u,int times,int gap,bitmap &buf);
+extern void CrossFadeOut(int u,int times,int gap,const bitmap &buf);
 extern void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void show_fbp(int,int);
 extern void shake_screen();
 extern void flush_screen();
-extern void wave_screen(bitmap &buffer,int grade,int height);
+extern void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height);
 extern int wave_progression;
 
 extern int CARD;
@@ -140,7 +139,5 @@ extern bool prelimit_OK;
 extern int compact_items();
 extern void learnmagic(bool flag_dialog,int magic,int role);
 
-struct BITMAP;
-extern BITMAP *fakescreen;
 #endif
 

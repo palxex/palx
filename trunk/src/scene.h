@@ -82,7 +82,7 @@ struct Scene{
 	void move_usable_screen();
 	void get_sprites();
 	void produce_one_screen();
-	void scanline_draw_normal_scene(sprite_queue&,int);
+	void scanline_draw_normal_scene(sprite_queue&,int,BITMAP * =screen);
 };
 struct BattleScene{
 	fbp background;
