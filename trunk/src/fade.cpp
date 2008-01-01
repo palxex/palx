@@ -133,6 +133,17 @@ void crossFade_desault(int gap,int time,bitmap &src,bitmap &dst)
 		*srcptr=((*dstptr)>(*srcptr)? (*srcptr)+1 : ((*dstptr)<(*srcptr)? (*srcptr)-1 : (*srcptr)));
 	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
 }
+void crossFade_self(int gap,int time,bitmap &src)
+{
+	bitmap myscreen(screen);
+	BITMAP *srcbmp(src),*dstbmp(myscreen);
+	uint8_t *dstbegin=(uint8_t*)(dstbmp->dat),*srcbegin=(uint8_t*)(srcbmp->dat);
+	uint8_t *srcptr=srcbegin+gap, *dstptr=dstbegin+gap;
+	do
+		*dstptr=*srcptr;
+	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
+	myscreen.blit_to(screen);
+}
 void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 {
     bitmap &dst(const_cast<bitmap &>(_src));
@@ -140,22 +151,17 @@ void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 	blit(screen,src,0,0,0,0,SCREEN_W,SCREEN_H);
 	for(int i=0;i<times;i++)
 	{
-		save_bitmap("pal1.bmp",src,_current_palette);
-		save_bitmap("pal2.bmp",dst,_current_palette);
 		int arg=i%6;
-		if(i<=6)
+		if(i<6)
 			crossFade_assimilate(fadegap[arg],u,src,dst);
 		else
 			crossFade_desault(fadegap[arg],u,src,dst);
-		crossFade_F(fadegap[arg],u,src,dst);
+		crossFade_self(fadegap[arg],u,src);
 		delay(gap);
 		perframe_proc();
-		blit(src,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
 	dst.blit_to(screen,0,0,0,0);
 }
-void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter)
-{}
 
 void palette_fade()
 {/*
@@ -173,7 +179,7 @@ void show_fbp(int pic,int gap)
 	if(pic>0)
 		bitmap(FBP.decode(pic),320,200).blit_to(buf,0,0,0,0);
 	if(gap)
-		;//CrossFadeOut(0x29B0,0x5F,gap,buf);
+		CrossFadeOut(0x29B0,0x5F,gap,buf);
 	buf.blit_to(screen,0,0,0,0);
 }
 int shake_times=0,shake_grade=0;

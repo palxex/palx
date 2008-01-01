@@ -46,6 +46,7 @@ extern int abstract_x_bak,abstract_y_bak;
 extern int viewport_x_bak,viewport_y_bak;
 extern int direction_offs[4][2];
 extern bool key_enable;
+extern int fadegap[6];
 
 extern bool flag_parallel_mutex;
 extern int redraw_flag;
@@ -107,7 +108,7 @@ class bitmap;
 extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void CrossFadeOut(int u,int times,int gap,const bitmap &buf);
-extern void crossFade_F(int gap,int time,bitmap &dst,bitmap &jitter);
+extern void crossFade_self(int gap,int time,bitmap &src);
 extern void show_fbp(int,int);
 extern void shake_screen();
 extern void flush_screen();

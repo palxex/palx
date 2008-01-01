@@ -96,7 +96,7 @@ void startup_splash()
 int select_scene()
 {
 	res::pat.read(0);
-	bitmap(FBP.decode(60),320,200).blit_to(screen,0,0,0,0);
+	show_fbp(60,0);
 	rix->play(4);
 	pal_fade_in(1);
 	bool ok=false;
