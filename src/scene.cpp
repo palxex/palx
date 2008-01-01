@@ -41,7 +41,7 @@ tile &palmap::gettile(int x,int y,int h,int l)
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return non_valid;
 	return sprites[x][y][h][l];
 }
-palmap::palmap():scene_map(0,SCREEN_W,SCREEN_H),sprites(boost::extents[0x40][0x80][2][2])
+palmap::palmap():curr_map(0),scene_map(0,SCREEN_W,SCREEN_H),sprites(boost::extents[0x40][0x80][2][2])
 {
 	for(int i=0;i<0x40;i++)
 		for(int j=0;j<0x80;j++)
@@ -49,23 +49,22 @@ palmap::palmap():scene_map(0,SCREEN_W,SCREEN_H),sprites(boost::extents[0x40][0x8
 				for(int t=0;t<2;t++)
 					sprites[i][j][k][t].valid=false;
 }
-int t=-1;
 void palmap::change(int p){
-	if(t!=p)
+	if(curr_map!=p)
 		for(int i=0;i<0x40;i++)
 			for(int j=0;j<0x80;j++)
 				for(int k=0;k<2;k++)
 					for(int t=0;t<2;t++)
 						sprites[i][j][k][t].valid=false;
-	t=p;
+	curr_map=p;
 }
 inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 {
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) {
         //*/
         //城光接天?- -
-        _buf=MAP.decode(t,0);
-	    getsprite(0,0,0,0,GOP.decode(t,(_buf[1]&0x10)<<4|_buf[0]),(_buf[1]&0x20)?true:false,_buf[1]&0xf).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
+        _buf=MAP.decode(curr_map,0);
+	    getsprite(0,0,0,0,GOP.decode(curr_map,(_buf[1]&0x10)<<4|_buf[0]),(_buf[1]&0x20)?true:false,_buf[1]&0xf).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 	    /*/
 	    //黑云覆地~
 	    bitmap black(0,32,16);clear_bitmap(black);
@@ -82,13 +81,13 @@ inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 	int index=(_buf[1]&0x10)<<4|_buf[0],index2=(_buf[3]&0x10)<<4|_buf[2];
 	bool throu=(_buf[1]&0x20)?true:false,throu2=(_buf[3]&0x20)?true:false;
 	int layer=_buf[1]&0xf,layer2=_buf[3]&0xf;
-	getsprite(x,y,h,0,GOP.decode(t,index),throu,layer).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
+	getsprite(x,y,h,0,GOP.decode(curr_map,index),throu,layer).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 	if(index2)
-		getsprite(x,y,h,1,GOP.decode(t,index2-1),throu2,layer2).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
+		getsprite(x,y,h,1,GOP.decode(curr_map,index2-1),throu2,layer2).blit_to(dest,x*32+h*16-16-res::rpg.viewport_x,y*16+h*8-8-res::rpg.viewport_y);
 }
 void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
-	uint8_t *mapbuf=MAP.decode(t,0);
+	uint8_t *mapbuf=MAP.decode(curr_map,0);
 	for(int y=source_y/16-1;y<dest_y/16+2;y++)
 		for(int x=source_x/32-1;x<dest_x/32+2;x++)
 			for(int h=0;h<2;h++)
@@ -165,6 +164,7 @@ void sprite_queue::visible_NPC_movment_setdraw()
 			active_list.push_back(it);
 		}
 }
+int fade_div=0,fade_timing=0;
 void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 {
 	s_list redraw_list;s_list::value_type masker;
@@ -192,11 +192,19 @@ void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 						}
 		std::copy(redraw_list.begin(),redraw_list.end(),std::back_inserter(active_list));
 		break;
-	case 1:
-		return;
 	case 2:
-		/*many many*/
-		redraw_flag=1;
+		fade_div=(fade_div?fade_div:1);
+		int arg=fade_timing/fade_div,u=0x29AC;
+		bitmap back2(backbuf);
+		if(!(fade_timing%fade_div))
+			if(arg<0x60)
+				if(arg<6)
+					crossFade_assimilate(fadegap[arg],u,scene->scene_buf,back2);
+				else
+					crossFade_desault(fadegap[arg%6],u,scene->scene_buf,back2);
+			else
+				redraw_flag=1;
+		fade_timing++;
 		break;
 	}
 }

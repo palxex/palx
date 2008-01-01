@@ -46,5 +46,5 @@ public:
 	~battle();
 	int process();
 };
-
+int process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H

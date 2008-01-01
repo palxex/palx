@@ -36,7 +36,7 @@
 
 #define screen fakescreen
 
-extern BITMAP *fakescreen,*backbuf;
+extern BITMAP *fakescreen,*backbuf,*bakscreen;
 extern void redraw_everything(int gap=1,BITMAP * =screen);
 
 class bitmap{

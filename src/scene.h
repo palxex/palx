@@ -37,9 +37,10 @@ protected:
 };
 class fbp:public scene_map{
 public:
-	fbp():scene_map(0,SCREEN_W,SCREEN_H){}
+	fbp():scene_map(0,320,160){}
+	fbp(int p):scene_map(FBP.decode(p),320,200){}
 	void change(int p){
-		memcpy(bmp->dat,FBP.decode(p,0),bmp->w*bmp->h);
+		memcpy(bmp->dat,FBP.decode(p),bmp->w*bmp->h);
 	}
 };
 struct tile{
@@ -50,6 +51,7 @@ struct tile{
 	tile():image((sprite*)0),blocked(0),layer(0),valid(false){}
 };
 class palmap:public scene_map{
+	int curr_map;
 	boost::multi_array<tile,4> sprites;
 	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
 	void make_tile(uint8_t*,int,int,int,BITMAP*);

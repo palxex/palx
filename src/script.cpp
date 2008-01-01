@@ -34,17 +34,17 @@ using namespace res;
 extern int scale;
 bool prelimit_OK=false;
 
-extern int process_Battle(uint16_t,uint16_t);
+extern int fade_div,fade_timing;
 
 extern BITMAP *backbuf;
 void restore_screen()
 {
-    blit(backbuf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+    blit(bakscreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
     flag_pic_level=0;
 }
 void backup_screen()
 {
-    blit(screen,backbuf,0,0,0,0,SCREEN_W,SCREEN_H);
+    blit(screen,bakscreen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 
 inline void sync_viewport()
@@ -982,17 +982,43 @@ __walk_role:
         break;
 	case 0x99:
 		if(param1<0){
-			rpg.scenes[res::rpg.scene_id].id=param2;
+			res::scenes[res::rpg.scene_id].id=param2;
 			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
 		}else
-			rpg.scenes[param1].id=param2;
+			res::scenes[param1].id=param2;
 		break;
 	case 0x9a:
 		for(int i=param1;i<=param2;i++)
 			evtobjs[i].status=param3;
 		break;
     case 0x9b:
-        scene->produce_one_screen();
+		if(!(redraw_flag=param1)){
+			scene->scenemap.change(0);
+			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+			scene->produce_one_screen();
+		}else if(param2<0){
+			bitmap backup(0,SCREEN_W,SCREEN_H);
+			scene->scene_buf.blit_to(backup);
+			scene->produce_one_screen();
+			scene->scenemap.change(0);
+			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+			scene->scene_buf.blit_to(backbuf);
+			backup.blit_to(scene->scene_buf);
+		}else{
+			fbp t(param2);
+			if(redraw_flag==1){
+				t.blit_to(scene->scene_buf);
+			}else{
+				scene->produce_one_screen();
+				scene->scenemap.change(0);
+				scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+				t.blit_to(backbuf);
+			}
+		}
+		if(redraw_flag==2){
+			fade_div=param3?param3:2;
+			fade_timing=0;
+		}
         break;
 	case 0x9c:
 		//not implemented
