@@ -68,13 +68,11 @@ class sprite_prim{
 	int id;
 	std::vector<boost::shared_ptr<sprite> > sprites;
 public:
-	int determain_smkfs(uint8_t *src);
 	sprite_prim();
 	sprite_prim(int);
 	sprite_prim(cached_res &,int);
-	sprite_prim(int,uint8_t *src);
 	sprite_prim(const sprite_prim &);
-	sprite_prim &getsource(uint8_t *src);
+	sprite_prim &getsource(cached_res &,int =-1);
 	sprite *getsprite(int);
 	void blit(int i,BITMAP *bmp);
 	friend bool operator==(const sprite_prim&,const sprite_prim&);
