@@ -130,23 +130,16 @@ sprite_prim::sprite_prim(int _id):id(_id)
 {}
 sprite_prim::sprite_prim(cached_res &archive,int _id):id(_id)
 {
-	getsource(archive.decode(id));
-}
-int sprite_prim::determain_smkfs(uint8_t *src)
-{
-	uint16_t *usrc=(uint16_t*)src;
-	return usrc[0]-((usrc[usrc[0]-1]==0 || usrc[usrc[0]-1]>=cached_res::_len)?1:0);
-}
-sprite_prim::sprite_prim(int _id,uint8_t *src):id(_id)
-{
-	getsource(src);
+	getsource(archive);
 }
 sprite_prim::sprite_prim(const sprite_prim &rhs):id(rhs.id),sprites(rhs.sprites)
 {}
-sprite_prim &sprite_prim::getsource(uint8_t *src)
+sprite_prim &sprite_prim::getsource(cached_res &archive,int _id)
 {
-	for(int i=0,subfiles=determain_smkfs(src);i<subfiles;i++)
-		sprites.push_back(boost::shared_ptr<sprite>(new sprite(src+2*((uint16_t *)src)[i])));
+	if(_id!=-1)
+		id=_id;
+	for(int i=0,s=archive.slices(id);i<s;i++)
+		sprites.push_back(boost::shared_ptr<sprite>(new sprite(archive.decode(id,i))));
 	return *this;
 }
 sprite * sprite_prim::getsprite(int i)

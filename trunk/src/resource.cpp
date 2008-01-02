@@ -21,24 +21,34 @@
 #include "pallib.h"
 
 #include <boost/shared_array.hpp>
+#include <cstdio>
+#include <string>
 
+using namespace std;
 using namespace boost;
 using namespace Pal::Tools;
 namespace{
-	uint8_t *denone(FILE *fp,long &len)
+	uint8_t *denone_file(const char *file,long &len)
 	{
 		int32_t length;
+		FILE *fp=fopen(file,"rb");
 		fseek(fp,0,SEEK_END);
 		length=ftell(fp);
 		rewind(fp);
 		uint8_t *buf=new uint8_t[length];
 		fread(buf,length,1,fp);
+		fclose(fp);
 		len=length;
 		return buf;
 	}
-	uint8_t *demkf_t(FILE *fp,int n,long &len)
+	uint8_t *denone_sp(shared_array<char> file,long &len)
+	{
+		return denone_file(file.get(),len);
+	}
+	uint8_t *demkf_ptr(const char *file,int n,long &len)
 	{
 		int32_t offset=n*4,length;
+		FILE *fp=fopen(file,"rb");
 		fseek(fp,offset,SEEK_SET);
 		fread(&offset,4,1,fp);
 		fread(&length,4,1,fp);length-=offset;
@@ -48,11 +58,11 @@ namespace{
 		len=length;
 		return buf;
 	}
-	shared_array<uint8_t> demkf(FILE *fp,int n,long &len)
+	shared_array<uint8_t> demkf_file(const char *file,int n,long &len)
 	{
-		return shared_array<uint8_t>(demkf_t(fp,n,len));
+		return shared_array<uint8_t>(demkf_ptr(file,n,len));
 	}
-	shared_array<uint8_t> demkf_impl(shared_array<uint8_t> src,int n,long &len)
+	shared_array<uint8_t> demkf_sp(shared_array<uint8_t> src,int n,long &len)
 	{
 		uint32_t *usrc=(uint32_t *)src.get();
 		int32_t length=usrc[n+1]-usrc[n];
@@ -61,12 +71,12 @@ namespace{
 		len=length;
 		return shared_array<uint8_t>(buf);
 	}
-	uint8_t *desmkf(shared_array<uint8_t> src,int n,long &len)//todo:算法不完整
+	uint8_t *desmkf_ptr(shared_array<uint8_t> src,int n,long &len,int &files)
 	{
 		uint16_t *usrc=(uint16_t *)src.get();
-		int files=usrc[0];
+		files=(usrc[0]-((usrc[usrc[0]-1]==0 || usrc[usrc[0]-1]>=len)?1:0));
 		int16_t length;
-		if(n == files - 1 || (n == files - 2 && usrc[files-1] == 0) )
+		if(n == files - 1)
 			length=(int16_t)len-usrc[n]*2;
 		else
 			length=(usrc[n+1]-usrc[n])*2;
@@ -75,7 +85,7 @@ namespace{
 		len=length;
 		return buf;
 	}
-	uint8_t *deyj1(shared_array<uint8_t> src,long &len)
+	uint8_t *deyj1_ptr(shared_array<uint8_t> src,long &len)
 	{
 		void *dst;
 		uint32_t length;
@@ -83,31 +93,47 @@ namespace{
 		len=length;
 		return (uint8_t*)dst;
 	}
-	shared_array<uint8_t> deyj1_t(shared_array<uint8_t> src,long &len)
+	shared_array<uint8_t> deyj1_sp(shared_array<uint8_t> src,long &len)
 	{
-		return shared_array<uint8_t>(deyj1(src,len));
+		return shared_array<uint8_t>(deyj1_ptr(src,len));
+	}
+	uint8_t *defile_dir(const char *dir,int file,long &len)
+	{
+		char *buf=new char[80];
+		sprintf(buf,"%s/%d",dir,file);
+		return denone_file(shared_array<char>(buf).get(),len);
+	}
+	shared_array<char> dedir_dir(const char *dir,int dir2)
+	{
+		char *buf=new char[80];
+		sprintf(buf,"%s/%d",dir,dir2);
+		return shared_array<char>(buf);
 	}
 }
-decoder_func de_none		=bind(denone,_1,_4);
-decoder_func de_mkf			=bind(demkf_t,_1,_2,_4);
-decoder_func de_mkf_yj1		=bind(deyj1,	bind(demkf,		_1,_2,_4),_4);
-decoder_func de_mkf_mkf_yj1	=bind(deyj1,	bind(demkf_impl,bind(demkf,_1,_2,_4),_3,_4),_4);
-decoder_func de_mkf_smkf	=bind(desmkf,	bind(demkf,		_1,_2,_4),_3,_4);
-decoder_func de_mkf_yj1_smkf=bind(desmkf,	bind(deyj1_t,		bind(demkf,_1,_2,_4),_4),_3,_4);
+decoder_func de_none		=bind(denone_file,_1,_4);
+/*
+decoder_func de_mkf			=bind(demkf_ptr,_1,_2,_4);
+decoder_func de_mkf_yj1		=bind(deyj1_ptr,	bind(demkf_file,		_1,_2,_4),_4);
+decoder_func de_mkf_mkf_yj1	=bind(deyj1_ptr,	bind(demkf_sp,bind(demkf_file,_1,_2,_4),_3,_4),_4);
+decoder_func de_mkf_smkf	=bind(desmkf_ptr,	bind(demkf_file,		_1,_2,_4),_3,_4,_5);
+decoder_func de_mkf_yj1_smkf=bind(desmkf_ptr,	bind(deyj1_sp,		bind(demkf_file,_1,_2,_4),_4),_3,_4,_5);
+/*/
+decoder_func de_mkf			=bind(defile_dir,_1,_2,_4);
+decoder_func de_mkf_yj1		=de_mkf;
+decoder_func de_mkf_mkf_yj1	=bind(denone_sp,	bind(dedir_dir,_1,_2),_4);
+decoder_func de_mkf_smkf	=de_mkf_mkf_yj1;
+decoder_func de_mkf_yj1_smkf=de_mkf_mkf_yj1;
+//*/
 
 long cached_res::_len;
 bool cached_res::_decoded;
 
 cached_res::cached_res(const char *filename,decoder_func &func):
-	file(filename),
-	fp(fopen(filename,"rb"))
+	file(filename)
 {
-	if(!fp)
-		exit(-1);
 	setdecoder(func);
 }
 cached_res::~cached_res(){
-	fclose(fp);
 	clear();
 }
 decoder_func cached_res::setdecoder(decoder_func &func)
@@ -122,11 +148,18 @@ uint8_t *cached_res::decode(int n,int n2,bool &decoded,long &length)
 	decoded=false;
 	std::pair<int,int> pos(n,n2);
 	cache_type::iterator i=cache.find(pos);
-	if(i==cache.end())
-		cache[pos]=decoder(fp,n,n2,length);
-	else
+	int slices;
+	if(i==cache.end()){
+		cache[pos]=decoder(file.c_str(),n,n2,length,slices);
+		splits[n]=slices;
+	}else
 		decoded=true;
 	return cache[pos];
+}
+int cached_res::slices(int n)
+{
+	decode(n);
+	return splits[n];
 }
 uint8_t *cached_res::decode(int n,bool &decoded,long &length)
 {
@@ -152,19 +185,19 @@ void cached_res::clear(int n, int n2){
 	cache.erase(iter);
 }
 
-cached_res ABC("ABC.MKF" ,de_mkf_yj1);
-cached_res MIDI("MIDI.MKF",de_mkf);
-cached_res VOC("VOC.MKF" ,de_mkf);
-cached_res MAP("MAP.MKF" ,de_mkf_yj1);
-cached_res GOP("GOP.MKF" ,de_mkf_smkf);
-cached_res RNG("RNG.MKF" ,de_mkf_mkf_yj1);
-cached_res DATA("DATA.MKF",de_mkf);
-cached_res SSS("SSS.MKF" ,de_mkf);
-cached_res BALL("BALL.MKF",de_mkf_smkf);
-cached_res RGM("RGM.MKF" ,de_mkf);
-cached_res FBP("FBP.MKF" ,de_mkf_yj1);
-cached_res F("F.MKF"   ,de_mkf_yj1);
-cached_res FIRE("FIRE.MKF",de_mkf_yj1);
-cached_res MGO("MGO.MKF" ,de_mkf_yj1);
-cached_res PAT("PAT.MKF" ,de_mkf);
 cached_res SETUP("SETUP.DAT",de_none);
+cached_res PAT	("PAT.MKF"	,de_mkf);
+cached_res MIDI	("MIDI.MKF"	,de_mkf);
+cached_res VOC	("VOC.MKF"	,de_mkf);
+cached_res DATA	("DATA.MKF"	,de_mkf);
+cached_res SSS	("SSS.MKF"	,de_mkf);
+cached_res FBP	("FBP.MKF"	,de_mkf_yj1);
+cached_res MAP	("MAP.MKF"	,de_mkf_yj1);
+cached_res GOP	("GOP.MKF"	,de_mkf_smkf);
+cached_res BALL	("BALL.MKF"	,de_mkf_smkf);
+cached_res RGM	("RGM.MKF"	,de_mkf_smkf);
+cached_res ABC	("ABC.MKF"	,de_mkf_yj1_smkf);
+cached_res F	("F.MKF"	,de_mkf_yj1_smkf);
+cached_res FIRE	("FIRE.MKF"	,de_mkf_yj1_smkf);
+cached_res MGO	("MGO.MKF"	,de_mkf_yj1_smkf);
+cached_res RNG	("RNG.MKF"	,de_mkf_mkf_yj1);

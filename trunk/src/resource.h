@@ -31,15 +31,15 @@
 #include <map>
 
 class cached_res;
-typedef boost::function<uint8_t *(FILE *,int,int,long&)> decoder_func;
+typedef boost::function<uint8_t *(const char *,int,int,long&,int&)> decoder_func;
 extern decoder_func de_mkf,de_mkf_yj1,de_mkf_mkf_yj1,de_mkf_smkf,de_mkf_yj1_smkf;
 
 class cached_res{
 	std::string file;
-	FILE *fp;
 	decoder_func decoder;
 	typedef std::map<std::pair<int,int>,uint8_t *> cache_type;
 	cache_type cache;
+	std::map<int,int> splits;
 public:
 	static long _len;static bool _decoded;
 	cached_res(const char *filename,decoder_func &d);
@@ -49,6 +49,7 @@ public:
 	uint8_t *decode(int,bool& ,long& =_len);
 	uint8_t *decode(int,long& =_len);
 	uint8_t *decode(long& =_len);
+	int slices(int);
 	void clear();
 	void clear(int n,int n2);
 };

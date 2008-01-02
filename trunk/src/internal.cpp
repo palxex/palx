@@ -103,7 +103,7 @@ void Load_Data()
 		scene->sprites_end  =res::evtobjs.begin()+res::scenes[res::rpg.scene_id+1].prev_evtobjs+1;
 		for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 			if(i->image)
-				i->frames_auto=sprite_prim().determain_smkfs(MGO.decode(i->image));
+				i->frames_auto=MGO.slices(i->image);
 	//load map & npc
 	scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
 	scene->get_sprites();

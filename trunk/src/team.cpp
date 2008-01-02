@@ -39,9 +39,7 @@ std::map<int,int> npc_mgos;
 
 int load_mgo(int id)
 {
-	bool decoded;
-	uint8_t *buf=MGO.decode(id,decoded);
-	mgos.push_back(sprite_prim(id,buf));
+	mgos.push_back(sprite_prim(MGO,id));
 	return std::find(mgos.begin(),mgos.end(),sprite_prim(id))-mgos.begin();
 }
 void load_team_mgo()

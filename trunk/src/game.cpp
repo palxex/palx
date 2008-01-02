@@ -57,9 +57,9 @@ namespace res{
 		T *usrc=(T *)src;
 		copy(usrc,usrc+len/sizeof(T),back_inserter(vec));
 	}
-	inline void reunion(sprite_prim &vec,uint8_t *src,const long &len)
+	inline void reunion(sprite_prim &vec,cached_res &ar,int f)
 	{
-		vec.getsource(src);
+		vec.getsource(ar,f);
 	}
 	template<typename T>
 	inline void reunion(T *vec,uint8_t *src,const long &len)
@@ -128,12 +128,14 @@ namespace res{
         reunion(learns,					DATA.decode(6,len),len);
         //7:not used
         //8:not used
-        reunion(UIpics,					DATA.decode(9,len),len);
-        reunion(discharge_effects,		DATA.decode(10,len),len);
         //11:not known!!!
-        reunion(message_handles,		DATA.decode(12,len),len);
         reunion(enemyposes,				DATA.decode(13,len),len);
         reunion(upgradexp,				DATA.decode(14,len),len);
+
+		DATA.setdecoder(de_mkf_smkf);
+        reunion(UIpics,					DATA,9);
+        reunion(discharge_effects,		DATA,10);
+        reunion(message_handles,		DATA,12);
 
         flag_to_load=0x1D;
 

@@ -447,7 +447,7 @@ __walk_npc:
                 flag_pic_level=param3;
                 backup_screen();
             }
-            sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x30*scale,0x37*scale);
+            sprite_prim(RGM,param1).getsprite(0)->blit_middle(screen,0x30*scale,0x37*scale);
         }
         dialog_x=(param1?0x50:0xC)*scale;
         dialog_y=8*scale;
@@ -465,7 +465,7 @@ __walk_npc:
                 flag_pic_level=param3;
                 backup_screen();
             }
-            sprite_prim().getsource(RGM.decode(param1,0)).getsprite(0)->blit_middle(screen,0x10E*scale,0x90*scale);
+            sprite_prim(RGM,param1).getsprite(0)->blit_middle(screen,0x10E*scale,0x90*scale);
         }
         dialog_x=(param1?4:0xC)*scale;
         dialog_y=0x6C*scale;
