@@ -41,10 +41,6 @@ namespace{
 		len=length;
 		return buf;
 	}
-	uint8_t *denone_sp(shared_array<char> file,long &len)
-	{
-		return denone_file(file.get(),len);
-	}
 	uint8_t *demkf_ptr(const char *file,int n,long &len)
 	{
 		int32_t offset=n*4,length;
@@ -103,6 +99,10 @@ namespace{
 		sprintf(buf,"%s/%d",dir,file);
 		return denone_file(shared_array<char>(buf).get(),len);
 	}
+	uint8_t *defile_sp(shared_array<char> dir,int file,long &len)
+	{
+		return defile_dir(dir.get(),file,len);
+	}
 	shared_array<char> dedir_dir(const char *dir,int dir2)
 	{
 		char *buf=new char[80];
@@ -111,7 +111,7 @@ namespace{
 	}
 }
 decoder_func de_none		=bind(denone_file,_1,_4);
-/*
+//*
 decoder_func de_mkf			=bind(demkf_ptr,_1,_2,_4);
 decoder_func de_mkf_yj1		=bind(deyj1_ptr,	bind(demkf_file,		_1,_2,_4),_4);
 decoder_func de_mkf_mkf_yj1	=bind(deyj1_ptr,	bind(demkf_sp,bind(demkf_file,_1,_2,_4),_3,_4),_4);
@@ -120,7 +120,7 @@ decoder_func de_mkf_yj1_smkf=bind(desmkf_ptr,	bind(deyj1_sp,		bind(demkf_file,_1
 /*/
 decoder_func de_mkf			=bind(defile_dir,_1,_2,_4);
 decoder_func de_mkf_yj1		=de_mkf;
-decoder_func de_mkf_mkf_yj1	=bind(denone_sp,	bind(dedir_dir,_1,_2),_4);
+decoder_func de_mkf_mkf_yj1	=bind(defile_sp,	bind(dedir_dir,_1,_2),_3,_4);
 decoder_func de_mkf_smkf	=de_mkf_mkf_yj1;
 decoder_func de_mkf_yj1_smkf=de_mkf_mkf_yj1;
 //*/
