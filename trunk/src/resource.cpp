@@ -51,6 +51,7 @@ namespace{
 		fseek(fp,offset,SEEK_SET);
 		uint8_t *buf=new uint8_t[length];
 		fread(buf,length,1,fp);
+		fclose(fp);
 		len=length;
 		return buf;
 	}
@@ -58,9 +59,10 @@ namespace{
 	{
 		return shared_array<uint8_t>(demkf_ptr(file,n,len));
 	}
-	shared_array<uint8_t> demkf_sp(shared_array<uint8_t> src,int n,long &len)
+	shared_array<uint8_t> demkf_sp(shared_array<uint8_t> src,int n,long &len,int &files)
 	{
 		uint32_t *usrc=(uint32_t *)src.get();
+		files=usrc[0]/4-2;
 		int32_t length=usrc[n+1]-usrc[n];
 		uint8_t *buf=new uint8_t[length];
 		memcpy(buf,src.get()+usrc[n],length);
@@ -93,15 +95,26 @@ namespace{
 	{
 		return shared_array<uint8_t>(deyj1_ptr(src,len));
 	}
-	uint8_t *defile_dir(const char *dir,int file,long &len)
+	uint8_t *defile_dir(const char *dir,int file,long &len,int &files)
 	{
 		char *buf=new char[80];
+		for(int i=0;i<999999 && file == 0;i++)
+		{
+			char buf2[80];
+			sprintf(buf2,"%s/%d",dir,i);
+			FILE *fp=fopen(buf2,"rb");
+			if(!fp){
+				files=i;
+				break;
+			}
+			fclose(fp);
+		}
 		sprintf(buf,"%s/%d",dir,file);
 		return denone_file(shared_array<char>(buf).get(),len);
 	}
-	uint8_t *defile_sp(shared_array<char> dir,int file,long &len)
+	uint8_t *defile_sp(shared_array<char> dir,int file,long &len,int &files)
 	{
-		return defile_dir(dir.get(),file,len);
+		return defile_dir(dir.get(),file,len,files);
 	}
 	shared_array<char> dedir_dir(const char *dir,int dir2)
 	{
@@ -114,13 +127,13 @@ decoder_func de_none		=bind(denone_file,_1,_4);
 //*
 decoder_func de_mkf			=bind(demkf_ptr,_1,_2,_4);
 decoder_func de_mkf_yj1		=bind(deyj1_ptr,	bind(demkf_file,		_1,_2,_4),_4);
-decoder_func de_mkf_mkf_yj1	=bind(deyj1_ptr,	bind(demkf_sp,bind(demkf_file,_1,_2,_4),_3,_4),_4);
+decoder_func de_mkf_mkf_yj1	=bind(deyj1_ptr,	bind(demkf_sp,bind(demkf_file,_1,_2,_4),_3,_4,_5),_4);
 decoder_func de_mkf_smkf	=bind(desmkf_ptr,	bind(demkf_file,		_1,_2,_4),_3,_4,_5);
 decoder_func de_mkf_yj1_smkf=bind(desmkf_ptr,	bind(deyj1_sp,		bind(demkf_file,_1,_2,_4),_4),_3,_4,_5);
 /*/
-decoder_func de_mkf			=bind(defile_dir,_1,_2,_4);
+decoder_func de_mkf			=bind(defile_dir,_1,_2,_4,_5);
 decoder_func de_mkf_yj1		=de_mkf;
-decoder_func de_mkf_mkf_yj1	=bind(defile_sp,	bind(dedir_dir,_1,_2),_3,_4);
+decoder_func de_mkf_mkf_yj1	=bind(defile_sp,	bind(dedir_dir,_1,_2),_3,_4,_5);
 decoder_func de_mkf_smkf	=de_mkf_mkf_yj1;
 decoder_func de_mkf_yj1_smkf=de_mkf_mkf_yj1;
 //*/

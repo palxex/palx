@@ -25,9 +25,8 @@
 int RNG_num;
 void play_RNG(int begin,int end,int gap)
 {
-	decoder_func olddecoder=RNG.setdecoder(de_mkf);
-	int total_clips=((uint32_t *)RNG.decode(RNG_num))[0]/4-2;
-	RNG.setdecoder(olddecoder);
+	extern decoder_func de_mkf_t;
+	int total_clips=RNG.slices(RNG_num);
 	bitmap cache(0,320,200);
 	blit(screen,cache,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);
 	for(int i=begin;i<=std::min(total_clips-1,end);i++){
