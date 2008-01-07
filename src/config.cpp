@@ -29,7 +29,7 @@
 #include <cstdio>
 
 #include "resource.h"
-#include "UI.H"
+#include "UI.h"
 #include "pallib.h"
 
 using namespace std;
@@ -37,14 +37,15 @@ using namespace boost;
 using namespace Pal::Tools;
 class ini_parser
 {
-    struct correspond{
-		string value,comment;
-	};
-	typedef std::map<string,correspond> configmap;
 	class section{
+	  struct correspond{
+		string value,comment;
+	  };
+	  typedef std::map<string,correspond> configmap;
 		string section_name;
 		string section_desc;
 		configmap keymap;
+	  friend class ini_parser;
 	public:
         section(){}
         section(string name,std::map<string,correspond> map,string description=""):section_name(name),section_desc(description),keymap(map)
@@ -111,7 +112,7 @@ class ini_parser
 public:
 	ini_parser(char *conf):name(conf),needwrite(false)
 	{
-        configmap configprop;
+	  section::configmap configprop;
         configprop["path"].value=".";
 		configprop["path"].comment="资源路径";
         configprop["setup"].value="true";
@@ -122,14 +123,14 @@ public:
 		configprop["last"].comment="Int;最后载入的存档";
         section config("config",configprop);
         sections["config"]=config;
-        configmap debugprop;
+        section::configmap debugprop;
         debugprop["resource"].value="mkf";
         debugprop["resource"].comment="资源使用方式;mkf/filesystem";
         debugprop["allow_frozen"].value="true";
         debugprop["allow_frozen"].comment="允许冻结启动/停止;true/false";
         section debug("debug",debugprop);
         sections["debug"]=debug;
-        configmap displayprop;
+        section::configmap displayprop;
         displayprop["height"].value="320";
 		displayprop["height"].comment="粒度;320x200正整数倍.";
         displayprop["width"].value="200";
@@ -139,20 +140,20 @@ public:
         displayprop["fullscreen"].value="Bool ;全屏";
         section display("display",displayprop);
         sections["display"]=display;
-		configmap fontprop;
+	section::configmap fontprop;
 		fontprop["type"].value="truetype";
 		fontprop["type"].comment="truetype: ttf/ttc; fon: wor16.fon";
 		fontprop["path"].value="%WINDIR%/fonts/mingliu.ttc";
 		section font("font",fontprop);
 		sections["font"]=font;
-		configmap musicprop;
+		section::configmap musicprop;
 		musicprop["type"].value="rix";
 		musicprop["type"].comment="rix/mid/foreverCD,+gameCD,+gameCDmp3，或任意混合。foreverCD指永恒回忆录之FM曲集";
 		musicprop["volume"].value="100";
 		musicprop["volume"].comment="0-100;音量";
 		section music("music",musicprop,"与setup正交");
 		sections["music"]=music;
-		configmap keyprop;
+		section::configmap keyprop;
 		keyprop["west"].value="";
 		keyprop["north"].value="";
 		keyprop["east"].value="";
