@@ -18,9 +18,7 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "game.h"
-
-#include <alfont.h>
-
+#include "alfont.h"
 #include "internal.h"
 #include "scene.h"
 
@@ -43,7 +41,7 @@ namespace res{
 	sprite_prim discharge_effects;
 	sprite_prim message_handles;
 	ENEMY_POSES enemyposes;
-	std::vector<UPGRADE_EXP> upgradexp;
+	UPGRADE_EXP upgradexp;
 
 	//sss
 	std::vector<EVENT_OBJECT> evtobjs;
@@ -151,7 +149,9 @@ namespace res{
         if(!id)
             return;
         pat.read(0);
-        FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".RPG").str().c_str(),"rb");
+        char name[80];
+        sprintf(name,"%s/%d.RPG",path_root.c_str(),id);
+        FILE *fprpg=fopen(name,"rb");
         if(!fprpg){
 			pat.set(rpg.palette_offset);
 			map_toload=(rpg.scene_id?rpg.scene_id:1);
@@ -190,7 +190,9 @@ namespace res{
         pal_fade_out(1);
     }
     void save(int id){
-        FILE *fprpg=fopen(static_cast<ostringstream&>(ostringstream()<<id<<".RPG").str().c_str(),"wb");
+        char name[80];
+        sprintf(name,"%s/%d.RPG",path_root.c_str(),id);
+        FILE *fprpg=fopen(name,"wb");
 		rpg.save_times=1;
         copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
         copy(scenes.begin()+1,scenes.end(),rpg.scenes);

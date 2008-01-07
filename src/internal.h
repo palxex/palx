@@ -20,10 +20,12 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-#include "integer.h"
 #include "structs.h"
+#include <string>
 #include <vector>
 #include <map>
+
+extern std::string path_root;
 
 struct Scene;
 struct BattleScene;
@@ -78,6 +80,7 @@ extern int scale;
 extern int x_off,y_off;
 extern bool running;
 
+extern int global_init(char* );
 extern void Load_Data();
 extern void GameLoop_OneCycle(bool);
 extern bool process_Menu();
@@ -92,7 +95,7 @@ extern void record_step();
 extern void calc_trace_frames();
 extern void team_walk_one_step();
 extern void stop_and_update_frame();
-extern void store_team_frame_data();
+extern void calc_followers_screen_pos();
 extern int calc_faceto(int x_diff,int y_diff);
 extern bool barrier_check(uint16_t self,int x,int y,bool =true);
 extern bool no_barrier;
@@ -103,7 +106,6 @@ extern int shake_times,shake_grade;
 extern void pal_fade_out(int gap);
 extern void pal_fade_in(int gap);
 extern void fade_inout(int);
-extern void palette_fade();
 class bitmap;
 extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);

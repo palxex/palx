@@ -269,10 +269,9 @@ typedef struct{
 	_POS pos[TEAMROLES][TEAMROLES];
 }ENEMY_POSES;
 
-typedef struct{
-	int16_t level;
-	int16_t exp;
-}UPGRADE_EXP;
+typedef 
+	int16_t UPGRADE_EXP[100]
+;
 typedef struct
 {
 unsigned short int key_left;

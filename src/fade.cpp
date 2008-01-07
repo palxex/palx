@@ -163,13 +163,15 @@ void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 	dst.blit_to(screen,0,0,0,0);
 }
 
-void palette_fade()
-{/*
-	PALETTE pal;
-	pal[0].r=res::pat.get(rpg.palette_offset)[0].r;
-	pal[0].g=res::pat
-	for(int i=1;i<0x100;i++)
-		pal[i].r=res::pat.get(rpg.palette_offset)[i].r>res::*/
+void palette_fade(PALETTE &src,const PALETTE &dst)
+{
+	uint8_t *usrc=(uint8_t*)src,*udst=(uint8_t*)dst;
+	for(int i=0;i<sizeof(src);i++)
+		if(udst[i]<usrc[i])
+			usrc[i]--;
+		else if(udst[i]>usrc[i])
+			usrc[i]++;
+	set_palette(src);
 }
 
 void show_fbp(int pic,int gap)
@@ -210,7 +212,16 @@ void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height)
 {
 	static int index=0;
 	calc_waving calc(grade);
-	for(int i=0,t=index-1;i<height*scale;i++)
-		blit(buffer,dst,calc.result[t=(t+1)%32],i,0,i,SCREEN_W,1);
+	blit(buffer,dst,0,0,0,0,SCREEN_W,SCREEN_H);
+	for(int i=0,t=index;i<height*scale;i++,t=(t+1)%32)
+		if(calc.result[t]>=0){
+			blit(buffer,dst,0,i,calc.result[t],i,SCREEN_W-calc.result[t]+1,1);
+			blit(buffer,dst,SCREEN_W-calc.result[t]+1,i,0,i+1,calc.result[t],1);
+		}else{
+			blit(buffer,dst,-calc.result[t],i,0,i,SCREEN_W+calc.result[t]+1,1);
+			blit(buffer,dst,0,i,SCREEN_W+calc.result[t]+1,i-1,-calc.result[t],1);
+		}
+	char buf[80];sprintf(buf,"tmp/%d.bmp",grade);
+	save_bitmap(buf,dst,_current_palette);
 	index=(index+1)%32;
 }

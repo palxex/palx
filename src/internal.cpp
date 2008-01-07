@@ -61,7 +61,7 @@ void switch_proc()
 		while(mutex_paletting || mutex_blitting)
 			rest(1);
 		int &mode=CARD;
-		static PALETTE pal;static bitmap bak(NULL,SCREEN_W,SCREEN_H);
+		static PALETTE pal;bitmap bak(NULL,SCREEN_W,SCREEN_H);
 		if(mode==GFX_AUTODETECT_WINDOWED || mode ==GFX_AUTODETECT)
 			mode=GFX_AUTODETECT_FULLSCREEN;
 		else

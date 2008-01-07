@@ -94,13 +94,13 @@ public:
 
 class cut_msg_impl
 {
-	FILE *fp;
 	char *glb_buf;
 	char buf[100];
 public:
-	cut_msg_impl(const char *fname="M.MSG")
-		:fp(fopen(fname,"rb"))
+	cut_msg_impl(){}
+	void set(const std::string &fname)
 	{
+		FILE *fp=fopen(fname.c_str(),"rb");
 		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);
 		glb_buf=new char[len];
 		fread(glb_buf,len,1,fp);

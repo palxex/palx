@@ -277,7 +277,7 @@ void keyhook(int)
 		static char filename[30];
 		static int i=0;
 		get_palette(pal);
-		sprintf(filename,"ScrnShot\\%d.bmp",i++);
+		sprintf(filename,"ScrnShot/%d.bmp",i++);
 		save_bitmap(filename,screen,pal);
 	}
 	if(key[KEY_F3])

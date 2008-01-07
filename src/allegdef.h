@@ -43,8 +43,10 @@ class bitmap{
 protected:
 	BITMAP *bmp;
 public:
+	int width,height;
 	bitmap(const uint8_t *,int,int);
 	bitmap(BITMAP *);
+	uint8_t *getdata();
 	virtual ~bitmap();
 	operator BITMAP *() const {return bmp;}
 	bool blit_to(BITMAP *dest,int source_x=0,int source_y=0,int dest_x=0,int dest_y=0);
@@ -98,7 +100,6 @@ public:
 	void read(uint32_t i);
 	PALETTE &get(int);
 	void set(int t);
-	void switch_daytime();
 };
 class CEmuopl;
 class CrixPlayer;
@@ -111,9 +112,14 @@ class playrix
 	static const int sample_len=630;
 	short 		Buffer[sample_len*2];
 	friend void playrix_timer(void *);
+	static char mus[80];
 public:
 	playrix();
 	~playrix();
+	static void set(const char *name)
+	{
+		strcpy(mus,name);
+	}
 	void play(int sub_song,int =0);
 	void stop(int =0);
 };
