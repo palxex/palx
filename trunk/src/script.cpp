@@ -37,6 +37,8 @@ bool prelimit_OK=false;
 extern int fade_div,fade_timing;
 
 extern BITMAP *backbuf;
+extern void palette_fade(PALETTE &src,const PALETTE &dst);
+
 void restore_screen()
 {
     blit(bakscreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
@@ -47,10 +49,12 @@ void backup_screen()
     blit(screen,bakscreen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 
-inline void sync_viewport()
+inline void sync_viewport(bool backup=true)
 {
-    viewport_x_bak=rpg.viewport_x;
-    viewport_y_bak=rpg.viewport_y;
+	if(backup){
+		viewport_x_bak=rpg.viewport_x;
+		viewport_y_bak=rpg.viewport_y;
+	}
     rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
     rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
 }
@@ -104,19 +108,17 @@ void GameLoop_OneCycle(bool trigger)
                     autoscript=process_autoscript(autoscript,(int16_t)(iter-evtobjs.begin()));
             if (iter->status==2 && iter->image>0 && trigger
                     && abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
-            {
                 //check barrier;this means, role status 2 means it takes place
-                backup_position();
                 for (int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
                     if (!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
                     {
+						backup_position();
                         scene->team_pos.toXY().x+=direction_offs[direction][0];
                         scene->team_pos.toXY().y+=direction_offs[direction][1];
+						sync_viewport();
+						scene->move_usable_screen();
                         break;
                     }
-                sync_viewport();
-                scene->move_usable_screen();
-            }
         }
 		if(!--rpg.chasespeed_change_cycles)
 			rpg.chase_range=1;
@@ -163,11 +165,11 @@ void clear_effective(int16_t p1,int16_t p2)
 	int unknown;
 	if(flag_battling){
 		//battle::get()->draw()//?
-		unknown=0x2364;
+		unknown=0x2364*scale*scale;
 	}else{
 		scene->produce_one_screen();
 		redraw_everything(0,backbuf);
-		unknown=0x29AC;
+		unknown=0x29AC*scale*scale;
 	}
 	CrossFadeOut(unknown,during,p2,(bitmap)backbuf);
 }
@@ -521,8 +523,10 @@ __ride:
                     scene->team_pos.y+=y_off;
                 sync_viewport();
                 obj.direction=direction;
-                obj.pos_x+=x_off;
-                obj.pos_y+=y_off;
+                if (x_diff)
+					obj.pos_x+=x_off;
+                if (y_diff)
+					obj.pos_y+=y_off;
                 record_step();
                 GameLoop_OneCycle(false);
                 scene->move_usable_screen();
@@ -538,8 +542,22 @@ __ride:
         scene->team_pos.toXYH().x=param1;
         scene->team_pos.toXYH().y=param2;
         scene->team_pos.toXYH().h=param3;
-        sync_viewport();
-        scene->produce_one_screen();
+		backup_position();
+        sync_viewport(false);
+		{
+			int x=x_scrn_offset,y=y_scrn_offset;
+			for(int i=0;i<=4;i++)
+			{
+				rpg.team[i].x=x;
+				rpg.team[i].y=y;
+				rpg.team_track[i].x=x+rpg.viewport_x;
+				rpg.team_track[i].y=y+rpg.viewport_y;
+				rpg.team_track[i].direction=rpg.team_direction;
+				x-=direction_offs[rpg.team_direction][0];y-=direction_offs[rpg.team_direction][1];
+			}
+		}
+		if(!flag_battling)
+			scene->produce_one_screen();
         break;
     case 0x47:
         voc(VOC.decode(param1)).play();
@@ -710,8 +728,9 @@ __ride:
         }
         break;
     case 0x6e:
-        backup_position();
-        sync_viewport();
+        backup_position();        
+		viewport_x_bak=rpg.viewport_x;
+		viewport_y_bak=rpg.viewport_y;
         rpg.viewport_x+=param1;
         rpg.viewport_y+=param2;
         rpg.layer=param3*8;
@@ -769,7 +788,7 @@ __walk_role:
         rpg.team_roles=(param1?1:0)+(param2?1:0)+(param3?1:0)-1;
         load_team_mgo();
         setup_our_team_data_things();
-        store_team_frame_data();
+        calc_followers_screen_pos();
         break;
     case 0x76:
         show_fbp(param1,param2);
@@ -824,55 +843,68 @@ __walk_role:
 				y_scrn_offset=0x70*scale;
 				rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
 				rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
-			}
-			int t=param3;
-			for (int i=0;i<(t>0?t:1);i++)
-			{
-				int b1=x_scrn_offset,b2=y_scrn_offset;
-				viewport_x_bak=rpg.viewport_x;
-				viewport_y_bak=rpg.viewport_y;
-				if (!param1 && !param2 && !param3)
+			}else
+				for (int i=1,loops=(param3>0?param3:1);i<=loops;i++)
 				{
-					x_scrn_offset=0xA0*scale;
-					y_scrn_offset=0x70*scale;
-					rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
-					rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
-					scene->produce_one_screen();
-					t=-1;
-				}
-				else
-				{
-					if (param3<0)
+					int b1=x_scrn_offset,b2=y_scrn_offset;
+					viewport_x_bak=rpg.viewport_x;
+					viewport_y_bak=rpg.viewport_y;
+					if (!param1 && !param2 && !param3)
 					{
-						rpg.viewport_x=param1*32-0xA0*scale;
-						rpg.viewport_y=param2*16-0x70*scale;
+						x_scrn_offset=0xA0*scale;
+						y_scrn_offset=0x70*scale;
+						rpg.viewport_x=scene->team_pos.toXY().x-x_scrn_offset;
+						rpg.viewport_y=scene->team_pos.toXY().y-y_scrn_offset;
 						scene->produce_one_screen();
+						loops=-1;
 					}
 					else
 					{
-						rpg.viewport_x+=param1;
-						rpg.viewport_y+=param2;
+						if (param3<0)
+						{
+							rpg.viewport_x=param1*32-0xA0*scale;
+							rpg.viewport_y=param2*16-0x70*scale;
+							scene->produce_one_screen();
+						}
+						else
+						{
+							rpg.viewport_x+=param1;
+							rpg.viewport_y+=param2;
+						}
+						x_scrn_offset=scene->team_pos.toXY().x-rpg.viewport_x;
+						y_scrn_offset=scene->team_pos.toXY().y-rpg.viewport_y;
 					}
-					x_scrn_offset=scene->team_pos.toXY().x-rpg.viewport_x;
-					y_scrn_offset=scene->team_pos.toXY().y-rpg.viewport_y;
+					rpg.team[0].x=x_scrn_offset;
+					rpg.team[0].y=y_scrn_offset;
+					for (int loops=1;loops<=rpg.team_roles;loops++)
+					{
+						rpg.team[loops].x+=(x_scrn_offset-b1);
+						rpg.team[loops].y+=(y_scrn_offset-b2);
+					}
+					GameLoop_OneCycle(false);
+					if (param3>=0)
+						scene->move_usable_screen();
+					redraw_everything();
 				}
-				rpg.team[0].x=x_scrn_offset;
-				rpg.team[0].y=y_scrn_offset;
-				for (int t=1;t<=rpg.team_roles;t++)
-				{
-					rpg.team[t].x+=(x_scrn_offset-b1);
-					rpg.team[t].y+=(y_scrn_offset-b2);
-				}
-				GameLoop_OneCycle(false);
-				if (param3>=0)
-					scene->move_usable_screen();
-				redraw_everything();
-			}
 		}
         break;
     case 0x80://todo:
-        GameLoop_OneCycle(false);
-        redraw_everything();
+		{
+			int dstpat=0x180-rpg.palette_offset;
+			PALETTE tmp;
+			memcpy(tmp,pat.get(rpg.palette_offset),sizeof(PALETTE));
+			for(int i=0;i<=0x20;i++)
+			{
+				palette_fade(tmp,pat.get(dstpat));
+				if(param1<=0){
+					GameLoop_OneCycle(false);
+					redraw_everything();
+				}else
+					delay(param1);
+			}
+			rpg.palette_offset=dstpat;
+			pat.set(rpg.palette_offset);
+		}
         mutex_can_change_palette=false;
         break;
     case 0x81:
@@ -938,7 +970,21 @@ __walk_role:
             pat.set(rpg.palette_offset);
         break;
 	case 0x8c://fade to color
-		//not implemented
+		{
+			PALETTE tmp,tmp2;
+			memcpy(tmp,pat.get(rpg.palette_offset),sizeof(PALETTE));
+			memcpy(tmp2,pat.get(rpg.palette_offset),sizeof(PALETTE));
+			for(int i=0;i<0x100;i++)
+				tmp[i]=tmp[param1];
+			for(int i=0;i<0x40;i++)
+			{
+				if(param3)
+					palette_fade(tmp,tmp2);
+				else
+					palette_fade(tmp2,tmp);
+				delay(param2?param2:1);
+			}
+		}
 		break;
 	case 0x8d://level up
 		//not implemented
@@ -978,7 +1024,7 @@ __walk_role:
         goto __ride;
     case 0x98:
         load_team_mgo();
-        store_team_frame_data();
+        calc_followers_screen_pos();
         break;
 	case 0x99:
 		if(param1<0){
@@ -1058,8 +1104,8 @@ __walk_role:
     }
 }
 
-cut_msg_impl msges("M.MSG");
-cut_msg_impl objs("WORD.DAT");
+cut_msg_impl msges;;
+cut_msg_impl objs;
 uint16_t process_script(uint16_t id,int16_t object)
 {
     static char *msg,colon[3];
@@ -1222,7 +1268,7 @@ uint16_t process_script(uint16_t id,int16_t object)
                 //printf("µÚ%xÑ­»·:\n",cycle);
                 if (param3)
                     calc_trace_frames(),
-                    store_team_frame_data();
+                    calc_followers_screen_pos();
                 GameLoop_OneCycle(param2!=0);
                 redraw_everything();
             }

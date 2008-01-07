@@ -21,19 +21,23 @@
 #include "internal.h"
 #include "game.h"
 
-bitmap::bitmap(const uint8_t *src,int width,int height):
-	bmp(create_bitmap(width,height))
+bitmap::bitmap(const uint8_t *src,int w,int h):
+	width(w),height(h),bmp(create_bitmap(w,h))
 {
 	if(src)
 		memcpy(bmp->dat,src,width*height);
 }
-bitmap::bitmap(BITMAP *b):bmp(create_bitmap(b->w,b->h))
+bitmap::bitmap(BITMAP *b):bmp(create_bitmap(b->w,b->h)),width(b->w),height(b->h)
 {
     blit(b,bmp,0,0,0,0,b->w,b->h);
 }
 bitmap::~bitmap()
 {
 	destroy_bitmap(bmp);
+}
+uint8_t *bitmap::getdata()
+{
+	return (uint8_t*)bmp->dat;
 }
 bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
@@ -185,8 +189,5 @@ void palette::set(int t)
 	day=t;
 	set_palette(pat[day]);
 }
-void palette::switch_daytime()
-{
-	day=!day;
-	set(day);
-}
+
+BITMAP *fakescreen,*backbuf,*bakscreen;

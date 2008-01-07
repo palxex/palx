@@ -87,7 +87,7 @@ void calc_trace_frames()
 
 	store_step();
 }
-void store_team_frame_data()
+void calc_followers_screen_pos()
 {
 	res::rpg.team[0].frame=(res::rpg.roles_properties.walk_frames[res::rpg.team[0].role]==4? res::rpg.team_direction*4+this_step_frame : res::rpg.team_direction*3+step_frame_leader);
 	res::rpg.team[0].x=x_scrn_offset;
@@ -129,7 +129,7 @@ void team_walk_one_step()
 	else
 		step_frame_follower=0,step_frame_leader=0,
 		this_step_frame&=2,this_step_frame^=2;
-	store_team_frame_data();
+	calc_followers_screen_pos();
 }
 void stop_and_update_frame()
 {

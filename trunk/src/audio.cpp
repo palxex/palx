@@ -26,7 +26,7 @@
 
 #define MAX_VOICES 10
 
-bool begin=false,once=false;
+bool once=false;
 int voices[MAX_VOICES];int vocs=0;
 void playrix_timer(void *param)
 {
@@ -38,17 +38,17 @@ void playrix_timer(void *param)
 		}
 
 	playrix * const plr=reinterpret_cast<playrix*>(param);
-		
-	if(voice_get_volume(plr->stream->voice)==0){
-		begin=false;
-	}
+
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
-	if (begin && p)
+	if (p)
 	{
 		//update
-		if(!plr->rix.update())
-			plr->rix.rewind(plr->subsong),
+		if(!plr->rix.update()){
+			if(once)
+				voice_set_volume(plr->stream->voice,0);
+			plr->rix.rewind(plr->subsong);
 			plr->rix.update();
+		}
 		plr->opl.update(plr->Buffer, plr->sample_len);
 		short *buf=plr->Buffer;
 		//volume x2
@@ -71,7 +71,7 @@ END_OF_FUNCTION(playrix_timer);
 
 playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),stream(0)
 {
-	rix.load(std::string("MUS.MKF"), CProvider_Filesystem());
+	rix.load(mus, CProvider_Filesystem());
 	LOCK_VARIABLE(Buffer);
 	LOCK_VARIABLE(leaving);
 	LOCK_VARIABLE(sample_len);
@@ -87,6 +87,7 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),stream(0)
 	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
 	voice_set_volume(stream->voice,0);
 }
+char playrix::mus[80];
 playrix::~playrix()
 {
 	remove_param_int(playrix_timer,this);
@@ -95,7 +96,6 @@ playrix::~playrix()
 }
 void playrix::play(int sub_song,int times)
 {
-	begin=false;
 	once=(times==1);
 	if(!sub_song){
 		subsong=sub_song;
@@ -105,11 +105,11 @@ void playrix::play(int sub_song,int times)
 	subsong=sub_song;
 
 	rix.rewind(subsong);
-	//opl.init();
 
+	rest(150);
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
-	begin=true;
+
 }
 void playrix::stop(int gap)
 {

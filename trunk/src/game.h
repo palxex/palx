@@ -44,7 +44,7 @@ namespace res{
 	extern sprite_prim discharge_effects;
 	extern sprite_prim message_handles;
 	extern ENEMY_POSES enemyposes;
-	extern std::vector<UPGRADE_EXP> upgradexp;
+	extern UPGRADE_EXP upgradexp;
 
 	//sss
 	extern std::vector<EVENT_OBJECT> evtobjs;
