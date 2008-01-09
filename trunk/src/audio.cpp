@@ -19,64 +19,78 @@
  ***************************************************************************/
 #include "allegdef.h"
 
-#define BUFFER_SIZE 630
+#define BUFFER_SIZE 5040
 
 #define SAMPLE_RATE	44100
 #define CHANNELS	1
 
 #define MAX_VOICES 10
 
-bool once=false;
+bool begin=false,once=false;
 int voices[MAX_VOICES];int vocs=0;
 void playrix_timer(void *param)
 {
+	playrix * const plr=reinterpret_cast<playrix*>(param);
+	if(voice_get_volume(plr->stream->voice)==0)
+		begin=false;
+	int f=0;
 	for(int i=0;i<vocs;i++)
 		if (!voice_check(voices[i])){
 			destroy_sample(voice_check(voices[i]));
 			std::copy(voices+i+1,voices+MAX_VOICES,voices+i);
 			vocs--;
 		}
-
-	playrix * const plr=reinterpret_cast<playrix*>(param);
-
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
-	if (p)
+	if (begin && p)
 	{
-		//update
-		if(!plr->rix.update()){
-			if(once)
-				voice_set_volume(plr->stream->voice,0);
-			plr->rix.rewind(plr->subsong);
-			plr->rix.update();
-		}
-		plr->opl.update(plr->Buffer, plr->sample_len);
-		short *buf=plr->Buffer;
-		//volume x2
-		for(int t=0;t<plr->sample_len;t++)
+		static int leaving=0,slen_buf=0,slen=630;
+		static short *buf=plr->Buffer;
+		if(leaving<BUFFER_SIZE*CHANNELS)
 		{
-			if (*buf >= 16384)
-				*buf = 32767;
-			else if (*buf <= -16384)
-				*buf = -32768;
-			else
-				*buf *= 2;
-			*buf++^=0x8000;
-		}
-		memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
-		free_audio_stream_buffer(plr->stream);
+			slen_buf=0;
+			int rel=BUFFER_SIZE*CHANNELS-leaving;
+			while(slen_buf<rel)
+			{
+				if(!plr->rix.update())
+				{
+					if(once)
+						plr->stop();
+					plr->rix.rewind(plr->subsong);
+					continue;
+				}
+				plr->opl.update(buf, slen);
+				for(int t=0;t<slen * CHANNELS;t++)
+				{
+				    if (*buf >= 16384)
+		                        *buf = 32767;
+		                    else if (*buf <= -16384)
+		                        *buf = -32768;
+		                    else
+		                        *buf *= 2;
+		                    *buf++^=0x8000;
+				}
+				slen_buf+=slen * CHANNELS;
+			 }
+			 buf=plr->Buffer;
+			 leaving+=slen_buf;
+			 buf+=leaving%(BUFFER_SIZE*CHANNELS);
+		 }
+		 leaving-=BUFFER_SIZE*CHANNELS;
+		 memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
+		 memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,leaving*2);
+		 free_audio_stream_buffer(plr->stream);
 	}
 	rest(0);
 }
 END_OF_FUNCTION(playrix_timer);
 
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),stream(0)
+char playrix::mus[80];
+playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),Buffer(0),stream(0)
 {
+	int BufferLength=SAMPLE_RATE*CHANNELS*10;
 	rix.load(mus, CProvider_Filesystem());
+	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
 	LOCK_VARIABLE(Buffer);
-	LOCK_VARIABLE(leaving);
-	LOCK_VARIABLE(sample_len);
-	LOCK_VARIABLE(sample_len_buf);
-	LOCK_VARIABLE(tune);
 	LOCK_VARIABLE(stream);
 	LOCK_VARIABLE(opl);
 	LOCK_VARIABLE(rix);
@@ -84,18 +98,21 @@ playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),stream(0)
 	LOCK_FUNCTION(playrix_timer);
 	install_param_int(playrix_timer,this,14);
 
-	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
+	Buffer = new short [BufferLength];
+	memset(Buffer, 0, sizeof(short) * BufferLength);
+
 	voice_set_volume(stream->voice,0);
 }
-char playrix::mus[80];
 playrix::~playrix()
 {
 	remove_param_int(playrix_timer,this);
 	stop();
 	stop_audio_stream(stream);
+	delete []Buffer;
 }
 void playrix::play(int sub_song,int times)
 {
+	begin=false;
 	once=(times==1);
 	if(!sub_song){
 		subsong=sub_song;
@@ -105,11 +122,13 @@ void playrix::play(int sub_song,int times)
 	subsong=sub_song;
 
 	rix.rewind(subsong);
+	//opl.init();
+	memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
+	memset(stream->samp,0,sizeof(stream->samp));
 
-	rest(150);
+	begin=true;
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
-
 }
 void playrix::stop(int gap)
 {
