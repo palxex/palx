@@ -38,15 +38,14 @@ using namespace Pal::Tools;
 class ini_parser
 {
 	class section{
-	  struct correspond{
-		string value,comment;
-	  };
-	  typedef std::map<string,correspond> configmap;
 		string section_name;
 		string section_desc;
-		configmap keymap;
-	  friend class ini_parser;
 	public:
+		struct correspond{
+			string value,comment;
+		};
+		typedef std::map<string,correspond> configmap;
+		configmap keymap;
         section(){}
         section(string name,std::map<string,correspond> map,string description=""):section_name(name),section_desc(description),keymap(map)
         {}
@@ -112,7 +111,7 @@ class ini_parser
 public:
 	ini_parser(char *conf):name(conf),needwrite(false)
 	{
-	  section::configmap configprop;
+		section::configmap configprop;
         configprop["path"].value=".";
 		configprop["path"].comment="资源路径";
         configprop["setup"].value="true";
@@ -137,10 +136,10 @@ public:
         displayprop["scale"].value="none";
 		displayprop["scale"].comment="none, 2x; etc.";
         displayprop["fullscreen"].value="false";
-        displayprop["fullscreen"].value="Bool ;全屏";
+        displayprop["fullscreen"].comment="Bool ;全屏";
         section display("display",displayprop);
         sections["display"]=display;
-	section::configmap fontprop;
+		section::configmap fontprop;
 		fontprop["type"].value="truetype";
 		fontprop["type"].comment="truetype: ttf/ttc; fon: wor16.fon";
 		fontprop["path"].value="%WINDIR%/fonts/mingliu.ttc";
@@ -357,7 +356,7 @@ int global_init(char *)
 	msges.set(path_root+"/M.MSG");
 	objs.set(path_root+"/WORD.DAT");
 
-	CARD=(conf.getSection("display").getBool("fullscreen")?GFX_AUTODETECT_FULLSCREEN:GFX_AUTODETECT_WINDOWED);
+	CARD=(conf.getSection("display").getBool("fullscreen")?GFX_AUTODETECT:GFX_SAFE);
 
 	//allegro init
 	allegro_init();
@@ -375,7 +374,7 @@ int global_init(char *)
         alfont_init();
         char fontpath[100];
         sprintf(fontpath,"%s%s",FONT_PATH,FONT_FILE);
-        ttfont::glb_font=alfont_load_font(fontpath);
+        ttfont::glb_font=alfont_load_font(conf.getSection("font").getString("path").c_str());
         alfont_set_language(ttfont::glb_font, LOCALE);
         alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
         alfont_text_mode(-1);

@@ -194,7 +194,7 @@ void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 		break;
 	case 2:
 		fade_div=(fade_div?fade_div:1);
-		int arg=fade_timing/fade_div,u=0x29AC;
+		int arg=fade_timing/fade_div,u=0x29AC*scale*scale;
 		bitmap back2(backbuf);
 		if(!(fade_timing%fade_div))
 			if(arg<0x60)
