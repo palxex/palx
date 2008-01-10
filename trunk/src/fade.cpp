@@ -31,7 +31,7 @@ void pal_fade_out(int t)
 	{
 		mutex_can_change_palette=true;
 		PALETTE pal;
-		if(t)
+		if(t>0)
 			for(int i=0x3f;i>=3;i--)
 			{
 				perframe_proc();
@@ -55,7 +55,7 @@ void pal_fade_in(int t)
 	{
 		mutex_can_change_palette=false;
 		PALETTE pal;
-		if(t)
+		if(t>0)
 			for(int i=4;i<=0x3f;i++)
 			{
 				perframe_proc();
@@ -68,7 +68,7 @@ void pal_fade_in(int t)
 				set_palette(pal);
 				delay(t);
 			}
-			set_palette(res::pat.get(rpg.palette_offset));
+		set_palette(res::pat.get(rpg.palette_offset));
 	}
 }
 void fade_inout(int t)
