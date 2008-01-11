@@ -1,5 +1,5 @@
 ## for automake to generate Makefile.in
-noinst_PROGRAMS = palx
+bin_PROGRAMS = palx
 palx_SOURCES = UI.cpp      fade.cpp      keyboard.cpp  playrng.cpp   script.cpp audio.cpp   game.cpp      mainloop.cpp  qbrand.cpp    team.cpp battle.cpp  graph.cpp     message.cpp   resource.cpp  timing.cpp begin.cpp   internal.cpp  palx.cpp      scene.cpp item.cpp shop.cpp config.cpp celestial.cpp ../PalLibrary/src/yj1.cpp ../PalLibrary/src/rle.cpp ../PalLibrary/src/rng.cpp ../alfont/alfont.c
 palx_LDADD = $(adplug_LIBS) $(allegro_LIBS) $(freetype2_LIBS)
 #$(BOOST_REGEX_LIB)

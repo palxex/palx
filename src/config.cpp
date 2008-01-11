@@ -32,6 +32,24 @@
 #include "UI.h"
 #include "pallib.h"
 
+#if defined (WIN32)
+#   define FONT_PATH getenv("WINDIR")
+#   define FONT_FILE "/fonts/mingliu.ttc"
+#   define LOCALE "chinese"
+#else
+#   define FONT_PATH ""
+#   define FONT_FILE "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
+#   define LOCALE "BIG5"
+#endif
+
+#ifdef __MINGW32__  //mingw hack. unknown bug on the ifstream tellg that makes it actually moved the pointer.
+#   define getpos()
+#   define retpos() is.seekg(-80,ios_base::cur)
+#else
+#   define getpos() pos=is.tellg()
+#   define retpos() is.seekg(pos,ios_base::beg)
+#endif
+
 using namespace std;
 using namespace boost;
 using namespace Pal::Tools;
@@ -51,6 +69,7 @@ class ini_parser
         {}
 		friend istream &operator>>(istream &is,section &rhs)
 		{
+		  streampos pos;
 			while(!is.eof() && is.get()!='[');
 			is>>rhs.section_name;
 			rhs.section_name.erase(find(rhs.section_name.begin(),rhs.section_name.end(),']'),rhs.section_name.end());
@@ -68,7 +87,7 @@ class ini_parser
 				if(find(line.begin(),line.end(),';')!=line.end())
 					copy(find(line.begin(),line.end(),';')+1,line.end(),back_inserter(comment));
 				line.erase(find(line.begin(),line.end(),';'),line.end());//comments
-				if(line=="")
+				if(find(line.begin(),line.end(),'=')==line.end())
 					continue;
 				line.insert(find(line.begin(),line.end(),'='),' ');
 				line.insert(find(line.begin(),line.end(),'=')+1,' ');
@@ -77,10 +96,10 @@ class ini_parser
 				ss>>name>>equ>>value;
 				rhs.keymap[name].value=value;
 				rhs.keymap[name].comment=comment;
-				//pos=is.tellg(); BS.g++ implement.Such a simple pointer return can cause a move of file pointer.
+				getpos();
 			}
 			if(!is.eof())
-				is.seekg(-80,ios_base::cur);//BS. again. Not follow the standardization behavior of moving back *charactors*.
+				retpos();
 			return is;
 		}
 		friend ostream &operator<<(ostream &os,const section &rhs)
@@ -142,7 +161,9 @@ public:
 		section::configmap fontprop;
 		fontprop["type"].value="truetype";
 		fontprop["type"].comment="truetype: ttf/ttc; fon: wor16.fon";
-		fontprop["path"].value="%WINDIR%/fonts/mingliu.ttc";
+        char fontpath[100];
+        sprintf(fontpath,"%s%s",FONT_PATH,FONT_FILE);
+		fontprop["path"].value=fontpath;
 		section font("font",fontprop);
 		sections["font"]=font;
 		section::configmap musicprop;
@@ -171,13 +192,15 @@ public:
 			needwrite=true;
 	}
 	void write(){
-		ofstream ofs(name.c_str(),ios_base::out|ios_base::trunc);
+		ofstream ofs((name+".2").c_str(),ios_base::out|ios_base::trunc);
 		for(std::map<string,section>::const_iterator i=sections.begin();i!=sections.end();i++)
 			ofs<<(*i).second;
 		ofs.flush();
 	}
 	~ini_parser()
 	{
+	    if(getSection("config").getBool("allow_memory") && getSection("config").getInt("last")!=rpg_to_load)
+            getSection("config").keymap["last"].value=lexical_cast<string>(rpg_to_load),needwrite=true;
 		if(needwrite)
 			write();
 	}
@@ -302,18 +325,6 @@ void close_button_handler(void)
 }
 END_OF_FUNCTION(close_button_handler)
 
-#if defined (WIN32)
-#define FONT_PATH getenv("WINDIR")
-#define FONT_FILE "\\fonts\\mingliu.ttc"
-#define LOCALE "chinese"
-#define PATH_SEP '\\'
-#else
-#define FONT_PATH ""
-#define FONT_FILE "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
-#define LOCALE "BIG5"
-#define PATH_SEP '/'
-#endif
-
 string path_root;
 
 int global_init(char *)
@@ -372,8 +383,6 @@ int global_init(char *)
 	if(conf.getSection("font").getString("type")=="truetype")
 	{
         alfont_init();
-        char fontpath[100];
-        sprintf(fontpath,"%s%s",FONT_PATH,FONT_FILE);
         ttfont::glb_font=alfont_load_font(conf.getSection("font").getString("path").c_str());
         alfont_set_language(ttfont::glb_font, LOCALE);
         alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
