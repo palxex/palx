@@ -55,6 +55,6 @@ public:
 	void clear();
 	void clear(int n,int n2);
 };
-extern cached_res /*MIDI,*/VOC,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;
+extern cached_res /*MIDI,*/SFX,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;
 
 #endif

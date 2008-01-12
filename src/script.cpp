@@ -560,7 +560,7 @@ __ride:
 			scene->produce_one_screen();
         break;
     case 0x47:
-        voc(VOC.decode(param1)).play();
+        voc(SFX.decode(param1)).play();
         break;
 	case 0x48: //lost script...
         //not implemented

@@ -126,6 +126,7 @@ void playrix::play(int sub_song,int times)
 	memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
 	memset(stream->samp,0,sizeof(stream->samp));
 
+    rest(150);
 	begin=true;
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
@@ -137,7 +138,7 @@ void playrix::stop(int gap)
 voc::voc(uint8_t *f):spl(load_voc_mem(f))
 {}
 
-
+bool not_voc=false;
 SAMPLE *voc::load_voc_mem(uint8_t *src)
 {
    char buffer[30];
@@ -155,8 +156,10 @@ SAMPLE *voc::load_voc_mem(uint8_t *src)
    //pack_fread(buffer, 0x16, f);
    memcpy(buffer,f,0x16);f+=0x16;
 
-   if (memcmp(buffer, "Creative Voice File", 0x13))
+   if (memcmp(buffer, "Creative Voice File", 0x13)){
+	   not_voc=true;
       goto getout;
+   }
 
    ver = ((uint16_t*)f)[0];f+=2;
    if (ver != 0x010A && ver != 0x0114) /* version: should be 0x010A or 0x0114 */
@@ -240,5 +243,6 @@ getout:
 
 void voc::play()
 {
-	voices[vocs++]=play_sample(spl,255,128,1000,0);
+	if(!not_voc)
+		voices[vocs++]=play_sample(spl,255,128,1000,0);
 }
