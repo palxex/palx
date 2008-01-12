@@ -90,4 +90,4 @@ void cached_res::clear(int n, int n2){
 	cache.erase(iter);
 }
 
-cached_res MIDI,VOC,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;
+cached_res MIDI,SFX,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;

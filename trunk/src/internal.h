@@ -21,19 +21,18 @@
 #define CONSTANTS
 
 #include "structs.h"
-#include <string>
 #include <vector>
 #include <map>
-
-extern std::string path_root;
 
 struct Scene;
 struct BattleScene;
 class playrix;
 class Game;
+class global_init;
 extern Scene *scene;
 extern BattleScene *battle_scene;
 extern playrix *rix;
+extern global_init *global;
 
 extern bool flag_battling;
 
@@ -80,7 +79,6 @@ extern int scale;
 extern int x_off,y_off;
 extern bool running;
 
-extern int global_init(char* );
 extern void Load_Data();
 extern void GameLoop_OneCycle(bool);
 extern bool process_Menu();

@@ -21,6 +21,7 @@
 #include "scene.h"
 #include "game.h"
 #include "begin.h"
+#include "config.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -28,8 +29,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	int save=global_init("dosbox.conf");
 	try{
+		global_init _global("palx.conf");global=&_global;
+		int save=_global();
 		bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
 		bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;
 		bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;

@@ -207,6 +207,10 @@
 					RelativePath=".\PalLibrary\src\yj1.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\PalLibrary\src\yj2.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="alleg"
@@ -396,6 +400,10 @@
 					</File>
 					<File
 						RelativePath=".\src\battle.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\config.h"
 						>
 					</File>
 					<File

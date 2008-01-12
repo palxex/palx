@@ -21,6 +21,7 @@
 #include "alfont.h"
 #include "internal.h"
 #include "scene.h"
+#include "config.h"
 
 using namespace std;
 volatile uint8_t time_interrupt_occurs;
@@ -150,7 +151,7 @@ namespace res{
             return;
         pat.read(0);
         char name[80];
-        sprintf(name,"%s/%d.RPG",path_root.c_str(),id);
+        sprintf(name,"%s/%d.RPG",global->get<string>("config","path").c_str(),id);
         FILE *fprpg=fopen(name,"rb");
         if(!fprpg){
 			pat.set(rpg.palette_offset);
@@ -180,7 +181,7 @@ namespace res{
         SSS.clear();
         //DATA.clear();
         //ABC.clear();
-        //VOC.clear();
+        //SFX.clear();
         //BALL.clear();
         //RGM.clear();
         //FBP.clear();
@@ -191,7 +192,7 @@ namespace res{
     }
     void save(int id){
         char name[80];
-        sprintf(name,"%s/%d.RPG",path_root.c_str(),id);
+        sprintf(name,"%s/%d.RPG",global->get<string>("config","path").c_str(),id);
         FILE *fprpg=fopen(name,"wb");
 		rpg.save_times=1;
         copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
