@@ -752,8 +752,8 @@ __ride:
         role_speed=2;
 __walk_role:
         {
-            int16_t x_diff,y_diff;
-            while ((x_diff=scene->team_pos.x-(param1*32+param3*16)) && (y_diff=scene->team_pos.y-(param2*16+param3*8)))
+            int16_t x_diff=scene->team_pos.x-(param1*32+param3*16),y_diff=scene->team_pos.y-(param2*16+param3*8);
+            while (x_diff || y_diff )
             {
                 backup_position();
                 rpg.team_direction=calc_faceto(-x_diff,-y_diff);
@@ -765,7 +765,10 @@ __walk_role:
                 GameLoop_OneCycle(false);
                 scene->move_usable_screen();
                 redraw_everything();
+				x_diff=scene->team_pos.x-(param1*32+param3*16),y_diff=scene->team_pos.y-(param2*16+param3*8);
             }
+			for(int i=0;i<=rpg.team_roles;i++)
+				rpg.team[i].frame=rpg.team_track[i].direction*3;
         }
         break;
 	case 0x71:

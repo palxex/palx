@@ -266,6 +266,13 @@ global_init::global_init(char *name):conf(name)
 		extract_ptr=deyj1_ptr,extract_sp=deyj1_sp,sfx_file="VOC.MKF";
 	else if(get<string>("config","resource")=="win95")
 		extract_ptr=deyj2_ptr,extract_sp=deyj2_sp,sfx_file="SOUNDS.MKF";
+
+	if(get<string>("config","encoding")=="")
+	  if(get<string>("config","resource")=="dos")
+	    set<string>("config","encode",LOCALE);
+	  else if(get<string>("config","resource")=="win95")
+	    set<string>("config","encode","GBK");
+
 	if(get<string>("debug","resource")=="mkf")
 	{
 		de_none			=bind(denone_file,_1,_4);
@@ -305,19 +312,21 @@ int global_init::operator ()()
 
 	msges.set(path_root+"/M.MSG");
 	objs.set(path_root+"/WORD.DAT");
+	playrix::set((path_root+"/MUS.MKF").c_str());
 
 	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_SAFE);
 
 	//allegro init
 	allegro_init();
-	LOCK_FUNCTION(close_button_handler);
-	set_close_button_callback(close_button_handler);
-	install_timer();
-	install_keyboard();
-	keyboard_lowlevel_callback = key_watcher;
-	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	set_gfx_mode(CARD,get<int>("display","height"),get<int>("display","width"),0,0);
 	set_color_depth(8);
+	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
+	install_timer();
+	install_keyboard();keyboard_lowlevel_callback = key_watcher;
+	//install_mouse();enable_hardware_cursor();select_mouse_cursor(MOUSE_CURSOR_ARROW);show_mouse(screen);
+
+	LOCK_FUNCTION(close_button_handler);
+	set_close_button_callback(close_button_handler);
 
 	if(get<string>("font","type")=="truetype")
 	{
@@ -333,7 +342,6 @@ int global_init::operator ()()
 	{}
 
 	randomize();
-	playrix::set((path_root+"/MUS.MKF").c_str());
 
 	int save=0;
 	if(get<bool>("config","allow_memory"))
