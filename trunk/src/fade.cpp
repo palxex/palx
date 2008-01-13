@@ -188,13 +188,17 @@ int shake_times=0,shake_grade=0;
 void shake_screen()
 {
 #undef screen
-    if(--shake_times<0x10)
-		shake_grade*=(15.0/16);
+	if(shake_times>0){
+		if(--shake_times<0x10)
+			shake_grade*=(15.0/16);
+	}else
+        shake_grade=0;
     blit(fakescreen,screen,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
 }
 void flush_screen()
 {
 #undef screen
+    vsync();
     blit(fakescreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 struct calc_waving

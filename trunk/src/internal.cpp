@@ -63,9 +63,9 @@ void switch_proc()
 		int &mode=CARD;
 		static PALETTE pal;bitmap bak(NULL,SCREEN_W,SCREEN_H);
 		if(mode==GFX_AUTODETECT_WINDOWED || mode ==GFX_AUTODETECT)
-			mode=GFX_AUTODETECT_FULLSCREEN;
+			mode=GFX_SAFE;
 		else
-			mode=GFX_AUTODETECT_WINDOWED;
+			mode=GFX_AUTODETECT;
 		get_palette(pal);blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		vsync();
 		set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0);

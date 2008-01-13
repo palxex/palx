@@ -126,7 +126,6 @@ void playrix::play(int sub_song,int times)
 	memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
 	memset(stream->samp,0,sizeof(stream->samp));
 
-    rest(150);
 	begin=true;
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
