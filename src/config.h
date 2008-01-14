@@ -123,6 +123,12 @@ public:
 	section &getSection(char *sec){
 		return sections[std::string(sec)];
 	}
+	template<typename T>
+	void set(char *sec,char *name,T val)
+	{
+	    needwrite=true;
+        getSection(sec).set(name,val);
+	}
 };
 
 class global_init{
@@ -138,7 +144,7 @@ public:
 	template<typename T>
 	void set(char *sec,char *name,T val)
 	{
-		conf.getSection(sec).set(name,val);
+		conf.set(sec,name,val);
 	}
 	int operator()();
 };

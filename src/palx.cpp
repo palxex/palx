@@ -50,7 +50,8 @@ int main(int argc, char *argv[])
         load();
         run();
 		destroy_resource();
-		  }
+		  }else
+            global->set<string>("config","path",".");
 	}catch(exception *){
 		allegro_exit();
 	}
