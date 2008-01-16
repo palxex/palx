@@ -64,8 +64,12 @@ class ini_parser
 				if(line=="")
 					continue;
 				line.erase(find(line.begin(),line.end(),'\r'),line.end());//remove 0xA!DOS/Win text signature
-				if(find(line.begin(),line.end(),';')!=line.end())
+				if(find(line.begin(),line.end(),';')!=line.end()){
+					std::string _comment;
 					copy(find(line.begin(),line.end(),';')+1,line.end(),back_inserter(comment));
+					std::istringstream ss(_comment);
+					ss>>comment;
+				}
 				line.erase(find(line.begin(),line.end(),';'),line.end());//comments
 				if(find(line.begin(),line.end(),'=')==line.end())
 					continue;

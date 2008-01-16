@@ -178,7 +178,7 @@ extern void add_goods_to_list(int,int);
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
     //printf("%s\n",scr_desc(func,param).c_str());
-    int16_t &param1=param[0],&param2=param[1],&param3=param[2];
+    const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
     EVENT_OBJECT &obj=evtobjs[object];
 #define curr_obj (param1<0?obj:evtobjs[param1])
     int role=rpg.team[(object>=0&&object<=4)?object:0].role;

@@ -267,7 +267,7 @@ global_init::global_init(char *name):conf(name)
 	else if(get<string>("config","resource")=="win95")
 		extract_ptr=deyj2_ptr,extract_sp=deyj2_sp,sfx_file="SOUNDS.MKF";
 
-	if(get<string>("config","encoding")=="")
+	if(get<string>("config","encode")=="")
 	  if(get<string>("config","resource")=="dos")
 	    set<string>("config","encode",LOCALE);
 	  else if(get<string>("config","resource")=="win95")
