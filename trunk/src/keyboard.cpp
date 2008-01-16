@@ -24,8 +24,8 @@
 		std::map<int,int> mymap;
 	public:
 		__scancode_map(){
-			mymap[KEY_UP]=0x48;
 			mymap[KEY_LEFT]=0x4b;
+			mymap[KEY_UP]=0x48;
 			mymap[KEY_RIGHT]=0x4d;
 			mymap[KEY_DOWN]=0x50;
 		}

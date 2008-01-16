@@ -89,20 +89,18 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	ini_parser::section::configmap musicprop;
 	musicprop["type"].value="rix";
 	musicprop["type"].comment="rix/mid/foreverCD,+gameCD,+gameCDmp3，或任意混合。foreverCD指永恒回忆录之FM曲集";
-	musicprop["volume"].value="100";
-	musicprop["volume"].comment="0-100;音量";
-	musicprop["enable"].value="true";
-	musicprop["enable"].comment="允许/禁止音乐";
-	musicprop["enable_sfx"].value="true";
-	musicprop["enable_sfx"].comment="允许/禁止音效";
+	musicprop["volume"].value="255";
+	musicprop["volume"].comment="0-255;音量";
+	musicprop["volume_sfx"].value="255";
+	musicprop["volume_sfx"].comment="0-255;音效音量";
 	section music("music",musicprop,"与setup正交");
 	sections["music"]=music;
 
 	ini_parser::section::configmap keyprop;
-	keyprop["west"].value="";
-	keyprop["north"].value="";
-	keyprop["east"].value="";
-	keyprop["south"].value="";
+	keyprop["west"].value="0x4b";
+	keyprop["north"].value="0x48";
+	keyprop["east"].value="0x4d";
+	keyprop["south"].value="0x50";
 	section keymap("keymap",keyprop,"行走键盘定义；与setup正交");
 	sections["keymap"]=keymap;
 
@@ -247,13 +245,25 @@ namespace{
 }
 
 int CARD=0;
-void close_button_handler(void)
-{
-	//if(!yesno_dialog()) return;
-	running=false;
-	remove_timer();
+namespace{
+    void close_button_handler(void)
+    {
+        //if(!yesno_dialog()) return;
+        running=false;
+        remove_timer();
+    }
+    END_OF_FUNCTION(close_button_handler)
+    int volume;
+    void switchin_proc()
+    {
+        global->set<int>("music","volume",volume);
+    }
+    void switchout_proc()
+    {
+        volume=global->get<int>("music","volume");
+        rix->stop();
+    }
 }
-END_OF_FUNCTION(close_button_handler)
 
 global_init::global_init(char *name):conf(name)
 {
@@ -317,6 +327,9 @@ int global_init::operator ()()
 	//allegro init
 	allegro_init();
 	set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0);
+	//set_display_switch_mode(SWITCH_BACKGROUND);
+	//set_display_switch_callback(SWITCH_IN,switchin_proc);
+	//set_display_switch_callback(SWITCH_OUT,switchout_proc);
 	set_color_depth(8);
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	install_timer();

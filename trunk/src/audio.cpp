@@ -18,6 +18,8 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
+#include "internal.h"
+#include "config.h"
 
 #define BUFFER_SIZE 5040
 
@@ -85,11 +87,11 @@ void playrix_timer(void *param)
 END_OF_FUNCTION(playrix_timer);
 
 char playrix::mus[80];
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),Buffer(0),stream(0)
+playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),Buffer(0),stream(0),max_vol(global->get<int>("music","volume"))
 {
 	int BufferLength=SAMPLE_RATE*CHANNELS*10;
 	rix.load(mus, CProvider_Filesystem());
-	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, 255, 128);
+	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, max_vol, 128);
 	LOCK_VARIABLE(Buffer);
 	LOCK_VARIABLE(stream);
 	LOCK_VARIABLE(opl);
@@ -128,13 +130,13 @@ void playrix::play(int sub_song,int times)
 
 	begin=true;
 	voice_set_volume(stream->voice,1);
-	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, 255);
+	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, max_vol);
 }
 void playrix::stop(int gap)
 {
 	voice_ramp_volume(stream->voice, gap*1000, 0);
 }
-voc::voc(uint8_t *f):spl(load_voc_mem(f))
+voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume"))
 {}
 
 bool not_voc=false;
@@ -243,5 +245,5 @@ getout:
 void voc::play()
 {
 	if(!not_voc)
-		voices[vocs++]=play_sample(spl,255,128,1000,0);
+		voices[vocs++]=play_sample(spl,max_vol,128,1000,0);
 }
