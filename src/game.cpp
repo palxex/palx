@@ -110,7 +110,21 @@ namespace res{
         long len=0;
         EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
         SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
-        reunion(setup,      SETUP.decode(len), len);
+		if(!global->get<bool>("config","setup")){
+			struct{
+				int operator()(const string &i){
+					istringstream in(i);
+					int x;
+					in>>hex>>x;
+					return x;
+				}
+			}getint;
+			setup.key_left=getint(global->get<string>("keymap","west"));
+			setup.key_up=getint(global->get<string>("keymap","north"));
+			setup.key_right=getint(global->get<string>("keymap","east"));
+			setup.key_down=getint(global->get<string>("keymap","south"));
+		}else
+			reunion(setup,      SETUP.decode(len), len);
 
         reunion(evtobjs,	SSS.decode(0,len), len);
         reunion(scenes,		SSS.decode(1,len), len);

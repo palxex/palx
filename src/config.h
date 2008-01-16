@@ -104,7 +104,6 @@ class ini_parser
 			return keymap[name].value=="true";
 		}
 		int get(const char *name,int){
-		    const char *t=keymap[name].value.c_str();
 			return boost::lexical_cast<int>("0"+keymap[name].value);
 		}
 		void set(const char *name,const std::string &val){

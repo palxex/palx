@@ -116,6 +116,7 @@ class playrix
 	short 		*Buffer;
 	friend void playrix_timer(void *);
 	static char mus[80];
+	int max_vol;
 public:
 	playrix();
 	~playrix();
@@ -130,6 +131,7 @@ public:
 class voc{
 	SAMPLE *spl;
 	SAMPLE *load_voc_mem(uint8_t *f);
+	int max_vol;
 public:
 	voc(uint8_t *);
 	void play();
