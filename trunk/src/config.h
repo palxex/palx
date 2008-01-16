@@ -97,23 +97,23 @@ class ini_parser
 		std::string name() const{
 			return section_name;
 		}
-		std::string get(char *name,std::string){
+		std::string get(const char *name,std::string){
 			return keymap[name].value;
 		}
-		bool get(char *name,bool){
+		bool get(const char *name,bool){
 			return keymap[name].value=="true";
 		}
-		int get(char *name,int){
+		int get(const char *name,int){
 		    const char *t=keymap[name].value.c_str();
 			return boost::lexical_cast<int>("0"+keymap[name].value);
 		}
-		void set(char *name,const std::string &val){
+		void set(const char *name,const std::string &val){
 			keymap[name].value=val;
 		}
-		void set(char *name,bool val){
+		void set(const char *name,bool val){
 			keymap[name].value=(val?"true":"false");
 		}
-		void set(char *name,int val){
+		void set(const char *name,int val){
 			keymap[name].value=boost::lexical_cast<std::string>(val);
 		}
 	};
@@ -124,11 +124,11 @@ public:
 	ini_parser(char *conf);
 	void write();
 	~ini_parser();
-	section &getSection(char *sec){
+	section &getSection(const char *sec){
 		return sections[std::string(sec)];
 	}
 	template<typename T>
-	void set(char *sec,char *name,T val)
+	void set(const char *sec,const char *name,T val)
 	{
 	    needwrite=true;
         getSection(sec).set(name,val);
@@ -141,12 +141,12 @@ public:
 	std::string sfx_file;
 	global_init(char *name);
 	template<typename T>
-	T get(char *sec,char *name)
+	T get(const char *sec,const char *name)
 	{
 		return conf.getSection(sec).get(name,T());
 	}
 	template<typename T>
-	void set(char *sec,char *name,T val)
+	void set(const char *sec,const char *name,T val)
 	{
 		conf.set(sec,name,val);
 	}
