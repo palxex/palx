@@ -198,7 +198,7 @@ void shake_screen()
 void flush_screen()
 {
 #undef screen
-    vsync();
+    //vsync();
     blit(fakescreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 struct calc_waving
