@@ -67,9 +67,9 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	sections["debug"]=debug;
 
 	ini_parser::section::configmap displayprop;
-	displayprop["height"].value="320";
+	displayprop["height"].value="200";
 	displayprop["height"].comment="粒度;320x200正整数倍.";
-	displayprop["width"].value="200";
+	displayprop["width"].value="320";
 	displayprop["scale"].value="none";
 	displayprop["scale"].comment="none, 2x; etc.";
 	displayprop["fullscreen"].value="false";
@@ -113,8 +113,6 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 			ifs>>s;
 			sections[s.name()]=s;
 		}
-	else
-		needwrite=true;
 }
 
 void ini_parser::write(){
@@ -318,7 +316,7 @@ int global_init::operator ()()
 
 	//allegro init
 	allegro_init();
-	set_gfx_mode(CARD,get<int>("display","height"),get<int>("display","width"),0,0);
+	set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0);
 	set_color_depth(8);
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	install_timer();
