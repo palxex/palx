@@ -158,6 +158,7 @@ int begin_scene::operator()(){
 	MGO.clear();
 	FBP.clear();
 	RNG.clear();
+	res::rpg.chase_range=1;
 	return select_scene();
 }
 
