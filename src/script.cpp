@@ -583,7 +583,7 @@ __ride:
 				int x_off=obj.pos_x-scene->team_pos.toXY().x,y_off=obj.pos_y-scene->team_pos.toXY().y;
 				position pos(obj.pos_x,obj.pos_y);pos.toXYH();pos.toXY();
 				if(abs(x_off)+2*abs(y_off)<guard_field*32*rpg.chase_range){
-					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(rnd0()?-1:1),y_off?-y_off:(rnd0()?-1:1));
+					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(rnd0()?-1:1),y_off?-y_off:(rnd0()?-1:1)));
 					if(param3)
 						obj.direction=d,
 						npc_speed=chase_speed;
@@ -728,7 +728,7 @@ __ride:
         }
         break;
     case 0x6e:
-        backup_position();        
+        backup_position();
 		viewport_x_bak=rpg.viewport_x;
 		viewport_y_bak=rpg.viewport_y;
         rpg.viewport_x+=param1;
