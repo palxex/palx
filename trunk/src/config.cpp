@@ -47,7 +47,7 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	configprop["path"].comment="资源路径";
 	configprop["setup"].value="true";
 	configprop["setup"].comment="Bool;是否用setup.dat里的设置覆盖这里的对应设置";
-	configprop["allow_memory"].value="";
+	configprop["allow_memory"].value="false";
 	configprop["allow_memory"].comment="Bool;是否允许跨进程记忆最后存档";
 	configprop["last"].value="";
 	configprop["last"].comment="Int;最后载入的存档";
@@ -55,6 +55,8 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	configprop["resource"].comment="dos/win95/ss(?)";
 	configprop["encode"].value=LOCALE;
 	configprop["encode"].comment="win32:chs/cht;linux/mac/dos/...(iconv):GBK/BIG5";
+	configprop["switch_off"].value="false";
+	configprop["switch_off"].comment="控制切换出窗口时程序是否继续执行";
 	section config("config",configprop);
 	sections["config"]=config;
 
@@ -327,7 +329,8 @@ int global_init::operator ()()
 	//allegro init
 	allegro_init();
 	set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0);
-	//set_display_switch_mode(SWITCH_BACKGROUND);
+	if(get<bool>("config","switch_off"))
+        set_display_switch_mode(SWITCH_BACKGROUND);
 	//set_display_switch_callback(SWITCH_IN,switchin_proc);
 	//set_display_switch_callback(SWITCH_OUT,switchout_proc);
 	set_color_depth(8);
