@@ -141,4 +141,7 @@ enum VKEY { VK_NONE=0,VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGU
 VKEY get_key(bool =true);
 VKEY get_key_lowlevel();
 void key_watcher(int scancode);
+
+void SAFE_GETKEY(VKEY &,bool =false);
+
 #endif

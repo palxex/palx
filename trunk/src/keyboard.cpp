@@ -120,6 +120,21 @@ VKEY get_key(bool clear)
 	}
 	return keygot;
 }
+void SAFE_GETKEY(VKEY &x,bool etc)
+{
+	do{ 
+		while(!(x=get_key()))
+		{
+			extern bool running;
+			if(!running)
+				throw new std::exception();
+			switch_proc();
+			if(etc)
+				return;
+			rest(10);
+		}
+	}while(false);
+}
 int make_layer(int key)
 {
 	if(2<=key && key<=3)

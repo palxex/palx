@@ -28,7 +28,9 @@ void randomize()
 {
 	time_t t;
 	time(&t);
-	double f=t;
+	struct tm *local;
+	local=localtime(&t);
+	double f=(local->tm_hour*60+local->tm_min)*60+local->tm_sec;
 	uint64_t u=*reinterpret_cast<uint64_t*>(&f);
 	seed=((u>>48)^((u>>32)&0xffff))<<8;
 }
