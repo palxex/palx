@@ -1086,6 +1086,7 @@ __walk_role:
     case 0xa0:
         clear_bitmap(screen);
         running=false;
+		throw new std::exception();
         break;
 	case 0xa1:
 		//not implemented

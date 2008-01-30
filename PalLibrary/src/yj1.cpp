@@ -57,6 +57,7 @@ YJ_1½âÂë¹ý³Ì£º
 
 #include <stdlib.h>
 #include <memory.h>
+#include <string.h>
 
 #include "pallib.h"
 using namespace Pal::Tools;

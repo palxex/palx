@@ -31,7 +31,7 @@ void startup_splash()
 	bitmap(FBP.decode(0x27),320,200).blit_to(cat,0,0,0,200);
 
 	sprite_prim goose(MGO,0x49),title(MGO,0x47);
-	uint16_t &title_height=((uint16_t *)MGO.decode(0x47))[3],max_height=title_height,temp_height=0;
+	uint16_t &title_height=((uint16_t *)MGO.decode(0x47))[3],max_height=title_height,temp_height=8;
 	int poses[9][3];
 	for(int i=0;i<9;i++){
 		poses[i][0]=rnd0()*260+420;
@@ -59,6 +59,7 @@ void startup_splash()
 		title_height=temp_height;
 		title.getsprite(0)->blit_to(scrn_buf,0xFE,10);
 		blit(scrn_buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		perframe_proc();
 		wait(10);
 		prog_pale=begin_pale/10;
 		begin_pale+=add_pale;
@@ -73,7 +74,8 @@ void startup_splash()
 			}
 			set_palette(pal);
 		}
-	}while((keygot=get_key())!=VK_EXPLORE);
+		SAFE_GETKEY(keygot,true);
+	}while(keygot!=VK_EXPLORE);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){

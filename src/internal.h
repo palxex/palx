@@ -125,18 +125,6 @@ extern void play_RNG(int begin,int end,int gap);
 
 extern bool prelimit_OK;
 
-#define SAFE_GETKEY(x) \
-	do{ \
-		while(!(x=get_key())) \
-		{ \
-			extern bool running; \
-			if(!running) \
-				throw new std::exception(); \
-			switch_proc(); \
-			rest(10); \
-		} \
-	}while(false)
-
 extern int compact_items();
 extern void learnmagic(bool flag_dialog,int magic,int role);
 
