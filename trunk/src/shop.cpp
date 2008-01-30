@@ -21,7 +21,7 @@
 
 class Shop:public single_menu
 {
-	
+
 };
 void shop(int num)
 {
@@ -29,7 +29,7 @@ void shop(int num)
 	for(int i=0;i<9;i++)
 		if(res::shops[num].item[i])
 			items.push_back(objs(res::shops[num].item[i]*10));
-	menu(0x7a,8,items,5,9,9)(&single_menu(),0);
+	menu(0x7a,8,items,5,9,9)(single_menu(),0);
 }
 void hockshop()
 {}

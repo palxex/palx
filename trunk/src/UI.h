@@ -49,19 +49,20 @@ struct menu
 public:
 	menu(int x,int y,int menus,int begin,int chars,int style=0,bool shadow=true);
 	menu(int x,int y,std::vector<std::string> &strs,int chars,int length=-1,int =0);
-	int operator()(menu_tmp *,int selected=0);
+	int operator()(const menu_tmp &,int selected=0);
 };
 struct menu_tmp
 {
 	int got;
 	int selected;
 	int color_selecting;
-	menu_tmp():color_selecting(0xFA),got(-1){}
+	menu_tmp():got(-1),color_selecting(0xFA){}
 	virtual void prev_action(menu*)=0;
 	virtual void post_action(menu*)=0;
 	virtual void draw(menu*)=0;
 	virtual int select(menu*,int)=0;
 	virtual int keyloop(menu*)=0;
+	virtual ~menu_tmp(){}
 };
 struct single_menu:public menu_tmp
 {

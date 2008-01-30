@@ -1229,7 +1229,7 @@ uint16_t process_script(uint16_t id,int16_t object)
             break;
         case 6:
             //printf("以%d%%几率跳转到脚本%x:",param1,param2);
-            if (rnd0()*100<param1)
+            if (rnd1(100)<param1)
             {
                 //printf("成功\n");
 				if(!param2){
@@ -1297,7 +1297,6 @@ uint16_t process_script(uint16_t id,int16_t object)
         }
         ++id;
     }
-exit:
     if (current_dialog_lines>0)
         show_wait_icon();
     return id;
@@ -1350,7 +1349,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
         break;
     case 6:
         //printf("以%d%%几率跳转到脚本%x:",param1,param2);
-        if (rnd0()*100<param1 && param2)
+        if (rnd1(100)<param1 && param2)
             //printf("成功\n");
             id = process_autoscript(param2,object) - 1;
         break;

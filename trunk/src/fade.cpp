@@ -166,7 +166,7 @@ void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 void palette_fade(PALETTE &src,const PALETTE &dst)
 {
 	uint8_t *usrc=(uint8_t*)src,*udst=(uint8_t*)dst;
-	for(int i=0;i<sizeof(src);i++)
+	for(size_t i=0;i<sizeof(src);i++)
 		if(udst[i]<usrc[i])
 			usrc[i]--;
 		else if(udst[i]>usrc[i])
@@ -190,7 +190,7 @@ void shake_screen()
 #undef screen
 	if(shake_times>0){
 		if(--shake_times<0x10)
-			shake_grade*=(15.0/16);
+			shake_grade=(int)(shake_grade*(15.0/16));
 	}else
         shake_grade=0;
     blit(fakescreen,screen,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
@@ -225,7 +225,5 @@ void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height)
 			blit(buffer,dst,-calc.result[t],i,0,i,SCREEN_W+calc.result[t]+1,1);
 			blit(buffer,dst,0,i,SCREEN_W+calc.result[t]+1,i-1,-calc.result[t],1);
 		}
-	char buf[80];sprintf(buf,"tmp/%d.bmp",grade);
-	save_bitmap(buf,dst,_current_palette);
 	index=(index+1)%32;
 }

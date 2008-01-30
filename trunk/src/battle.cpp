@@ -35,7 +35,7 @@ static struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{18
 
 void battle::draw(int delay,int time)
 {
-	stage_blow_away+=rnd0()*max_blow_away;
+	stage_blow_away+=rnd1(max_blow_away);
 
 	for(int i=1;i<=time;i++)
 	{
@@ -70,7 +70,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	for(int i=0;i<5;i++)
 		if(res::enemyteams[enemy_team].enemy[i]>0)
 			enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].inbeing);
-	
+
 	thebattle=this;
 }
 battle::~battle()

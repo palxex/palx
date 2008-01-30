@@ -36,6 +36,7 @@ namespace{
 		//Parse Key
 		VKEY keygot=get_key_lowlevel();
 
+        flag_to_load=0;
 		GameLoop_OneCycle(true);
 		if(flag_to_load){
 			Load_Data();

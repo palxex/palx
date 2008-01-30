@@ -74,6 +74,7 @@ extern std::map<int,int> npc_mgos;
 
 extern void randomize();
 extern float rnd0();
+extern int rnd1(int);
 
 extern int scale;
 extern int x_off,y_off;
