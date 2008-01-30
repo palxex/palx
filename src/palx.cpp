@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		destroy_resource();
 		  }else
             global->set<string>("config","path",".");
-	}catch(exception *){
+	}catch(...){
 		allegro_exit();
 	}
 	return 0;
