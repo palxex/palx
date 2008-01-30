@@ -54,7 +54,7 @@ namespace res{
 
 	void init_resource();
 	void destroy_resource();
-	void load(int id=rpg_to_load);
+	bool load(int id=rpg_to_load);
 	void save(int id);
 	int run();
 };

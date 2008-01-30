@@ -35,7 +35,6 @@ void playrix_timer(void *param)
 	playrix * const plr=reinterpret_cast<playrix*>(param);
 	if(voice_get_volume(plr->stream->voice)==0)
 		begin=false;
-	int f=0;
 	for(int i=0;i<vocs;i++)
 		if (!voice_check(voices[i])){
 			destroy_sample(voice_check(voices[i]));

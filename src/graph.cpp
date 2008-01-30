@@ -22,7 +22,7 @@
 #include "game.h"
 
 bitmap::bitmap(const uint8_t *src,int w,int h):
-	width(w),height(h),bmp(create_bitmap(w,h))
+	bmp(create_bitmap(w,h)),width(w),height(h)
 {
 	if(src)
 		memcpy(bmp->dat,src,width*height);
@@ -44,7 +44,7 @@ bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_
 	blit(bmp,dest,source_x,source_y,dest_x,dest_y,std::max(bmp->w,dest->w),std::max(bmp->h,dest->h));
 	return true;
 }
-sprite::sprite(uint8_t *src):x(0),y(0),l(0),width(0),height(0),buf(src)
+sprite::sprite(uint8_t *src):buf(src),x(0),y(0),l(0),width(0),height(0)
 {
 	width=((uint16_t*)src)[0];
 	height=((uint16_t*)src)[1];
@@ -89,14 +89,11 @@ bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 		uint8_t *rle = buf + 4, *dst;
 		int l = dest->w;
 
-		BITMAP *bmp;
+		bitmap bmp(screen);
 		if(dest!=screen)
 			dst=(uint8_t *)dest->dat;
-		else{
-			bmp=create_bitmap(SCREEN_W,SCREEN_H);
-			blit(screen,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
-			dst=(uint8_t *)bmp->dat;
-		}
+		else
+			dst=(uint8_t *)((BITMAP*)bmp)->dat;
 
 		for(int i=(y+sy)*l+x+sx,prei=i;i<(y+sy+height)*l+x+sx && i<=dest->w*dest->h;i=prei+l,prei=i)
 			for(int j=0;j<width;)

@@ -97,6 +97,8 @@ int select_rpg(int ori_select,BITMAP *bmp)
 			case VK_EXPLORE:
 				ok=0;
 				break;
+            default:
+                break;
 		}
 		selected=(selected<=1?1:selected);
 	}while(ok);
@@ -116,9 +118,9 @@ menu::menu(int x,int y,std::vector<std::string> &strs,int chars,int length,int s
 	menu_items.swap(strs);
 	blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
-int menu::operator()(menu_tmp *con,int _selected)
+int menu::operator()(const menu_tmp &con,int _selected)
 {
-	return con->select(this,_selected);
+	return const_cast<menu_tmp&>(con).select(this,_selected);
 }
 int single_menu::select(menu *abs,int _selected)
 {
@@ -169,9 +171,12 @@ int single_menu::keyloop(menu *abs)
 			got=1;
 			color_selecting=0x2B;
 			break;
+        default:
+            break;
 	}
 	selected+=(int)abs->menu_items.size();
 	selected%=abs->menu_items.size();
+	return selected;
 }
 void single_menu::prev_action(menu *abs)
 {
@@ -261,12 +266,14 @@ int multi_menu::keyloop(menu *abs)
 				got=1;
 				color_selecting=0x2B;
 				break;
+            default:
+                break;
 		}
 		return selected=(selected<0?0:(selected>max-1?max-1:selected));
 }
 int select_item(int mask,int skip,int selected)
 {
-	return menu(2,33,8,0,18,9,false)(&multi_menu(mask,skip),selected);
+	return menu(2,33,8,0,18,9,false)(multi_menu(mask,skip),selected);
 }
 
 struct magic_menu:public multi_menu
@@ -290,5 +297,5 @@ struct magic_menu:public multi_menu
 };
 int select_theurgy(int role,int mask,int selected)
 {
-	return menu(2,33,8,0,18,9,false)(&magic_menu(role,mask),selected);
+	return menu(2,33,8,0,18,9,false)(magic_menu(role,mask),selected);
 }

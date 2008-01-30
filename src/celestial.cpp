@@ -65,3 +65,4 @@ static void _set_allegro_icon(void)
     allegro_icon = celestial_xpm;
 }
 #endif
+int __just_for_eliminating_the_warning_gcc_reported=celestial_xpm[0][0];

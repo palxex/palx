@@ -42,10 +42,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd 4819"
+				AdditionalOptions="/wd 4819 /wd 4985"
 				Optimization="0"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALFONT_DLL"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALFONT_DLL;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -129,7 +129,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd 4819"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

@@ -41,7 +41,7 @@ tile &palmap::gettile(int x,int y,int h,int l)
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return non_valid;
 	return sprites[x][y][h][l];
 }
-palmap::palmap():curr_map(0),scene_map(0,SCREEN_W,SCREEN_H),sprites(boost::extents[0x40][0x80][2][2])
+palmap::palmap():scene_map(0,SCREEN_W,SCREEN_H),curr_map(0),sprites(boost::extents[0x40][0x80][2][2])
 {
 	for(int i=0;i<0x40;i++)
 		for(int j=0;j<0x80;j++)
@@ -173,7 +173,7 @@ void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 	case 0:
 		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
 			for(int vx=(res::rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(res::rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
-				for(int vy=(res::rpg.viewport_y+masker->y-masker->height)/16-1,vh=(res::rpg.viewport_y+masker->y)%16/8;vy<=(res::rpg.viewport_y+masker->y)/16+1;vy++)
+				for(int vy=(res::rpg.viewport_y+masker->y-masker->height)/16-1;vy<=(res::rpg.viewport_y+masker->y)/16+1;vy++)
 					for(int x=vx-1,y=vy;x<=vx+1 && y>=0;x++)
 						for(int h=0;h<2;h++)
 						{

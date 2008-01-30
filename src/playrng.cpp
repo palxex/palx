@@ -25,7 +25,6 @@
 int RNG_num;
 void play_RNG(int begin,int end,int gap)
 {
-	extern decoder_func de_mkf_t;
 	int total_clips=RNG.slices(RNG_num);
 	bitmap cache(0,320,200);
 	blit(screen,cache,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);

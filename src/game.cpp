@@ -24,6 +24,7 @@
 #include "config.h"
 
 using namespace std;
+using namespace boost;
 volatile uint8_t time_interrupt_occurs;
 int mutex_paletting=0,mutex_blitting=0,mutex_int=0;
 int scale=1;
@@ -160,19 +161,16 @@ namespace res{
     /*/
     extern "C" __declspec(dllimport) uint32_t __stdcall GetLastError();/*/
     int GetLastError(){return 0;}//*/
-    void load(int id){
-        if(!id)
-            return;
+    bool load(int id){
         pat.read(0);
-        char name[80];
-        sprintf(name,"%s/%d.RPG",global->get<string>("config","path").c_str(),id);
-        FILE *fprpg=fopen(name,"rb");
-        if(!fprpg){
-			pat.set(rpg.palette_offset);
-			map_toload=(rpg.scene_id?rpg.scene_id:1);
-            return;
-        }
-        flag_to_load=0x12;
+        string name=global->get<string>("config","path")+"/"+lexical_cast<string>(id)+".RPG";
+		FILE *fprpg=fopen(name.c_str(),"rb");
+        if(!fprpg)
+            return false;
+		if(fgetc(fprpg)==0 && fgetc(fprpg)==0){// dos pal emulation
+			fclose(fprpg);
+			return false;
+		}
         rpg_to_load=id;
         scene->scenemap.change(-1);
         fread(&rpg,sizeof(RPG),1,fprpg);
@@ -188,7 +186,7 @@ namespace res{
         scenes.clear();scenes.push_back(SCENE());
         reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
         fclose(fprpg);
-        flag_to_load=0x17;
+        flag_to_load=0x1D;
         MAP.clear();
         GOP.clear();
         RNG.clear();
@@ -203,11 +201,11 @@ namespace res{
         //FIRE.clear();
         //MGO.clear();
         pal_fade_out(1);
+		return true;
     }
     void save(int id){
-        char name[80];
-        sprintf(name,"%s/%d.RPG",global->get<string>("config","path").c_str(),id);
-        FILE *fprpg=fopen(name,"wb");
+        string name=global->get<string>("config","path")+"/"+lexical_cast<string>(id)+".RPG";
+		FILE *fprpg=fopen(name.c_str(),"wb");
 		rpg.save_times=1;
         copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
         copy(scenes.begin()+1,scenes.end(),rpg.scenes);

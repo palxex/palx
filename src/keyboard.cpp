@@ -249,12 +249,12 @@ void key_watcher(int scancode)
 	if(scancode>127){
 		while(examine_mutex) rest(1);
 		std::stack<int> another;
-		for(int i=0;i<keys.size();){
+		for(size_t i=0;i<keys.size();){
 			if(keys.top()!=(scancode&0x7f))
 				another.push(keys.top());
 			keys.pop();
 		}
-		for(int i=0;i<another.size();){
+		for(size_t i=0;i<another.size();){
 			keys.push(another.top());
 			another.pop();
 		}
