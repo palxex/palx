@@ -282,6 +282,7 @@ struct magic_menu:public multi_menu
 	magic_menu(int _role,int _mask):multi_menu(_mask,0),role(_role){}
 	void prev_action(menu *abs){
 		max=0x20-std::count_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,0));
+		max_ori=max;
 		blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		begin_y=33;
 	}

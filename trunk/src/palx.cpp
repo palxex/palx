@@ -45,10 +45,10 @@ int main(int argc, char *argv[])
 			if(save!=0 || (save=begin_scene()()))
 				rpg_to_load=save;
 			Scene normal;	scene=&normal;
-			bool new_rpg=!save;
-			new_rpg&=load();
+			flag_to_load=0x10;
+			bool new_rpg=!(save&&load());
 			if(new_rpg){
-				flag_to_load=0x12;
+				flag_to_load|=0xD;
 				map_toload=1;
 				for(int i=0;i<5;i++)
 					for(int j=0;j<8;j++)

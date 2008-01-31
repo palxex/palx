@@ -127,7 +127,7 @@ void SAFE_GETKEY(VKEY &x,bool etc)
 		{
 			extern bool running;
 			if(!running)
-				throw new std::exception();
+				throw std::exception();
 			switch_proc();
 			if(etc)
 				return;
@@ -143,7 +143,7 @@ int make_layer(int key)
 }
 extern int x_off,y_off;
 void reproduct_key();
-int examine_mutex=0;
+int examine_mutex=0,_examine_mutex=0;
 VKEY get_key_lowlevel()
 {
 	VKEY keygot=VK_NONE;
@@ -225,6 +225,7 @@ VKEY get_key_lowlevel()
 	x_off=((key_updown<0||key_leftright>0)?1:((key_updown>0||key_leftright<0)?-1:0));
 	y_off=((key_updown>0||key_leftright>0)?1:((key_updown<0||key_leftright<0)?-1:0));*/
 
+	while(_examine_mutex) rest(1);
 	examine_mutex=1;
 	if(!keys.empty())
 	{
@@ -248,6 +249,7 @@ void key_watcher(int scancode)
 	scancode=(scancode&0x80)|scancode_translate(scancode&0x7f);
 	if(scancode>127){
 		while(examine_mutex) rest(1);
+		_examine_mutex=1;
 		std::stack<int> another;
 		for(size_t i=0;i<keys.size();){
 			if(keys.top()!=(scancode&0x7f))
@@ -258,6 +260,7 @@ void key_watcher(int scancode)
 			keys.push(another.top());
 			another.pop();
 		}
+		_examine_mutex=0;
 	}else
 		if(keys.empty() || keys.top()!=scancode && scancode)
 			keys.push(scancode);

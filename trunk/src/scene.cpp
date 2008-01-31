@@ -165,14 +165,27 @@ void sprite_queue::visible_NPC_movment_setdraw()
 		}
 }
 int fade_div=0,fade_timing=0;
+void calc_redraw(tile &a,tile &b,int x,int y,int h,int yp,std::vector<boost::shared_ptr<sprite> > &vec)
+{
+	if(a.valid && a.layer>0 && 16*(y+a.layer)+8*h>=yp){
+		std::vector<boost::shared_ptr<sprite> >::value_type it=boost::shared_ptr<sprite>(a.image.get()->clone());
+		it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+a.layer*8-res::rpg.viewport_y,a.layer*8);
+		vec.push_back(it);
+	}
+	if(b.valid && b.layer>0 && 16*(y+b.layer)+8*h>=yp){
+		std::vector<boost::shared_ptr<sprite> >::value_type it=boost::shared_ptr<sprite>(b.image.get()->clone());
+		it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+8+b.layer*8-res::rpg.viewport_y,b.layer*8+1);
+		vec.push_back(it);
+	}
+}
 void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 {
 	s_list redraw_list;s_list::value_type masker;
 	switch(redraw_flag)
 	{
 	case 0:
-		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i);i++)
-			for(int vx=(res::rpg.viewport_x+masker->x-masker->width/2)/32;vx<=(res::rpg.viewport_x+masker->x+masker->width/2)/32;vx++)
+		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i)&&(masker->l<72);i++)
+			/*for(int vx=(res::rpg.viewport_x+masker->x)/32;vx<=(res::rpg.viewport_x+masker->x+masker->width)/32;vx++)
 				for(int vy=(res::rpg.viewport_y+masker->y-masker->height)/16-1;vy<=(res::rpg.viewport_y+masker->y)/16+1;vy++)
 					for(int x=vx-1,y=vy;x<=vx+1 && y>=0;x++)
 						for(int h=0;h<2;h++)
@@ -189,7 +202,22 @@ void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 								it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-res::rpg.viewport_y,tile1.layer*8+1);
 								redraw_list.push_back(it);
 							}
-						}
+						}*/
+		{
+			position middle=position(res::rpg.viewport_x,res::rpg.viewport_y)+position(masker->x,masker->y);
+			int yp=middle.toXY().y,h=middle.toXYH().h;
+			for(int y=middle.y-(masker->height+15)/16;y<=middle.y;y++)
+				for(int x=middle.x-(masker->width)/64;x<=middle.x+(masker->width)/64;x++)
+				{
+#define TILES(x,y,h) scene->scenemap.gettile((x),(y),(h),0),scene->scenemap.gettile((x),(y),(h),1),(x),(y),(h)
+					calc_redraw(TILES(x,y,h),yp,redraw_list);//Olympic rings like
+					calc_redraw(TILES(x-1,y,h),yp,redraw_list);
+					calc_redraw(TILES(x+1,y,h),yp,redraw_list);
+					calc_redraw(TILES(h?x+1:x,h?y+1:y,!h),yp,redraw_list);
+					calc_redraw(TILES(h?x:x-1,h?y+1:y,!h),yp,redraw_list);
+#undef TILES
+				}
+		}
 		std::copy(redraw_list.begin(),redraw_list.end(),std::back_inserter(active_list));
 		break;
 	case 2:
