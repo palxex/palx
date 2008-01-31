@@ -30,11 +30,51 @@
 
 bool begin=false,once=false;
 int voices[MAX_VOICES];int vocs=0;
+
+int leaving=0;
+void update_cache(playrix *plr)
+{
+	static int slen_buf=0,slen=630,v_scale=1;
+	static short *buf=plr->Buffer;
+
+	if(leaving<BUFFER_SIZE*CHANNELS)
+	{
+		slen_buf=0;
+		int rel=BUFFER_SIZE*CHANNELS-leaving;
+		while(slen_buf<rel)
+		{
+			if(!plr->rix.update())
+			{
+				if(once)
+					plr->stop();
+				plr->rix.rewind(plr->subsong);
+				continue;
+			}
+			plr->opl.update(buf, slen);
+			for(int t=0;t<slen * CHANNELS;t++)
+			{
+			    if (*buf >= 32767/v_scale)
+	                        *buf = 32767;
+	                    else if (*buf <= -32768/v_scale)
+	                        *buf = -32768;
+	                    else
+	                        *buf *= v_scale;
+		             *buf++^=0x8000;
+			}
+			slen_buf+=slen * CHANNELS;
+		}
+		buf=plr->Buffer;
+		leaving+=slen_buf;
+		buf+=leaving%(BUFFER_SIZE*CHANNELS);
+	}
+}
 void playrix_timer(void *param)
 {
 	playrix * const plr=reinterpret_cast<playrix*>(param);
-	if(voice_get_volume(plr->stream->voice)==0)
+	if(voice_get_volume(plr->stream->voice)==0){
 		begin=false;
+		//memset(plr->stream->samp->data,0,plr->stream->samp->len*plr->stream->samp->bits/8);
+	}
 	for(int i=0;i<vocs;i++)
 		if (!voice_check(voices[i])){
 			destroy_sample(voice_check(voices[i]));
@@ -44,42 +84,12 @@ void playrix_timer(void *param)
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
 	if (begin && p)
 	{
-		static int leaving=0,slen_buf=0,slen=630;
-		static short *buf=plr->Buffer;
-		if(leaving<BUFFER_SIZE*CHANNELS)
-		{
-			slen_buf=0;
-			int rel=BUFFER_SIZE*CHANNELS-leaving;
-			while(slen_buf<rel)
-			{
-				if(!plr->rix.update())
-				{
-					if(once)
-						plr->stop();
-					plr->rix.rewind(plr->subsong);
-					continue;
-				}
-				plr->opl.update(buf, slen);
-				for(int t=0;t<slen * CHANNELS;t++)
-				{
-				    /*if (*buf >= 16384)
-		                        *buf = 32767;
-		                    else if (*buf <= -16384)
-		                        *buf = -32768;
-		                    else
-		                        *buf *= 2;*/
-		                    *buf++^=0x8000;
-				}
-				slen_buf+=slen * CHANNELS;
-			 }
-			 buf=plr->Buffer;
-			 leaving+=slen_buf;
-			 buf+=leaving%(BUFFER_SIZE*CHANNELS);
-		 }
 		 leaving-=BUFFER_SIZE*CHANNELS;
 		 memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
 		 memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,leaving*2);
 		 free_audio_stream_buffer(plr->stream);
+
+		 update_cache(plr);
 	}
 	rest(0);
 }
@@ -125,17 +135,20 @@ void playrix::play(int sub_song,int times)
 	rix.rewind(subsong);
 	//opl.init();
 	memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
-	memset(stream->samp,0,sizeof(stream->samp));
+
+	leaving=0;
+	update_cache(this);
 
 	begin=true;
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, max_vol);
+
 }
 void playrix::stop(int gap)
 {
 	voice_ramp_volume(stream->voice, gap*1000, 0);
 }
-voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume"))
+voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume_sfx"))
 {}
 
 bool not_voc=false;

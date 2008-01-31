@@ -18,6 +18,7 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
+#include "config.h"
 #include "game.h"
 #include <stack>
  class __scancode_map{
@@ -292,10 +293,12 @@ void keyhook(int)
 {
 	if(key[KEY_PRTSCR] || key[KEY_P]){
 		static PALETTE pal;
-		static char filename[30];
+		static char filename[80],mkdircmd[80];
 		static int i=0;
 		get_palette(pal);
-		sprintf(filename,"ScrnShot/%d.bmp",i++);
+		sprintf(filename,"%s/ScrnShot/%d.bmp",global->get<std::string>("config","path").c_str(),i++);
+		sprintf(mkdircmd,"mkdir %s/ScrnShot",global->get<std::string>("config","path").c_str());
+		system(mkdircmd);
 		save_bitmap(filename,screen,pal);
 	}
 	if(key[KEY_F3])
