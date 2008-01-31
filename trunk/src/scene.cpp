@@ -110,6 +110,7 @@ void sprite_queue::clear_active()
 {
 	active_list.clear();
 }
+
 void sprite_queue::calc_team_walking()
 {
 	int16_t &direction=res::rpg.team_direction;
@@ -136,12 +137,42 @@ void sprite_queue::calc_team_walking()
 	scene->team_pos.x=res::rpg.viewport_x+x_scrn_offset;
 	scene->team_pos.y=res::rpg.viewport_y+y_scrn_offset;
 }
+void calc_redraw(tile &a,tile &b,int x,int y,int h,int yp,std::vector<boost::shared_ptr<sprite> > &vec)
+{
+	if(a.valid && a.layer>0 && 16*(y+a.layer)+8*h>=yp){
+		std::vector<boost::shared_ptr<sprite> >::value_type it=boost::shared_ptr<sprite>(a.image.get()->clone());
+		it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+a.layer*8-res::rpg.viewport_y,a.layer*8);
+		vec.push_back(it);
+	}
+	if(b.valid && b.layer>0 && 16*(y+b.layer)+8*h>=yp){
+		std::vector<boost::shared_ptr<sprite> >::value_type it=boost::shared_ptr<sprite>(b.image.get()->clone());
+		it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+8+b.layer*8-res::rpg.viewport_y,b.layer*8+1);
+		vec.push_back(it);
+	}
+}
+void add_ref_bricks(sprite *masker,int vx,int vy,std::vector<boost::shared_ptr<sprite> > &redraw_list)
+{
+	position middle=position(res::rpg.viewport_x,res::rpg.viewport_y)+position(vx,vy);
+	int yp=middle.toXY().y,h=middle.toXYH().h;
+	for(int y=middle.y-(masker->height+15)/16;y<=middle.y;y++)
+		for(int x=middle.x-(masker->width)/64;x<=middle.x+(masker->width)/64;x++)
+		{
+#define TILES(x,y,h) scene->scenemap.gettile((x),(y),(h),0),scene->scenemap.gettile((x),(y),(h),1),(x),(y),(h)
+			calc_redraw(TILES(x,y,h),yp,redraw_list);//Olympic rings like
+			calc_redraw(TILES(x-1,y,h),yp,redraw_list);
+			calc_redraw(TILES(x+1,y,h),yp,redraw_list);
+			calc_redraw(TILES(h?x+1:x,h?y+1:y,!h),yp,redraw_list);
+			calc_redraw(TILES(h?x:x-1,h?y+1:y,!h),yp,redraw_list);
+#undef TILES
+		}
+}
 void sprite_queue::our_team_setdraw()
 {
 	for(int i=0;i<=res::rpg.team_roles+res::rpg.team_followers;i++){
 		s_list::value_type it=boost::shared_ptr<sprite>(mgos[team_mgos[i]].getsprite(res::rpg.team[i].frame)->clone());
 		it->setXYL(res::rpg.team[i].x,res::rpg.team[i].y+res::rpg.layer+10,res::rpg.layer+6);
 		active_list.push_back(it);
+		add_ref_bricks(it.get(),res::rpg.team[i].x,res::rpg.team[i].y,active_list);
 	}
 }
 void sprite_queue::visible_NPC_movment_setdraw()
@@ -162,30 +193,18 @@ void sprite_queue::visible_NPC_movment_setdraw()
 			s_list::value_type it=boost::shared_ptr<sprite>(mgos[npc_mgos[t]].getsprite(i->direction*i->frames+frame)->clone());
 			it->setXYL(i->pos_x-res::rpg.viewport_x,i->pos_y-res::rpg.viewport_y+i->layer*8+9,i->layer*8+2);
 			active_list.push_back(it);
+			add_ref_bricks(it.get(),i->pos_x-res::rpg.viewport_x,i->pos_y-res::rpg.viewport_y,active_list);
 		}
 }
 int fade_div=0,fade_timing=0;
-void calc_redraw(tile &a,tile &b,int x,int y,int h,int yp,std::vector<boost::shared_ptr<sprite> > &vec)
-{
-	if(a.valid && a.layer>0 && 16*(y+a.layer)+8*h>=yp){
-		std::vector<boost::shared_ptr<sprite> >::value_type it=boost::shared_ptr<sprite>(a.image.get()->clone());
-		it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+a.layer*8-res::rpg.viewport_y,a.layer*8);
-		vec.push_back(it);
-	}
-	if(b.valid && b.layer>0 && 16*(y+b.layer)+8*h>=yp){
-		std::vector<boost::shared_ptr<sprite> >::value_type it=boost::shared_ptr<sprite>(b.image.get()->clone());
-		it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+8+b.layer*8-res::rpg.viewport_y,b.layer*8+1);
-		vec.push_back(it);
-	}
-}
 void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 {
 	s_list redraw_list;s_list::value_type masker;
 	switch(redraw_flag)
 	{
 	case 0:
-		for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i)&&(masker->l<72);i++)
-			/*for(int vx=(res::rpg.viewport_x+masker->x)/32;vx<=(res::rpg.viewport_x+masker->x+masker->width)/32;vx++)
+		/*for(s_list::iterator i=active_list.begin();i!=active_list.end()&&(masker=*i)&&(masker->l<72);i++)
+			for(int vx=(res::rpg.viewport_x+masker->x)/32;vx<=(res::rpg.viewport_x+masker->x+masker->width)/32;vx++)
 				for(int vy=(res::rpg.viewport_y+masker->y-masker->height)/16-1;vy<=(res::rpg.viewport_y+masker->y)/16+1;vy++)
 					for(int x=vx-1,y=vy;x<=vx+1 && y>=0;x++)
 						for(int h=0;h<2;h++)
@@ -202,23 +221,9 @@ void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 								it->setXYL(32*x+16*h-res::rpg.viewport_x,16*y+8*h+7+tile1.layer*8+1-res::rpg.viewport_y,tile1.layer*8+1);
 								redraw_list.push_back(it);
 							}
-						}*/
-		{
-			position middle=position(res::rpg.viewport_x,res::rpg.viewport_y)+position(masker->x,masker->y);
-			int yp=middle.toXY().y,h=middle.toXYH().h;
-			for(int y=middle.y-(masker->height+15)/16;y<=middle.y;y++)
-				for(int x=middle.x-(masker->width)/64;x<=middle.x+(masker->width)/64;x++)
-				{
-#define TILES(x,y,h) scene->scenemap.gettile((x),(y),(h),0),scene->scenemap.gettile((x),(y),(h),1),(x),(y),(h)
-					calc_redraw(TILES(x,y,h),yp,redraw_list);//Olympic rings like
-					calc_redraw(TILES(x-1,y,h),yp,redraw_list);
-					calc_redraw(TILES(x+1,y,h),yp,redraw_list);
-					calc_redraw(TILES(h?x+1:x,h?y+1:y,!h),yp,redraw_list);
-					calc_redraw(TILES(h?x:x-1,h?y+1:y,!h),yp,redraw_list);
-#undef TILES
-				}
-		}
-		std::copy(redraw_list.begin(),redraw_list.end(),std::back_inserter(active_list));
+						}
+
+		std::copy(redraw_list.begin(),redraw_list.end(),std::back_inserter(active_list));*/
 		break;
 	case 2:
 		fade_div=(fade_div?fade_div:1);

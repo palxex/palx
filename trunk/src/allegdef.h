@@ -109,11 +109,12 @@ class playrix
 {
 	CEmuopl 	opl;
 	CrixPlayer 	rix;
-	volatile int subsong,leaving;
+	volatile int subsong;
 	static const int samples=40;
 	static const int sample_len=630;
 	short 		*Buffer;
 	friend void playrix_timer(void *);
+	friend void update_cache(playrix*);
 	static char mus[80];
 	AUDIOSTREAM *stream;
 	int max_vol;
