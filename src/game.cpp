@@ -162,6 +162,8 @@ namespace res{
     extern "C" __declspec(dllimport) uint32_t __stdcall GetLastError();/*/
     int GetLastError(){return 0;}//*/
     bool load(int id){
+		if(!id)
+			return false;
         pat.read(0);
         string name=global->get<string>("config","path")+"/"+lexical_cast<string>(id)+".RPG";
 		FILE *fprpg=fopen(name.c_str(),"rb");
@@ -171,6 +173,7 @@ namespace res{
 			fclose(fprpg);
 			return false;
 		}
+		rewind(fprpg);
         rpg_to_load=id;
         scene->scenemap.change(-1);
         fread(&rpg,sizeof(RPG),1,fprpg);
@@ -186,7 +189,6 @@ namespace res{
         scenes.clear();scenes.push_back(SCENE());
         reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
         fclose(fprpg);
-        flag_to_load=0x1D;
         MAP.clear();
         GOP.clear();
         RNG.clear();
@@ -200,6 +202,7 @@ namespace res{
         //F.clear();
         //FIRE.clear();
         //MGO.clear();
+        flag_to_load|=7;
         pal_fade_out(1);
 		return true;
     }

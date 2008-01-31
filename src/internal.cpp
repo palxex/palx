@@ -49,7 +49,7 @@ void perframe_proc()
 {
 	extern bool running;
 	if(!running)
-		throw new std::exception();
+		throw std::exception();
 	switch_proc();
 	shake_screen();
 }
@@ -104,10 +104,10 @@ void Load_Data()
 		for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 			if(i->image)
 				i->frames_auto=MGO.slices(i->image);
-	//load map & npc
-	scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
-	scene->get_sprites();
-	scene->produce_one_screen();
+		//load map & npc
+		scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+		scene->get_sprites();
+		scene->produce_one_screen();
 	}
 	if(flag_to_load&1){
 		load_team_mgo();
