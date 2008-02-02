@@ -32,10 +32,10 @@ bool begin=false,once=false;
 int voices[MAX_VOICES];int vocs=0;
 
 int leaving=0;
+	static short *buf;
 void update_cache(playrix *plr)
 {
 	static int slen_buf=0,slen=630,v_scale=1;
-	static short *buf=plr->Buffer;
 
 	if(leaving<BUFFER_SIZE*CHANNELS)
 	{
@@ -84,12 +84,12 @@ void playrix_timer(void *param)
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
 	if (begin && p)
 	{
+		 update_cache(plr);
 		 leaving-=BUFFER_SIZE*CHANNELS;
 		 memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
 		 memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,leaving*2);
 		 free_audio_stream_buffer(plr->stream);
 
-		 update_cache(plr);
 	}
 	rest(0);
 }
@@ -136,7 +136,7 @@ void playrix::play(int sub_song,int times)
 	//opl.init();
 	memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
 
-	leaving=0;
+	leaving=0;buf=Buffer;
 	update_cache(this);
 
 	begin=true;

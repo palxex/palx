@@ -152,8 +152,8 @@ void calc_redraw(tile &a,tile &b,int x,int y,int h,int yp,std::vector<boost::sha
 }
 void add_ref_bricks(sprite *masker,int vx,int vy,std::vector<boost::shared_ptr<sprite> > &redraw_list)
 {
-	position middle=position(res::rpg.viewport_x,res::rpg.viewport_y)+position(vx,vy);
-	int yp=middle.toXY().y,h=middle.toXYH().h;
+	position middle=position(res::rpg.viewport_x+vx,res::rpg.viewport_y+vy);
+	int yp=res::rpg.viewport_y+vy,h=middle.toXYH().h;
 	for(int y=middle.y-(masker->height+15)/16;y<=middle.y;y++)
 		for(int x=middle.x-(masker->width)/64;x<=middle.x+(masker->width)/64;x++)
 		{
