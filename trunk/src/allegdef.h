@@ -33,7 +33,7 @@
 #   define set_palette(x) set_palette_range(x,0,255,FALSE)
 #endif
 
-#include "adplug/emuopl.h"
+#include "adplug/opl.h"
 #include "adplug/rix.h"
 
 #define screen fakescreen
@@ -107,7 +107,7 @@ class CEmuopl;
 class CrixPlayer;
 class playrix
 {
-	CEmuopl 	opl;
+	boost::shared_ptr<Copl> 	opl;
 	CrixPlayer 	rix;
 	volatile int subsong;
 	static const int samples=40;
@@ -127,6 +127,7 @@ public:
 	}
 	void play(int sub_song,int =0);
 	void stop(int =0);
+	void setvolume(int);
 };
 
 class voc{

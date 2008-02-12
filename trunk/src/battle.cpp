@@ -80,10 +80,10 @@ battle::~battle()
 }
 int battle::process()
 {
-	VKEY keygot;
+	VKEY keygot=VK_NONE;
 	do{
 		draw(0,1);
-		wait(10);
+		wait(1);
 		SAFE_GETKEY(keygot);
 	}while(keygot==VK_NONE);
 	return 0;

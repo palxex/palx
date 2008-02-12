@@ -22,6 +22,7 @@
 #include "scene.h"
 #include "game.h"
 #include "UI.h"
+#include "config.h"
 bool flag_battling=false;
 
 int flag_to_load=0;
@@ -55,7 +56,7 @@ void perframe_proc()
 }
 void switch_proc()
 {
-	mutex_int=1;
+	mutex_switching=1;
 	if(key[KEY_F11] || ((key[KEY_ALT]||key[KEY_ALTGR]) && key[KEY_ENTER]))
 	{
 		while(mutex_paletting || mutex_blitting)
@@ -67,12 +68,17 @@ void switch_proc()
 		else
 			mode=GFX_AUTODETECT;
 		get_palette(pal);blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
-		vsync();
+		//vsync();
 		set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0);
 		set_palette(pal);blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		//reapply; it seems that this feature was reset after switch
+        if(global->get<bool>("config","switch_off"))
+            set_display_switch_mode(SWITCH_BACKGROUND);
+		extern void switchin_proc(),switchout_proc();
+		set_display_switch_callback(SWITCH_IN,switchin_proc);
+		set_display_switch_callback(SWITCH_OUT,switchout_proc);
 	}
-	flush_screen();
-	mutex_int=0;
+	mutex_switching=0;
 }
 void Load_Data()
 {

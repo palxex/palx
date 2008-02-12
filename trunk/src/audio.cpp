@@ -21,6 +21,10 @@
 #include "internal.h"
 #include "config.h"
 
+#include "adplug/realopl.h"
+#include "adplug/emuopl.h"
+#include "adplug/kemuopl.h"
+
 #define BUFFER_SIZE 5040
 
 #define SAMPLE_RATE	44100
@@ -50,7 +54,7 @@ void update_cache(playrix *plr)
 				plr->rix.rewind(plr->subsong);
 				continue;
 			}
-			plr->opl.update(buf, slen);
+			plr->opl->update(buf, slen);
 			for(int t=0;t<slen * CHANNELS;t++)
 			{
 			    if (*buf >= 32767/v_scale)
@@ -96,7 +100,18 @@ void playrix_timer(void *param)
 END_OF_FUNCTION(playrix_timer);
 
 char playrix::mus[80];
-playrix::playrix():opl(SAMPLE_RATE, true, CHANNELS == 2),rix(&opl),Buffer(0),stream(0),max_vol(global->get<int>("music","volume"))
+Copl *getopl()
+{
+	if(global->get<std::string>("music","opltype")=="real")
+		return new CRealopl(global->get<int>("music","oplport"));
+	else if(global->get<std::string>("music","opltype")=="mame")
+		return new CEmuopl(SAMPLE_RATE, true, CHANNELS == 2);
+	else if(global->get<std::string>("music","opltype")=="ken")
+		return new CKemuopl(SAMPLE_RATE, true, CHANNELS == 2);
+	else
+		throw std::exception();
+}
+playrix::playrix():opl(getopl()),rix(opl.get()),Buffer(0),stream(0),max_vol(global->get<int>("music","volume"))
 {
 	int BufferLength=SAMPLE_RATE*CHANNELS*10;
 	rix.load(mus, CProvider_Filesystem());
@@ -133,8 +148,8 @@ void playrix::play(int sub_song,int times)
 	subsong=sub_song;
 
 	rix.rewind(subsong);
-	//opl.init();
-	memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
+	//opl->init();
+	//memset(Buffer, 0, sizeof(short) * SAMPLE_RATE * CHANNELS *10);
 
 	leaving=0;buf=Buffer;
 	update_cache(this);
@@ -148,6 +163,12 @@ void playrix::stop(int gap)
 {
 	voice_ramp_volume(stream->voice, gap*1000, 0);
 }
+
+void playrix::setvolume(int vol)
+{
+    voice_set_volume(stream->voice,vol);
+}
+
 voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume_sfx"))
 {}
 
