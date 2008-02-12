@@ -78,7 +78,7 @@ extern int rnd1(int);
 
 extern int scale;
 extern int x_off,y_off;
-extern bool running;
+extern bool running,is_out;
 
 extern void Load_Data();
 extern void GameLoop_OneCycle(bool);
@@ -117,7 +117,7 @@ extern void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height);
 extern int wave_progression;
 
 extern int CARD;
-extern int mutex_int;
+extern int mutex_switching;
 extern void switch_proc();
 extern void perframe_proc();
 

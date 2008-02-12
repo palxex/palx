@@ -123,13 +123,14 @@ VKEY get_key(bool clear)
 }
 void SAFE_GETKEY(VKEY &x,bool etc)
 {
-	do{ 
+	do{
 		while(!(x=get_key()))
 		{
 			extern bool running;
 			if(!running)
 				throw std::exception();
 			switch_proc();
+            flush_screen();
 			if(etc)
 				return;
 			rest(10);

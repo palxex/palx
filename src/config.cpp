@@ -91,6 +91,10 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	ini_parser::section::configmap musicprop;
 	musicprop["type"].value="rix";
 	musicprop["type"].comment="rix/mid/foreverCD,+gameCD,+gameCDmp3，或任意混合。foreverCD指永恒回忆录之FM曲集";
+	musicprop["opltype"].value="mame";
+	musicprop["opltype"].comment="real/mame/ken;真机OPL芯片/MAME版模拟/Ken版模拟FM音乐";
+	musicprop["oplport"].value="0x388";
+	musicprop["oplport"].comment="真机OPL2端口号;0x388为adlib声卡默认,0x220为sb16默认";
 	musicprop["volume"].value="255";
 	musicprop["volume"].comment="0-255;音量";
 	musicprop["volume_sfx"].value="255";
@@ -247,7 +251,8 @@ namespace{
 }
 
 int CARD=0;
-namespace{
+bool is_out;
+
     void close_button_handler(void)
     {
         //if(!yesno_dialog()) return;
@@ -258,14 +263,19 @@ namespace{
     int volume;
     void switchin_proc()
     {
-        global->set<int>("music","volume",volume);
+        is_out=false;
+        if(!global->get<bool>("config","switch_off"))
+            rix->setvolume(volume);
     }
     void switchout_proc()
     {
-        volume=global->get<int>("music","volume");
-        rix->stop();
+        is_out=true;
+        if(!global->get<bool>("config","switch_off"))
+        {
+            volume=global->get<int>("music","volume");
+            rix->setvolume(0);
+        }
     }
-}
 
 global_init::global_init(char *name):conf(name)
 {
@@ -331,8 +341,8 @@ int global_init::operator ()()
 	set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0);
 	if(get<bool>("config","switch_off"))
         set_display_switch_mode(SWITCH_BACKGROUND);
-	//set_display_switch_callback(SWITCH_IN,switchin_proc);
-	//set_display_switch_callback(SWITCH_OUT,switchout_proc);
+	set_display_switch_callback(SWITCH_IN,switchin_proc);
+	set_display_switch_callback(SWITCH_OUT,switchout_proc);
 	set_color_depth(8);
 	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
 	install_timer();

@@ -193,13 +193,16 @@ void shake_screen()
 			shake_grade=(int)(shake_grade*(15.0/16));
 	}else
         shake_grade=0;
-    blit(fakescreen,screen,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
+    flush_screen();
 }
 void flush_screen()
 {
 #undef screen
     //vsync();
-    blit(fakescreen,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+    if(is_out) return;
+    mutex_blitting=true;
+    blit(fakescreen,screen,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
+    mutex_blitting=false;
 }
 struct calc_waving
 {

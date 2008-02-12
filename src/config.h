@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include <boost/lexical_cast.hpp>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <vector>
 #include <map>
@@ -66,7 +67,7 @@ class ini_parser
 				line.erase(find(line.begin(),line.end(),'\r'),line.end());//remove 0xA!DOS/Win text signature
 				if(find(line.begin(),line.end(),';')!=line.end()){
 					std::string _comment;
-					copy(find(line.begin(),line.end(),';')+1,line.end(),back_inserter(comment));
+					copy(find(line.begin(),line.end(),';')+1,line.end(),back_inserter(_comment));
 					std::istringstream ss(_comment);
 					ss>>comment;
 				}
@@ -103,8 +104,29 @@ class ini_parser
 		bool get(const char *name,bool){
 			return keymap[name].value=="true";
 		}
+		int hexgetint(std::string i)
+		{
+			std::istringstream in(i);
+			int x;
+			in>>std::hex>>x;
+			return x;
+		}
 		int get(const char *name,int){
-			return boost::lexical_cast<int>("0"+keymap[name].value);
+			try
+			{
+				return boost::lexical_cast<int>(keymap[name].value);
+			}
+			catch(boost::bad_lexical_cast &)
+			{
+				try
+				{
+					return hexgetint(keymap[name].value);
+				}
+				catch(...)
+				{
+					return 0;
+				}
+			}
 		}
 		void set(const char *name,const std::string &val){
 			keymap[name].value=val;

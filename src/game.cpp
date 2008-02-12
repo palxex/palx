@@ -26,7 +26,7 @@
 using namespace std;
 using namespace boost;
 volatile uint8_t time_interrupt_occurs;
-int mutex_paletting=0,mutex_blitting=0,mutex_int=0;
+int mutex_paletting=0,mutex_blitting=0,mutex_switching=0;
 int scale=1;
 namespace res{
 	palette pat;
@@ -74,7 +74,8 @@ namespace res{
 	}
 	void timer_proc()
 	{
-		if(!mutex_int){
+        time_interrupt_occurs++;
+		if(!is_out && !mutex_switching && !mutex_blitting){
 			static int pal_lock=0;
 			static PALETTE pal;
 			mutex_paletting=true;
@@ -89,7 +90,6 @@ namespace res{
 				set_palette(pal);
 				pal_lock=0;
 			};
-			time_interrupt_occurs++;
 			mutex_paletting=false;
 		}
 		rest(1);
@@ -112,18 +112,10 @@ namespace res{
         EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
         SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
 		if(!global->get<bool>("config","setup")){
-			struct{
-				int operator()(const string &i){
-					istringstream in(i);
-					int x;
-					in>>hex>>x;
-					return x;
-				}
-			}getint;
-			setup.key_left=getint(global->get<string>("keymap","west"));
-			setup.key_up=getint(global->get<string>("keymap","north"));
-			setup.key_right=getint(global->get<string>("keymap","east"));
-			setup.key_down=getint(global->get<string>("keymap","south"));
+			setup.key_left=global->get<int>("keymap","west");
+			setup.key_up=global->get<int>("keymap","north");
+			setup.key_right=global->get<int>("keymap","east");
+			setup.key_down=global->get<int>("keymap","south");
 		}else
 			reunion(setup,      SETUP.decode(len), len);
 
