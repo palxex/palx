@@ -54,17 +54,20 @@ void update_cache(playrix *plr)
 				plr->rix.rewind(plr->subsong);
 				continue;
 			}
+			if(global->get<std::string>("music","opltype")=="real")
+				break;//direct output to opl2;not fully cached forever, so every timer interrupt should get its own task done.
 			plr->opl->update(buf, slen);
 			for(int t=0;t<slen * CHANNELS;t++)
 			{
-			    if (*buf >= 32767/v_scale)
-	                        *buf = 32767;
-	                    else if (*buf <= -32768/v_scale)
-	                        *buf = -32768;
-	                    else
-	                        *buf *= v_scale;
-		             *buf++^=0x8000;
+				if (buf[t] >= 32767/v_scale)
+					buf[t] = 32767;
+				else if (buf[t] <= -32768/v_scale)
+					buf[t] = -32768;
+				else
+					buf[t] *= v_scale;
+				buf[t]^=0x8000;
 			}
+			buf+=slen * CHANNELS;
 			slen_buf+=slen * CHANNELS;
 		}
 		buf=plr->Buffer;
@@ -88,11 +91,14 @@ void playrix_timer(void *param)
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
 	if (begin && p)
 	{
-		 update_cache(plr);
-		 leaving-=BUFFER_SIZE*CHANNELS;
-		 memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
-		 memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,leaving*2);
-		 free_audio_stream_buffer(plr->stream);
+		update_cache(plr);
+		if(global->get<std::string>("music","opltype")!="real")
+		{
+			leaving-=BUFFER_SIZE*CHANNELS;
+			memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
+			memcpy(plr->Buffer,plr->Buffer+BUFFER_SIZE*CHANNELS,leaving*2);
+			free_audio_stream_buffer(plr->stream);
+		}
 
 	}
 	rest(0);
@@ -154,9 +160,9 @@ void playrix::play(int sub_song,int times)
 	leaving=0;buf=Buffer;
 	update_cache(this);
 
-	begin=true;
 	voice_set_volume(stream->voice,1);
 	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, max_vol);
+	begin=true;
 
 }
 void playrix::stop(int gap)
@@ -166,7 +172,10 @@ void playrix::stop(int gap)
 
 void playrix::setvolume(int vol)
 {
-    voice_set_volume(stream->voice,vol);
+	if(global->get<std::string>("music","opltype")!="real")
+		voice_set_volume(stream->voice,vol);
+	else
+		((CRealopl*)opl.get())->setvolume((255-vol)/255.0*64);
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume_sfx"))
