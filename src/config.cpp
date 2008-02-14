@@ -264,13 +264,13 @@ bool is_out;
     void switchin_proc()
     {
         is_out=false;
-        if(!global->get<bool>("config","switch_off"))
+        if(running && !global->get<bool>("config","switch_off"))
             rix->setvolume(volume);
     }
     void switchout_proc()
     {
         is_out=true;
-        if(!global->get<bool>("config","switch_off"))
+        if(running && !global->get<bool>("config","switch_off"))
         {
             volume=global->get<int>("music","volume");
             rix->setvolume(0);

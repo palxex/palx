@@ -85,7 +85,7 @@ int battle::process()
 		draw(0,1);
 		wait(1);
 		SAFE_GETKEY(keygot);
-	}while(keygot==VK_NONE);
+	}while(keygot==VK_NONE && running);
 	return 0;
 }
 

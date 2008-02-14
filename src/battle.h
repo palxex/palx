@@ -36,7 +36,7 @@ public:
 		if(thebattle)
 			return thebattle;
 		else
-			throw;
+			throw std::exception();
 	}
 
 	static int max_blow_away;
