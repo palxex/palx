@@ -75,7 +75,7 @@ void startup_splash()
 			set_palette(pal);
 		}
 		SAFE_GETKEY(keygot,true);
-	}while(keygot!=VK_EXPLORE);
+	}while(keygot!=VK_EXPLORE && running);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
@@ -142,7 +142,7 @@ int select_scene()
                 break;
 		}
 		menu_selected+=2;menu_selected%=2;
-	}while(!ok);
+	}while(!ok && running);
 	destroy_bitmap(cache);
 	pal_fade_out(1);
 	return save;
