@@ -153,8 +153,8 @@ bool process_Menu()
 				role_select=menu(0x2c,0x40,names,3)(single_menu(),role_select);
 			}
 			else
-				role_select=res::rpg.team[0].role;
-			magic_select=select_theurgy(role_select,1,magic_select);
+				role_select=0;
+			magic_select=select_theurgy(res::rpg.team[role_select].role,1,magic_select);
 		}
 		break;
 	case 2:
