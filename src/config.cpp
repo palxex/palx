@@ -27,20 +27,34 @@
 #include "config.h"
 
 #if defined (WIN32)
-#   define FONT_PATH getenv("WINDIR")
-#   define FONT_FILE "/fonts/mingliu.ttc"
+#   define FONT_PATH "%WINDIR%/fonts/mingliu.ttc"
 #   define LOCALE "chinese"
-#else
-#   define FONT_PATH ""
-#   define FONT_FILE "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
+#   define CONF "palx.conf"
+#elif defined __MSDOS__
+#   define FONT_PATH "mingliu.ttc"
 #   define LOCALE "BIG5"
+#   define CONF "palx.cfg"
+#else   //predicate *NIX
+#   define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
+#   define LOCALE "BIG5"
+#   define CONF "~/palx.conf"
 #endif
 
 using namespace std;
 using namespace boost;
 using namespace Pal::Tools;
 
-ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
+string env_expand(string &name)
+{
+    if(name[0]=='~')
+        name=getenv("HOME")+name.substr(1,name.size()-1);
+    string::iterator begin,end;
+	while((begin=find(name.begin(),name.end(),'%'))!=name.end() && (end=find(begin+1,name.end(),'%'))!=name.end())
+		name.replace(begin,end+1,getenv(name.substr(begin-name.begin()+1,end-begin-1).c_str()));
+
+    return name;
+}
+ini_parser::ini_parser(const char *conf):name(conf),needwrite(false)
 {
 	ini_parser::section::configmap configprop;
 	configprop["path"].value=".";
@@ -82,9 +96,7 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	ini_parser::section::configmap fontprop;
 	fontprop["type"].value="truetype";
 	fontprop["type"].comment="truetype: ttf/ttc; fon: wor16.fon";
-	char fontpath[100];
-	sprintf(fontpath,"%s%s",FONT_PATH,FONT_FILE);
-	fontprop["path"].value=fontpath;
+	fontprop["path"].value=FONT_PATH;
 	section font("font",fontprop);
 	sections["font"]=font;
 
@@ -110,13 +122,15 @@ ini_parser::ini_parser(char *conf):name(conf),needwrite(false)
 	section keymap("keymap",keyprop,"行走键盘定义；与setup正交");
 	sections["keymap"]=keymap;
 
-	ifstream ifs(name.c_str());
+	ifstream ifs((env_expand(name)).c_str());
 	if(ifs.is_open() )
 		while(!ifs.eof()){
 			section s;
 			ifs>>s;
 			sections[s.name()]=s;
 		}
+    else
+        needwrite=true;
 }
 
 void ini_parser::write(){
@@ -277,7 +291,14 @@ bool is_out;
         }
     }
 
-global_init::global_init(char *name):conf(name)
+ini_parser getconf(int c,char *v[])
+{
+    string name=CONF;
+    if(c>1 && !strcmp(v[1],"--conf"))
+        name=v[2];
+    return ini_parser(name.c_str());
+}
+global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 {
 	//version dispatch
 	boost::function<uint8_t *(shared_array<uint8_t> ,long &)> extract_ptr;

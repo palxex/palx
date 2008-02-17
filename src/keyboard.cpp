@@ -121,21 +121,19 @@ VKEY get_key(bool clear)
 	}
 	return keygot;
 }
-void SAFE_GETKEY(VKEY &x,bool etc)
+VKEY place;
+VKEY SAFE_GETKEY(VKEY &x,bool once)
 {
-	do{
-		while(!(x=get_key()))
+		extern bool running,is_out;
+		x=VK_NONE;
+		while(!once && running && !is_out && !(x=get_key()))
 		{
-			extern bool running;
-			if(!running)
-				throw std::exception();
 			switch_proc();
             flush_screen();
-			if(etc)
-				return;
+			once=!once;
 			rest(10);
 		}
-	}while(false);
+        return x;
 }
 int make_layer(int key)
 {

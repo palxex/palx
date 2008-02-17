@@ -175,7 +175,7 @@ void playrix::setvolume(int vol)
 	if(global->get<std::string>("music","opltype")!="real")
 		voice_set_volume(stream->voice,vol);
 	else
-		((CRealopl*)opl.get())->setvolume((255-vol)/255.0*64);
+		((CRealopl*)opl.get())->setvolume(int((255-vol)/255.0*64));
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume_sfx"))

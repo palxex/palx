@@ -46,7 +46,7 @@ extern bool running;
 bool key_enable=true;
 
 #include <exception>
-void perframe_proc()
+void perframe_real()
 {
 	extern bool running;
 	if(!running)

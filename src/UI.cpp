@@ -77,9 +77,7 @@ int select_rpg(int ori_select,BITMAP *bmp)
 		}
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
 
-		VKEY keygot;
-		SAFE_GETKEY(keygot);
-		switch(keygot){
+		switch(SAFE_GETKEY()){
 			case VK_UP:
 				selected--;
 				break;
@@ -239,9 +237,7 @@ void multi_menu::draw(menu *abs)
 }
 int multi_menu::keyloop(menu *abs)
 {
-	VKEY keygot;
-	SAFE_GETKEY(keygot);
-		switch(keygot){
+		switch(SAFE_GETKEY()){
 			case VK_UP:
 				selected-=3;
 				break;

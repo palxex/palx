@@ -1306,6 +1306,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
     SCRIPT &curr=scripts[id];
     EVENT_OBJECT &obj=evtobjs[object];
     const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
+    int for_eliminating_warning=param3;for_eliminating_warning++;
     //printf("触发场景:%s,触发对象:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
     //printf("自动脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
     switch (curr.func)

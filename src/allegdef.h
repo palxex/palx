@@ -144,6 +144,7 @@ VKEY get_key(bool =true);
 VKEY get_key_lowlevel();
 void key_watcher(int scancode);
 
-void SAFE_GETKEY(VKEY &,bool =false);
+extern VKEY place;
+VKEY SAFE_GETKEY(VKEY & =place,bool =false);
 
 #endif

@@ -30,9 +30,8 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	try{
-		global_init _global("palx.conf");global=&_global;
-		if(argc==1)
-		{
+		global_init _global(argc, argv);global=&_global;
+
 			int save=_global();
 			bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
 			bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;
@@ -62,8 +61,6 @@ int main(int argc, char *argv[])
 			}
 			run();
 			destroy_resource();
-		}else
-            global->set<string>("config","path",".");
 	}catch(...){
 #if defined(_CRTDBG_MAP_ALLOC_NEW)
 		_CrtDumpMemoryLeaks();
