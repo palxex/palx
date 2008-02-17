@@ -119,7 +119,12 @@ extern int wave_progression;
 extern int CARD;
 extern int mutex_switching;
 extern void switch_proc();
-extern void perframe_proc();
+extern void perframe_real();
+#define perframe_proc() \
+    extern bool running;\
+    if(!running)\
+        return;\
+    perframe_real();\
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);

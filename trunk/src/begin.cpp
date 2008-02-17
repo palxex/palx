@@ -75,7 +75,7 @@ void startup_splash()
 			set_palette(pal);
 		}
 		SAFE_GETKEY(keygot,true);
-	}while(keygot!=VK_EXPLORE && running);
+	}while(running && keygot!=VK_EXPLORE);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
@@ -111,8 +111,7 @@ int select_scene()
 			for(int i=7;i<9;i++)
 				ttfont(objs(i*10,i*10+10)).blit_to(screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
-		VKEY keygot;SAFE_GETKEY(keygot);
-		switch(keygot){
+		switch(SAFE_GETKEY()){
 			case VK_UP:
 				changed=true;
 				menu_selected++;
@@ -142,7 +141,7 @@ int select_scene()
                 break;
 		}
 		menu_selected+=2;menu_selected%=2;
-	}while(!ok && running);
+	}while(running && !ok);
 	destroy_bitmap(cache);
 	pal_fade_out(1);
 	return save;

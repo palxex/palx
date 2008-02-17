@@ -33,14 +33,14 @@ void wait_key(uint8_t gap)
 {
 	clear_keybuf();flush_screen();
 	time_interrupt_occurs=0;
-	while(!keypressed() && time_interrupt_occurs<gap && running)
+	while(running && !keypressed() && time_interrupt_occurs<gap)
 		rest(10);
 }
 
 void wait_for_key()
 {
 	clear_keybuf();flush_screen();
-	while(!keypressed() && running)
+	while(running && !keypressed())
 		rest(10);
 	clear_keybuf();
 }

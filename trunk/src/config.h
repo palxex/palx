@@ -33,6 +33,7 @@
 #   define retpos() is.seekg(pos,std::ios_base::beg)
 #endif
 
+std::string env_expand(std::string &);
 class ini_parser
 {
 	friend class global_init;
@@ -98,8 +99,8 @@ class ini_parser
 		std::string name() const{
 			return section_name;
 		}
-		std::string get(const char *name,std::string){
-			return keymap[name].value;
+		std::string get(const char *name,const std::string&){
+			return env_expand(keymap[name].value);
 		}
 		bool get(const char *name,bool){
 			return keymap[name].value=="true";
@@ -142,7 +143,7 @@ class ini_parser
 	std::map<std::string,section> sections;
 	bool needwrite;
 public:
-	ini_parser(char *conf);
+	ini_parser(const char *conf);
 	void write();
 	~ini_parser();
 	section &getSection(const char *sec){
@@ -160,7 +161,7 @@ class global_init{
 	ini_parser conf;
 public:
 	std::string sfx_file;
-	global_init(char *name);
+	global_init(int,char *[]);
 	template<typename T>
 	T get(const char *sec,const char *name)
 	{
