@@ -54,7 +54,7 @@ string env_expand(string &name)
 
     return name;
 }
-ini_parser::ini_parser(const char *conf):name(conf),needwrite(false)
+ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 {
 	ini_parser::section::configmap configprop;
 	configprop["path"].value=".";
@@ -106,7 +106,7 @@ ini_parser::ini_parser(const char *conf):name(conf),needwrite(false)
 	musicprop["opltype"].value="mame";
 	musicprop["opltype"].comment="real/mame/ken;真机OPL芯片/MAME版模拟/Ken版模拟FM音乐";
 	musicprop["oplport"].value="0x388";
-	musicprop["oplport"].comment="真机OPL2端口号;0x388为adlib声卡默认,0x220为sb16默认";
+	musicprop["oplport"].comment="真机OPL2端口号;0x388为adlib声卡默认.只在dos build(尚未出现)生效";
 	musicprop["volume"].value="255";
 	musicprop["volume"].comment="0-255;音量";
 	musicprop["volume_sfx"].value="255";
@@ -131,6 +131,11 @@ ini_parser::ini_parser(const char *conf):name(conf),needwrite(false)
 		}
     else
         needwrite=true;
+
+    if(once){
+        write();
+        throw std::exception();
+    }
 }
 
 void ini_parser::write(){
@@ -294,9 +299,12 @@ bool is_out;
 ini_parser getconf(int c,char *v[])
 {
     string name=CONF;
+    bool write_directly=false;
     if(c>1 && !strcmp(v[1],"--conf"))
         name=v[2];
-    return ini_parser(name.c_str());
+    if(c>1 && (!strcmp(v[1],"--write") || !strcmp(v[1],"w")))
+        write_directly=true;
+    return ini_parser(name.c_str(),write_directly);
 }
 global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 {

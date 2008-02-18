@@ -143,7 +143,7 @@ class ini_parser
 	std::map<std::string,section> sections;
 	bool needwrite;
 public:
-	ini_parser(const char *conf);
+	ini_parser(const char *conf,bool);
 	void write();
 	~ini_parser();
 	section &getSection(const char *sec){
