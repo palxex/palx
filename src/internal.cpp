@@ -64,7 +64,7 @@ void switch_proc()
 		int &mode=CARD;
 		static PALETTE pal;bitmap bak(NULL,SCREEN_W,SCREEN_H);
 		if(mode==GFX_AUTODETECT_WINDOWED || mode ==GFX_AUTODETECT)
-			mode=GFX_SAFE;
+			mode=GFX_AUTODETECT_WINDOWED;
 		else
 			mode=GFX_AUTODETECT;
 		get_palette(pal);blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);

@@ -363,7 +363,7 @@ int global_init::operator ()()
 	objs.set(path_root+"/WORD.DAT");
 	playrix::set((path_root+"/MUS.MKF").c_str());
 
-	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_SAFE);
+	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED);
 
 	//allegro init
 	allegro_init();
