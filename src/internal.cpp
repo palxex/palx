@@ -69,7 +69,9 @@ void switch_proc()
 			mode=GFX_AUTODETECT;
 		get_palette(pal);blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		//vsync();
-		set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0);
+		if(set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0)<0)
+            if(set_gfx_mode(GFX_SAFE,SCREEN_W,SCREEN_H,0,0)<0)
+                throw std::exception();
 		set_palette(pal);blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 		//reapply; it seems that this feature was reset after switch
         if(global->get<bool>("config","switch_off"))
