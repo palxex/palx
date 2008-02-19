@@ -128,6 +128,10 @@ class ini_parser
 					return 0;
 				}
 			}
+			catch(...)
+			{
+				return 0;
+			}
 		}
 		void set(const char *name,const std::string &val){
 			keymap[name].value=val;
