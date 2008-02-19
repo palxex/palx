@@ -1,7 +1,7 @@
 [Project]
 FileName=palx.dev
 Name=palx
-UnitCount=43
+UnitCount=42
 Type=0
 Ver=1
 ObjFiles=
@@ -148,27 +148,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit15]
-FileName=src\icon.rc
-CompileCpp=1
-Folder=palx
-Compile=1
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit16]
-FileName=src\integer.h
-CompileCpp=1
-Folder=palx
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit17]
 FileName=src\internal.cpp
 CompileCpp=1
 Folder=palx
@@ -178,8 +158,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit18]
+[Unit17]
 FileName=src\internal.h
+CompileCpp=1
+Folder=palx
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit18]
+FileName=src\item.cpp
 Folder=palx
 Compile=1
 Link=1
@@ -189,16 +179,6 @@ BuildCmd=
 CompileCpp=1
 
 [Unit19]
-FileName=src\item.cpp
-CompileCpp=1
-Folder=palx
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit20]
 FileName=src\keyboard.cpp
 CompileCpp=1
 Folder=palx
@@ -208,7 +188,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit21]
+[Unit20]
 FileName=src\mainloop.cpp
 CompileCpp=1
 Folder=palx
@@ -218,7 +198,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit22]
+[Unit21]
 FileName=src\message.cpp
 CompileCpp=1
 Folder=palx
@@ -228,7 +208,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit23]
+[Unit22]
 FileName=src\palx.cpp
 CompileCpp=1
 Folder=palx
@@ -238,7 +218,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit24]
+[Unit23]
 FileName=src\playrng.cpp
 CompileCpp=1
 Folder=palx
@@ -248,7 +228,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit25]
+[Unit24]
 FileName=src\qbrand.cpp
 CompileCpp=1
 Folder=palx
@@ -258,7 +238,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit26]
+[Unit25]
 FileName=src\resource.cpp
 CompileCpp=1
 Folder=palx
@@ -268,7 +248,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit27]
+[Unit26]
 FileName=src\resource.h
 CompileCpp=1
 Folder=palx
@@ -278,7 +258,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit28]
+[Unit27]
 FileName=src\scene.cpp
 CompileCpp=1
 Folder=palx
@@ -288,7 +268,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit29]
+[Unit28]
 FileName=src\scene.h
 CompileCpp=1
 Folder=palx
@@ -298,7 +278,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit30]
+[Unit29]
 FileName=src\script.cpp
 CompileCpp=1
 Folder=palx
@@ -308,7 +288,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit31]
+[Unit30]
 FileName=src\shop.cpp
 CompileCpp=1
 Folder=palx
@@ -318,7 +298,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit32]
+[Unit31]
 FileName=src\structs.h
 CompileCpp=1
 Folder=palx
@@ -328,7 +308,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit33]
+[Unit32]
 FileName=src\team.cpp
 CompileCpp=1
 Folder=palx
@@ -338,7 +318,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit34]
+[Unit33]
 FileName=src\timing.cpp
 CompileCpp=1
 Folder=palx
@@ -348,7 +328,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit35]
+[Unit34]
 FileName=src\timing.h
 CompileCpp=1
 Folder=palx
@@ -358,7 +338,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit36]
+[Unit35]
 FileName=src\UI.cpp
 CompileCpp=1
 Folder=palx
@@ -368,7 +348,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit37]
+[Unit36]
 FileName=src\UI.h
 CompileCpp=1
 Folder=palx
@@ -378,7 +358,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit38]
+[Unit37]
 FileName=alfont\alfont.h
 CompileCpp=1
 Folder=palx
@@ -388,7 +368,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit39]
+[Unit38]
 FileName=alfont\alfont.c
 CompileCpp=0
 Folder=palx
@@ -398,7 +378,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit40]
+[Unit39]
 FileName=PalLibrary\src\yj2.cpp
 CompileCpp=1
 Folder=palx
@@ -408,7 +388,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit41]
+[Unit40]
 FileName=PalLibrary\src\rle.cpp
 CompileCpp=1
 Folder=palx
@@ -418,8 +398,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit42]
+[Unit41]
 FileName=PalLibrary\src\rng.cpp
+CompileCpp=1
+Folder=palx
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit42]
+FileName=PalLibrary\src\yj1.cpp
 CompileCpp=1
 Folder=palx
 Compile=1
@@ -498,6 +488,16 @@ BuildCmd=
 
 [Unit4]
 FileName=src\battle.cpp
+CompileCpp=1
+Folder=palx
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit15]
+FileName=src\integer.h
 CompileCpp=1
 Folder=palx
 Compile=1
