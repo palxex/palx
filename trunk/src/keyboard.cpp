@@ -126,11 +126,12 @@ VKEY SAFE_GETKEY(VKEY &x,bool once)
 {
 		extern bool running,is_out;
 		x=VK_NONE;
-		while(!once && running && !is_out && !(x=get_key()))
+		while(running && !is_out && !(x=get_key()))
 		{
 			switch_proc();
             flush_screen();
-			once=!once;
+			if(once)
+                break;
 			rest(10);
 		}
         return x;
