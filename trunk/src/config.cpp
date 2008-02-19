@@ -367,7 +367,9 @@ int global_init::operator ()()
 
 	//allegro init
 	allegro_init();
-	set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0);
+	if(set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0)<0)
+        if(set_gfx_mode(GFX_SAFE,get<int>("display","width"),get<int>("display","height"),0,0)<0)
+            throw std::exception();
 	if(get<bool>("config","switch_off"))
         set_display_switch_mode(SWITCH_BACKGROUND);
 	set_display_switch_callback(SWITCH_IN,switchin_proc);

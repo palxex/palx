@@ -23,7 +23,6 @@
 					<Add library="kernel32" />
 					<Add library="user32" />
 					<Add library="gdi32" />
-					<Add library="comdlg32" />
 					<Add library="ole32" />
 					<Add library="dinput" />
 					<Add library="ddraw" />
@@ -51,14 +50,12 @@
 					<Add library="kernel32" />
 					<Add library="user32" />
 					<Add library="gdi32" />
-					<Add library="comdlg32" />
 					<Add library="ole32" />
 					<Add library="dinput" />
 					<Add library="ddraw" />
 					<Add library="dxguid" />
 					<Add library="winmm" />
 					<Add library="dsound" />
-					<Add library="iconv" />
 				</Linker>
 			</Target>
 		</Build>
