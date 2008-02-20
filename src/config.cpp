@@ -283,17 +283,10 @@ bool is_out;
     void switchin_proc()
     {
         is_out=false;
-        if(running && !global->get<bool>("config","switch_off"))
-            rix->setvolume(volume);
     }
     void switchout_proc()
     {
         is_out=true;
-        if(running && !global->get<bool>("config","switch_off"))
-        {
-            volume=global->get<int>("music","volume");
-            rix->setvolume(0);
-        }
     }
 
 ini_parser getconf(int c,char *v[])

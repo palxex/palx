@@ -12,7 +12,7 @@ AC_PROG_CC
 #AM_PROG_CC_C_O
 
 dnl Check for Allegro Installed
-AM_PATH_ALLEGRO(4.2.1)
+AM_PATH_ALLEGRO(4.2.0)
 
 dnl Check for boost lib
 AX_BOOST_BASE([1.33])
