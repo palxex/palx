@@ -3,6 +3,7 @@
 echo "Generating build information using aclocal, autoheader, automake and autoconf"
 echo "This may take a while ..."
 
+cp m4/* /usr/share/aclocal
 # Regenerate configuration files.
 
 aclocal
