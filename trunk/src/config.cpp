@@ -68,7 +68,7 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	configprop["resource"].value="dos";
 	configprop["resource"].comment="dos/win95/ss(?)";
 	configprop["encode"].value=LOCALE;
-	configprop["encode"].comment="GBK/BIG5";
+	configprop["encode"].comment="win32:chs/cht;linux/mac/dos/...(iconv):GBK/BIG5";
 	configprop["switch_off"].value="false";
 	configprop["switch_off"].comment="控制切换出窗口时程序是否继续执行";
 	section config("config",configprop);
