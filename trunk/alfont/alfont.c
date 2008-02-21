@@ -17,7 +17,7 @@
 #include <ft2build.h>
 #include "alfont.h"
 
-#ifdef ALFONT_ICONV	//run in DOS
+#ifdef ALFONT_ICONV
 #include <iconv.h>
 #else			//run in Other
 #include <locale.h>
@@ -599,14 +599,14 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
   int alpha_table[256];
   int last_glyph_index;
   int first_x=0, final_x=0, final_y=0;
-  int curr_uformat;
+  int curr_uformat = 0;
   int first_flag=TRUE; //First Char flag
-  BITMAP *masked_bmp; //the masked bmp used by Font hollow
+  BITMAP *masked_bmp = NULL; //the masked bmp used by Font hollow
 
   #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
-  char *sin, *sout;
+  const char *sin;char *sout;
   #endif
 
   if (s == NULL) {
@@ -871,9 +871,9 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
   last_glyph_index = 0;
 
 #ifdef ALFONT_LINUX //Fix for Linux Unicode System(be converted)
-  for (character = ugetxc((const char*)&lpszW); character != 0; character = ugetxc((const char*)&lpszW),character = ugetxc((const char*)&lpszW)) {
+  for (character = ugetxc((const char**)&lpszW); character != 0; character = ugetxc((const char**)&lpszW),character = ugetxc((const char**)&lpszW)) {
 #else
-  for (character = ugetxc((const char*)&lpszW); character != 0; character = ugetxc((const char*)&lpszW)) {
+  for (character = ugetxc((const char**)&lpszW); character != 0; character = ugetxc((const char**)&lpszW)) {
 #endif
 	int real_x, real_y, glyph_index;
 	struct _ALFONT_CACHED_GLYPH cglyph;
@@ -1711,13 +1711,13 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
   int character, last_glyph_index;
   int first_x=0, final_x=0, final_y=0;
-  int curr_uformat;
+  int curr_uformat = 0;
   int first_flag=TRUE; //First Char flag
-  BITMAP *masked_bmp; //the masked bmp used by Font hollow
+  BITMAP *masked_bmp = NULL; //the masked bmp used by Font hollow
   #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
-  char *sin, *sout;
+  const char *sin;char *sout;
   #endif
 
   if (s == NULL) {
@@ -1957,9 +1957,9 @@ void alfont_textout_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y,
   last_glyph_index = 0;
 
 #ifdef ALFONT_LINUX //Fix for Linux Unicode System(be converted)
-  for (character = ugetxc((const char*)&lpszW); character != 0; character = ugetxc((const char*)&lpszW),character = ugetxc((const char*)&lpszW)) {
+  for (character = ugetxc((const char**)&lpszW); character != 0; character = ugetxc((const char**)&lpszW),character = ugetxc((const char**)&lpszW)) {
 #else
-  for (character = ugetxc((const char*)&lpszW); character != 0; character = ugetxc((const char*)&lpszW)) {
+  for (character = ugetxc((const char**)&lpszW); character != 0; character = ugetxc((const char**)&lpszW)) {
 #endif
 	int real_x, real_y, glyph_index;
 	struct _ALFONT_CACHED_GLYPH cglyph;
@@ -2513,13 +2513,13 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
   char *precedingchar_pointer=NULL; //used for precedingchar character
   int nLen;
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
-  int curr_uformat;
+  int curr_uformat = 0;
   int total_length = 0, character, last_glyph_index;
   int glyph_index;
   #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
-  char *sin, *sout;
+  const char *sin;char *sout;
   #endif
 
   if (str == NULL) {
@@ -2735,9 +2735,9 @@ int alfont_text_length(ALFONT_FONT *f, const char *str) {
   /* virtually draw char by char */
   last_glyph_index = 0;
 #ifdef ALFONT_LINUX //Fix for Linux Unicode System(be converted)
-  for (character = ugetxc((const char*)&lpszW); character != 0; character = ugetxc((const char*)&lpszW),character = ugetxc((const char*)&lpszW)) {
+  for (character = ugetxc((const char**)&lpszW); character != 0; character = ugetxc((const char**)&lpszW),character = ugetxc((const char**)&lpszW)) {
 #else
-  for (character = ugetxc((const char*)&lpszW); character != 0; character = ugetxc((const char*)&lpszW)) {
+  for (character = ugetxc((const char**)&lpszW); character != 0; character = ugetxc((const char**)&lpszW)) {
 #endif
 	/* get the character out of the font */
 
@@ -2801,12 +2801,12 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
   char *precedingchar_pointer=NULL; //used for precedingchar character
   int nLen;
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
-  int curr_uformat;
+  int curr_uformat = 0;
   int string_count=0;
   #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
-  char *sin, *sout;
+  const char *sin;char *sout;
   #endif
 
   if (str == NULL) {
@@ -3048,19 +3048,18 @@ int alfont_text_count(ALFONT_FONT *f, const char *str) {
 }
 
 int alfont_ugetc(ALFONT_FONT *f, const char *s) {
-  char *lpszW;
-  char *lpszW_pointer=NULL; //used for freeing string
+  char *lpszW = NULL;
   char *s_pointer=NULL; //used for original string fixed by autofix
   char *s_pointer_temp=NULL; //temporary used for autofix string
   char *precedingchar_pointer=NULL; //used for precedingchar character
   int nLen;
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
   int character;
-  int curr_uformat;
+  int curr_uformat = 0;
   #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
-  char *sin, *sout;
+  const char *sin;char *sout;
   #endif
 
   if (s == NULL) {
@@ -3300,11 +3299,11 @@ int alfont_need_uconvert(ALFONT_FONT *f, const char *str) {
   int need_unicode_convert=TRUE;
   int nLen;
   int ret; //decide that if the ASCII Code convert to Unicode Code is all OK when used for autofix string or used for general convert.
-  int curr_uformat;
+  int curr_uformat = 0;
   #ifdef ALFONT_ICONV
   iconv_t c_pt;
   size_t fromlen, tolen;
-  char *sin, *sout;
+  const char *sin;char *sout;
   #endif
 
   if (str == NULL) {
