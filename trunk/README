@@ -1,9 +1,6 @@
 将palx.exe放入仙剑的安装目录。
-运行参数：palx.exe x w h f
-x:存档号，可直接继续游戏。
-w/h：窗口长/宽，将被调整到320/200的正整数倍。
-f:全屏
-所有参数均为可选，双击直接以320x200窗口模式开始游戏，拖放存档到palx.exe以存档在320x200窗口模式继续游戏。
+运行参数：palx.exe [ [ --conf filename] | [ --write | w ] ]
+默认:WIN32: .\palx.conf;*NIX:~/.palxrc;[DOS:.\palx.cfg;OSX:]
 功能增强：
 无限存档。
 P/PrtScn键截屏。

@@ -45,15 +45,6 @@ extern int scale;
 extern bool running;
 bool key_enable=true;
 
-#include <exception>
-void perframe_real()
-{
-	extern bool running;
-	if(!running)
-		throw std::exception();
-	switch_proc();
-	shake_screen();
-}
 void switch_proc()
 {
 	mutex_switching=1;
@@ -71,7 +62,7 @@ void switch_proc()
 		//vsync();
 		if(set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0)<0)
             if(set_gfx_mode(GFX_SAFE,SCREEN_W,SCREEN_H,0,0)<0)
-                throw std::exception();
+                running=false;
 		set_palette(pal);blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 		//reapply; it seems that this feature was reset after switch
         if(global->get<bool>("config","switch_off"))

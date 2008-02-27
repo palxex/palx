@@ -47,7 +47,7 @@ int mykey[256];
 int mykey_lowlevel[256];
 std::stack<int> keys;
 
-VKEY get_key(bool clear)
+VKEY async_getkey()
 {
 	VKEY keygot=VK_NONE;
 	int k;
@@ -113,27 +113,18 @@ VKEY get_key(bool clear)
 			break;
 		default:
 			keygot = VK_NONE;
-			if(!clear)
-				simulate_keypress(k<<8);
 		}
-		if(clear)
-			clear_keybuf();
+		clear_keybuf();
 	}
 	return keygot;
 }
-VKEY place;
-VKEY SAFE_GETKEY(VKEY &x,bool once)
+VKEY sync_getkey()
 {
+	VKEY x;
 		extern bool running,is_out;
 		x=VK_NONE;
-		while(running && !is_out && !(x=get_key()))
-		{
-			switch_proc();
-            flush_screen();
-			if(once)
-                break;
+		while(running && !is_out && !(x=async_getkey()))
 			rest(10);
-		}
         return x;
 }
 int make_layer(int key)

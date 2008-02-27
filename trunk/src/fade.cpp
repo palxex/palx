@@ -34,7 +34,6 @@ void pal_fade_out(int t)
 		if(t>0)
 			for(int i=0x3f;i>=3;i--)
 			{
-				perframe_proc();
 				for(int j=0;j<0x100;j++)
 				{
 					pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
@@ -58,7 +57,6 @@ void pal_fade_in(int t)
 		if(t>0)
 			for(int i=4;i<=0x3f;i++)
 			{
-				perframe_proc();
 				for(int j=0;j<0x100;j++)
 				{
 					pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
@@ -81,7 +79,6 @@ void fade_inout(int t)
 	int begin=(arg>0?0:0x40),end=(arg>0?0x40:0);
 	for(int i=begin;i!=end;i+=arg)
 	{
-		perframe_proc();
 		for(int j=0;j<0x100;j++)
 		{
 			pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
@@ -158,7 +155,6 @@ void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 			crossFade_desault(fadegap[arg],u,src,dst);
 		crossFade_self(fadegap[arg],u,src);
 		delay(gap);
-		perframe_proc();
 	}
 	dst.blit_to(screen,0,0,0,0);
 }

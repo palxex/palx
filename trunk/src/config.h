@@ -33,7 +33,7 @@
 #   define retpos() is.seekg(pos,std::ios_base::beg)
 #endif
 
-std::string env_expand(std::string &);
+std::string env_expand(std::string);
 class ini_parser
 {
 	friend class global_init;
