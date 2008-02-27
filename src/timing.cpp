@@ -25,24 +25,25 @@ extern bool running;
 void wait(uint8_t gap)
 {
 	time_interrupt_occurs=0;
-	rest(gap*8);
+	rest(gap*10);
 }
 
 
 void wait_key(uint8_t gap)
 {
-	clear_keybuf();flush_screen();
+	clear_keybuf();
 	time_interrupt_occurs=0;
 	while(running && !keypressed() && time_interrupt_occurs<gap)
-		rest(10);
+		delay(1);
 }
 
-void wait_for_key()
+VKEY wait_for_key()
 {
-	clear_keybuf();flush_screen();
-	while(running && !keypressed())
-		rest(10);
 	clear_keybuf();
+	VKEY x=VK_NONE;
+	while(running && (x=async_getkey())!=VK_NONE)
+		rest(10);
+	return x;
 }
 
 void delay(uint8_t gap)

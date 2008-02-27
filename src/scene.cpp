@@ -303,5 +303,4 @@ void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap,BITMAP *dst
 	sprites.flush(scanline);
 	blit(scanline,dst,0,0,0,0,SCREEN_W,SCREEN_H);
 	pal_fade_in(gap);
-	perframe_proc();
 }

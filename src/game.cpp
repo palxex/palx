@@ -78,8 +78,8 @@ namespace res{
 		if(!is_out && !mutex_switching && !mutex_blitting){
 			static int pal_lock=0;
 			static PALETTE pal;
-			mutex_paletting=true;
 			if(pal_lock++==10){
+                mutex_paletting=true;
 				get_palette(pal);
 				RGB temp=pal[0xF6];
 				memcpy(pal+0xF6,pal+0xF7,6);
@@ -89,12 +89,19 @@ namespace res{
 				pal[0xFE]=temp;
 				set_palette(pal);
 				pal_lock=0;
+                mutex_paletting=false;
 			};
-			mutex_paletting=false;
 		}
 		rest(1);
 	}
 	END_OF_FUNCTION(timer_proc);
+
+    void perframe_proc()
+    {
+        switch_proc();
+        shake_screen();
+    }
+    END_OF_FUNCTION(perframe_proc);
 
     void init_resource()
     {
@@ -106,6 +113,7 @@ namespace res{
 
         LOCK_VARIABLE(time_interrupt_occurs);
         install_int(timer_proc,10);
+        install_int(perframe_proc,1);
 
         //load sss&data
         long len=0;
@@ -148,6 +156,7 @@ namespace res{
     }
     void destroy_resource(){
         remove_int(timer_proc);
+		remove_int(perframe_proc);
     }
 
     /*/

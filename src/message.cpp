@@ -62,7 +62,6 @@ void draw_oneline_m_text(char *str,int x,int y)
 	icon=0;
 	int text_x=x;
 	for(int i=0,len=(int)strlen(str);i<len;i++){
-		perframe_proc();
 		switch(str[i]){
 			case '-':
 				std::swap(glbvar_fontcolor, font_color_cyan);
@@ -92,10 +91,10 @@ void draw_oneline_m_text(char *str,int x,int y)
 			default:
 				strncpy(word,str+i,2);
 				dialog_string(word,text_x,y,glbvar_fontcolor,true);
-				if(get_key()==VK_EXPLORE)
+				if(async_getkey()==VK_EXPLORE)
 					keepon_delay=false;
 				if(keepon_delay)
-					wait(delay_centisecond);
+					delay(delay_centisecond);
 				icon_x=text_x+=16;
 				i++;
 		}

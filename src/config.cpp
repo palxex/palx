@@ -44,7 +44,7 @@ using namespace std;
 using namespace boost;
 using namespace Pal::Tools;
 
-string env_expand(string &name)
+string env_expand(string name)
 {
     if(name[0]=='~')
         name=getenv("HOME")+name.substr(1,name.size()-1);
@@ -134,12 +134,12 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 
     if(once){
         write();
-        throw std::exception();
+        running=false;
     }
 }
 
 void ini_parser::write(){
-	ofstream ofs(name.c_str(),ios_base::out|ios_base::trunc);
+	ofstream ofs((env_expand(name)).c_str(),ios_base::out|ios_base::trunc);
 	for(std::map<string,section>::const_iterator i=sections.begin();i!=sections.end();i++)
 		ofs<<(*i).second;
 	ofs.flush();
@@ -362,7 +362,7 @@ int global_init::operator ()()
 	allegro_init();
 	if(set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0)<0)
         if(set_gfx_mode(GFX_SAFE,get<int>("display","width"),get<int>("display","height"),0,0)<0)
-            throw std::exception();
+            running=false;
 	if(get<bool>("config","switch_off"))
         set_display_switch_mode(SWITCH_BACKGROUND);
 	set_display_switch_callback(SWITCH_IN,switchin_proc);

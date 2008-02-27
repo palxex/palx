@@ -115,7 +115,7 @@ Copl *getopl()
 	else if(global->get<std::string>("music","opltype")=="ken")
 		return new CKemuopl(SAMPLE_RATE, true, CHANNELS == 2);
 	else
-		throw std::exception();
+		running=false;
 }
 playrix::playrix():opl(getopl()),rix(opl.get()),Buffer(0),stream(0),max_vol(global->get<int>("music","volume"))
 {

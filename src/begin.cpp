@@ -47,7 +47,6 @@ void startup_splash()
 
 	bitmap scrn_buf(0,SCREEN_W,SCREEN_H*2);
 	int prog_lines=200,prog_pale=0,prog_goose=0,begin_pale=40,add_pale=16;
-	VKEY keygot;
 	do{
 		blit(cat,scrn_buf,0,std::max(prog_lines--,0),0,0,SCREEN_W,SCREEN_H);
 		for(int i=0;i<9;i++)
@@ -59,14 +58,12 @@ void startup_splash()
 		title_height=temp_height;
 		title.getsprite(0)->blit_to(scrn_buf,0xFE,10);
 		blit(scrn_buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
-		perframe_proc();
-		wait(10);
+		delay(10);
 		prog_pale=begin_pale/10;
 		begin_pale+=add_pale;
 		if(add_pale>=3)
 			add_pale--;
 		if(prog_pale<=0x40){
-			perframe_proc();
 			for(int i=0;i<0xF0;i++){
 				pal[i].r=res::pat.get(0)[i].r*prog_pale/0x40;
 				pal[i].g=res::pat.get(0)[i].g*prog_pale/0x40;
@@ -74,20 +71,18 @@ void startup_splash()
 			}
 			set_palette(pal);
 		}
-		SAFE_GETKEY(keygot,true);
-	}while(running && keygot!=VK_EXPLORE);
+	}while(running && async_getkey()==VK_EXPLORE);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
 		for(int i=prog_pale;i<0x40;i++){
-			perframe_proc();
 			for(int j=0;j<0xF0;j++){
 				pal[j].r=res::pat.get(0)[j].r*i/0x40;
 				pal[j].g=res::pat.get(0)[j].g*i/0x40;
 				pal[j].b=res::pat.get(0)[j].b*i/0x40;
 			}
 			set_palette(pal);
-			wait(1);
+			delay(1);
 		}
 		wait_key(90);
 	}
@@ -111,7 +106,7 @@ int select_scene()
 			for(int i=7;i<9;i++)
 				ttfont(objs(i*10,i*10+10)).blit_to(screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
-		switch(SAFE_GETKEY()){
+		switch(sync_getkey()){
 			case VK_UP:
 				changed=true;
 				menu_selected++;
