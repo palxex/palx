@@ -113,7 +113,7 @@ namespace res{
 
         LOCK_VARIABLE(time_interrupt_occurs);
         install_int(timer_proc,10);
-        install_int(perframe_proc,1);
+        install_int(perframe_proc,10);
 
         //load sss&data
         long len=0;
@@ -159,9 +159,6 @@ namespace res{
 		remove_int(perframe_proc);
     }
 
-    /*/
-    extern "C" __declspec(dllimport) uint32_t __stdcall GetLastError();/*/
-    int GetLastError(){return 0;}//*/
     bool load(int id){
 		if(!id)
 			return false;

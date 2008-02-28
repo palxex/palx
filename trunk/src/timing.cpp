@@ -41,7 +41,7 @@ VKEY wait_for_key()
 {
 	clear_keybuf();
 	VKEY x=VK_NONE;
-	while(running && (x=async_getkey())!=VK_NONE)
+	while(running && (x=async_getkey())==VK_NONE)
 		rest(10);
 	return x;
 }
