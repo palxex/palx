@@ -71,7 +71,7 @@ void startup_splash()
 			}
 			set_palette(pal);
 		}
-	}while(running && async_getkey()==VK_EXPLORE);
+	}while(running && async_getkey()==VK_NONE);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
