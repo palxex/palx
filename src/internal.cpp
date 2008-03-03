@@ -47,31 +47,31 @@ bool key_enable=true;
 
 void switch_proc()
 {
-	mutex_switching=1;
 	if(key[KEY_F11] || ((key[KEY_ALT]||key[KEY_ALTGR]) && key[KEY_ENTER]))
 	{
+		int scale=global->get<int>("display","scale");
+		mutex_switching=1;
 		while(mutex_paletting || mutex_blitting)
 			rest(1);
 		int &mode=CARD;
-		static PALETTE pal;bitmap bak(NULL,SCREEN_W,SCREEN_H);
-		if(mode==GFX_AUTODETECT_WINDOWED || mode ==GFX_AUTODETECT)
+		static PALETTE pal;
+		if(mode==GFX_SAFE || mode==GFX_AUTODETECT)
 			mode=GFX_AUTODETECT_WINDOWED;
 		else
 			mode=GFX_AUTODETECT;
-		get_palette(pal);blit(screen,bak,0,0,0,0,SCREEN_W,SCREEN_H);
-		//vsync();
-		if(set_gfx_mode(mode,SCREEN_W,SCREEN_H,0,0)<0)
-            if(set_gfx_mode(GFX_SAFE,SCREEN_W,SCREEN_H,0,0)<0)
+		get_palette(pal);
+		if(set_gfx_mode(mode,SCREEN_W*scale,SCREEN_H*scale,0,0)<0)
+            if(set_gfx_mode(GFX_SAFE,SCREEN_W*scale,SCREEN_H*scale,0,0)<0)
                 running=false;
-		set_palette(pal);blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+		set_palette(pal);
 		//reapply; it seems that this feature was reset after switch
         if(global->get<bool>("config","switch_off"))
             set_display_switch_mode(SWITCH_BACKGROUND);
 		extern void switchin_proc(),switchout_proc();
 		set_display_switch_callback(SWITCH_IN,switchin_proc);
 		set_display_switch_callback(SWITCH_OUT,switchout_proc);
+		mutex_switching=0;
 	}
-	mutex_switching=0;
 }
 void Load_Data()
 {

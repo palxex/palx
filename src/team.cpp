@@ -49,7 +49,9 @@ void load_team_mgo()
 	{
 		int id=res::rpg.roles_properties.avator[res::rpg.team[i].role];
 		team_mgos[i]=load_mgo(id);
-	};
+	}
+	for(int i=1;i<=res::rpg.team_followers;i++)
+		team_mgos[res::rpg.team_roles+i]=load_mgo(res::rpg.team[res::rpg.team_roles+i].role);
 }
 void load_NPC_mgo()
 {
@@ -115,9 +117,9 @@ void calc_followers_screen_pos()
 	}
 	for(int i=1;i<=res::rpg.team_followers;i++)
 	{
-		res::rpg.team[res::rpg.team_roles+i].x=res::rpg.team_track[i+res::rpg.team_roles].x-res::rpg.viewport_x;
-		res::rpg.team[res::rpg.team_roles+i].y=res::rpg.team_track[i+res::rpg.team_roles].y-res::rpg.viewport_y;
-		res::rpg.team[res::rpg.team_roles+i].frame=res::rpg.team_track[i+res::rpg.team_roles].direction*3+step_frame_follower;
+		res::rpg.team[res::rpg.team_roles+i].x=res::rpg.team_track[i+2].x-res::rpg.viewport_x;
+		res::rpg.team[res::rpg.team_roles+i].y=res::rpg.team_track[i+2].y-res::rpg.viewport_y;
+		res::rpg.team[res::rpg.team_roles+i].frame=res::rpg.team_track[i+2].direction*3+step_frame_follower;
 	}
 }
 void team_walk_one_step()

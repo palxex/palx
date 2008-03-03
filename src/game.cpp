@@ -98,7 +98,7 @@ namespace res{
 
     void perframe_proc()
     {
-        switch_proc();
+        //switch_proc();
         shake_screen();
     }
     END_OF_FUNCTION(perframe_proc);

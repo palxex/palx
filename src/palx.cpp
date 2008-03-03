@@ -33,9 +33,9 @@ int main(int argc, char *argv[])
 		global_init _global(argc, argv);global=&_global;
 
 			int save=_global();
-			bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;
-			bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;
-			bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;
+			bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;clear_bitmap(fakescreen);
+			bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;clear_bitmap(backbuf);
+			bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;clear_bitmap(bakscreen);
 
 			playrix player;rix=&player;
 			using namespace res;

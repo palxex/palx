@@ -38,6 +38,13 @@
 
 #define screen fakescreen
 
+#undef SCREEN_W
+#undef SCREEN_H
+#define SCREEN_W (global->get<int>("display","width"))
+#define SCREEN_H (global->get<int>("display","height"))
+
+#include "config.h"
+
 extern BITMAP *fakescreen,*backbuf,*bakscreen;
 extern void redraw_everything(int gap=1,BITMAP * =screen);
 

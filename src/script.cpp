@@ -1026,8 +1026,21 @@ __walk_role:
         npc_speed=8;
         goto __ride;
     case 0x98:
-        load_team_mgo();
-        calc_followers_screen_pos();
+		rpg.team_followers=0;
+		if(param1>0)
+		{
+			rpg.team_followers=1;
+			rpg.team[rpg.team_roles+1].role=param1;
+		}
+		if(param2>0)
+		{
+			rpg.team_followers=2;
+			rpg.team[rpg.team_roles+2].role=param2;
+		}
+		if(rpg.team_followers){
+			load_team_mgo();
+			calc_followers_screen_pos();
+		}
         break;
 	case 0x99:
 		if(param1<0){
@@ -1088,7 +1101,13 @@ __walk_role:
 		running=0;
         break;
 	case 0xa1:
-		//not implemented
+		for(int i=1;i<=rpg.team_roles;i++)
+		{
+			rpg.team[i].x=x_scrn_offset;
+			rpg.team[i].y=y_scrn_offset-2;
+			rpg.team_track[i].x=scene->team_pos.toXY().x;
+			rpg.team_track[i].y=scene->team_pos.toXY().y;
+		}
 		break;
 	case 0xa2:
 		//not implemented
