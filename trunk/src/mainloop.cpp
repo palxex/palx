@@ -78,6 +78,7 @@ namespace res{
             rest(1);
             if(time_interrupt_occurs>=10)
                 mainloop_proc(),time_interrupt_occurs=0;
+			switch_proc();
         }
 		keyboard_lowlevel_callback=NULL;
         return 0;

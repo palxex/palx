@@ -86,8 +86,8 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	displayprop["height"].value="200";
 	displayprop["height"].comment="粒度;320x200正整数倍.";
 	displayprop["width"].value="320";
-	displayprop["scale"].value="none";
-	displayprop["scale"].comment="none, 2x; etc.";
+	displayprop["scale"].value="2";
+	displayprop["scale"].comment="1,2;etc.";
 	displayprop["fullscreen"].value="false";
 	displayprop["fullscreen"].comment="Bool ;全屏";
 	section display("display",displayprop);
@@ -360,15 +360,17 @@ int global_init::operator ()()
 
 	//allegro init
 	allegro_init();
-	if(set_gfx_mode(CARD,get<int>("display","width"),get<int>("display","height"),0,0)<0)
-        if(set_gfx_mode(GFX_SAFE,get<int>("display","width"),get<int>("display","height"),0,0)<0)
+	if(get<int>("display","scale")<1)
+		set<int>("display","scale",1);
+	if(set_gfx_mode(CARD,SCREEN_W*get<int>("display","scale"),SCREEN_H*get<int>("display","scale"),0,0)<0)
+        if(set_gfx_mode(GFX_SAFE,SCREEN_W*get<int>("display","scale"),SCREEN_H*get<int>("display","scale"),0,0)<0)
             running=false;
 	if(get<bool>("config","switch_off"))
         set_display_switch_mode(SWITCH_BACKGROUND);
 	set_display_switch_callback(SWITCH_IN,switchin_proc);
 	set_display_switch_callback(SWITCH_OUT,switchout_proc);
 	set_color_depth(8);
-	install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL);
+	install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL);
 	install_timer();
 	install_keyboard();keyboard_lowlevel_callback = key_watcher;
 	//install_mouse();enable_hardware_cursor();select_mouse_cursor(MOUSE_CURSOR_ARROW);show_mouse(screen);

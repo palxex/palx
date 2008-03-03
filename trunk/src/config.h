@@ -17,6 +17,10 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
+
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <sstream>
@@ -178,3 +182,5 @@ public:
 	}
 	int operator()();
 };
+
+#endif //_CONFIG_H
