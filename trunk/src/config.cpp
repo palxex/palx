@@ -34,6 +34,10 @@
 #   define FONT_PATH "mingliu.ttc"
 #   define LOCALE "BIG5"
 #   define CONF "palx.cfg"
+#elif defined __APPLE__
+#   define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
+#   define LOCALE "BIG5"
+#   define CONF "~/.palxrc"
 #else   //predicate *NIX
 #   define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
 #   define LOCALE "BIG5"
@@ -69,7 +73,7 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	configprop["resource"].comment="dos/win95/ss(?)";
 	configprop["encode"].value=LOCALE;
 	configprop["encode"].comment="win32:chs/cht;linux/mac/dos/...(iconv):GBK/BIG5";
-	configprop["switch_off"].value="false";
+	configprop["switch_off"].value="true";
 	configprop["switch_off"].comment="控制切换出窗口时程序是否继续执行";
 	section config("config",configprop);
 	sections["config"]=config;
