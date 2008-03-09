@@ -156,11 +156,114 @@ bool operator==(const sprite_prim& lhs,const sprite_prim& rhs)
 	return lhs.id==rhs.id;
 }
 
-ALFONT_FONT *ttfont::glb_font;
-void ttfont::blit_to(BITMAP *dest,int x,int y,uint8_t color,bool shadow){
+ALFONT_FONT *ttfont::glb_font=NULL;
+ttfont::ttfont()
+{
+	using namespace std;
+	if(!glb_font){
+        alfont_init();
+        glb_font=alfont_load_font(global->get<string>("font","path").c_str());
+		alfont_set_language(glb_font, global->get<string>("config","encode").c_str());
+        alfont_set_convert(glb_font, TYPE_WIDECHAR);
+        alfont_text_mode(-1);
+        alfont_set_font_background(glb_font, FALSE);
+        alfont_set_char_extra_spacing(glb_font,1);
+        alfont_set_font_size(glb_font,16);
+	}
+}
+void ttfont::blit_to(const char *msg,BITMAP *dest,int x,int y,uint8_t color,bool shadow){
 	if(shadow)
 		alfont_textout(dest, glb_font, msg, x+1, y+1, 0);
 	alfont_textout(dest, glb_font, msg, x, y, color);
+}
+
+uint16_t pixfont::worbuf[10000];
+uint8_t pixfont::fonbuf[300000];
+int nChar;
+pixfont::pixfont()
+{
+   FILE *fp;
+
+   //
+   // Load the wor16.asc file.
+   //
+   fp = fopen((global->get<std::string>("config","path")+"/WOR16.ASC").c_str(), "rb");
+
+   //
+   // Get the size of wor16.asc file.
+   //
+   fseek(fp, 0, SEEK_END);
+   nChar = ftell(fp);
+   nChar /= 2;
+
+   fseek(fp, 0, SEEK_SET);
+   fread(worbuf, 2, nChar, fp);
+
+   //
+   // Close wor16.asc file.
+   //
+   fclose(fp);
+
+   //
+   // Read all bitmaps from wor16.fon file.
+   //
+   fp = fopen((global->get<std::string>("config","path")+"/WOR16.FON").c_str(), "rb");
+
+   //
+   // The font glyph data begins at offset 0x682 in wor16.fon.
+   //
+   fseek(fp, 0x682, SEEK_SET);
+   fread(fonbuf, 30, nChar, fp);
+   fclose(fp);
+}
+void pixfont::blit_to(const char *msg, BITMAP *dest, int x, int y, unsigned char color, bool shadow)
+{
+	for(int word=0,len=strlen(msg)/2;word<len;word++)
+	{
+		uint16_t wChar=((uint16_t*)msg)[word];
+   int i, j, dx;
+
+   //
+   // Locate for this character in the font lib.
+   //
+   for (i = 0; i < nChar; i++)
+   {
+      if (worbuf[i] == wChar)
+      {
+         break;
+      }
+   }
+
+   if (i >= nChar)
+   {
+      //
+      // This character does not exist in the font lib.
+      //
+      return;
+   }
+
+   uint8_t *pChar = fonbuf + i * 30;
+
+   //
+   // Draw the character to the surface.
+   //
+   int dy = y * SCREEN_W;
+   for (i = 0; i < 30; i++)
+   {
+      dx = x + word*16 + ((i & 1) << 3);
+      for (j = 0; j < 8; j++)
+      {
+         if (pChar[i] & (1 << (7 - j)))
+         {
+			 if(shadow)
+				 ((uint8_t*)dest->dat)[dy + SCREEN_W + dx + 1] = 0;
+            ((uint8_t*)dest->dat)[dy + dx] = color;
+         }
+         dx++;
+      }
+      dy += (i & 1) * SCREEN_W;
+   }
+	}
 }
 
 palette::palette()

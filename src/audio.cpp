@@ -39,7 +39,7 @@ int leaving=0;
 	static short *buf;
 void update_cache(playrix *plr)
 {
-	static int slen_buf=0,slen=630,v_scale=1;
+	static int slen_buf=0,slen=630,v_scale=2;
 
 	if(leaving<BUFFER_SIZE*CHANNELS)
 	{
@@ -116,6 +116,7 @@ Copl *getopl()
 		return new CKemuopl(SAMPLE_RATE, true, CHANNELS == 2);
 	else
 		running=false;
+	return NULL;
 }
 playrix::playrix():opl(getopl()),rix(opl.get()),Buffer(0),stream(0),max_vol(global->get<int>("music","volume"))
 {
@@ -172,10 +173,13 @@ void playrix::stop(int gap)
 
 void playrix::setvolume(int vol)
 {
+    global->set<int>("music","volume",vol);
 	if(global->get<std::string>("music","opltype")!="real")
 		voice_set_volume(stream->voice,vol);
 	else
 		((CRealopl*)opl.get())->setvolume(int((255-vol)/255.0*64));
+	if(vol)
+		begin=true;
 }
 
 voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume_sfx"))

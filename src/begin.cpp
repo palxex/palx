@@ -104,7 +104,7 @@ int select_scene()
 		static bool changed=true;
 		if(changed)
 			for(int i=7;i<9;i++)
-				ttfont(objs(i*10,i*10+10)).blit_to(screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
+				Font->blit_to(objs(i*10,i*10+10),screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
 		switch(sync_getkey()){
 			case VK_UP:
@@ -118,7 +118,7 @@ int select_scene()
 			case VK_MENU:
 				continue;
 			case VK_EXPLORE:
-				ttfont(objs((menu_selected+7)*10,(menu_selected+7)*10+10)).blit_to(screen,0x7D,0x60+menu_selected*0x12,0x2B,true);
+				Font->blit_to(objs((menu_selected+7)*10,(menu_selected+7)*10+10),screen,0x7D,0x60+menu_selected*0x12,0x2B,true);
 				blit(screen,cache,0,0,0,0,SCREEN_W,SCREEN_H);
 				if(menu_selected==0){
 					ok=true;

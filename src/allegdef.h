@@ -89,13 +89,25 @@ public:
 	friend bool operator==(const sprite_prim&,const sprite_prim&);
 	friend class map;
 };
-class ttfont{
-	const char *msg;
+class def_font{
 public:
-	static ALFONT_FONT *glb_font;
-	ttfont(const char *_msg):msg(_msg){}
-	void blit_to(BITMAP *dest,int x,int y,uint8_t color,bool shadow);
+	virtual void blit_to(const char *msg,BITMAP *dest,int x,int y,uint8_t color,bool shadow)=0;
 };
+class ttfont : public def_font{
+	static ALFONT_FONT *glb_font;
+public:
+	ttfont();
+	void blit_to(const char *msg,BITMAP *dest,int x,int y,uint8_t color,bool shadow);
+};
+class pixfont : public def_font{
+	static uint16_t worbuf[10000];
+	static uint8_t fonbuf[300000];
+public:
+	pixfont();
+	void blit_to(const char *msg,BITMAP *dest,int x,int y,uint8_t color,bool shadow);
+};
+extern boost::shared_ptr<def_font> Font;
+
 class Game;extern Game *game;
 class palette{
 	struct myRGB{

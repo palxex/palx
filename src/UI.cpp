@@ -231,7 +231,7 @@ void multi_menu::draw(menu *abs)
 		blit(abs->bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
 			if(r<0x100 && res::rpg.items[r].item)
-				ttfont(objs(res::rpg.items[r].item*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
+				Font->blit_to(objs(res::rpg.items[r].item*10),buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].param&mask)?0x4E:0x18):0xC8),true);
 		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
@@ -287,7 +287,7 @@ struct magic_menu:public multi_menu
 		blit(abs->bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
 			if(r<0x20 && res::rpg.role_prop_tables[0x20+r][role])
-				ttfont(objs(res::rpg.role_prop_tables[0x20+r][role]*10)).blit_to(buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0x4E:0x18),true);
+				Font->blit_to(objs(res::rpg.role_prop_tables[0x20+r][role]*10),buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].param&mask)?0x4E:0x18),true);
 		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 	}
@@ -296,3 +296,39 @@ int select_theurgy(int role,int mask,int selected)
 {
 	return menu(2,33,8,0,18,9,false)(magic_menu(role,mask),selected);
 }
+bool yes_or_no(int word,int selected)
+{
+	bitmap buf(screen);
+	bool got=false;
+	do{
+		single_dialog(0x78,0x64,2,buf).to_screen();
+		single_dialog(0xC8,0x64,2,buf).to_screen();
+		dialog_string(objs(word*10   ,word*10+10),0x78+0xF,0x64+0x9,(selected==0)?0xFA:0,(selected==0)?true:false);
+		dialog_string(objs(word*10+10,word*10+20),0xC8+0xF,0x64+0x9,(selected==1)?0xFA:0,(selected==1)?true:false);
+		switch(sync_getkey())
+		{
+		case VK_MENU:
+		case VK_EXPLORE:
+			got=true;
+			break;
+		case VK_LEFT:
+			selected--;
+			break;
+		case VK_RIGHT:
+			selected++;
+			break;
+		default:
+			break;
+		}
+		selected=!!selected;
+	}while(!got);
+	return selected;
+}
+void num2pic(int num,int x,int y,int color,bool shadow)
+{
+    if(num<0)
+        return;
+
+}
+
+boost::shared_ptr<def_font> Font;

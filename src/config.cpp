@@ -278,7 +278,7 @@ bool is_out;
 
     void close_button_handler(void)
     {
-        //if(!yesno_dialog()) return;
+        //if(!yes_or_no(0x13,0)) return;
         running=false;
         remove_timer();
     }
@@ -383,17 +383,9 @@ int global_init::operator ()()
 	set_close_button_callback(close_button_handler);
 
 	if(get<string>("font","type")=="truetype")
-	{
-        alfont_init();
-        ttfont::glb_font=alfont_load_font(get<string>("font","path").c_str());
-		alfont_set_language(ttfont::glb_font, get<string>("config","encode").c_str());
-        alfont_set_convert(ttfont::glb_font, TYPE_WIDECHAR);
-        alfont_text_mode(-1);
-        alfont_set_font_background(ttfont::glb_font, FALSE);
-        alfont_set_char_extra_spacing(ttfont::glb_font,1);
-        alfont_set_font_size(ttfont::glb_font,16);
-	}else if(get<string>("font","type")=="fon")
-	{}
+		Font=boost::shared_ptr<def_font>(new ttfont());
+	else if(get<string>("font","type")=="fon")
+		Font=boost::shared_ptr<def_font>(new pixfont());
 
 	randomize();
 
