@@ -53,7 +53,7 @@ void show_wait_icon()
 
 void dialog_string(const char *str,int x,int y,int color,bool shadow,BITMAP *bmp)
 {
-	ttfont(str).blit_to(bmp,x,y,color,shadow);
+	Font->blit_to(str,bmp,x,y,color,shadow);
 }
 
 void draw_oneline_m_text(char *str,int x,int y)

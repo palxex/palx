@@ -89,7 +89,7 @@ class single_dialog
 	sprite *border[3];
 	BITMAP *cache;
 public:
-	single_dialog(int x,int y,int len,BITMAP *bmp=screen);
+	single_dialog(int x,int y,int len,BITMAP *bmp);
 	void to_screen();
 };
 
@@ -126,7 +126,9 @@ extern cut_msg_impl objs,msges;
 int select_rpg(int =0,BITMAP * =screen);
 int select_item(int mask,int ,int selected);
 int select_theurgy(int role,int mask,int selected);
-void num2pic(int num,int x,int y);
+void num2pic(int num,int x,int y,int color,bool shadow);
+
+bool yes_or_no(int word,int selected);
 
 void shop(int);
 void hockshop();

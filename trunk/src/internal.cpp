@@ -128,10 +128,10 @@ void Load_Data()
 }
 bool process_Menu()
 {
-	static int main_select=0,role_select=0,magic_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0;
+	static int main_select=0,role_select=0,magic_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0,music_selected=0,sfx_selected=0;
 	//show_money();
 	single_dialog(0,0,5,bitmap(screen)).to_screen();
-	ttfont(objs(0x15*10,0x16*10)).blit_to(screen,10,10,0,false);
+	Font->blit_to(objs(0x15*10,0x16*10),screen,10,10,0,false);
 	switch(main_select=menu(3,37,4,3,2)(single_menu(),main_select))
 	{
 	case 0:
@@ -184,8 +184,16 @@ bool process_Menu()
 			else
 				return true;
 			break;
+		case 2:
+			music_selected=yes_or_no(0x11,global->get<int>("music","volume")>0);
+			rix->setvolume((music_selected==true)?255:0);
+			break;
+		case 3:
+			sfx_selected=yes_or_no(0x11,global->get<int>("music","volume_sfx")>0);
+			global->set<int>("music","volume_sfx",(sfx_selected==true)?255:0);
+			break;
 		case 4:
-			return false;
+			return !yes_or_no(0x13,0);
 		}
 	}
 	clear_keybuf();
