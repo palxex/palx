@@ -121,7 +121,6 @@ VKEY async_getkey()
 VKEY sync_getkey()
 {
 	VKEY x;
-		extern bool running,is_out;
 		x=VK_NONE;
 		while(running && !is_out && !(x=async_getkey()))
 			rest(10);

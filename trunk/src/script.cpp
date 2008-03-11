@@ -1000,7 +1000,7 @@ __walk_role:
 		break;
 	case 0x90:
 		if(param1>0)
-			rpg.objects[param1].script[param3]=param2;
+			rpg.objects[param1].general.script[param3]=param2;
 		break;
 	case 0x91:
 		//not implemented
@@ -1126,7 +1126,7 @@ __walk_role:
     }
 }
 
-cut_msg_impl msges;;
+cut_msg_impl msges;
 cut_msg_impl objs;
 uint16_t process_script(uint16_t id,int16_t object)
 {

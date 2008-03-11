@@ -89,46 +89,20 @@ class single_dialog
 	sprite *border[3];
 	BITMAP *cache;
 public:
-	single_dialog(int x,int y,int len,BITMAP *bmp);
+	single_dialog(int x,int y,int len,BITMAP *bmp,bool shadow=true);
 	void to_screen();
 };
 
-class cut_msg_impl
-{
-	char *glb_buf;
-	char buf[100];
-public:
-	cut_msg_impl(){}
-	void set(const std::string &fname)
-	{
-		FILE *fp=fopen(fname.c_str(),"rb");
-		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);
-		glb_buf=new char[len];
-		fread(glb_buf,len,1,fp);
-		fclose(fp);
-	}
-	~cut_msg_impl()
-	{
-		delete[] glb_buf;
-	}
-	char *operator()(int start,int end=-1)
-	{
-		if(end==-1)
-			end=start+10;
-		assert(end>start);assert(start>=0);
-		memset(buf,0,sizeof(buf));
-		memcpy(buf,glb_buf+start,end-start);
-		return buf;
-	}
-};
-extern cut_msg_impl objs,msges;
 
 int select_rpg(int =0,BITMAP * =screen);
 int select_item(int mask,int ,int selected);
 int select_theurgy(int role,int mask,int selected);
-void num2pic(int num,int x,int y,int color,bool shadow);
+void show_money(int num,int x,int y,int text,bool shadow);
+void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp=screen);
+void show_num_han(int num,int x,int y,int digits,BITMAP *bmp=screen,bool shadow=true);
+void show_number(int number,int x,int y,int color,BITMAP *bmp=screen);
 
-bool yes_or_no(int word,int selected);
+int yes_or_no(int word,int selected);
 
 void shop(int);
 void hockshop();

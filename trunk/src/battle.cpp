@@ -68,7 +68,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 		team_images[i]=sprite_prim(F,res::rpg.roles_properties.battle_avator[res::rpg.team[i].role]);
 	for(int i=0;i<5;i++)
 		if(res::enemyteams[enemy_team].enemy[i]>0)
-			enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].inbeing);
+			enemy_images[i]=sprite_prim(ABC,res::rpg.objects[res::enemyteams[enemy_team].enemy[i]].general.inbeing);
 
 	thebattle=this;
 }

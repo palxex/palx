@@ -22,7 +22,9 @@
 #include <cstdio>
 
 #include "resource.h"
-#include "UI.h"
+#include "allegdef.h"
+#include "internal.h"
+//#include "UI.h"
 #include "pallib.h"
 #include "config.h"
 
@@ -276,6 +278,7 @@ namespace{
 int CARD=0;
 bool is_out;
 
+namespace{
     void close_button_handler(void)
     {
         //if(!yes_or_no(0x13,0)) return;
@@ -283,7 +286,6 @@ bool is_out;
         remove_timer();
     }
     END_OF_FUNCTION(close_button_handler)
-    int volume;
     void switchin_proc()
     {
         is_out=false;
@@ -292,6 +294,7 @@ bool is_out;
     {
         is_out=true;
     }
+}
 
 ini_parser getconf(int c,char *v[])
 {
@@ -336,6 +339,29 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 		de_mkf_yj1_smkf=de_mkf_mkf_yj1;
 	}
 }
+void global_init::display_setup(bool ext)
+{
+	static PALETTE pal;get_palette(pal);
+	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED);
+	if(!ext){
+		if(CARD==GFX_AUTODETECT)
+			CARD=GFX_AUTODETECT_WINDOWED;
+		else if(CARD==GFX_AUTODETECT_WINDOWED)
+			CARD=GFX_AUTODETECT;
+	}
+	if(get<int>("display","scale")<1)
+		set<int>("display","scale",1);
+	if(set_gfx_mode(CARD,SCREEN_W*get<int>("display","scale"),SCREEN_H*get<int>("display","scale"),0,0)<0)
+        if(set_gfx_mode(GFX_SAFE,SCREEN_W,SCREEN_H,0,0)<0)
+            running=false;
+	set_palette(pal);
+	if(get<bool>("config","switch_off"))
+        set_display_switch_mode(SWITCH_BACKGROUND);
+	set_display_switch_callback(SWITCH_IN,switchin_proc);
+	set_display_switch_callback(SWITCH_OUT,switchout_proc);
+	set_color_depth(8);
+	set<bool>("display","fullscreen",CARD==GFX_AUTODETECT);
+}
 int global_init::operator ()()
 {
 	string path_root=get<string>("config","path");
@@ -360,20 +386,10 @@ int global_init::operator ()()
 	objs.set(path_root+"/WORD.DAT");
 	playrix::set((path_root+"/MUS.MKF").c_str());
 
-	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED);
 
 	//allegro init
 	allegro_init();
-	if(get<int>("display","scale")<1)
-		set<int>("display","scale",1);
-	if(set_gfx_mode(CARD,SCREEN_W*get<int>("display","scale"),SCREEN_H*get<int>("display","scale"),0,0)<0)
-        if(set_gfx_mode(GFX_SAFE,SCREEN_W*get<int>("display","scale"),SCREEN_H*get<int>("display","scale"),0,0)<0)
-            running=false;
-	if(get<bool>("config","switch_off"))
-        set_display_switch_mode(SWITCH_BACKGROUND);
-	set_display_switch_callback(SWITCH_IN,switchin_proc);
-	set_display_switch_callback(SWITCH_OUT,switchout_proc);
-	set_color_depth(8);
+	display_setup();
 	install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL);
 	install_timer();
 	install_keyboard();keyboard_lowlevel_callback = key_watcher;

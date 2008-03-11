@@ -198,7 +198,8 @@ void flush_screen()
     //vsync();
     if(is_out || mutex_switching) return;
     mutex_blitting=true;
-    //clear_bitmap(screen);
+    if(CARD==GFX_SAFE)
+		w2=w1,h2=h1;
     stretch_blit(fakescreen,screen,0,(shake_times&1)*shake_grade,w1,h1,0,0,w2,h2);
     mutex_blitting=false;
 }

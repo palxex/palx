@@ -29,7 +29,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	try{
+	//try{
 		global_init _global(argc, argv);global=&_global;
 
 			int save=_global();
@@ -61,12 +61,12 @@ int main(int argc, char *argv[])
 			}
 			run();
 			destroy_resource();
-	}catch(...){
+	/*}catch(...){
 #if defined(_CRTDBG_MAP_ALLOC_NEW)
 		_CrtDumpMemoryLeaks();
 #endif
 		allegro_exit();
-	}
+	}*/
 	return 0;
 }
 END_OF_MAIN();
