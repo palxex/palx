@@ -66,6 +66,7 @@ extern uint32_t dialog_x;
 extern uint32_t dialog_y;
 extern uint32_t frame_text_x;
 extern uint32_t frame_text_y;
+extern int CARD;
 
 class sprite_prim;
 extern std::vector<sprite_prim> mgos;

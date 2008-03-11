@@ -170,6 +170,7 @@ class global_init{
 public:
 	std::string sfx_file;
 	global_init(int,char *[]);
+	void display_setup(bool =true);
 	template<typename T>
 	T get(const char *sec,const char *name)
 	{
@@ -182,5 +183,35 @@ public:
 	}
 	int operator()();
 };
+
+class cut_msg_impl
+{
+	char *glb_buf;
+	char buf[100];
+public:
+	cut_msg_impl(){}
+	void set(const std::string &fname)
+	{
+		FILE *fp=fopen(fname.c_str(),"rb");
+		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);
+		glb_buf=new char[len];
+		fread(glb_buf,len,1,fp);
+		fclose(fp);
+	}
+	~cut_msg_impl()
+	{
+		delete[] glb_buf;
+	}
+	char *operator()(int start,int end=-1)
+	{
+		if(end==-1)
+			end=start+10;
+		assert(end>start);assert(start>=0);
+		memset(buf,0,sizeof(buf));
+		memcpy(buf,glb_buf+start,end-start);
+		return buf;
+	}
+};
+extern cut_msg_impl objs,msges;
 
 #endif //_CONFIG_H

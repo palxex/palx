@@ -51,28 +51,42 @@ typedef struct scene_def{
 
 const int ALLROLES=6,TEAMROLES=5;
 
-typedef struct object_def{
-	int16_t inbeing;
-	int16_t attrib;
-	union{
-		uint16_t script[3];
+typedef union object_def{
 		struct{
+			int16_t inbeing;
+			int16_t attrib;
+			uint16_t script[3];
+			int16_t param;
+		}general;
+		struct{
+			uint16_t _reserved[2];
 			uint16_t other_dead,self_hurt,reserved;
-		}role_script;
+			uint16_t ___reserved;
+		}role;
 		struct{
+			int16_t image;
+			int16_t value;
 			uint16_t use,equip,chuck;
-		}item_script;
+			uint16_t param;
+		}item;
 		struct{
+			int16_t magic;
+			uint16_t ___reserved;
 			uint16_t post,occur,reserved;
-		}magic_script;
+			uint16_t param;
+		}magic;
 		struct{
+			int16_t enemy;
+			int16_t voodoo_defence;
 			uint16_t after,before,occur;
-		}enemy_script;
+			uint16_t ____reserved;
+		}enemy;
 		struct{
+			int16_t toxicity;
+			int16_t color;
 			uint16_t to_role,reserved,to_enemy;
-		}poison_script;
-	};
-	int16_t param;
+			int16_t _____reserved;
+		}poison;
 }OBJECT;
 
 typedef struct script_def{

@@ -21,7 +21,6 @@
 #include "allegdef.h"
 #include "scene.h"
 #include "game.h"
-#include "UI.h"
 #include "config.h"
 bool flag_battling=false;
 
@@ -41,35 +40,16 @@ BattleScene *battle_scene;
 playrix *rix;
 Game *game;
 
-extern int scale;
-extern bool running;
 bool key_enable=true;
 
 void switch_proc()
 {
 	if(key[KEY_F11] || ((key[KEY_ALT]||key[KEY_ALTGR]) && key[KEY_ENTER]))
 	{
-		int scale=global->get<int>("display","scale");
 		mutex_switching=1;
 		while(mutex_paletting || mutex_blitting)
 			rest(1);
-		int &mode=CARD;
-		static PALETTE pal;
-		if(mode==GFX_SAFE || mode==GFX_AUTODETECT)
-			mode=GFX_AUTODETECT_WINDOWED;
-		else
-			mode=GFX_AUTODETECT;
-		get_palette(pal);
-		if(set_gfx_mode(mode,SCREEN_W*scale,SCREEN_H*scale,0,0)<0)
-            if(set_gfx_mode(GFX_SAFE,SCREEN_W*scale,SCREEN_H*scale,0,0)<0)
-                running=false;
-		set_palette(pal);
-		//reapply; it seems that this feature was reset after switch
-        if(global->get<bool>("config","switch_off"))
-            set_display_switch_mode(SWITCH_BACKGROUND);
-		extern void switchin_proc(),switchout_proc();
-		set_display_switch_callback(SWITCH_IN,switchin_proc);
-		set_display_switch_callback(SWITCH_OUT,switchout_proc);
+		global->display_setup(false);
 		mutex_switching=0;
 	}
 }
@@ -125,80 +105,6 @@ void Load_Data()
 	}
 	flag_to_load=0;
 	setup_our_team_data_things();
-}
-bool process_Menu()
-{
-	static int main_select=0,role_select=0,magic_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0,music_selected=0,sfx_selected=0;
-	//show_money();
-	single_dialog(0,0,5,bitmap(screen)).to_screen();
-	Font->blit_to(objs(0x15*10,0x16*10),screen,10,10,0,false);
-	switch(main_select=menu(3,37,4,3,2)(single_menu(),main_select))
-	{
-	case 0:
-		break;
-	case 1:
-		{
-			if(res::rpg.team_roles)
-			{
-				std::vector<std::string> names;
-				for(int i=0;i<=res::rpg.team_roles;i++)
-					names.push_back(objs(res::rpg.roles_properties.name[res::rpg.team[i].role]*10));
-				role_select=menu(0x2c,0x40,names,3)(single_menu(),role_select);
-			}
-			else
-				role_select=0;
-			magic_select=select_theurgy(res::rpg.team[role_select].role,1,magic_select);
-		}
-		break;
-	case 2:
-		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2)(single_menu(),itemuse_select))
-		{
-		case 0:
-			item_select=select_item(2,0,item_select);
-			{
-				uint16_t &equip_script=res::rpg.objects[res::rpg.items[item_select].item].script[1];
-				process_script(equip_script,0);
-			}
-			break;
-		case 1:
-			item_select=select_item(1,0,item_select);
-			{
-				uint16_t &use_script=res::rpg.objects[res::rpg.items[item_select].item].script[0];
-				process_script(use_script,0);
-			}
-			break;
-		}
-		break;
-	case 3:
-		switch(sys_select=menu(0x28,0x3c,5,0xB,4)(single_menu(),sys_select))
-		{
-		case 0:
-			if(rpg_select=select_rpg(rpg_to_load))
-				rpg_to_load=rpg_select,
-				res::save(rpg_to_load);
-			break;
-		case 1:
-			if(rpg_select=select_rpg(rpg_to_load))
-				rpg_to_load=rpg_select,
-				res::load(rpg_to_load);
-			else
-				return true;
-			break;
-		case 2:
-			music_selected=yes_or_no(0x11,global->get<int>("music","volume")>0);
-			rix->setvolume((music_selected==true)?255:0);
-			break;
-		case 3:
-			sfx_selected=yes_or_no(0x11,global->get<int>("music","volume_sfx")>0);
-			global->set<int>("music","volume_sfx",(sfx_selected==true)?255:0);
-			break;
-		case 4:
-			return !yes_or_no(0x13,0);
-		}
-	}
-	clear_keybuf();
-	rest(100);
-	return true;
 }
 
 void redraw_everything(int time_gap,BITMAP *dst)
