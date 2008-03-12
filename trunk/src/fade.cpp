@@ -193,14 +193,11 @@ void shake_screen()
 }
 void flush_screen()
 {
-    static int w1=SCREEN_W,h1=SCREEN_H,w2=w1*global->get<int>("display","scale"),h2=h1*global->get<int>("display","scale");
 #undef screen
     //vsync();
     if(is_out || mutex_switching) return;
     mutex_blitting=true;
-    if(CARD==GFX_SAFE)
-		w2=w1,h2=h1;
-    stretch_blit(fakescreen,screen,0,(shake_times&1)*shake_grade,w1,h1,0,0,w2,h2);
+    stretch_blit(fakescreen,screen,0,(shake_times&1)*shake_grade,fakescreen->w,fakescreen->h,0,0,screen->w,screen->h);
     mutex_blitting=false;
 }
 struct calc_waving
