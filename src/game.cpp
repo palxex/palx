@@ -106,7 +106,7 @@ namespace res{
     void init_resource()
     {
         memset(&rpg,0,sizeof(RPG));
-            scale=SCREEN_W/320;
+            scale=gfx_driver->w/320/global->get<int>("display","scale");
             x_scrn_offset*=scale;
             y_scrn_offset*=scale;
 
