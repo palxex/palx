@@ -63,12 +63,17 @@ public:
 };
 class sprite{
 	uint8_t *buf;
+	typedef Pal::Tools::PDECODERLECALLBACK filter_func;
+	filter_func filter;
+	int filt_data;
 public:
 	int x,y,l;
 	int width,height;
 	sprite(uint8_t *);
 	~sprite();
 	sprite *clone();
+	void setfilter(filter_func r,int data);
+	void setfilter();
 	void setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
@@ -91,7 +96,7 @@ public:
 };
 class def_font{
 public:
-	virtual void blit_to(const char *msg,BITMAP *dest,int x,int y,uint8_t color,bool shadow)=0;
+	virtual void blit_to(const char *msg,BITMAP *dest,int x,int y,uint8_t color,bool shadow=true)=0;
 };
 class ttfont : public def_font{
 	static ALFONT_FONT *glb_font;

@@ -20,15 +20,18 @@
 #include "UI.h"
 #include "timing.h"
 #include "structs.h"
+#include "item.h"
 
 #include <boost/lexical_cast.hpp>
+
+using namespace res;
 
 dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow,BITMAP *bmp)
 {
 	rows--;columns--;
 	for(int i=0;i<3;i++)
 		for(int j=0;j<3;j++)
-			border[i][j]=res::UIpics.getsprite(i*3+j+style);
+			border[i][j]=UIpics.getsprite(i*3+j+style);
 	int len=0;
 	for(int i=0;i<2+rows;i++)
 	{
@@ -51,7 +54,7 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp,bool shadow):cache(
 {
 	int i=0;
 	for(i=0;i<3;i++)
-		border[i]=res::UIpics.getsprite(44+i);
+		border[i]=UIpics.getsprite(44+i);
 	border[0]->blit_to(bmp,x,y,shadow);
 	for(i=0;i<len;i++)
 		border[1]->blit_to(bmp,x+border[0]->width+i*border[1]->width,y,shadow);
@@ -60,6 +63,43 @@ single_dialog::single_dialog(int x,int y,int len,BITMAP *bmp,bool shadow):cache(
 void single_dialog::to_screen()
 {
     blit(cache,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+}
+bool fade_filter(int srcVal, uint8* pOutVal, void* pUserData)
+{
+	if(srcVal==-1)
+		return false;
+	int color=*(int*)pUserData;
+	*pOutVal=(srcVal&0xf-color&0xF)|(color&0xF0);
+	return true;
+}
+void show_status_bar(BITMAP *buf=screen)
+{
+	int start_x=(flag_battling?0x5A:0x2A);
+	for(int i=0;i<=rpg.team_roles;i++)
+	{
+		int role=rpg.team[i].role;
+		int x=start_x+i*0x4E,y=0xA0;
+		int color=0;
+		for(int it=0,max=-1;it<16;it++)
+			if(rpg.objects[rpg.poison_stack[it][i].poison].poison.toxicity>max)
+				max=rpg.objects[rpg.poison_stack[it][i].poison].poison.toxicity,
+				color=rpg.objects[rpg.poison_stack[it][i].poison].poison.color;
+		color=(rpg.roles_properties.HP[role]?color:2);
+		UIpics.getsprite(18)->blit_to(buf,x,0xA5);
+		{
+			if(color)
+				UIpics.getsprite(48+role)->setfilter(fade_filter,color);
+			else
+				UIpics.getsprite(48+role)->setfilter();
+			UIpics.getsprite(48+role)->blit_to(buf,x-3,y);
+			UIpics.getsprite(39)->blit_to(buf,x+0x2F,y+0xB);
+			UIpics.getsprite(39)->blit_to(buf,x+0x2F,y+0x1B);
+			show_number(rpg.roles_properties.HP_max[role],x+0x40,y+0xD,0,buf);
+			show_number(rpg.roles_properties.MP_max[role],x+0x40,y+0x1D,2,buf);
+			show_number(rpg.roles_properties.HP[role],x+0x2A,y+0x9,0,buf);
+			show_number(rpg.roles_properties.MP[role],x+0x2A,y+0x19,2,buf);
+		}
+	}
 }
 
 int select_rpg(int ori_select,BITMAP *bmp)
@@ -115,7 +155,7 @@ menu::menu(int x,int y,int menus,int begin,int chars,int style,bool shadow)
 	:bak(screen),menu_dialog(style,x,y,menus,chars,shadow,bak),text_x(x+menu_dialog.border[0][0]->width-8),text_y(y+menu_dialog.border[1][0]->height-8)
 {
 	for(int i=begin;i<begin+menus;i++)
-		menu_items.push_back(std::string(objs(i*10,(i+1)*10)));
+		menu_items.push_back(std::string(objs(i)));
 	blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 menu::menu(int x,int y,std::vector<std::string> &strs,int chars,int length,int style)
@@ -195,29 +235,33 @@ void single_menu::post_action(menu *abs)
 
 int multi_menu::select(menu *abs,int _selected)
 {
-	prev_action(abs);int s;
+	prev_action(abs);
 	selected=((_selected<=max && _selected>=0)?_selected:0);
-	do{
-		draw(abs);
-		s=keyloop(abs);
-		if(s==-1)
-			return -1;
-	}while(running && !got);
-	post_action(abs);
+		do{
+			draw(abs);
+			if(keyloop(abs)==-1){				
+				for(int i=max_ori;i<max;i++)
+					rpg.items[i].item=0,
+					rpg.items[i].amount=0,
+					rpg.items[i].using_amount=0;
+				return -1;
+			}
+		}while(running && !got);
+		post_action(abs);
 	return selected;
 }
 void multi_menu::prev_action(menu *abs)
 {
 	max=compact_items();
 	max_ori=max;
-	if(!skip)//装备中的土灵珠等}
-		for(int i=0;i<=res::rpg.team_roles;i++)
+	if(!skip && mask==1)//装备中的土灵珠等
+		for(int i=0;i<=rpg.team_roles;i++)
 			for(int j=0xB;j<=0x10;j++)
-				if(res::rpg.objects[((roles*)&res::rpg.roles_properties)[j][i]].item.param & 1)
-//only available on gcc					res::rpg.items[max++]=(RPG::ITEM){((roles*)&res::rpg.roles_properties)[j][i],1,0};
+				if(rpg.objects[((roles*)&rpg.roles_properties)[j][rpg.team[i].role]].item.param & 1)
+//only available on gcc					rpg.items[max++]=(RPG::ITEM){((roles*)&rpg.roles_properties)[j][i],1,0};
 				{
-					RPG::ITEM it;it.item=((roles*)&res::rpg.roles_properties)[j][i];it.amount=1;it.using_amount=0;
-					res::rpg.items[max++]=it;
+					RPG::ITEM it;it.item=((roles*)&rpg.roles_properties)[j][rpg.team[i].role];it.amount=1;it.using_amount=0;
+					rpg.items[max++]=it;
 				}
 	if(skip==-1)
 		begin_y=-8;
@@ -227,24 +271,20 @@ void multi_menu::prev_action(menu *abs)
 }
 void multi_menu::post_action(menu *abs)
 {
-	for(int i=max_ori;i<max;i++)
-		res::rpg.items[i].item=0,
-		res::rpg.items[i].amount=0,
-		res::rpg.items[i].using_amount=0;
 }
 void multi_menu::draw(menu *abs)
 {
 		static int offset=0;
 		offset=(selected/3<middle?0:selected/3-middle);
 		blit(abs->bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
-		show_money(res::rpg.objects[res::rpg.items[selected].item].item.value /2 ,0,0xE0,0x19,false);
+		show_money(rpg.objects[rpg.items[selected].item].item.value /2 ,0,0xE0,0x19,false);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
-			if(r<0x100 && res::rpg.items[r].item){
-				Font->blit_to(objs(res::rpg.items[r].item*10),buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.items[r].item].item.param&mask)?0xFA:0x1C):(r<=max_ori?((res::rpg.objects[res::rpg.items[r].item].item.param&mask)?0x4E:0x18):0xC8),true);
-				if(res::rpg.items[r].amount>1)
-					show_number(res::rpg.items[r].amount,16+100*(r%3)+84,begin_y+12+(r/3-offset)*18+6,0,buf);
+			if(r<0x100 && rpg.items[r].item){
+				Font->blit_to(objs(rpg.items[r].item),buf,16+100*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((rpg.objects[rpg.items[r].item].item.param&mask)?0xFA:0x1C):(r<max_ori?((rpg.objects[rpg.items[r].item].item.param&mask)?0x4E:0x18):0xC8),true);
+				if(rpg.items[r].amount>1)
+					show_number(rpg.items[r].amount,16+100*(r%3)+84,begin_y+12+(r/3-offset)*18+6,0,buf);
 			}
-		res::UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
+		UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
 int multi_menu::keyloop(menu *abs)
@@ -289,23 +329,265 @@ struct magic_menu:public multi_menu
 	int role;
 	magic_menu(int _role,int _mask):multi_menu(_mask,0,5),role(_role){}
 	void prev_action(menu *abs){
-		max=0x20-std::count_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,0));
+		max=0x20-std::count_if(rpg.role_prop_tables+0x20,rpg.role_prop_tables+0x40,rolemagic_select(role,0));
+		for(int i=0;i<31;i++)
+			for(int j=0;j<32;j++)
+				if(rpg.roles_properties.magics[i][role]<rpg.roles_properties.magics[j][role])
+					std::swap(rpg.roles_properties.magics[i][role],rpg.roles_properties.magics[j][role]);
+		for(int i=0;i<32;i++)
+			if(rpg.roles_properties.magics[i][role])
+				std::swap(std::find_if(rpg.roles_properties.magics,rpg.roles_properties.magics+sizeof(rpg.roles_properties.magics)/sizeof(roles),rolemagic_select(role,0))[0][role],rpg.roles_properties.magics[i][role]);
 		max_ori=max;
 		blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		begin_y=45;
+	}
+	int select(menu *abs,int _selected)
+	{
+		prev_action(abs);
+		selected=((_selected<=max && _selected>=0)?_selected:0);
+		while(running){
+			do{
+				draw(abs);
+				if(keyloop(abs)==-1)
+					return -1;
+			}while(running && !got);
+			got=0;
+			post_action(abs);
+		}
+		return selected;
+	}
+	int keyloop(menu *abs)
+	{
+		switch(sync_getkey()){
+			case VK_UP:
+				selected-=3;
+				break;
+			case VK_DOWN:
+				selected+=3;
+				break;
+			case VK_LEFT:
+				selected--;
+				break;
+			case VK_RIGHT:
+				selected++;
+				break;
+			case VK_PGUP:
+				selected-=middle*3;
+				break;
+			case VK_PGDN:
+				selected+=middle*3;
+				break;
+			case VK_MENU:
+				return -1;
+			case VK_EXPLORE:
+				if(rpg.objects[rpg.roles_properties.magics[selected][role]].magic.param&mask  && rpg.roles_properties.MP[role]>=magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used)
+					got=1;
+				break;
+            default:
+                break;
+		}
+		return selected=(selected<0?0:(selected>max-1?max-1:selected));
 	}
 	void draw(menu *abs){
 		int offset=(selected/3<middle?0:selected/3-middle);
 		blit(abs->bak,buf,0,0,0,0,SCREEN_W,SCREEN_H);
 		single_dialog(0xB7,7,4,buf,false);
-		show_number(res::magics[res::rpg.objects[res::rpg.role_prop_tables[0x20+selected][role]].magic.magic].power_used,0xD6,0x14,0,buf);
-		res::UIpics.getsprite(39)->blit_to(buf,0xDE,0x14);
-		show_number(res::rpg.roles_properties.MP[role],0xF0,0x14,2,buf);
+		show_number(magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used,0xD6,0x14,0,buf);
+		UIpics.getsprite(39)->blit_to(buf,0xDE,0x14);
+		show_number(rpg.roles_properties.MP[role],0xF0,0x14,2,buf);
 		for(int r=offset*3;r<offset*3+paging*3;r++)
-			if(r<0x20 && res::rpg.role_prop_tables[0x20+r][role])
-				Font->blit_to(objs(res::rpg.role_prop_tables[0x20+r][role]*10),buf,34+88*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].magic.param&mask)?0xFA:0x1C):((res::rpg.objects[res::rpg.role_prop_tables[0x20+r][role]].magic.param&mask)?0x4E:0x18),true);
-		res::UIpics.getsprite(69)->blit_to(buf,34+88*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
+			if(r<0x20 && rpg.roles_properties.magics[r][role])
+				Font->blit_to(objs(rpg.roles_properties.magics[r][role]),buf,34+88*(r%3),begin_y+12+(r/3-offset)*18,(r==selected)?((rpg.objects[rpg.roles_properties.magics[r][role]].magic.param&mask  && rpg.roles_properties.MP[role]>=magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used)?0xFA:0x1C):((rpg.objects[rpg.roles_properties.magics[r][role]].magic.param&mask && rpg.roles_properties.MP[role]>=magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used)?0x4E:0x18),true);
+		UIpics.getsprite(69)->blit_to(buf,34+88*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 		blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+	}
+	void post_action(menu *abs){
+		static int target=0;
+		if(rpg.objects[rpg.roles_properties.magics[selected][role]].magic.param & 0x10)//apply to all
+			target=role;
+		else
+			if((target=select_role(target))<0)
+				return;
+		uint16_t &effect_script=rpg.objects[rpg.roles_properties.magics[selected][role]].magic.post;
+		effect_script=process_script(effect_script,target);
+		if(prelimit_OK)
+			rpg.roles_properties.MP[role]-=magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used,
+			rpg.roles_properties.MP[role]=(rpg.roles_properties.MP[role]<0?0:rpg.roles_properties.MP[role]);
+		show_status_bar(abs->bak);
+	}
+	int select_role(int role)
+	{
+		int ok=0;
+		bitmap buf(screen);
+		do{
+			buf.blit_to(screen);
+			UIpics.getsprite(67)->blit_to(screen,0x50+role*0x4b,0x9E);
+			switch(sync_getkey())
+			{
+			case VK_MENU:
+				return -1;
+			case VK_UP:
+			case VK_LEFT:
+				role--;
+				break;
+			case VK_DOWN:
+			case VK_RIGHT:
+				role++;
+				break;
+			case VK_EXPLORE:
+				ok=1;
+				break;
+			default:
+				break;
+			}
+			role=(role<0?0:(role>rpg.team_roles?rpg.team_roles:role));
+		}while(!ok && running);
+		return role;
+	}
+};
+
+struct equip_menu:public multi_menu
+{
+	equip_menu():multi_menu(2,0){}
+	equip_menu(int mask,int skip):multi_menu(mask,skip){}
+	int keyloop(menu *abs)
+	{
+		switch(sync_getkey()){
+			case VK_UP:
+				selected-=3;
+				break;
+			case VK_DOWN:
+				selected+=3;
+				break;
+			case VK_LEFT:
+				selected--;
+				break;
+			case VK_RIGHT:
+				selected++;
+				break;
+			case VK_PGUP:
+				selected-=middle*3;
+				break;
+			case VK_PGDN:
+				selected+=middle*3;
+				break;
+			case VK_MENU:
+				return -1;
+			case VK_EXPLORE:
+				if(rpg.objects[rpg.items[selected].item].item.param &mask)
+					got=1;
+				break;
+            default:
+                break;
+		}
+		return selected=(selected<0?0:(selected>max-1?max-1:selected));
+	}
+	/*int select(menu *abs,int _selected)
+	{
+		prev_action(abs);
+		selected=((_selected<=max && _selected>=0)?_selected:0);
+		while(running){
+			do{
+				draw(abs);
+				if(keyloop(abs)==-1){
+					for(int i=max_ori;i<max;i++)
+						rpg.items[i].item=0,
+						rpg.items[i].amount=0,
+						rpg.items[i].using_amount=0;
+					return -1;
+				}
+			}while(running && !got);
+			got=0;
+			post_action(abs);
+		}
+		return selected;
+	}*/
+	void post_action(menu *abs){
+		bitmap buf(FBP.decode(1),320,200);
+		do{
+			buf.blit_to(screen);
+			switch(sync_getkey()){
+			default:
+				return;
+			}
+		}while(1);
+	}
+};
+void display_role_status(int flag,int role,int x,int y,BITMAP *buf)
+{
+	show_number(rpg.roles_properties.level[role],x+50,y+4,0,buf);
+	for(int i=0x30,y1=y;i<=0x37;i++,y1+=18)
+		if(flag)
+			Font->blit_to(objs(i),buf,x,y1,0xBB);
+		else
+			UIpics.getsprite(47)->blit_to(buf,x+0x10,y1+6);
+	for(int i=7,y2=y+20;i<=8;i++,y2+=18){
+		show_number(rpg.role_prop_tables[2+i][role],x+50,y2,0,buf);
+		UIpics.getsprite(39)->blit_to(buf,x+54,y2+3);
+		show_number(rpg.role_prop_tables[i][role],x+70,y2+6,1,buf);
+	}
+	for(int i=0x11,y3=y+58;i<=0x15;i++,y3+=18)
+		show_number(get_cons_attrib(role,i),x+50,y3,0,buf);
+}
+struct use_menu:public equip_menu
+{
+	use_menu():equip_menu(1,0){}
+	void post_action(menu *abs){
+		if(rpg.objects[rpg.items[selected].item].item.param & (2<<(4-1)))
+		{
+			scene->produce_one_screen();
+			uint16_t &use_script=rpg.objects[rpg.items[selected].item].item.use;
+			process_script(use_script,0);
+			if(prelimit_OK && (rpg.objects[rpg.items[selected].item].item.param & (2<<(3-1))))
+				use_item(rpg.items[selected].item,1);
+		}else{
+			bool ok=false;
+			int role_sele=0,role_max=rpg.team_roles;
+			int x=0x6E,y=2;
+			blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
+			bitmap buf(screen);
+			do{
+				if(rpg.items[selected].amount==0){
+					compact_items();
+					return;
+				}
+				dialog(0,x,y,8,10,false,buf);
+				UIpics.getsprite(70)->blit_to(buf,x+8,y+0x4f,true,6,5);
+
+				display_role_status(1,rpg.team[role_sele].role,x+0x54,y+0xC,buf);
+
+				for(int i=0,x2=x+0xE,y2=y+0xC;i<=rpg.team_roles;i++,y2+=0x16)
+					Font->blit_to(objs(rpg.roles_properties.name[rpg.team[i].role]),buf,x2,y2,(i==role_sele)?0xFA:0x4E);
+
+				sprite(BALL.decode(rpg.objects[rpg.items[selected].item].item.image)).blit_to(buf,x+0x10,y+0x56);
+				Font->blit_to(objs(rpg.items[selected].item),buf,x+4,y+0x8E,0xD,true);
+				if(rpg.items[selected].amount > 1)
+					show_number(rpg.items[selected].amount,x+0x3E,y+0x84,2,buf);
+				buf.blit_to(screen);
+				switch(sync_getkey())
+				{
+				case VK_MENU:
+					return;
+				case VK_EXPLORE:
+				{
+					uint16_t &use_script=rpg.objects[rpg.items[selected].item].item.use;
+					process_script(use_script,role_sele);
+					if(prelimit_OK && (rpg.objects[rpg.items[selected].item].item.param & (2<<(3-1))))
+						use_item(rpg.items[selected].item,1);
+				}
+				break;
+				case VK_UP:
+					role_sele--;
+					break;
+				case VK_DOWN:
+					role_sele++;
+					break;
+				default:
+					break;
+				}
+				role_sele=(role_sele<0?0:(role_sele>role_max?role_max:role_sele));
+			}while(running & !ok);
+		}
 	}
 };
 int select_theurgy(int role,int mask,int selected)
@@ -319,8 +601,8 @@ int yes_or_no(int word,int selected)
 	do{
 		single_dialog(0x78,0x64,2,buf).to_screen();
 		single_dialog(0xC8,0x64,2,buf).to_screen();
-		dialog_string(objs(word*10   ,word*10+10),0x78+0xF,0x64+0x9,(selected==0)?0xFA:0,(selected==0)?true:false);
-		dialog_string(objs(word*10+10,word*10+20),0xC8+0xF,0x64+0x9,(selected==1)?0xFA:0,(selected==1)?true:false);
+		dialog_string(objs(word  ),0x78+0xF,0x64+0x9,(selected==0)?0xFA:0,(selected==0)?true:false);
+		dialog_string(objs(word+1),0xC8+0xF,0x64+0x9,(selected==1)?0xFA:0,(selected==1)?true:false);
 		switch(sync_getkey())
 		{
 		case VK_MENU:
@@ -345,9 +627,9 @@ void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp)//unimplemented cal
 {
     if(num<0)
         return;
-	x=x+digits*6-6;
-	for(int i=0;num>0 && i<digits;num/=10,i++)
-		res::UIpics.getsprite(num%10+19)->blit_to(bmp,x-i*6,y);
+	do
+		UIpics.getsprite(num%10+19)->blit_to(bmp,x+digits*6-6,y);
+	while((num/=10) && --digits);
 }
 void show_num_han(int num,int x,int y,int color,BITMAP *bmp,bool shadow)
 {
@@ -389,57 +671,143 @@ void show_number(int number,int x,int y,int color,BITMAP *bmp)
 	int i=(color==0?19:(color==1?29:(color==2?56:0)));
 	x+=6;
 	do
-		res::UIpics.getsprite(i+number%10)->blit_to(bmp,x-=6,y);
+		UIpics.getsprite(i+number%10)->blit_to(bmp,x-=6,y);
 	while(number/=10);
 }
 void show_money(int num,int x,int y,int text,bool shadow)
 {
 	single_dialog(x,y,5,bitmap(screen),shadow).to_screen();
-	Font->blit_to(objs(text*10,text*10+10),screen,x+10,y+10,0,false);
+	Font->blit_to(objs(text),screen,x+10,y+10,0,false);
 	show_num_lim(num,x+48,y+15,6);
 }
 
 boost::shared_ptr<def_font> Font;
 
+void role_status()
+{
+	int selected=0,cur_role=rpg.team[selected].role;
+	bool ok=true;
+	bitmap buf(NULL,320,200);
+	do{
+		bitmap(FBP.decode(0),buf.width,buf.height).blit_to(buf);
 
+		Font->blit_to(objs(2   ),buf,6,8   ,0x4E,true);
+		show_number(rpg.roles_exp[0][cur_role].exp,                    0x4E,8   ,0,buf);
+		show_number(upgradexp[rpg.roles_exp[0][cur_role].level+1],0x4E,0x12,1,buf);
+
+		Font->blit_to(objs(0x30),buf,6,0x22,0x4E,true);
+		show_number(rpg.roles_properties.level[cur_role],              0x3A,0x26,0,buf);
+
+		Font->blit_to(objs(0x31),buf,6,0x39,0x4E,true);
+		show_number(rpg.roles_properties.HP[cur_role],                 0x3A,0x3A,0,buf);
+		UIpics.getsprite(39)->blit_to(buf,0x3E,0x3D);
+		show_number(rpg.roles_properties.HP_max[cur_role],             0x4E,0x40,1,buf);
+
+		Font->blit_to(objs(0x32),buf,6,0x4F,0x4E,true);
+		show_number(rpg.roles_properties.HP[cur_role],                 0x3A,0x50,0,buf);
+		UIpics.getsprite(39)->blit_to(buf,0x3E,0x53);
+		show_number(rpg.roles_properties.HP_max[cur_role],             0x4E,0x56,1,buf);
+
+		for(int i=0x11,y=0x66;i<=0x15;i++,y+=0x14)
+		{
+			Font->blit_to(objs(0x22+i),buf,6,y-4,0x4E,true);
+			show_number(get_cons_attrib(cur_role,i),0x3A,y,0,buf);
+		}
+
+		if(int equip=rpg.roles_properties.head_equip[cur_role]){
+			sprite(BALL.decode(rpg.objects[equip].item.image)).blit_to(buf,0xBE,0);
+			Font->blit_to(objs(equip),buf,0xBE + 4,0+0x2A,0xBD,true);
+		}
+
+		if(int equip=rpg.roles_properties.armo_equip[cur_role]){
+			sprite(BALL.decode(rpg.objects[equip].item.image)).blit_to(buf,0xF8,0x28);
+			Font->blit_to(objs(equip),buf,0xF8+4,0x28+0x2A,0xBD,true);
+		}
+
+		if(int equip=rpg.roles_properties.body_equip[cur_role]){
+			sprite(BALL.decode(rpg.objects[equip].item.image)).blit_to(buf,0xFC,0x66);
+			Font->blit_to(objs(equip),buf,0xFC+4,0x66+0x2A,0xBD,true);
+		}
+
+		if(int equip=rpg.roles_properties.arms_equip[cur_role]){
+			sprite(BALL.decode(rpg.objects[equip].item.image)).blit_to(buf,0xCA,0x86);
+			Font->blit_to(objs(equip),buf,0xCA+4,0x86+0x2A,0xBD,true);
+		}
+
+		if(int equip=rpg.roles_properties.feet_equip[cur_role]){
+			sprite(BALL.decode(rpg.objects[equip].item.image)).blit_to(buf,0x8E,0x8E);
+			Font->blit_to(objs(equip),buf,0x8E + 4,0x8E + 0x2A,0xBD,true);
+		}
+
+		if(int equip=rpg.roles_properties.trea_equip[cur_role]){
+			sprite(BALL.decode(rpg.objects[equip].item.image)).blit_to(buf,0x52,0x7E);
+			Font->blit_to(objs(equip),buf,0x52+4,0x7E + 0x2A,0xBD,true);
+		}
+
+		sprite(RGM.decode(rpg.roles_properties.icon[cur_role])).blit_middle(buf,0x9b,0x4e);
+		Font->blit_to(objs(rpg.roles_properties.name[cur_role]),buf,0x6E,8,0x4E,true);
+
+		for(int i=0,poisons=0;i<0x10;i++,poisons=(poisons>4?4:poisons))
+			if(rpg.objects[rpg.poison_stack[i][selected].poison].poison.color)
+				Font->blit_to(objs(rpg.poison_stack[i][selected].poison),buf,0xBC,0x3c+0x12*poisons++,rpg.objects[rpg.poison_stack[i][selected].poison].poison.color+10);
+
+		buf.blit_to(screen);
+		switch(sync_getkey()){
+			case VK_MENU:
+				ok=false;
+			case VK_UP:
+			case VK_LEFT:
+				selected--;
+				break;
+			case VK_DOWN:
+			case VK_RIGHT:
+				selected++;
+				break;
+            default:
+                break;
+		}
+		cur_role=rpg.team[selected=((selected<0)?0:((selected>rpg.team_roles)?rpg.team_roles:selected))].role;
+	}while(ok && running);
+}
 bool process_Menu()
 {
 	static int main_select=0,role_select=0,magic_select=0,itemuse_select=0,item_select=0,sys_select=0,rpg_select=0,music_selected=(global->get<int>("music","volume")>0),sfx_selected=(global->get<int>("music","volume_sfx")>0);
-	show_money(res::rpg.coins,0,0,0x15,true);
+	show_money(rpg.coins,0,0,0x15,true);
 	switch(main_select=menu(3,37,4,3,2)(single_menu(),main_select))
 	{
 	case 0:
+		role_status();
 		break;
 	case 1:
 		{
-			if(res::rpg.team_roles)
+			show_status_bar();
+			if(rpg.team_roles)
 			{
 				std::vector<std::string> names;
-				for(int i=0;i<=res::rpg.team_roles;i++)
-					names.push_back(objs(res::rpg.roles_properties.name[res::rpg.team[i].role]*10));
+				for(int i=0;i<=rpg.team_roles;i++)
+					names.push_back(objs(rpg.roles_properties.name[rpg.team[i].role]));
 				role_select=menu(0x2c,0x40,names,3)(single_menu(),role_select);
 			}
 			else
 				role_select=0;
-			magic_select=select_theurgy(res::rpg.team[role_select].role,1,magic_select);
+			if(role_select>=0)
+				magic_select=select_theurgy(rpg.team[role_select].role,1,magic_select);
 		}
 		break;
 	case 2:
 		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2)(single_menu(),itemuse_select))
 		{
 		case 0:
-			item_select=select_item(2,0,item_select);
-			{
-				uint16_t &equip_script=res::rpg.objects[res::rpg.items[item_select].item].item.equip;
+			//select_item(2,0,item_select);
+			item_select=menu(2,33,8,0,18,9,false)(equip_menu(),item_select);
+			/*{
+				uint16_t &equip_script=rpg.objects[rpg.items[item_select].item].item.equip;
 				process_script(equip_script,0);
-			}
+			}*/
 			break;
 		case 1:
-			item_select=select_item(1,0,item_select);
-			{
-				uint16_t &use_script=res::rpg.objects[res::rpg.items[item_select].item].item.use;
-				process_script(use_script,0);
-			}
+			//item_select=select_item(1,0,item_select);
+			item_select=menu(2,33,8,0,18,9,false)(use_menu(),item_select);
 			break;
 		}
 		break;
@@ -449,12 +817,12 @@ bool process_Menu()
 		case 0:
 			if(rpg_select=select_rpg(rpg_to_load))
 				rpg_to_load=rpg_select,
-				res::save(rpg_to_load);
+				save(rpg_to_load);
 			break;
 		case 1:
 			if(rpg_select=select_rpg(rpg_to_load))
 				rpg_to_load=rpg_select,
-				res::load(rpg_to_load);
+				load(rpg_to_load);
 			else
 				return true;
 			break;

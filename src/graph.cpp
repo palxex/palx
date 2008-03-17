@@ -44,7 +44,8 @@ bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_
 	blit(bmp,dest,source_x,source_y,dest_x,dest_y,std::max(bmp->w,dest->w),std::max(bmp->h,dest->h));
 	return true;
 }
-sprite::sprite(uint8_t *src):buf(src),x(0),y(0),l(0),width(0),height(0)
+bool do_nothing(int srcVal, uint8* pOutVal, void* pUserData){return false;}
+sprite::sprite(uint8_t *src):buf(src),filter(do_nothing),filt_data(0),x(0),y(0),l(0),width(0),height(0)
 {
 	width=((uint16_t*)src)[0];
 	height=((uint16_t*)src)[1];
@@ -61,6 +62,16 @@ void sprite::setXYL(int x,int y,int l)
 	this->y=y;
 	this->l=l;
 }
+
+void sprite::setfilter(filter_func r,int data)
+{
+	filter=r;filt_data=data;
+}
+void sprite::setfilter()
+{
+	filter=do_nothing;
+	filt_data=0;
+}
 void sprite::blit_middle(BITMAP *dest,int x,int y)
 {
 	this->x=x-((uint16_t*)buf)[0]/2;
@@ -68,51 +79,38 @@ void sprite::blit_middle(BITMAP *dest,int x,int y)
 	this->l=0;
 	blit_to(dest);
 }
-bool do_nothing(int srcVal, uint8* pOutVal, void* pUserData){return false;}
 bool sprite::blit_to(BITMAP *dest)
 {
 	if(!dest->dat)
 	{
 		BITMAP *buf2=create_bitmap(dest->w,dest->h);
 		blit(dest,buf2,0,0,0,0,dest->w,dest->h);
-		Pal::Tools::DecodeRle(buf,buf2->dat,dest->w,dest->h,x,y-l-height,do_nothing,NULL);
+		Pal::Tools::DecodeRle(buf,buf2->dat,dest->w,dest->h,x,y-l-height,filt_data?filter:do_nothing,(void*)&filt_data);
 		blit(buf2,dest,0,0,0,0,dest->w,dest->h);
 		destroy_bitmap(buf2);
 	}else
-		Pal::Tools::DecodeRle(buf,dest->dat,dest->w,dest->h,x,y-l-height,do_nothing,NULL);
+		Pal::Tools::DecodeRle(buf,dest->dat,dest->w,dest->h,x,y-l-height,filt_data?filter:do_nothing,(void*)&filt_data);
 	return true;
 }
+
+bool shadow_filter(int srcVal, uint8* pOutVal, void* pUserData)
+{
+	if(srcVal==-1)
+		return false;
+	uint8_t pix=*pOutVal;
+	*pOutVal=(pix-(pix%0x10/2));
+	return true;
+}
+
 bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 {
-	if(shadow)
-	{
-		uint8_t *rle = buf + 4, *dst;
-		int l = dest->w;
-
-		bitmap bmp(screen);
-		if(dest!=screen)
-			dst=(uint8_t *)dest->dat;
-		else
-			dst=(uint8_t *)((BITMAP*)bmp)->dat;
-
-		for(int i=(y+sy)*l+x+sx,prei=i;i<(y+sy+height)*l+x+sx && i<=dest->w*dest->h;i=prei+l,prei=i)
-			for(int j=0;j<width;)
-			{
-				uint8_t flag=*rle++;
-				if(flag>=0x80)
-					i += (flag-0x80);
-				else{
-					for(int t=j;t<j+flag;t++)
-						dst[i+t]-=(dst[i+t]%0x10/2);
-					rle+=flag;
-				}
-				j+=(flag%0x80);
-			}
-
-		if(dest==screen){
-			blit(bmp,screen,0,0,0,0,SCREEN_W,SCREEN_H);
-			destroy_bitmap(bmp);
-		}
+	if(shadow){
+		this->x=x+sx;
+		this->y=y+height+sy;
+		this->l=0;
+		setfilter(shadow_filter,1);
+		blit_to(dest);
+		setfilter();
 	}
 
 	this->x=x;
@@ -273,7 +271,7 @@ void palette::read(uint32_t i)
 {
 	pal=i;
 	bool fx;long len;
-	myRGB *buf=(myRGB *)PAT.decode(i,0,fx,len);
+	myRGB *buf=(myRGB *)res::PAT.decode(i,0,fx,len);
 	RGB   *p=(RGB*)pat;
 	for(int t=0;t<(i==0 || i==5?512:256);t++)
 		p[t].r=buf[t].r,

@@ -38,9 +38,9 @@ protected:
 class fbp:public scene_map{
 public:
 	fbp():scene_map(0,320,160){}
-	fbp(int p):scene_map(FBP.decode(p),320,200){}
+	fbp(int p):scene_map(res::FBP.decode(p),320,200){}
 	void change(int p){
-		memcpy(bmp->dat,FBP.decode(p),bmp->w*bmp->h);
+		memcpy(bmp->dat,res::FBP.decode(p),bmp->w*bmp->h);
 	}
 };
 struct tile{

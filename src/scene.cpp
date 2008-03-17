@@ -24,6 +24,7 @@
 #include <set>
 
 tile non_valid;
+using namespace res;
 
 inline sprite &palmap::getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer)
 {

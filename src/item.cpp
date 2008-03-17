@@ -21,6 +21,9 @@
 #include "internal.h"
 #include "game.h"
 
+int role_parts[5][17][74];
+int prev_equip;
+
 int compact_items()
 {
 	for(int i=0;i<0x100;i++)
@@ -40,9 +43,40 @@ void add_goods_to_list(int goods,int num)
 
 void learnmagic(bool flag_dialog,int magic,int role)
 {
-	if(std::find_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,magic))!=res::rpg.role_prop_tables+0x40)
+	if(std::find_if(res::rpg.roles_properties.magics,res::rpg.roles_properties.magics+0x20,rolemagic_select(role,magic))!=res::rpg.role_prop_tables+0x40)
 		return;
-	*std::find_if(res::rpg.role_prop_tables+0x20,res::rpg.role_prop_tables+0x40,rolemagic_select(role,0))[role]=magic;
+	*std::find_if(res::rpg.roles_properties.magics,res::rpg.roles_properties.magics+0x20,rolemagic_select(role,0))[role]=magic;
 	if(flag_dialog)
 		;//
+}
+
+int get_cons_attrib(int role,int attrib)
+{
+	int result=res::rpg.role_prop_tables[attrib][role];
+	for(int part=0xB;part<=0x10;part++)
+		result+=role_parts[role][part][attrib];
+	return result;
+}
+
+void use_item(int item,int amount)
+{
+	if(amount<=0)
+		return;
+	int i;
+	for(i=0;i<0x100;i++)
+		if(res::rpg.items[i].item==item)
+			break;
+	if((res::rpg.items[i].using_amount-=amount)<0)
+		res::rpg.items[i].using_amount=0;
+	if(res::rpg.items[i].amount>=amount)
+		res::rpg.items[i].amount-=amount,
+		amount=0;
+	else
+		amount-=res::rpg.items[i].amount,
+		res::rpg.items[i].amount=0;
+	for(int j=1;j<=amount;j++)
+		for(int k=0,role=res::rpg.team[k].role;k<=res::rpg.team_roles;k++,role=res::rpg.team[k].role)
+			for(int l=0xB;l<=0x10;l++)
+				if(res::rpg.role_prop_tables[l][role]==item)
+					res::rpg.role_prop_tables[l][role]=0;
 }

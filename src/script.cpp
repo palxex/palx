@@ -24,6 +24,7 @@
 #include "timing.h"
 #include "UI.h"
 #include "battle.h"
+#include "item.h"
 
 #include <stdlib.h>
 
@@ -173,8 +174,6 @@ void clear_effective(int16_t p1,int16_t p2)
 	}
 	CrossFadeOut(unknown,during,p2,(bitmap)backbuf);
 }
-extern void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
-extern void add_goods_to_list(int,int);
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
     //printf("%s\n",scr_desc(func,param).c_str());
@@ -265,10 +264,13 @@ __walk_npc:
         curr_obj.curr_frame=param3;
         break;
     case 0x17:
-        //arm rel,not implemented
+        role_parts[role][param1][param2]=param3;
         break;
     case 0x18:
-        //arm rel,not implemented
+        for(int attrib=0x11;attrib<=0x1E;attrib++)
+			role_parts[role][param1][attrib]=0;
+		prev_equip=rpg.role_prop_tables[param1][role];
+		rpg.role_prop_tables[param1][role]=param2;
         break;
     case 0x19:
         rpg.role_prop_tables[param1][param3>0?param3-1:role]+=param2;
@@ -280,42 +282,66 @@ __walk_npc:
             rpg.role_prop_tables[param1][param3-1]=param2;
         break;
     case 0x1b:
-        for (int i=(param1?0:object);i<=(param1?rpg.team_roles:object);i++)
-            if (rpg.roles_properties.HP[i]>0)
-            {
-                rpg.roles_properties.HP[i]+=param2;
-                if (rpg.roles_properties.HP[i]<0)
-                    rpg.roles_properties.HP[i]=0;
-                if (rpg.roles_properties.HP[i]>rpg.roles_properties.HP_max[i])
-                    rpg.roles_properties.HP[i]=rpg.roles_properties.HP_max[i];
-            }
+		{
+			int changed=0;
+			for (int j=(param1?0:object),i=rpg.team[j].role;j<=(param1?rpg.team_roles:object);j++,i=rpg.team[j].role)
+				if (rpg.roles_properties.HP[i]>0)
+				{
+					int origin=rpg.roles_properties.HP[i];
+					rpg.roles_properties.HP[i]+=param2;
+					if (rpg.roles_properties.HP[i]<0)
+						rpg.roles_properties.HP[i]=0;
+					if (rpg.roles_properties.HP[i]>rpg.roles_properties.HP_max[i])
+						rpg.roles_properties.HP[i]=rpg.roles_properties.HP_max[i];
+					if(origin!=rpg.roles_properties.HP[i])
+						changed++;
+				}
+			prelimit_OK=!!changed;
+		}
         break;
     case 0x1c:
-        for (int i=(param1?0:object);i<=(param1?rpg.team_roles:object);i++)
-            if (rpg.roles_properties.HP[i]>0)
-            {
-                rpg.roles_properties.MP[i]+=param2;
-                if (rpg.roles_properties.MP[i]<0)
-                    rpg.roles_properties.MP[i]=0;
-                if (rpg.roles_properties.MP[i]>rpg.roles_properties.MP_max[i])
-                    rpg.roles_properties.MP[i]=rpg.roles_properties.MP_max[i];
-            }
+		{
+			int changed=0;
+			for (int j=(param1?0:object),i=rpg.team[j].role;j<=(param1?rpg.team_roles:object);j++,i=rpg.team[j].role)
+				if (rpg.roles_properties.HP[i]>0)
+				{
+					int origin=rpg.roles_properties.MP[i];
+					rpg.roles_properties.MP[i]+=param2;
+					if (rpg.roles_properties.MP[i]<0)
+						rpg.roles_properties.MP[i]=0;
+					if (rpg.roles_properties.MP[i]>rpg.roles_properties.MP_max[i])
+						rpg.roles_properties.MP[i]=rpg.roles_properties.MP_max[i];
+					if(origin!=rpg.roles_properties.MP[i])
+						changed++;
+				}
+			prelimit_OK=!!changed;
+		}
         break;
     case 0x1d:
-        for (int i=(param1?0:object);i<=(param1?rpg.team_roles:object);i++)
-            if (rpg.roles_properties.HP[i]>0)
-            {
-                rpg.roles_properties.HP[i]+=param2;
-                if (rpg.roles_properties.HP[i]<0)
-                    rpg.roles_properties.HP[i]=0;
-                if (rpg.roles_properties.HP[i]>rpg.roles_properties.HP_max[i])
-                    rpg.roles_properties.HP[i]=rpg.roles_properties.HP_max[i];
-                rpg.roles_properties.MP[i]+=param2;
-                if (rpg.roles_properties.MP[i]<0)
-                    rpg.roles_properties.MP[i]=0;
-                if (rpg.roles_properties.MP[i]>rpg.roles_properties.MP_max[i])
-                    rpg.roles_properties.MP[i]=rpg.roles_properties.MP_max[i];
-            }
+		{
+			int changed=0;
+			for (int j=(param1?0:object),i=rpg.team[j].role;j<=(param1?rpg.team_roles:object);j++,i=rpg.team[j].role)
+				if (rpg.roles_properties.HP[i]>0)
+				{
+					int originHP=rpg.roles_properties.HP[i];
+					int originMP=rpg.roles_properties.MP[i];
+					rpg.roles_properties.HP[i]+=param2;
+					if (rpg.roles_properties.HP[i]<0)
+						rpg.roles_properties.HP[i]=0;
+					if (rpg.roles_properties.HP[i]>rpg.roles_properties.HP_max[i])
+						rpg.roles_properties.HP[i]=rpg.roles_properties.HP_max[i];
+					rpg.roles_properties.MP[i]+=param2;
+					if (rpg.roles_properties.MP[i]<0)
+						rpg.roles_properties.MP[i]=0;
+					if (rpg.roles_properties.MP[i]>rpg.roles_properties.MP_max[i])
+						rpg.roles_properties.MP[i]=rpg.roles_properties.MP_max[i];
+					if(originHP!=rpg.roles_properties.HP[i])
+						changed++;
+					if(originMP!=rpg.roles_properties.MP[i])
+						changed++;
+				}
+			prelimit_OK=!!changed;
+		}
         break;
     case 0x1e:
         if (param1<0 && rpg.coins<-param1)

@@ -364,10 +364,11 @@ void global_init::display_setup(bool ext)
 }
 int global_init::operator ()()
 {
+	using namespace res;
 	string path_root=get<string>("config","path");
 	SETUP.set(path_root+"/SETUP.DAT",de_none);
 	PAT.set	(path_root+"/PAT.MKF"	,de_mkf);
-	//MIDI.set(path_root+"/MIDI.MKF"	,de_mkf);
+	res::MIDI.set(path_root+"/MIDI.MKF"	,de_mkf);
 	SFX.set	(path_root+"/"+sfx_file	,de_mkf);
 	DATA.set(path_root+"/DATA.MKF"	,de_mkf);
 	SSS.set	(path_root+"/SSS.MKF"	,de_mkf);
