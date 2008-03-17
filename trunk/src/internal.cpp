@@ -22,6 +22,8 @@
 #include "scene.h"
 #include "game.h"
 #include "config.h"
+#include "item.h"
+
 bool flag_battling=false;
 
 int flag_to_load=0;
@@ -55,6 +57,7 @@ void switch_proc()
 }
 void Load_Data()
 {
+	using namespace res;
 	flag_battling=false;
 	x_off=0,y_off=0;
 	if(flag_to_load&0x10){
@@ -62,10 +65,10 @@ void Load_Data()
 	}
 	if(flag_to_load&0x20){
 		//load rpg
-		res::load(rpg_to_load);
+		load(rpg_to_load);
 	}
-	else if(res::rpg.scene_id!=map_toload){
-		res::rpg.wave_grade=0;
+	else if(rpg.scene_id!=map_toload){
+		rpg.wave_grade=0;
 		wave_progression=0;
 		//save previous scene's event objects,not needed in this policy
 	}
@@ -73,18 +76,18 @@ void Load_Data()
 	x_scrn_offset=0xA0*scale;
 	y_scrn_offset=0x70*scale;
 	//罢,罢,想加这个功能惹出一堆事
-	//scene->team_pos.toXY().x=res::rpg.viewport_x+x_scrn_offset;
-	//scene->team_pos.toXY().y=res::rpg.viewport_y+y_scrn_offset;
-	res::rpg.scene_id=map_toload;
+	//scene->team_pos.toXY().x=rpg.viewport_x+x_scrn_offset;
+	//scene->team_pos.toXY().y=rpg.viewport_y+y_scrn_offset;
+	rpg.scene_id=map_toload;
 	if(flag_to_load&4){
 		//load evtobjs
-		scene->sprites_begin=res::evtobjs.begin()+res::scenes[res::rpg.scene_id].prev_evtobjs+1;
-		scene->sprites_end  =res::evtobjs.begin()+res::scenes[res::rpg.scene_id+1].prev_evtobjs+1;
+		scene->sprites_begin=evtobjs.begin()+scenes[rpg.scene_id].prev_evtobjs+1;
+		scene->sprites_end  =evtobjs.begin()+scenes[rpg.scene_id+1].prev_evtobjs+1;
 		for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
 			if(i->image)
 				i->frames_auto=MGO.slices(i->image);
 		//load map & npc
-		scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+		scene->scenemap.change(scenes[rpg.scene_id].id);
 		scene->get_sprites();
 		scene->produce_one_screen();
 	}
@@ -94,14 +97,14 @@ void Load_Data()
 	if(flag_to_load&8){
 		//enter a new scene;
 		flag_to_load&=2;key_enable=false;
-		uint16_t &enterscript=res::scenes[res::rpg.scene_id].enter_script;
+		uint16_t &enterscript=scenes[rpg.scene_id].enter_script;
 		enterscript=process_script(enterscript,0);
-		if(res::rpg.scene_id!=map_toload)
+		if(rpg.scene_id!=map_toload)
 			Load_Data();
 	}
 	if(flag_to_load&2){
 		//play music
-		rix->play(res::rpg.music);
+		rix->play(rpg.music);
 	}
 	flag_to_load=0;
 	setup_our_team_data_things();
@@ -129,6 +132,15 @@ void setup_our_team_data_things()
 		res::rpg.items[i].using_amount=0;
 
 	//清除装备记录
+	memset(role_parts,0,sizeof(role_parts));
 
+	//重新装备
+	for(int i=0,role=res::rpg.team[i].role;i<=res::rpg.team_roles;i++,role=res::rpg.team[i].role)
+		for(int j=0xB;j<=0x10;j++)
+			if(res::rpg.role_prop_tables[j][role])
+			{
+				uint16_t &equip_script=res::rpg.objects[res::rpg.role_prop_tables[j][role]].item.equip;
+				equip_script=process_script(equip_script,i);
+			}
 }
 

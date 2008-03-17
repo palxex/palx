@@ -22,10 +22,12 @@
 #include "timing.h"
 #include "internal.h"
 
+using namespace res;
+
 void startup_splash()
 {
 	clear_keybuf();
-	res::pat.read(1);
+	pat.read(1);
 	bitmap cat(0,SCREEN_W,SCREEN_H*2);
 	bitmap(FBP.decode(0x26),320,200).blit_to(cat,0,0,0,0);
 	bitmap(FBP.decode(0x27),320,200).blit_to(cat,0,0,0,200);
@@ -65,9 +67,9 @@ void startup_splash()
 			add_pale--;
 		if(prog_pale<=0x40){
 			for(int i=0;i<0xF0;i++){
-				pal[i].r=res::pat.get(0)[i].r*prog_pale/0x40;
-				pal[i].g=res::pat.get(0)[i].g*prog_pale/0x40;
-				pal[i].b=res::pat.get(0)[i].b*prog_pale/0x40;
+				pal[i].r=pat.get(0)[i].r*prog_pale/0x40;
+				pal[i].g=pat.get(0)[i].g*prog_pale/0x40;
+				pal[i].b=pat.get(0)[i].b*prog_pale/0x40;
 			}
 			set_palette(pal);
 		}
@@ -77,9 +79,9 @@ void startup_splash()
 	if(prog_pale<0x40){
 		for(int i=prog_pale;i<0x40;i++){
 			for(int j=0;j<0xF0;j++){
-				pal[j].r=res::pat.get(0)[j].r*i/0x40;
-				pal[j].g=res::pat.get(0)[j].g*i/0x40;
-				pal[j].b=res::pat.get(0)[j].b*i/0x40;
+				pal[j].r=pat.get(0)[j].r*i/0x40;
+				pal[j].g=pat.get(0)[j].g*i/0x40;
+				pal[j].b=pat.get(0)[j].b*i/0x40;
 			}
 			set_palette(pal);
 			delay(1);
@@ -92,7 +94,7 @@ void startup_splash()
 
 int select_scene()
 {
-	res::pat.read(0);
+	pat.read(0);
 	show_fbp(60,0);
 	rix->play(4);
 	pal_fade_in(1);
@@ -104,7 +106,7 @@ int select_scene()
 		static bool changed=true;
 		if(changed)
 			for(int i=7;i<9;i++)
-				Font->blit_to(objs(i*10,i*10+10),screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
+				Font->blit_to(objs(i),screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
 		switch(sync_getkey()){
 			case VK_UP:
@@ -118,7 +120,7 @@ int select_scene()
 			case VK_MENU:
 				continue;
 			case VK_EXPLORE:
-				Font->blit_to(objs((menu_selected+7)*10,(menu_selected+7)*10+10),screen,0x7D,0x60+menu_selected*0x12,0x2B,true);
+				Font->blit_to(objs(menu_selected+7),screen,0x7D,0x60+menu_selected*0x12,0x2B,true);
 				blit(screen,cache,0,0,0,0,SCREEN_W,SCREEN_H);
 				if(menu_selected==0){
 					ok=true;
@@ -144,8 +146,8 @@ int select_scene()
 
 int begin_scene::operator()(){
 	RNG_num=6;
-	res::pat.read(3);
-	res::pat.set(res::rpg.palette_offset);
+	pat.read(3);
+	pat.set(rpg.palette_offset);
 	play_RNG(0,999,25);
 	wait_key(180);
 	pal_fade_out(1);
@@ -156,7 +158,7 @@ int begin_scene::operator()(){
 	MGO.clear();
 	FBP.clear();
 	RNG.clear();
-	res::rpg.chase_range=1;
+	rpg.chase_range=1;
 	return select_scene();
 }
 

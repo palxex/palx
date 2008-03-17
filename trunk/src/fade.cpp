@@ -193,11 +193,13 @@ void shake_screen()
 }
 void flush_screen()
 {
+	static bitmap fakebmp(NULL,SCREEN_W,SCREEN_H);
 #undef screen
     //vsync();
     if(is_out || mutex_switching) return;
     mutex_blitting=true;
-    stretch_blit(fakescreen,screen,0,(shake_times&1)*shake_grade,fakescreen->w,fakescreen->h,0,0,screen->w,screen->h);
+    blit(fakescreen,fakebmp,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
+    stretch_blit(fakebmp,screen,0,0,fakescreen->w,fakescreen->h,0,0,screen->w,screen->h);
     mutex_blitting=false;
 }
 struct calc_waving

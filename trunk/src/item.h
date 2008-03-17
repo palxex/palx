@@ -17,24 +17,16 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "resource.h"
-#include "pallib.h"
-#include "timing.h"
-#include "internal.h"
+#ifndef _ITEM_H
+#define _ITEM_H
 
-int RNG_num;
-void play_RNG(int begin,int end,int gap)
-{
-	using namespace res;
-	int total_clips=RNG.slices(RNG_num);
-	bitmap cache(0,320,200);
-	blit(screen,cache,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);
-	for(int i=begin;i<=std::min(total_clips-1,end) && running ;i++){
-		Pal::Tools::DecodeRNG(RNG.decode(RNG_num,i),((BITMAP*)cache)->dat);
-		blit(cache,screen,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);
-		pal_fade_in(1);
-		delay(100/gap);
-	}
-}
+int compact_items();
+void learnmagic(bool flag_dialog,int magic,int role);
+void add_goods_to_list(int,int);
+int get_cons_attrib(int role,int attrib);
+void use_item(int item,int amount);
 
+extern int role_parts[5][17][74];
+extern int prev_equip;
 
+#endif

@@ -39,7 +39,7 @@ std::map<int,int> npc_mgos;
 
 int load_mgo(int id)
 {
-	mgos.push_back(sprite_prim(MGO,id));
+	mgos.push_back(sprite_prim(res::MGO,id));
 	return std::find(mgos.begin(),mgos.end(),sprite_prim(id))-mgos.begin();
 }
 void load_team_mgo()

@@ -202,14 +202,18 @@ public:
 	{
 		delete[] glb_buf;
 	}
-	char *operator()(int start,int end=-1)
+	char *operator()(int start,int end)
 	{
-		if(end==-1)
-			end=start+10;
 		assert(end>start);assert(start>=0);
 		memset(buf,0,sizeof(buf));
 		memcpy(buf,glb_buf+start,end-start);
 		return buf;
+	}
+	char *operator()(int start)
+	{		
+		start*=10;
+		int end=start+10;
+		return operator()(start,end);
 	}
 };
 extern cut_msg_impl objs,msges;

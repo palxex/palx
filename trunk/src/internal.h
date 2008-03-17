@@ -81,10 +81,10 @@ extern int scale;
 extern int x_off,y_off;
 extern bool running,is_out;
 
-extern void Load_Data();
-extern void GameLoop_OneCycle(bool);
-extern bool process_Menu();
-extern void process_Explore();
+void Load_Data();
+void GameLoop_OneCycle(bool);
+bool process_Menu();
+void process_Explore();
 extern uint16_t process_script(uint16_t script,int16_t object);
 extern uint16_t process_autoscript(uint16_t script,int16_t object);
 
@@ -94,6 +94,7 @@ extern void setup_our_team_data_things();
 extern void record_step();
 extern void calc_trace_frames();
 extern void team_walk_one_step();
+extern void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
 extern void stop_and_update_frame();
 extern void calc_followers_screen_pos();
 extern int calc_faceto(int x_diff,int y_diff);
@@ -125,9 +126,6 @@ extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
 
 extern bool prelimit_OK;
-
-extern int compact_items();
-extern void learnmagic(bool flag_dialog,int magic,int role);
 
 #endif
 
