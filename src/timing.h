@@ -25,7 +25,7 @@
 extern volatile uint8_t time_interrupt_occurs;
 void wait(uint8_t cycles);
 void wait_key(uint8_t gap);
-VKEY wait_for_key();
+PAL_VKEY wait_for_key();
 void delay(uint8_t cycles);
 
 #endif

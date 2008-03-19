@@ -377,7 +377,7 @@ int global_init::operator ()()
 	GOP.set	(path_root+"/GOP.MKF"	,de_mkf_smkf);
 	BALL.set(path_root+"/BALL.MKF"	,de_mkf_smkf);
 	RGM.set	(path_root+"/RGM.MKF"	,de_mkf_smkf);
-	ABC.set	(path_root+"/ABC.MKF"	,de_mkf_yj1_smkf);
+	res::ABC.set	(path_root+"/ABC.MKF"	,de_mkf_yj1_smkf);
 	F.set	(path_root+"/F.MKF"	,de_mkf_yj1_smkf);
 	FIRE.set(path_root+"/FIRE.MKF"	,de_mkf_yj1_smkf);
 	MGO.set	(path_root+"/MGO.MKF"	,de_mkf_yj1_smkf);

@@ -126,21 +126,21 @@ int select_rpg(int ori_select,BITMAP *bmp)
 		blit(cache,bmp,0,0,0,0,SCREEN_W,SCREEN_H);
 
 		switch(sync_getkey()){
-			case VK_UP:
+			case PAL_VK_UP:
 				selected--;
 				break;
-			case VK_DOWN:
+			case PAL_VK_DOWN:
 				selected++;
 				break;
-			case VK_PGUP:
+			case PAL_VK_PGUP:
 				selected-=5;
 				break;
-			case VK_PGDN:
+			case PAL_VK_PGDN:
 				selected+=5;
 				break;
-			case VK_MENU:
+			case PAL_VK_MENU:
 				return 0;
-			case VK_EXPLORE:
+			case PAL_VK_EXPLORE:
 				ok=0;
 				break;
             default:
@@ -199,21 +199,21 @@ void single_menu::draw(menu *abs)
 }
 int single_menu::keyloop(menu *abs)
 {
-	VKEY keygot;
+	PAL_VKEY keygot;
 	if(got)
 		keygot=sync_getkey();
 	else
 		return -2;
 	switch(keygot){
-		case VK_UP:
+		case PAL_VK_UP:
 			selected--;
 			break;
-		case VK_DOWN:
+		case PAL_VK_DOWN:
 			selected++;
 			break;
-		case VK_MENU:
+		case PAL_VK_MENU:
 			return -1;
-		case VK_EXPLORE:
+		case PAL_VK_EXPLORE:
 			got=1;
 			color_selecting=0x2B;
 			break;
@@ -239,7 +239,7 @@ int multi_menu::select(menu *abs,int _selected)
 	selected=((_selected<=max && _selected>=0)?_selected:0);
 		do{
 			draw(abs);
-			if(keyloop(abs)==-1){				
+			if(keyloop(abs)==-1){
 				for(int i=max_ori;i<max;i++)
 					rpg.items[i].item=0,
 					rpg.items[i].amount=0,
@@ -290,27 +290,27 @@ void multi_menu::draw(menu *abs)
 int multi_menu::keyloop(menu *abs)
 {
 		switch(sync_getkey()){
-			case VK_UP:
+			case PAL_VK_UP:
 				selected-=3;
 				break;
-			case VK_DOWN:
+			case PAL_VK_DOWN:
 				selected+=3;
 				break;
-			case VK_LEFT:
+			case PAL_VK_LEFT:
 				selected--;
 				break;
-			case VK_RIGHT:
+			case PAL_VK_RIGHT:
 				selected++;
 				break;
-			case VK_PGUP:
+			case PAL_VK_PGUP:
 				selected-=middle*3;
 				break;
-			case VK_PGDN:
+			case PAL_VK_PGDN:
 				selected+=middle*3;
 				break;
-			case VK_MENU:
+			case PAL_VK_MENU:
 				return -1;
-			case VK_EXPLORE:
+			case PAL_VK_EXPLORE:
 				got=1;
 				color_selecting=0x2B;
 				break;
@@ -359,27 +359,27 @@ struct magic_menu:public multi_menu
 	int keyloop(menu *abs)
 	{
 		switch(sync_getkey()){
-			case VK_UP:
+			case PAL_VK_UP:
 				selected-=3;
 				break;
-			case VK_DOWN:
+			case PAL_VK_DOWN:
 				selected+=3;
 				break;
-			case VK_LEFT:
+			case PAL_VK_LEFT:
 				selected--;
 				break;
-			case VK_RIGHT:
+			case PAL_VK_RIGHT:
 				selected++;
 				break;
-			case VK_PGUP:
+			case PAL_VK_PGUP:
 				selected-=middle*3;
 				break;
-			case VK_PGDN:
+			case PAL_VK_PGDN:
 				selected+=middle*3;
 				break;
-			case VK_MENU:
+			case PAL_VK_MENU:
 				return -1;
-			case VK_EXPLORE:
+			case PAL_VK_EXPLORE:
 				if(rpg.objects[rpg.roles_properties.magics[selected][role]].magic.param&mask  && rpg.roles_properties.MP[role]>=magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used)
 					got=1;
 				break;
@@ -424,17 +424,17 @@ struct magic_menu:public multi_menu
 			UIpics.getsprite(67)->blit_to(screen,0x50+role*0x4b,0x9E);
 			switch(sync_getkey())
 			{
-			case VK_MENU:
+			case PAL_VK_MENU:
 				return -1;
-			case VK_UP:
-			case VK_LEFT:
+			case PAL_VK_UP:
+			case PAL_VK_LEFT:
 				role--;
 				break;
-			case VK_DOWN:
-			case VK_RIGHT:
+			case PAL_VK_DOWN:
+			case PAL_VK_RIGHT:
 				role++;
 				break;
-			case VK_EXPLORE:
+			case PAL_VK_EXPLORE:
 				ok=1;
 				break;
 			default:
@@ -453,27 +453,27 @@ struct equip_menu:public multi_menu
 	int keyloop(menu *abs)
 	{
 		switch(sync_getkey()){
-			case VK_UP:
+			case PAL_VK_UP:
 				selected-=3;
 				break;
-			case VK_DOWN:
+			case PAL_VK_DOWN:
 				selected+=3;
 				break;
-			case VK_LEFT:
+			case PAL_VK_LEFT:
 				selected--;
 				break;
-			case VK_RIGHT:
+			case PAL_VK_RIGHT:
 				selected++;
 				break;
-			case VK_PGUP:
+			case PAL_VK_PGUP:
 				selected-=middle*3;
 				break;
-			case VK_PGDN:
+			case PAL_VK_PGDN:
 				selected+=middle*3;
 				break;
-			case VK_MENU:
+			case PAL_VK_MENU:
 				return -1;
-			case VK_EXPLORE:
+			case PAL_VK_EXPLORE:
 				if(rpg.objects[rpg.items[selected].item].item.param &mask)
 					got=1;
 				break;
@@ -482,7 +482,7 @@ struct equip_menu:public multi_menu
 		}
 		return selected=(selected<0?0:(selected>max-1?max-1:selected));
 	}
-	/*int select(menu *abs,int _selected)
+	int select(menu *abs,int _selected)
 	{
 		prev_action(abs);
 		selected=((_selected<=max && _selected>=0)?_selected:0);
@@ -501,16 +501,73 @@ struct equip_menu:public multi_menu
 			post_action(abs);
 		}
 		return selected;
-	}*/
+	}
 	void post_action(menu *abs){
 		bitmap buf(FBP.decode(1),320,200);
+		bool ok=false;
+		int role_sele=0,role_max=rpg.team_roles;
+		int equip_selected=rpg.items[selected].item;
+		int role=rpg.team[role_sele].role;
+
+		dialog(0,3,0x62,rpg.team_roles+1,3,true,buf);
+		bitmap bak(buf);
 		do{
+			int param=(rpg.objects[equip_selected].item.param>>6);
+
+			sprite(BALL.decode(rpg.objects[equip_selected].item.image)).blit_to(buf,0x10,0xF);
+
+			Font->blit_to(objs(equip_selected),buf,4,0x45,0xD);
+			show_number(std::find(rpg.items,rpg.items+sizeof(rpg.items)/sizeof(RPG::ITEM),equip_selected)->amount,0x48,0x48,2,buf);
+
+			for(int i=0;i<=rpg.team_roles;i++)
+				Font->blit_to(objs(rpg.roles_properties.name[rpg.team[i].role]),buf,0x10,0x6E +i*0x12,(param>>res::rpg.team[i].role)&1?(i==role_sele?0xFA:0x4E):(i==role_sele?0x1C:0x18));
+
+			for(int i=0xB;i<=0x10;i++)
+				Font->blit_to(objs(rpg.role_prop_tables[i][role]),buf,0x84,0xB+0x16*(i-0xB),0x4E);
+			
+			for(int i=0x11;i<=0x15;i++)
+				show_number(get_cons_attrib(role,i),0x116,0x10+0x16*(i-0x11),0,buf);
+
 			buf.blit_to(screen);
-			switch(sync_getkey()){
+			bak.blit_to(buf);
+
+			switch(sync_getkey())
+			{
+				if(!equip_selected){
+					ok=true;
+					break;
+				}
+			case PAL_VK_MENU:
+				ok=true;
+				break;
+			case PAL_VK_EXPLORE:
+				if((param>>role)&1)
+				{
+					uint16_t contract_magic=rpg.roles_properties.contract_magic[role];
+
+					uint16_t &equip_script=rpg.objects[equip_selected].item.equip;
+					process_script(equip_script,role_sele);
+
+					rpg.roles_properties.contract_magic[role]=contract_magic;
+
+					use_item(equip_selected,1);
+					add_goods_to_list(prev_equip,1);
+					equip_selected=prev_equip;
+				}
+				break;
+			case PAL_VK_UP:
+				role_sele--;
+				break;
+			case PAL_VK_DOWN:
+				role_sele++;
+				break;
 			default:
-				return;
+				break;
 			}
-		}while(1);
+			role_sele=(role_sele<0?0:(role_sele>role_max?role_max:role_sele));
+			role=rpg.team[role_sele].role;
+		}while(running && !ok);
+		compact_items();
 	}
 };
 void display_role_status(int flag,int role,int x,int y,BITMAP *buf)
@@ -566,9 +623,9 @@ struct use_menu:public equip_menu
 				buf.blit_to(screen);
 				switch(sync_getkey())
 				{
-				case VK_MENU:
+				case PAL_VK_MENU:
 					return;
-				case VK_EXPLORE:
+				case PAL_VK_EXPLORE:
 				{
 					uint16_t &use_script=rpg.objects[rpg.items[selected].item].item.use;
 					process_script(use_script,role_sele);
@@ -576,10 +633,10 @@ struct use_menu:public equip_menu
 						use_item(rpg.items[selected].item,1);
 				}
 				break;
-				case VK_UP:
+				case PAL_VK_UP:
 					role_sele--;
 					break;
-				case VK_DOWN:
+				case PAL_VK_DOWN:
 					role_sele++;
 					break;
 				default:
@@ -605,15 +662,15 @@ int yes_or_no(int word,int selected)
 		dialog_string(objs(word+1),0xC8+0xF,0x64+0x9,(selected==1)?0xFA:0,(selected==1)?true:false);
 		switch(sync_getkey())
 		{
-		case VK_MENU:
+		case PAL_VK_MENU:
             return -1;
-		case VK_EXPLORE:
+		case PAL_VK_EXPLORE:
 			got=true;
 			break;
-		case VK_LEFT:
+		case PAL_VK_LEFT:
 			selected--;
 			break;
-		case VK_RIGHT:
+		case PAL_VK_RIGHT:
 			selected++;
 			break;
 		default:
@@ -753,14 +810,14 @@ void role_status()
 
 		buf.blit_to(screen);
 		switch(sync_getkey()){
-			case VK_MENU:
+			case PAL_VK_MENU:
 				ok=false;
-			case VK_UP:
-			case VK_LEFT:
+			case PAL_VK_UP:
+			case PAL_VK_LEFT:
 				selected--;
 				break;
-			case VK_DOWN:
-			case VK_RIGHT:
+			case PAL_VK_DOWN:
+			case PAL_VK_RIGHT:
 				selected++;
 				break;
             default:
@@ -798,15 +855,9 @@ bool process_Menu()
 		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2)(single_menu(),itemuse_select))
 		{
 		case 0:
-			//select_item(2,0,item_select);
 			item_select=menu(2,33,8,0,18,9,false)(equip_menu(),item_select);
-			/*{
-				uint16_t &equip_script=rpg.objects[rpg.items[item_select].item].item.equip;
-				process_script(equip_script,0);
-			}*/
 			break;
 		case 1:
-			//item_select=select_item(1,0,item_select);
 			item_select=menu(2,33,8,0,18,9,false)(use_menu(),item_select);
 			break;
 		}

@@ -21,7 +21,7 @@
 #include "internal.h"
 #include "game.h"
 
-int role_parts[5][17][74];
+int role_parts[6][17][74];
 int prev_equip;
 
 int compact_items()
@@ -80,3 +80,4 @@ void use_item(int item,int amount)
 				if(res::rpg.role_prop_tables[l][role]==item)
 					res::rpg.role_prop_tables[l][role]=0;
 }
+

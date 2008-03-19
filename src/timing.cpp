@@ -36,11 +36,11 @@ void wait_key(uint8_t gap)
 		delay(1);
 }
 
-VKEY wait_for_key()
+PAL_VKEY wait_for_key()
 {
 	clear_keybuf();
-	VKEY x=VK_NONE;
-	while(running && (x=async_getkey())==VK_NONE)
+	PAL_VKEY x=PAL_VK_NONE;
+	while(running && (x=async_getkey())==PAL_VK_NONE)
 		rest(10);
 	return x;
 }

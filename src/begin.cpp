@@ -73,7 +73,7 @@ void startup_splash()
 			}
 			set_palette(pal);
 		}
-	}while(running && async_getkey()==VK_NONE);
+	}while(running && async_getkey()==PAL_VK_NONE);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
 	if(prog_pale<0x40){
@@ -109,17 +109,17 @@ int select_scene()
 				Font->blit_to(objs(i),screen,0x7D,0x60+(i-7)*0x12,i-7==menu_selected?0xFA:0x4E,true);
 		changed=false;
 		switch(sync_getkey()){
-			case VK_UP:
+			case PAL_VK_UP:
 				changed=true;
 				menu_selected++;
 				break;
-			case VK_DOWN:
+			case PAL_VK_DOWN:
 				changed=true;
 				menu_selected--;
 				break;
-			case VK_MENU:
+			case PAL_VK_MENU:
 				continue;
-			case VK_EXPLORE:
+			case PAL_VK_EXPLORE:
 				Font->blit_to(objs(menu_selected+7),screen,0x7D,0x60+menu_selected*0x12,0x2B,true);
 				blit(screen,cache,0,0,0,0,SCREEN_W,SCREEN_H);
 				if(menu_selected==0){

@@ -47,9 +47,9 @@ int mykey[256];
 int mykey_lowlevel[256];
 std::stack<int> keys;
 
-VKEY async_getkey()
+PAL_VKEY async_getkey()
 {
-	VKEY keygot=VK_NONE;
+	PAL_VKEY keygot=PAL_VK_NONE;
 	int k;
 	if(keypressed()){
 		switch(k=(readkey()>>8)){
@@ -57,71 +57,71 @@ VKEY async_getkey()
 		case KEY_INSERT:
 		case KEY_ALT:
 		case KEY_ALTGR:
-			keygot = VK_MENU;
+			keygot = PAL_VK_MENU;
 			break;
 		case KEY_ENTER:
 		case KEY_SPACE:
 		case KEY_LCONTROL:
 		case KEY_RCONTROL:
-			keygot = VK_EXPLORE;
+			keygot = PAL_VK_EXPLORE;
 			break;
 		case KEY_LEFT:
-			keygot = VK_LEFT;
+			keygot = PAL_VK_LEFT;
 			break;
 		case KEY_UP:
-			keygot = VK_UP;
+			keygot = PAL_VK_UP;
 			break;
 		case KEY_RIGHT:
-			keygot = VK_RIGHT;
+			keygot = PAL_VK_RIGHT;
 			break;
 		case KEY_DOWN:
-			keygot = VK_DOWN;
+			keygot = PAL_VK_DOWN;
 			break;
 		case KEY_PGUP:
-			keygot = VK_PGUP;
+			keygot = PAL_VK_PGUP;
 			break;
 		case KEY_PGDN:
-			keygot = VK_PGDN;
+			keygot = PAL_VK_PGDN;
 			break;
 		case KEY_R:
-			keygot = VK_REPEAT;
+			keygot = PAL_VK_REPEAT;
 			break;
 		case KEY_A:
-			keygot = VK_AUTO;
+			keygot = PAL_VK_AUTO;
 			break;
 		case KEY_D:
-			keygot = VK_DEFEND;
+			keygot = PAL_VK_DEFEND;
 			break;
 		case KEY_E:
-			keygot = VK_USE;
+			keygot = PAL_VK_USE;
 			break;
 		case KEY_W:
-			keygot = VK_THROW;
+			keygot = PAL_VK_THROW;
 			break;
 		case KEY_Q:
-			keygot = VK_QUIT;
+			keygot = PAL_VK_QUIT;
 			break;
 		case KEY_S:
-			keygot = VK_STATUS;
+			keygot = PAL_VK_STATUS;
 			break;
 		case KEY_F:
-			keygot = VK_FORCE;
+			keygot = PAL_VK_FORCE;
 			break;
 		case KEY_P:
 		case KEY_PRTSCR:
-			keygot = VK_PRINTSCREEN;
+			keygot = PAL_VK_PRINTSCREEN;
 			break;
 		default:
-			keygot = VK_NONE;
+			keygot = PAL_VK_NONE;
 		}
 		clear_keybuf();
 	}
 	return keygot;
 }
-VKEY sync_getkey()
+PAL_VKEY sync_getkey()
 {
-	VKEY x;
-		x=VK_NONE;
+	PAL_VKEY x;
+		x=PAL_VK_NONE;
 		while(running && !is_out && !(x=async_getkey()))
 			rest(10);
         return x;
@@ -135,50 +135,50 @@ int make_layer(int key)
 extern int x_off,y_off;
 void reproduct_key();
 int examine_mutex=0,_examine_mutex=0;
-VKEY get_key_lowlevel()
+PAL_VKEY get_key_lowlevel()
 {
-	VKEY keygot=VK_NONE;
+	PAL_VKEY keygot=PAL_VK_NONE;
 	if(key[KEY_ESC] || key[KEY_INSERT] || key[KEY_ALT] || key[KEY_ALTGR])
-		keygot = VK_MENU;
+		keygot = PAL_VK_MENU;
 	else if(key[KEY_ENTER] || key[KEY_SPACE] || key[KEY_LCONTROL] || key[KEY_RCONTROL])
-		keygot = VK_EXPLORE;
+		keygot = PAL_VK_EXPLORE;
 	/*else if
 		case KEY_PGUP:
-			keygot = VK_PGUP;
+			keygot = PAL_VK_PGUP;
 			break;
 		case KEY_PGDN:
-			keygot = VK_PGDN;
+			keygot = PAL_VK_PGDN;
 			break;
 		case KEY_R:
-			keygot = VK_REPEAT;
+			keygot = PAL_VK_REPEAT;
 			break;
 		case KEY_A:
-			keygot = VK_AUTO;
+			keygot = PAL_VK_AUTO;
 			break;
 		case KEY_D:
-			keygot = VK_DEFEND;
+			keygot = PAL_VK_DEFEND;
 			break;
 		case KEY_E:
-			keygot = VK_USE;
+			keygot = PAL_VK_USE;
 			break;
 		case KEY_W:
-			keygot = VK_THROW;
+			keygot = PAL_VK_THROW;
 			break;
 		case KEY_Q:
-			keygot = VK_QUIT;
+			keygot = PAL_VK_QUIT;
 			break;
 		case KEY_S:
-			keygot = VK_STATUS;
+			keygot = PAL_VK_STATUS;
 			break;
 		case KEY_F:
-			keygot = VK_FORCE;
+			keygot = PAL_VK_FORCE;
 			break;
 		case KEY_P:
 		case KEY_PRTSCR:
-			keygot = VK_PRINTSCREEN;
+			keygot = PAL_VK_PRINTSCREEN;
 			break;
 		default:
-			keygot = VK_NONE;
+			keygot = PAL_VK_NONE;
 			if(!clear)
 				simulate_keypress(k<<8);
 		}

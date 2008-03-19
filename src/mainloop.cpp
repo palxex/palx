@@ -34,7 +34,7 @@ namespace{
 		first=false;
 
 		//Parse Key
-		VKEY keygot=get_key_lowlevel();
+		PAL_VKEY keygot=get_key_lowlevel();
 
         flag_to_load=0;
 		GameLoop_OneCycle(true);
@@ -58,9 +58,9 @@ namespace{
 		sprites.Redraw_Tiles_or_Fade_to_pic();
 
 		scene->scanline_draw_normal_scene(sprites,1);
-		if(keygot==VK_EXPLORE)
+		if(keygot==PAL_VK_EXPLORE)
 			process_Explore();
-		if(keygot==VK_MENU)
+		if(keygot==PAL_VK_MENU)
 			running=process_Menu();
 
 		flag_parallel_mutex=!flag_parallel_mutex;
