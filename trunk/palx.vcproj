@@ -45,7 +45,7 @@
 				AdditionalOptions="/wd 4819 /wd 4985"
 				Optimization="0"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ALFONT_DLL;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -129,7 +129,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd 4819"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW;ALLEGRO5;ALLEGRO_STATICLINK"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="alleg.lib adplug.lib binio.lib freetype235MT.lib"
+				AdditionalDependencies="alleg_s-4.9.3.lib adplugd.lib biniod.lib freetype235MT.lib d3d9.lib winmm.lib dsound.lib dxguid.lib dinput.lib ddraw.lib opengl32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""

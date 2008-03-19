@@ -55,6 +55,7 @@ public:
 	int width,height;
 	bitmap(const uint8_t *,int,int);
 	bitmap(BITMAP *);
+	bitmap(const bitmap &rhs);
 	uint8_t *getdata();
 	virtual ~bitmap();
 	operator BITMAP *() const {return bmp;}
@@ -163,10 +164,10 @@ public:
 	void play();
 };
 
-enum VKEY { VK_NONE=0,VK_MENU=1,VK_EXPLORE,VK_DOWN,VK_LEFT,VK_UP,VK_RIGHT,VK_PGUP,VK_PGDN,VK_REPEAT,VK_AUTO,VK_DEFEND,VK_USE,VK_THROW,VK_QUIT,VK_STATUS,VK_FORCE,VK_PRINTSCREEN};
-VKEY async_getkey();
-VKEY sync_getkey();
+enum PAL_VKEY { PAL_VK_NONE=0,PAL_VK_MENU=1,PAL_VK_EXPLORE,PAL_VK_DOWN,PAL_VK_LEFT,PAL_VK_UP,PAL_VK_RIGHT,PAL_VK_PGUP,PAL_VK_PGDN,PAL_VK_REPEAT,PAL_VK_AUTO,PAL_VK_DEFEND,PAL_VK_USE,PAL_VK_THROW,PAL_VK_QUIT,PAL_VK_STATUS,PAL_VK_FORCE,PAL_VK_PRINTSCREEN};
+PAL_VKEY async_getkey();
+PAL_VKEY sync_getkey();
 
-VKEY get_key_lowlevel();
+PAL_VKEY get_key_lowlevel();
 void key_watcher(int scancode);
 #endif

@@ -11,7 +11,6 @@
 
 // todo (char map null check)
 
-#include <allegro.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ft2build.h>

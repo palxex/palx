@@ -31,6 +31,10 @@ bitmap::bitmap(BITMAP *b):bmp(create_bitmap(b->w,b->h)),width(b->w),height(b->h)
 {
     blit(b,bmp,0,0,0,0,b->w,b->h);
 }
+bitmap::bitmap(const bitmap &rhs):bmp(create_bitmap(rhs.width,rhs.height)),width(rhs.width),height(rhs.height)
+{
+	blit(rhs,bmp,0,0,0,0,width,height);
+}
 bitmap::~bitmap()
 {
 	destroy_bitmap(bmp);

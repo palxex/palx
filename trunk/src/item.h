@@ -26,7 +26,8 @@ void add_goods_to_list(int,int);
 int get_cons_attrib(int role,int attrib);
 void use_item(int item,int amount);
 
-extern int role_parts[5][17][74];
+extern int role_parts[6][17][74];
 extern int prev_equip;
 
 #endif
+

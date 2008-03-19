@@ -1324,9 +1324,7 @@ uint16_t process_script(uint16_t id,int16_t object)
         case 0xA:
             //printf("选择:选否则继续(y/n)");
             current_dialog_lines=0;
-            char sele;
-            scanf("%c",&sele);
-            if (sele=='y')
+            if (!yes_or_no(0x13,0))
             {
                 id = param1;
                 //printf("跳转\n");
