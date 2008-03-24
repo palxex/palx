@@ -29,7 +29,7 @@
 #include "allegdef.h"
 #include "internal.h"
 
-namespace res{
+namespace Pal{
     extern SETUP_DEF setup;
 	extern palette pat;
 	extern RPG rpg;
@@ -45,6 +45,7 @@ namespace res{
 	extern sprite_prim message_handles;
 	extern ENEMY_POSES enemyposes;
 	extern UPGRADE_EXP upgradexp;
+	extern EFFECT_IDX effect_idx;
 
 	//sss
 	extern std::vector<EVENT_OBJECT> evtobjs;

@@ -23,6 +23,7 @@
 #include "game.h"
 #include "config.h"
 #include "item.h"
+#include "battle.h"
 
 bool flag_battling=false;
 
@@ -57,7 +58,7 @@ void switch_proc()
 }
 void Load_Data()
 {
-	using namespace res;
+	using namespace Pal;
 	flag_battling=false;
 	x_off=0,y_off=0;
 	if(flag_to_load&0x10){
@@ -114,7 +115,7 @@ void redraw_everything(int time_gap,BITMAP *dst)
 {
 	flag_parallel_mutex=!flag_parallel_mutex;
 	if(flag_battling)
-		;
+		battle::get()->battle_produce_screen();
 	else{
 		rest(100);
 		sprite_queue sprites;
@@ -129,18 +130,27 @@ void setup_our_team_data_things()
 {
 	//清除物品使用记录
 	for(int i=0;i<0x100;i++)
-		res::rpg.items[i].using_amount=0;
+		Pal::rpg.items[i].using_amount=0;
 
 	//清除装备记录
 	memset(role_parts,0,sizeof(role_parts));
 
-	//重新装备
-	for(int i=0,role=res::rpg.team[i].role;i<=res::rpg.team_roles;i++,role=res::rpg.team[i].role)
+	for(int i=0,role=Pal::rpg.team[i].role;i<=Pal::rpg.team_roles;i++,role=Pal::rpg.team[i].role)
+	{
+		//战象初始化,合体初始化
+		battle_role_data[i].battle_avatar=Pal::rpg.roles_properties.battle_avator[role];
+		battle_role_data[i].contract_magic=Pal::rpg.roles_properties.contract_magic[role];
+		//全攻消除
+		Pal::rpg.roles_properties.attack_all[role]=0;
+		//双攻消除
+		role_status[i][4]=0;
+		//重新装备
 		for(int j=0xB;j<=0x10;j++)
-			if(res::rpg.role_prop_tables[j][role])
+			if(Pal::rpg.role_prop_tables[j][role])
 			{
-				uint16_t &equip_script=res::rpg.objects[res::rpg.role_prop_tables[j][role]].item.equip;
+				uint16_t &equip_script=Pal::rpg.objects[Pal::rpg.role_prop_tables[j][role]].item.equip;
 				equip_script=process_script(equip_script,i);
 			}
+	}
 }
 

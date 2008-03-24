@@ -71,7 +71,7 @@ namespace{
 	END_OF_FUNCTION(mainloop_proc);
 }
 
-namespace res{
+namespace Pal{
     int run(){
         //游戏主循环10fps,画面100fps,音乐70fps。
         while(running){

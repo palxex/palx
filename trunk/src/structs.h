@@ -283,9 +283,12 @@ typedef struct{
 	_POS pos[TEAMROLES][TEAMROLES];
 }ENEMY_POSES;
 
-typedef 
-	int16_t UPGRADE_EXP[100]
-;
+typedef int16_t UPGRADE_EXP[100];
+
+typedef struct {
+	int16_t attack;
+	int16_t magic;
+}EFFECT_IDX[20];
 typedef struct
 {
 unsigned short int key_left;
@@ -314,7 +317,31 @@ unsigned short int use_files_on_CD;
 		position(int x_,int y_,int h_):x(x_),y(y_),h(h_),status(true){}
 		position(int x_,int y_):x(x_),y(y_),status(false){}
 		position():x(0),y(0),status(false){}
-		position &toXYH(){	if(!status){	h=(x%32!=0);x=x/32;y=y/16;	status=true;} return *this;}
+		position &toXYH()
+		{
+			if(!status){
+				status=true;
+				if(x<0 || y<0)
+					x=0,y=0,h=0;
+				else{
+					int x_rest=x%32,y_rest=y%16;
+					x/=32;y/=16;h=0;
+					int rest=x_rest+2*y_rest,rest2=0x20-x_rest+2*y_rest;
+
+					if(rest<0x10)
+						;
+					else if(rest>=0x30)
+						x++,y++;
+					else if(rest2<0x10)
+						x++;
+					else if(rest2<0x30)
+						h=1;
+					else
+						y++;
+				}
+			} 
+			return *this;
+		}
 		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}
 		position operator+(const position &rhs){
 			if(rhs.status)

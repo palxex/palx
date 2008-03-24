@@ -162,13 +162,13 @@ void playrix::play(int sub_song,int times)
 	update_cache(this);
 
 	voice_set_volume(stream->voice,1);
-	voice_ramp_volume(stream->voice, ((times==3)?2:0)*1000, max_vol);
+	voice_ramp_volume(stream->voice, ((times==3)?2:0)*3000, max_vol);
 	begin=true;
 
 }
 void playrix::stop(int gap)
 {
-	voice_ramp_volume(stream->voice, gap*1000, 0);
+	voice_ramp_volume(stream->voice, gap*3000, 0);
 }
 
 void playrix::setvolume(int vol)

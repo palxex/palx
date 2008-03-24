@@ -28,7 +28,7 @@ using namespace boost;
 volatile uint8_t time_interrupt_occurs;
 int mutex_paletting=0,mutex_blitting=0,mutex_switching=0;
 int scale=1;
-namespace res{
+namespace Pal{
 	palette pat;
 	RPG rpg;
 	SETUP_DEF setup;
@@ -44,6 +44,7 @@ namespace res{
 	sprite_prim message_handles;
 	ENEMY_POSES enemyposes;
 	UPGRADE_EXP upgradexp;
+	EFFECT_IDX effect_idx;
 
 	//sss
 	std::vector<EVENT_OBJECT> evtobjs;
@@ -113,7 +114,7 @@ namespace res{
 
         LOCK_VARIABLE(time_interrupt_occurs);
         install_int(timer_proc,10);
-        install_int(perframe_proc,10);
+        install_int(perframe_proc,1000/global->get<int>("debug","fps"));
 
         //load sss&data
         long len=0;
@@ -142,7 +143,9 @@ namespace res{
         reunion(learns,					DATA.decode(6,len),len);
         //7:not used
         //8:not used
-        //11:not known!!!
+		//reunion(effect_idx,				DATA.decode(11,len),len);
+		//walkaround for mingw, AGAIN.
+		memcpy(effect_idx,              DATA.decode(11,len),40);
         reunion(enemyposes,				DATA.decode(13,len),len);
         reunion(upgradexp,				DATA.decode(14,len),len);
 

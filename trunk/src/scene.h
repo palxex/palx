@@ -38,9 +38,9 @@ protected:
 class fbp:public scene_map{
 public:
 	fbp():scene_map(0,320,160){}
-	fbp(int p):scene_map(res::FBP.decode(p),320,200){}
+	fbp(int p):scene_map(Pal::FBP.decode(p),320,200){}
 	void change(int p){
-		memcpy(bmp->dat,res::FBP.decode(p),bmp->w*bmp->h);
+		memcpy(bmp->dat,Pal::FBP.decode(p),bmp->w*bmp->h);
 	}
 };
 struct tile{
@@ -51,21 +51,20 @@ struct tile{
 	tile():image((sprite*)0),blocked(0),layer(0),valid(false){}
 };
 class palmap:public scene_map{
-	int curr_map;
-	boost::multi_array<tile,4> sprites;
-	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
-	void make_tile(uint8_t*,int,int,int,BITMAP*);
 public:
 	void make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y);
 	void blit_to(BITMAP *dest,int sx,int sy,int dx,int dy);
 	tile &gettile(int x,int y,int h,int l);
 	palmap();
 	void change(int p);
+	int curr_map;
+private:
+	boost::multi_array<tile,4> sprites;
+	sprite &getsprite(int x,int y,int h,int l,uint8_t *src,bool throu,int layer);
+	void make_tile(uint8_t*,int,int,int,BITMAP*);
 };
 
 class sprite_queue{
-	typedef std::vector<boost::shared_ptr<sprite> > s_list;
-	s_list active_list;
 public:
 	void clear_active();
 	void calc_team_walking();
@@ -73,6 +72,11 @@ public:
 	void visible_NPC_movment_setdraw();
 	void Redraw_Tiles_or_Fade_to_pic();
 	void flush(bitmap &);
+	typedef std::vector<boost::shared_ptr<sprite> > s_list;
+	typedef std::list<boost::shared_ptr<sprite> > s_set;
+private:
+	s_list active_list;
+	s_set brick_list;
 };
 struct Scene{
 	palmap scenemap;
@@ -85,12 +89,6 @@ struct Scene{
 	void get_sprites();
 	void produce_one_screen();
 	void scanline_draw_normal_scene(sprite_queue&,int,BITMAP * =screen);
-};
-struct BattleScene{
-	fbp background;
-	typedef std::list<sprite *> s_list;
-	s_list active_list;
-	void draw();
 };
 
 #endif

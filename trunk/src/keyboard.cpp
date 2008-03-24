@@ -220,8 +220,8 @@ PAL_VKEY get_key_lowlevel()
 	examine_mutex=1;
 	if(!keys.empty())
 	{
-		x_off=((keys.top()==res::setup.key_left||keys.top()==res::setup.key_down)?-1:((keys.top()==res::setup.key_right||keys.top()==res::setup.key_up)?1:0));
-		y_off=((keys.top()==res::setup.key_down||keys.top()==res::setup.key_right)?1:((keys.top()==res::setup.key_left||keys.top()==res::setup.key_up)?-1:0));
+		x_off=((keys.top()==Pal::setup.key_left||keys.top()==Pal::setup.key_down)?-1:((keys.top()==Pal::setup.key_right||keys.top()==Pal::setup.key_up)?1:0));
+		y_off=((keys.top()==Pal::setup.key_down||keys.top()==Pal::setup.key_right)?1:((keys.top()==Pal::setup.key_left||keys.top()==Pal::setup.key_up)?-1:0));
 	}
 	else
 		x_off=0,y_off=0;

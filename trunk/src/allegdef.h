@@ -67,6 +67,7 @@ class sprite{
 	typedef Pal::Tools::PDECODERLECALLBACK filter_func;
 	filter_func filter;
 	int filt_data;
+	friend bool operator==(const boost::shared_ptr<sprite> &lhs,const boost::shared_ptr<sprite> &rhs);
 public:
 	int x,y,l;
 	int width,height;
@@ -79,7 +80,6 @@ public:
 	void blit_middle(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int,bool =false,int =6, int =6);
-	friend bool operator<(const sprite &lhs,const sprite &rhs);
 };
 class sprite_prim{
 	int id;

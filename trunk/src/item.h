@@ -21,8 +21,10 @@
 #define _ITEM_H
 
 int compact_items();
+int compact_magic(int role);
 void learnmagic(bool flag_dialog,int magic,int role);
-void add_goods_to_list(int,int);
+void add_goods_to_list(int goods,int num);
+int count_item(int item,bool hasequip=true);
 int get_cons_attrib(int role,int attrib);
 void use_item(int item,int amount);
 

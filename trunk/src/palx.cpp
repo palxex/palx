@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 			bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;clear_bitmap(bakscreen);
 
 			playrix player;rix=&player;
-			using namespace res;
+			using namespace Pal;
 			init_resource();
 			//load save
 			if(save!=0 || (save=begin_scene()()))

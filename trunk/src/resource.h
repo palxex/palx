@@ -55,7 +55,7 @@ public:
 	void clear();
 	void clear(int n,int n2);
 };
-namespace res{
+namespace Pal{
 	extern cached_res MIDI,SFX,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;
 }
 #endif
