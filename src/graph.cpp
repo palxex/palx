@@ -122,10 +122,6 @@ bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 	this->l=0;
 	return blit_to(dest);
 }
-bool operator<(const sprite &lhs, const sprite &rhs)
-{
-	return lhs.y<rhs.y;
-}
 
 sprite_prim::sprite_prim():id(-1)
 {}
@@ -223,7 +219,7 @@ void pixfont::blit_to(const char *msg, BITMAP *dest, int x, int y, unsigned char
 	for(int word=0,len=strlen(msg)/2;word<len;word++)
 	{
 		uint16_t wChar=((uint16_t*)msg)[word];
-   int i, j, dx;
+   int i=0, j=0, dx=0;
 
    //
    // Locate for this character in the font lib.
@@ -275,7 +271,7 @@ void palette::read(uint32_t i)
 {
 	pal=i;
 	bool fx;long len;
-	myRGB *buf=(myRGB *)res::PAT.decode(i,0,fx,len);
+	myRGB *buf=(myRGB *)Pal::PAT.decode(i,0,fx,len);
 	RGB   *p=(RGB*)pat;
 	for(int t=0;t<(i==0 || i==5?512:256);t++)
 		p[t].r=buf[t].r,

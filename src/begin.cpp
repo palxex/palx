@@ -22,7 +22,7 @@
 #include "timing.h"
 #include "internal.h"
 
-using namespace res;
+using namespace Pal;
 
 void startup_splash()
 {

@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-using namespace res;
+using namespace Pal;
 
 extern int scale;
 bool prelimit_OK=false;
@@ -357,7 +357,13 @@ __walk_npc:
         add_goods_to_list(param1,param2==0?1:param2);
         break;
     case 0x20:
-        //item rel,not implemented
+		{
+			int amount=(param2?param2:1);
+			if(amount<=count_item(param1,true) || param3==0)
+				use_item(param1,amount);
+			else
+				id=param3-1;
+		}
         break;
     case 0x21:
         //battle rel,not implemented
@@ -987,7 +993,7 @@ __walk_role:
 		//not implemented
 		break;
 	case 0x89:
-		//not implemented
+		battle::get()->endbattle_method=(param1?param1:-1);
 		break;
 	case 0x8a:
 		//not implemented
@@ -1070,10 +1076,10 @@ __walk_role:
         break;
 	case 0x99:
 		if(param1<0){
-			res::scenes[res::rpg.scene_id].id=param2;
-			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+			Pal::scenes[Pal::rpg.scene_id].id=param2;
+			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
 		}else
-			res::scenes[param1].id=param2;
+			Pal::scenes[param1].id=param2;
 		break;
 	case 0x9a:
 		for(int i=param1;i<=param2;i++)
@@ -1082,14 +1088,14 @@ __walk_role:
     case 0x9b:
 		if(!(redraw_flag=param1)){
 			scene->scenemap.change(0);
-			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
 			scene->produce_one_screen();
 		}else if(param2<0){
 			bitmap backup(0,SCREEN_W,SCREEN_H);
 			scene->scene_buf.blit_to(backup);
 			scene->produce_one_screen();
 			scene->scenemap.change(0);
-			scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
 			scene->scene_buf.blit_to(backbuf);
 			backup.blit_to(scene->scene_buf);
 		}else{
@@ -1099,7 +1105,7 @@ __walk_role:
 			}else{
 				scene->produce_one_screen();
 				scene->scenemap.change(0);
-				scene->scenemap.change(res::scenes[res::rpg.scene_id].id);
+				scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
 				t.blit_to(backbuf);
 			}
 		}
@@ -1324,7 +1330,7 @@ uint16_t process_script(uint16_t id,int16_t object)
         case 0xA:
             //printf("选择:选否则继续(y/n)");
             current_dialog_lines=0;
-            if (!yes_or_no(0x13,0))
+            if (yes_or_no()<=0)
             {
                 id = param1;
                 //printf("跳转\n");

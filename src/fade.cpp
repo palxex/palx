@@ -22,7 +22,7 @@
 #include "game.h"
 #include "timing.h"
 
-using namespace res;
+using namespace Pal;
 
 bool mutex_can_change_palette=true;
 void pal_fade_out(int t)
@@ -36,9 +36,9 @@ void pal_fade_out(int t)
 			{
 				for(int j=0;j<0x100;j++)
 				{
-					pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
-					pal[j].g=res::pat.get(rpg.palette_offset)[j].g*i/0x40;
-					pal[j].b=res::pat.get(rpg.palette_offset)[j].b*i/0x40;
+					pal[j].r=Pal::pat.get(rpg.palette_offset)[j].r*i/0x40;
+					pal[j].g=Pal::pat.get(rpg.palette_offset)[j].g*i/0x40;
+					pal[j].b=Pal::pat.get(rpg.palette_offset)[j].b*i/0x40;
 				}
 				set_palette(pal);
 				delay(t);
@@ -59,14 +59,14 @@ void pal_fade_in(int t)
 			{
 				for(int j=0;j<0x100;j++)
 				{
-					pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
-					pal[j].g=res::pat.get(rpg.palette_offset)[j].g*i/0x40;
-					pal[j].b=res::pat.get(rpg.palette_offset)[j].b*i/0x40;
+					pal[j].r=Pal::pat.get(rpg.palette_offset)[j].r*i/0x40;
+					pal[j].g=Pal::pat.get(rpg.palette_offset)[j].g*i/0x40;
+					pal[j].b=Pal::pat.get(rpg.palette_offset)[j].b*i/0x40;
 				}
 				set_palette(pal);
 				delay(t);
 			}
-		set_palette(res::pat.get(rpg.palette_offset));
+		set_palette(Pal::pat.get(rpg.palette_offset));
 	}
 }
 void fade_inout(int t)
@@ -81,9 +81,9 @@ void fade_inout(int t)
 	{
 		for(int j=0;j<0x100;j++)
 		{
-			pal[j].r=res::pat.get(rpg.palette_offset)[j].r*i/0x40;
-			pal[j].g=res::pat.get(rpg.palette_offset)[j].g*i/0x40;
-			pal[j].b=res::pat.get(rpg.palette_offset)[j].b*i/0x40;
+			pal[j].r=Pal::pat.get(rpg.palette_offset)[j].r*i/0x40;
+			pal[j].g=Pal::pat.get(rpg.palette_offset)[j].g*i/0x40;
+			pal[j].b=Pal::pat.get(rpg.palette_offset)[j].b*i/0x40;
 		}
 		set_palette(pal);
 		GameLoop_OneCycle(false);
@@ -105,9 +105,9 @@ void normalize_fade()
 	PALETTE pal;
 	for(int i=0;i<0x100;i++)
 	{
-		pal[i].r=normalize(res::pat.get(rpg.palette_offset)[i].r);
-		pal[i].g=normalize(res::pat.get(rpg.palette_offset)[i].g);
-		pal[i].b=normalize(res::pat.get(rpg.palette_offset)[i].b);
+		pal[i].r=normalize(Pal::pat.get(rpg.palette_offset)[i].r);
+		pal[i].g=normalize(Pal::pat.get(rpg.palette_offset)[i].g);
+		pal[i].b=normalize(Pal::pat.get(rpg.palette_offset)[i].b);
 	}
 	set_palette(pal);
 }

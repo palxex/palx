@@ -85,6 +85,8 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	debugprop["resource"].comment="资源使用方式;mkf/filesystem";
 	debugprop["allow_frozen"].value="true";
 	debugprop["allow_frozen"].comment="允许冻结启动/停止;true/false";
+	debugprop["fps"].value="20";
+	debugprop["fps"].comment="";
 	section debug("debug",debugprop);
 	sections["debug"]=debug;
 
@@ -322,6 +324,9 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 	  else if(get<string>("config","resource")=="win95")
 	    set<string>("config","encode","GBK");
 
+	if(!get<int>("debug","fps"))
+		set<int>("debug","fps",20);
+
 	if(get<string>("debug","resource")=="mkf")
 	{
 		de_none			=bind(denone_file,_1,_4);
@@ -364,11 +369,11 @@ void global_init::display_setup(bool ext)
 }
 int global_init::operator ()()
 {
-	using namespace res;
+	using namespace Pal;
 	string path_root=get<string>("config","path");
 	SETUP.set(path_root+"/SETUP.DAT",de_none);
 	PAT.set	(path_root+"/PAT.MKF"	,de_mkf);
-	res::MIDI.set(path_root+"/MIDI.MKF"	,de_mkf);
+	Pal::MIDI.set(path_root+"/MIDI.MKF"	,de_mkf);
 	SFX.set	(path_root+"/"+sfx_file	,de_mkf);
 	DATA.set(path_root+"/DATA.MKF"	,de_mkf);
 	SSS.set	(path_root+"/SSS.MKF"	,de_mkf);
@@ -377,7 +382,7 @@ int global_init::operator ()()
 	GOP.set	(path_root+"/GOP.MKF"	,de_mkf_smkf);
 	BALL.set(path_root+"/BALL.MKF"	,de_mkf_smkf);
 	RGM.set	(path_root+"/RGM.MKF"	,de_mkf_smkf);
-	res::ABC.set	(path_root+"/ABC.MKF"	,de_mkf_yj1_smkf);
+	Pal::ABC.set	(path_root+"/ABC.MKF"	,de_mkf_yj1_smkf);
 	F.set	(path_root+"/F.MKF"	,de_mkf_yj1_smkf);
 	FIRE.set(path_root+"/FIRE.MKF"	,de_mkf_yj1_smkf);
 	MGO.set	(path_root+"/MGO.MKF"	,de_mkf_yj1_smkf);

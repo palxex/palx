@@ -50,6 +50,7 @@ public:
 	menu(int x,int y,int menus,int begin,int chars,int style=0,bool shadow=true);
 	menu(int x,int y,std::vector<std::string> &strs,int chars,int length=-1,int =0);
 	int operator()(const menu_tmp &,int selected=0);
+	~menu();
 };
 struct menu_tmp
 {
@@ -57,31 +58,30 @@ struct menu_tmp
 	int selected;
 	int color_selecting;
 	menu_tmp():got(-1),color_selecting(0xFA){}
-	virtual void prev_action(menu*)=0;
-	virtual void post_action(menu*)=0;
-	virtual void draw(menu*)=0;
+	virtual void prev_action(menu*);
+	virtual void post_action(menu*);
 	virtual int select(menu*,int)=0;
+	virtual void draw(menu*)=0;
 	virtual int keyloop(menu*)=0;
+	virtual void got_action(menu*)=0;
 	virtual ~menu_tmp(){}
 };
 struct single_menu:public menu_tmp
 {
-	void prev_action(menu*);
-	void post_action(menu*);
 	void draw(menu*);
 	int select(menu*,int);
 	int keyloop(menu*);
+	void got_action(menu*);
 };
 struct multi_menu:public menu_tmp
 {
 	int mask,skip,max,max_ori,begin_y,paging,middle;
 	bitmap buf;
 	multi_menu(int _mask,int _skip,int _paging=8):menu_tmp(),mask(_mask),skip(_skip),paging(_paging),middle(paging/2),buf(0,SCREEN_W,SCREEN_H){got=0;}
-	void prev_action(menu*);
-	void post_action(menu*);
-	void draw(menu*);
-	int select(menu*,int);
 	int keyloop(menu*);
+	void got_action(menu*);
+	void draw(menu*);
+	int select(menu*,int selected);
 };
 
 class single_dialog
@@ -97,13 +97,14 @@ public:
 int select_rpg(int =0,BITMAP * =screen);
 int select_item(int mask,int ,int selected);
 int select_theurgy(int role,int mask,int selected);
-void show_money(int num,int x,int y,int text,bool shadow);
+void show_money(int num,int x,int y,int text,bool shadow,BITMAP *bmp=screen);
 void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp=screen);
 void show_num_han(int num,int x,int y,int digits,BITMAP *bmp=screen,bool shadow=true);
 void show_number(int number,int x,int y,int color,BITMAP *bmp=screen);
 void display_role_status(int flag,int role,int x,int y,BITMAP *bmp=screen);
+void show_status_bar(BITMAP *buf=screen);
 
-int yes_or_no(int word,int selected);
+int yes_or_no(int word=0x13,int selected=0);
 
 void shop(int);
 void hockshop();

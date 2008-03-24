@@ -90,6 +90,6 @@ void cached_res::clear(int n, int n2){
 	cache.erase(iter);
 }
 
-namespace res{
+namespace Pal{
 	cached_res MIDI,SFX,MAP,GOP,RNG,DATA,SSS,BALL,RGM,FBP,F,FIRE,ABC,MGO,PAT,SETUP;
 }
