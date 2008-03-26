@@ -809,7 +809,7 @@ bool process_Menu()
 		case 2:
 			if((music_selected=yes_or_no(0x11,music_selected))<0)
                 break;
-			rix->setvolume((music_selected==1)?255:0);
+			musicplayer->setvolume((music_selected==1)?255:0);
 			break;
 		case 3:
 			if((sfx_selected=yes_or_no(0x11,sfx_selected))<0)

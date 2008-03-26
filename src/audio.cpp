@@ -32,6 +32,8 @@
 
 #define MAX_VOICES 10
 
+bool mask_use_CD=false;
+boost::shared_ptr<player> musicplayer,cdplayer;
 bool begin=false,once=false;
 int voices[MAX_VOICES];int vocs=0;
 
@@ -208,6 +210,7 @@ SAMPLE *voc::load_voc_mem(uint8_t *src)
 	   not_voc=true;
       goto getout;
    }
+   not_voc=false;
 
    ver = ((uint16_t*)f)[0];f+=2;
    if (ver != 0x010A && ver != 0x0114) /* version: should be 0x010A or 0x0114 */
@@ -291,6 +294,124 @@ getout:
 
 void voc::play()
 {
-	if(!not_voc)
+	if(!not_voc && max_vol)
 		voices[vocs++]=play_sample(spl,max_vol,128,1000,0);
 }
+bool not_midi=false;
+#include <allegro/internal/aintern.h>
+
+void b2l_memcpy(uint8_t *dst,const uint8_t *src,size_t size)
+{
+	for(size_t i=0;i<size;i++)
+		dst[i]=src[size-1-i];
+}
+MIDI *load_midi_mem(int midiseq)
+{
+	long len,sek=0;
+	uint8_t *midibuf=Pal::MIDI.decode(midiseq,len);
+   int c;
+   char buf[4];
+   long data=0;
+
+   MIDI *midi;
+   int num_tracks=0;
+
+   midi = (MIDI*)_AL_MALLOC(sizeof(MIDI));              /* get some memory */
+   if (!midi) {
+	   not_midi=true;
+      return NULL;
+   }
+   not_midi=false;
+
+   for (c=0; c<MIDI_TRACKS; c++) {
+      midi->track[c].data = NULL;
+      midi->track[c].len = 0;
+   }
+
+   memcpy(buf,midibuf+sek,4);sek+=4;//pack_fread(buf, 4, fp); /* read midi header */
+
+   /* Is the midi inside a .rmi file? */
+   if (memcmp(buf, "RIFF", 4) == 0) { /* check for RIFF header */
+      sek+=4;//pack_mgetl(fp);
+	   
+
+	   while (sek<=len){//!pack_feof(fp)) {
+         memcpy(buf,midibuf+sek,4);sek+=4;//pack_fread(buf, 4, fp); /* RMID chunk? */
+         if (memcmp(buf, "RMID", 4) == 0) break;
+
+         sek+=4;sek+=*(long*)(midibuf+sek);//pack_fseek(fp, pack_igetl(fp)); /* skip to next chunk */
+      }
+
+      if (sek>=len) goto err;
+
+      sek+=4;//pack_mgetl(fp);
+      sek+=4;//pack_mgetl(fp);
+      memcpy(buf,midibuf+sek,4);sek+=4;//pack_fread(buf, 4, fp); /* read midi header */
+   }
+
+   if (memcmp(buf, "MThd", 4))
+      goto err;
+
+   sek+=4;//pack_mgetl(fp);                           /* skip header chunk length */
+
+   b2l_memcpy((uint8_t*)&data,midibuf+sek,2);sek+=2;//pack_mgetw(fp);                    /* MIDI file type */
+   if ((data != 0) && (data != 1))
+      goto err;
+
+   b2l_memcpy((uint8_t*)&num_tracks,midibuf+sek,2);sek+=2;//pack_mgetw(fp);              /* number of tracks */
+   if ((num_tracks < 1) || (num_tracks > MIDI_TRACKS))
+      goto err;
+
+   b2l_memcpy((uint8_t*)&data,midibuf+sek,2);sek+=2;//pack_mgetw(fp);                    /* beat divisions */
+   midi->divisions = ABS(data);
+
+   for (c=0; c<num_tracks; c++) {            /* read each track */
+      memcpy(buf,midibuf+sek,4);sek+=4;//pack_fread(buf, 4, fp);                /* read track header */
+      if (memcmp(buf, "MTrk", 4))
+	 goto err;
+
+      b2l_memcpy((uint8_t*)&data,midibuf+sek,4);sek+=4;//pack_mgetl(fp);                 /* length of track chunk */
+      midi->track[c].len = data;
+
+      midi->track[c].data = (uint8_t*)_AL_MALLOC_ATOMIC(data); /* allocate memory */
+      if (!midi->track[c].data)
+	 goto err;
+					     /* finally, read track data */
+	  if(len-sek>=data){
+		  memcpy(midi->track[c].data,midibuf+sek,data);
+		  sek+=data;
+	  }
+	  else
+      //if (pack_fread(midi->track[c].data, data, fp) != data)
+	 goto err;
+   }
+
+   //pack_fclose(fp);
+   lock_midi(midi);
+   return midi;
+
+   /* oh dear... */
+   err:
+   //pack_fclose(fp);
+   destroy_midi(midi);
+   return NULL;
+}
+playmidi::playmidi()
+{}
+playmidi::~playmidi()
+{}
+MIDI *pmidi=NULL;
+void playmidi::play(int sub_song,int)
+{
+	if(!not_midi && global->get<int>("music","volume")){
+		pmidi=load_midi_mem(sub_song);
+		play_midi(pmidi,1);
+	}
+}
+void playmidi::stop(int fade)
+{
+	destroy_midi(pmidi);
+	play_midi(NULL,0);
+}
+void playmidi::setvolume(int)
+{}

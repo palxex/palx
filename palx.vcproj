@@ -128,7 +128,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd 4819"
-				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
+				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont,allegro5"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW;ALLEGRO5;ALLEGRO_STATICLINK"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"

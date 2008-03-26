@@ -83,6 +83,13 @@ void sprite::blit_middle(BITMAP *dest,int x,int y)
 	this->l=0;
 	blit_to(dest);
 }
+void sprite::blit_middlebottom(BITMAP *dest,int x,int y)
+{
+	this->x=x-((uint16_t*)buf)[0]/2;
+	this->y=y;
+	this->l=0;
+	blit_to(dest);
+}
 bool sprite::blit_to(BITMAP *dest)
 {
 	if(!dest->dat)

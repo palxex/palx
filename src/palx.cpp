@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
 			bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;clear_bitmap(backbuf);
 			bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;clear_bitmap(bakscreen);
 
-			playrix player;rix=&player;
 			using namespace Pal;
 			init_resource();
 			//load save
