@@ -78,6 +78,7 @@ public:
 	void setfilter();
 	void setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
+	void blit_middlebottom(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int,bool =false,int =6, int =6);
 };
@@ -130,7 +131,12 @@ public:
 };
 class CEmuopl;
 class CrixPlayer;
-class playrix
+struct player{
+	virtual void play(int sub_song,int =0)=0;
+	virtual void stop(int =0)=0;
+	virtual void setvolume(int)=0;
+};
+class playrix:public player
 {
 	boost::shared_ptr<Copl> 	opl;
 	CrixPlayer 	rix;
@@ -154,6 +160,14 @@ public:
 	void stop(int =0);
 	void setvolume(int);
 };
+class playmidi:public player{
+public:
+	playmidi();
+	~playmidi();
+	void play(int sub_song,int =0);
+	void stop(int =0);
+	void setvolume(int);
+};
 
 class voc{
 	SAMPLE *spl;
@@ -163,6 +177,7 @@ public:
 	voc(uint8_t *);
 	void play();
 };
+extern boost::shared_ptr<player> musicplayer,cdplayer;
 
 enum PAL_VKEY { PAL_VK_NONE=0,PAL_VK_MENU=1,PAL_VK_EXPLORE,PAL_VK_DOWN,PAL_VK_LEFT,PAL_VK_UP,PAL_VK_RIGHT,PAL_VK_PGUP,PAL_VK_PGDN,PAL_VK_REPEAT,PAL_VK_AUTO,PAL_VK_DEFEND,PAL_VK_USE,PAL_VK_THROW,PAL_VK_QUIT,PAL_VK_STATUS,PAL_VK_FORCE,PAL_VK_PRINTSCREEN};
 PAL_VKEY async_getkey();

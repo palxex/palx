@@ -40,7 +40,7 @@ void startup_splash()
 		poses[i][1]=rnd1(80);
 		poses[i][2]=rnd1(8);
 	}
-	rix->play(5);
+	musicplayer->play(5);
 
 	PALETTE pal;
 	get_palette(pal);
@@ -96,7 +96,7 @@ int select_scene()
 {
 	pat.read(0);
 	show_fbp(60,0);
-	rix->play(4);
+	musicplayer->play(4);
 	pal_fade_in(1);
 	bool ok=false;
 	int save=0;

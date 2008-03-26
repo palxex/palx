@@ -44,13 +44,14 @@ void battle::setup_role_enemy_image()
 		battle_role_data[i].pos_y_bak=battle_role_data[i].pos_y;
 	}
 	for(int i=0;i<enemy_poses_count;i++){
-		if(battle_enemy_data[i].HP>0 && battle_enemy_data[i].id>0)
+		if(battle_enemy_data[i].HP>0 && battle_enemy_data[i].id>0){
 			enemy_images[i]=sprite_prim(Pal::ABC,rpg.objects[enemyteams[enemy_team].enemy[i]].general.inbeing);
+			battle_enemy_data[i].length=enemy_images[i].getsprite(0)->height;
+		}
 		battle_enemy_data[i].pos_x=enemyposes.pos[i][enemy_poses_count-1].x;
 		battle_enemy_data[i].pos_y=enemyposes.pos[i][enemy_poses_count-1].y+monsters[rpg.objects[battle_enemy_data[i].id].enemy.enemy].pos_y_offset;
 		battle_enemy_data[i].pos_x_bak=battle_enemy_data[i].pos_x;
 		battle_enemy_data[i].pos_y_bak=battle_enemy_data[i].pos_y;
-		battle_enemy_data[i].length=enemy_images[i].getsprite(0)->height;
 		battle_enemy_data[i].frame=battle_enemy_data[i].frame_bak=0;
 	}
 }
@@ -108,12 +109,12 @@ void battle::battle_produce_screen()
 		if(enemyteams[enemy_team].enemy[i]>0){
 			if(affected_enemies[i])
 				enemy_images[i].getsprite(battle_enemy_data[i].frame)->setfilter(brighter_filter,6);
-			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_to(screen,battle_enemy_data[i].pos_x-enemy_images[i].getsprite(battle_enemy_data[i].frame)->width/2,battle_enemy_data[i].pos_y-enemy_images[i].getsprite(battle_enemy_data[i].frame)->height);
+			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_middlebottom(screen,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y);
 			if(affected_enemies[i])
 				enemy_images[i].getsprite(battle_enemy_data[i].frame)->setfilter();
 		}
-		for(int i=Pal::rpg.team_roles;i>=0;i--)
-			team_images[i].getsprite(0)->blit_middle(screen,battle_role_data[i].pos_x,battle_role_data[i].pos_y-team_images[i].getsprite(0)->height/2);
+	for(int i=Pal::rpg.team_roles;i>=0;i--)
+		team_images[i].getsprite(battle_role_data[i].frame)->blit_middlebottom(screen,battle_role_data[i].pos_x,battle_role_data[i].pos_y);
 
 }
 battle::battle(int team,int script):battlescene(0,SCREEN_W,SCREEN_H),enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0),battle_wave(battlefields[Pal::rpg.battlefield].waving),endbattle_method(0),battle_result(0),escape_flag(0),
@@ -152,7 +153,7 @@ battle::battle(int team,int script):battlescene(0,SCREEN_W,SCREEN_H),enemy_team(
 	setup_role_enemy_image();
 	setup_role_status();
 
-	rix->play(Pal::rpg.battle_music);
+	musicplayer->play(Pal::rpg.battle_music);
 
 	bitmap fbp(FBP.decode(Pal::rpg.battlefield),320,200);fbp.blit_to(battlescene);
 

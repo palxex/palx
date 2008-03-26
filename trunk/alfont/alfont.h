@@ -34,14 +34,13 @@
 #define Encode_Code "zh_TW.Big5"
 #endif
 
+#include <allegro.h>
+
 #ifdef ALLEGRO5
-	#include <allegro5/allegro.h>
 	//undefine the ambiguous allegro5 defininations
 	#undef bool
 	#undef max
 	#undef min
-#else
-	#include <allegro.h>
 #endif
 
 //#include "alfontdll.h"

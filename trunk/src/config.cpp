@@ -392,7 +392,6 @@ int global_init::operator ()()
 	objs.set(path_root+"/WORD.DAT");
 	playrix::set((path_root+"/MUS.MKF").c_str());
 
-
 	//allegro init
 	allegro_init();
 	display_setup();
@@ -403,6 +402,15 @@ int global_init::operator ()()
 
 	LOCK_FUNCTION(close_button_handler);
 	set_close_button_callback(close_button_handler);
+
+	if(get<string>("music","type")=="rix")
+		musicplayer=boost::shared_ptr<player>(new playrix());
+	else if(get<string>("music","type")=="midi")
+		musicplayer=boost::shared_ptr<player>(new playmidi());
+	/*
+	else if(get<string>("music","type")=="foreverCD")
+		musicplayer=boost::shared_ptr<player>(new playFOREVER());
+	*/
 
 	if(get<string>("font","type")=="truetype")
 		Font=boost::shared_ptr<def_font>(new ttfont());

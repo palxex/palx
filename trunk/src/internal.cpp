@@ -105,7 +105,7 @@ void Load_Data()
 	}
 	if(flag_to_load&2){
 		//play music
-		rix->play(rpg.music);
+		musicplayer->play(rpg.music);
 	}
 	flag_to_load=0;
 	setup_our_team_data_things();

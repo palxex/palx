@@ -31,7 +31,6 @@ class Game;
 class global_init;
 extern Scene *scene;
 extern BattleScene *battle_scene;
-extern playrix *rix;
 extern global_init *global;
 
 extern bool flag_battling;
@@ -67,6 +66,7 @@ extern uint32_t dialog_y;
 extern uint32_t frame_text_x;
 extern uint32_t frame_text_y;
 extern int CARD;
+extern bool mask_use_CD;
 
 class sprite_prim;
 extern std::vector<sprite_prim> mgos;

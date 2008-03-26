@@ -533,10 +533,10 @@ __walk_npc:
         if (param1)
         {
             if(rpg.music!=param1)
-                rix->play(rpg.music=param1,param2);
+                musicplayer->play(rpg.music=param1,param2);
         }
         else
-            rix->stop();
+            musicplayer->stop();
         break;
     case 0x44:
         npc_speed=4;
@@ -829,7 +829,7 @@ __walk_role:
         show_fbp(param1,param2);
         break;
     case 0x77:
-		rix->stop(param1>0?param1:1);
+		musicplayer->stop(param1>0?param1:1);
         if (!param2)
             ;//CD stop
 		if(!flag_battling)
@@ -1145,7 +1145,10 @@ __walk_role:
 		//not implemented
 		break;
 	case 0xa3:
-		rix->play(param2);
+		if(mask_use_CD)
+			cdplayer->play(param2);
+		else
+			musicplayer->play(param2,param3);
 		break;
 	case 0xa4:
 		//not implemented
@@ -1179,7 +1182,7 @@ uint16_t process_script(uint16_t id,int16_t object)
     frame_text_x = 0x2C;
     frame_text_y = 0x1A;
     bool ok=true;
-    while (id && ok)
+    while (id && ok && running)
     {
         SCRIPT &curr=scripts[id];
 		const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
