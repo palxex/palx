@@ -41,6 +41,7 @@ void pal_fade_out(int t)
 					pal[j].b=Pal::pat.get(rpg.palette_offset)[j].b*i/0x40;
 				}
 				set_palette(pal);
+				perframe_proc();
 				delay(t);
 			}
 		memset(&pal,0,sizeof(PALETTE));
@@ -64,6 +65,7 @@ void pal_fade_in(int t)
 					pal[j].b=Pal::pat.get(rpg.palette_offset)[j].b*i/0x40;
 				}
 				set_palette(pal);
+				perframe_proc();
 				delay(t);
 			}
 		set_palette(Pal::pat.get(rpg.palette_offset));
@@ -86,6 +88,7 @@ void fade_inout(int t)
 			pal[j].b=Pal::pat.get(rpg.palette_offset)[j].b*i/0x40;
 		}
 		set_palette(pal);
+		perframe_proc();
 		GameLoop_OneCycle(false);
 		redraw_everything(0);
 	}
@@ -154,6 +157,7 @@ void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 		else
 			crossFade_desault(fadegap[arg],u,src,dst);
 		crossFade_self(fadegap[arg],u,src);
+        perframe_proc();
 		delay(gap);
 	}
 	dst.blit_to(screen,0,0,0,0);
@@ -199,6 +203,7 @@ void flush_screen()
     if(is_out || mutex_switching) return;
     mutex_blitting=true;
     blit(fakescreen,fakebmp,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
+	//int sy=(shake_times&1)*shake_grade;
     stretch_blit(fakebmp,screen,0,0,fakescreen->w,fakescreen->h,0,0,screen->w,screen->h);
     mutex_blitting=false;
 }

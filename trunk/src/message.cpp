@@ -104,6 +104,7 @@ void draw_oneline_m_text(char *str,int x,int y)
 				Font->blit_to(word,screen,text_x,y,glbvar_fontcolor,true);
 				if(async_getkey()==PAL_VK_EXPLORE)
 					keepon_delay=false;
+				perframe_proc();
 				if(keepon_delay)
 					delay(delay_centisecond);
 				icon_x=text_x+=16;

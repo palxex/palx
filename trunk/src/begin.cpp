@@ -72,6 +72,7 @@ void startup_splash()
 				pal[i].b=pat.get(0)[i].b*prog_pale/0x40;
 			}
 			set_palette(pal);
+			perframe_proc();
 		}
 	}while(running && async_getkey()==PAL_VK_NONE);
 	title_height=max_height;
@@ -84,6 +85,7 @@ void startup_splash()
 				pal[j].b=pat.get(0)[j].b*i/0x40;
 			}
 			set_palette(pal);
+			perframe_proc();
 			delay(1);
 		}
 		wait_key(90);

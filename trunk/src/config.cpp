@@ -32,18 +32,22 @@
 #   define FONT_PATH "%WINDIR%/fonts/mingliu.ttc"
 #   define LOCALE "chinese"
 #   define CONF "palx.conf"
+#	define RESOURCE "."
 #elif defined __MSDOS__
 #   define FONT_PATH "mingliu.ttc"
 #   define LOCALE "BIG5"
 #   define CONF "palx.cfg"
+#	define RESOURCE "."
 #elif defined __APPLE__
 #   define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
 #   define LOCALE "BIG5"
 #   define CONF "~/.palxrc"
+#	define RESOURCE ".."
 #else   //predicate *NIX
 #   define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
 #   define LOCALE "BIG5"
 #   define CONF "~/.palxrc"
+#	define RESOURCE "."
 #endif
 
 using namespace std;
@@ -63,7 +67,7 @@ string env_expand(string name)
 ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 {
 	ini_parser::section::configmap configprop;
-	configprop["path"].value=".";
+	configprop["path"].value=RESOURCE;
 	configprop["path"].comment="资源路径";
 	configprop["setup"].value="true";
 	configprop["setup"].comment="Bool;是否用setup.dat里的设置覆盖这里的对应设置";
@@ -85,8 +89,6 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	debugprop["resource"].comment="资源使用方式;mkf/filesystem";
 	debugprop["allow_frozen"].value="true";
 	debugprop["allow_frozen"].comment="允许冻结启动/停止;true/false";
-	debugprop["fps"].value="20";
-	debugprop["fps"].comment="";
 	section debug("debug",debugprop);
 	sections["debug"]=debug;
 
@@ -347,12 +349,14 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 void global_init::display_setup(bool ext)
 {
 	static PALETTE pal;get_palette(pal);
+	bitmap *bmp;
 	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED);
 	if(!ext){
 		if(CARD==GFX_AUTODETECT)
 			CARD=GFX_AUTODETECT_WINDOWED;
 		else if(CARD==GFX_AUTODETECT_WINDOWED)
 			CARD=GFX_AUTODETECT;
+		bmp=new bitmap(screen);
 	}
 	if(get<int>("display","scale")<1)
 		set<int>("display","scale",1);
@@ -366,6 +370,11 @@ void global_init::display_setup(bool ext)
 	set_display_switch_callback(SWITCH_OUT,switchout_proc);
 	set_color_depth(8);
 	set<bool>("display","fullscreen",CARD==GFX_AUTODETECT);
+	if(!ext){
+		bmp->blit_to(screen);
+		perframe_proc();
+		delete bmp;
+	}
 }
 int global_init::operator ()()
 {

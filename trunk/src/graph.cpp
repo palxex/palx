@@ -296,3 +296,5 @@ void palette::set(int t)
 }
 
 BITMAP *fakescreen,*backbuf,*bakscreen;
+#undef screen
+BITMAP *realscreen=screen;

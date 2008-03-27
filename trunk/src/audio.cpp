@@ -43,7 +43,7 @@ void update_cache(playrix *plr)
 {
 	static int slen_buf=0,slen=630,v_scale=2;
 
-	if(leaving<BUFFER_SIZE*CHANNELS)
+	if(leaving<BUFFER_SIZE*CHANNELS && running)
 	{
 		slen_buf=0;
 		int rel=BUFFER_SIZE*CHANNELS-leaving;
@@ -396,22 +396,37 @@ MIDI *load_midi_mem(int midiseq)
    destroy_midi(midi);
    return NULL;
 }
-playmidi::playmidi()
-{}
+playmidi::playmidi():pmidi(NULL)
+{
+	subsong=-1;
+}
 playmidi::~playmidi()
 {}
-MIDI *pmidi=NULL;
-void playmidi::play(int sub_song,int)
+void playmidi::play(int sub_song,int times)
 {
-	if(!not_midi && global->get<int>("music","volume")){
+	if(global->get<int>("music","volume")){		
+		if(!sub_song){
+			stop();
+			return;
+		}
+		subsong=sub_song;
+		if(pmidi)
+			stop();
 		pmidi=load_midi_mem(sub_song);
-		play_midi(pmidi,1);
+		play_midi(pmidi,(times==0)?1:0);
 	}
 }
-void playmidi::stop(int fade)
+void playmidi::stop(int)
 {
 	destroy_midi(pmidi);
-	play_midi(NULL,0);
+	pmidi=NULL;
+	play_midi(pmidi,0);
 }
-void playmidi::setvolume(int)
-{}
+void playmidi::setvolume(int vol)
+{
+	global->set<int>("music","volume",vol);
+	if(vol<=0)
+		stop();
+	else
+		play(subsong);
+}
