@@ -36,6 +36,7 @@
 #include "adplug/opl.h"
 #include "adplug/rix.h"
 
+extern BITMAP *realscreen;
 #define screen fakescreen
 
 #undef SCREEN_W
@@ -132,6 +133,7 @@ public:
 class CEmuopl;
 class CrixPlayer;
 struct player{
+	volatile int subsong;
 	virtual void play(int sub_song,int =0)=0;
 	virtual void stop(int =0)=0;
 	virtual void setvolume(int)=0;
@@ -140,7 +142,6 @@ class playrix:public player
 {
 	boost::shared_ptr<Copl> 	opl;
 	CrixPlayer 	rix;
-	volatile int subsong;
 	static const int samples=40;
 	static const int sample_len=630;
 	short 		*Buffer;
@@ -161,6 +162,7 @@ public:
 	void setvolume(int);
 };
 class playmidi:public player{
+	MIDI *pmidi;
 public:
 	playmidi();
 	~playmidi();

@@ -20,6 +20,7 @@
 #include "allegdef.h"
 #include "config.h"
 #include "game.h"
+#include "timing.h"
 #include <stack>
  class __scancode_map{
 		std::map<int,int> mymap;
@@ -120,10 +121,10 @@ PAL_VKEY async_getkey()
 }
 PAL_VKEY sync_getkey()
 {
-	PAL_VKEY x;
-		x=PAL_VK_NONE;
+	PAL_VKEY x=PAL_VK_NONE;
+		perframe_proc();
 		while(running && !is_out && !(x=async_getkey()))
-			rest(10);
+			delay(1);
         return x;
 }
 int make_layer(int key)

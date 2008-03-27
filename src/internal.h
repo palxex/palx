@@ -124,6 +124,7 @@ extern void switch_proc();
 
 extern int RNG_num;
 extern void play_RNG(int begin,int end,int gap);
+void perframe_proc();
 
 extern bool prelimit_OK;
 

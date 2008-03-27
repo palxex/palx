@@ -56,9 +56,11 @@ uint8_t *cached_res::decode(int n,int n2,bool &decoded,long &length)
 		cache[pos]=decoder(file.c_str(),n,n2,length,slices,buf,size,buf_decoded);
 		splits[n]=slices;
 		buf_cache[n]=buf;
-		buf_sizes[n]=size;
-	}else
+		buf_sizes[n]=((size==0)?length:size);
+	}else{
+		length=buf_sizes[n];
 		decoded=true;
+	}
 	return cache[pos];
 }
 int cached_res::slices(int n)

@@ -1,3 +1,4 @@
+2008-3-26 画面绘制改回主动式(震动，在固定fps下不正常)。音乐的缓冲机制再修。
 2008-1-17 mask flicker.
 07-5-24: Fix The Through under the floor.Add the role AutoDuck function.
 	 prefixed,OK
