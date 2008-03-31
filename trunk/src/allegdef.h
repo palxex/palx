@@ -82,11 +82,14 @@ public:
 	void blit_middlebottom(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int,bool =false,int =6, int =6);
+	void blit_filter(BITMAP *dest,int,int,filter_func r,int data,bool is);
 };
 class sprite_prim{
 	int id;
+	int frame;
 	std::vector<boost::shared_ptr<sprite> > sprites;
 public:
+	int frames() const;
 	sprite_prim();
 	sprite_prim(int);
 	sprite_prim(cached_res &,int);
@@ -152,7 +155,7 @@ class playrix:public player
 	int max_vol;
 public:
 	playrix();
-	~playrix();
+	virtual ~playrix();
 	static void set(const char *name)
 	{
 		strcpy(mus,name);
@@ -165,7 +168,7 @@ class playmidi:public player{
 	MIDI *pmidi;
 public:
 	playmidi();
-	~playmidi();
+	virtual ~playmidi();
 	void play(int sub_song,int =0);
 	void stop(int =0);
 	void setvolume(int);

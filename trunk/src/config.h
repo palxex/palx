@@ -170,6 +170,7 @@ class global_init{
 public:
 	std::string sfx_file;
 	global_init(int,char *[]);
+	~global_init();
 	void display_setup(bool =true);
 	template<typename T>
 	T get(const char *sec,const char *name)

@@ -219,7 +219,8 @@ void multi_menu::got_action(menu *){
 struct magic_menu:public multi_menu
 {
 	int role;
-	magic_menu(int _role,int _mask):multi_menu(_mask,0,5),role(_role){}
+	bool after;
+	magic_menu(int _role,int _mask,bool b=true):multi_menu(_mask,0,5),role(_role),after(b){}
 	void prev_action(menu *abs){
 		max=compact_magic(role);
 		blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
@@ -236,7 +237,10 @@ struct magic_menu:public multi_menu
 					return -1;
 			}while(running && !got);
 			got=0;
-			post_action(abs);
+			if(after)
+				post_action(abs);
+			else
+				break;
 		}
 		return selected;
 	}
@@ -387,7 +391,9 @@ struct equip_menu:public multi_menu
 };
 struct use_menu:public equip_menu
 {
+	bool after;
 	use_menu():equip_menu(1,0){}
+	use_menu(int i,int skip):equip_menu(i,skip){}
 	void prev_action(menu *abs){
 		equip_menu::prev_action(abs);
 
@@ -406,6 +412,8 @@ struct use_menu:public equip_menu
 			got=1;
 	}
 	void post_action(menu *abs){
+		if(skip==-1)
+			return;
 		if(rpg.objects[rpg.items[selected].item].item.param & (2<<(4-1)))
 		{
 			scene->produce_one_screen();
@@ -573,9 +581,9 @@ int select_rpg(int ori_select,BITMAP *bmp)
 	}while(running && ok);
 	return selected;
 }
-int select_theurgy(int role,int mask,int selected)
+int select_theurgy(int role,int mask,int selected,bool after)
 {
-	return menu(0xA,0x2D,5,0,17,9,false)(magic_menu(role,mask),selected);
+	return menu(0xA,0x2D,5,0,17,9,false)(magic_menu(role,mask,after),selected);
 }
 int yes_or_no(int word,int selected)
 {
@@ -675,7 +683,7 @@ void role_status()
 	bool ok=true;
 	bitmap buf(NULL,320,200);
 	do{
-		bitmap(FBP.decode(0),buf.width,buf.height).blit_to(buf);
+		fbp(0).blit_to(buf);
 
 		Font->blit_to(objs(2   ),buf,6,8   ,0x4E,true);
 		show_number(rpg.roles_exp[0][cur_role].exp,                    0x4E,8   ,0,buf);
@@ -754,6 +762,10 @@ void role_status()
 		}
 		cur_role=rpg.team[selected=((selected<0)?0:((selected>rpg.team_roles)?rpg.team_roles:selected))].role;
 	}while(ok && running);
+}
+int menu_item(int selected,int filter)
+{
+	return menu(2,-8,8,0,18,9,false)(use_menu(filter,-1),selected);
 }
 bool process_Menu()
 {

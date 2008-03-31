@@ -29,43 +29,35 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	//try{
-		global_init _global(argc, argv);global=&_global;
-
-			int save=_global();
+	global_init _global(argc, argv);global=&_global;
+	int save=_global();
 			bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;clear_bitmap(fakescreen);
 			bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;clear_bitmap(backbuf);
 			bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;clear_bitmap(bakscreen);
 
-			using namespace Pal;
-			init_resource();
-			//load save
-			if(save!=0 || (save=begin_scene()()))
-				rpg_to_load=save;
-			Scene normal;	scene=&normal;
-			flag_to_load=0x10;
-			bool new_rpg=!(save&&load());
-			if(new_rpg){
-				flag_to_load|=0xD;
-				map_toload=1;
-				for(int i=0;i<5;i++)
-					for(int j=0;j<8;j++)
-						if(j)
-							rpg.roles_exp[j][i].level=rpg.roles_properties.level[i]+rnd1(2)+2,
-							rpg.roles_exp[j][i].exp=rnd1(20);
-						else
-							rpg.roles_exp[j][i].level=rpg.roles_properties.level[i],
-							rpg.roles_exp[j][i].exp=0;
-				pal_fade_out(1);
-			}
-			run();
-			destroy_resource();
-	/*}catch(...){
-#if defined(_CRTDBG_MAP_ALLOC_NEW)
-		_CrtDumpMemoryLeaks();
-#endif
-		allegro_exit();
-	}*/
+	using namespace Pal;
+	init_resource();
+	//load save
+	if(save!=0 || (save=begin_scene()()))
+		rpg_to_load=save;
+	Scene normal;	scene=&normal;
+	flag_to_load=0x10;
+	bool new_rpg=!(save&&load());
+	if(new_rpg){
+		flag_to_load|=0xD;
+		map_toload=1;
+		for(int i=0;i<5;i++)
+			for(int j=0;j<8;j++)
+				if(j)
+					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i]+rnd1(2)+2,
+					rpg.roles_exp[j][i].exp=rnd1(20);
+				else
+					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i],
+					rpg.roles_exp[j][i].exp=0;
+		pal_fade_out(1);
+	}
+	run();
+	destroy_resource();
 	return 0;
 }
 END_OF_MAIN();

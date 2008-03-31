@@ -129,6 +129,14 @@ bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 	this->l=0;
 	return blit_to(dest);
 }
+void sprite::blit_filter(BITMAP *dest,int x,int y,filter_func r,int data,bool is)
+{
+	if(is)
+		setfilter(r,data);
+	blit_to(dest,x,y);
+	if(is)
+		setfilter();
+}
 
 sprite_prim::sprite_prim():id(-1)
 {}
@@ -144,9 +152,14 @@ sprite_prim &sprite_prim::getsource(cached_res &archive,int _id)
 {
 	if(_id!=-1)
 		id=_id;
-	for(int i=0,s=archive.slices(id);i<s;i++)
+	frame=archive.slices(id);
+	for(int i=0;i<frame;i++)
 		sprites.push_back(boost::shared_ptr<sprite>(new sprite(archive.decode(id,i))));
 	return *this;
+}
+int sprite_prim::frames() const
+{
+	return frame;
 }
 sprite * sprite_prim::getsprite(int i)
 {
@@ -280,7 +293,7 @@ void palette::read(uint32_t i)
 	bool fx;long len;
 	myRGB *buf=(myRGB *)Pal::PAT.decode(i,0,fx,len);
 	RGB   *p=(RGB*)pat;
-	for(int t=0;t<(i==0 || i==5?512:256);t++)
+	for(int t=0;t<((i==0 || i==5)?512:256);t++)
 		p[t].r=buf[t].r,
 		p[t].g=buf[t].g,
 		p[t].b=buf[t].b;

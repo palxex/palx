@@ -209,7 +209,7 @@ void sprite_queue::visible_NPC_movment_setdraw()
 		}
 }
 int fade_div=0,fade_timing=0,flag_redraw=0;
-void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
+void sprite_queue::Redraw_Tiles_or_Fade_to_pic(bitmap &dst,BITMAP *src)
 {
 	s_list redraw_list;s_list::value_type masker;
 	switch(redraw_flag)
@@ -220,13 +220,13 @@ void sprite_queue::Redraw_Tiles_or_Fade_to_pic()
 	case 2:
 		fade_div=(fade_div?fade_div:1);
 		int arg=fade_timing/fade_div,u=0x29AC*scale*scale;
-		bitmap back2(backbuf);
+		bitmap back2(src);
 		if(!(fade_timing%fade_div))
 			if(arg<0x60)
 				if(arg<6)
-					crossFade_assimilate(fadegap[arg],u,scene->scene_buf,back2);
+					crossFade_assimilate(fadegap[arg],u,dst,back2);
 				else
-					crossFade_desault(fadegap[arg%6],u,scene->scene_buf,back2);
+					crossFade_desault(fadegap[arg%6],u,dst,back2);
 			else
 				redraw_flag=1;
 		fade_timing++;
@@ -294,7 +294,7 @@ void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap,BITMAP *dst
 		Pal::rpg.wave_grade=0,wave_progression=0;
 	}
 	sprites.flush(scanline);
-	blit(scanline,dst,0,0,0,0,SCREEN_W,SCREEN_H);
+	scanline.blit_to(dst);
 	perframe_proc();
 	pal_fade_in(gap);
 }

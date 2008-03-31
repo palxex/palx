@@ -111,7 +111,7 @@ class bitmap;
 extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);
 extern void CrossFadeOut(int u,int times,int gap,const bitmap &buf);
-extern void crossFade_self(int gap,int time,bitmap &src);
+extern void crossFade_self(int gap,bitmap &src);
 extern void show_fbp(int,int);
 extern void shake_screen();
 extern void flush_screen();

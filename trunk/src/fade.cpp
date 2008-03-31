@@ -21,6 +21,7 @@
 #include "internal.h"
 #include "game.h"
 #include "timing.h"
+#include "scene.h"
 
 using namespace Pal;
 
@@ -133,8 +134,10 @@ void crossFade_desault(int gap,int time,bitmap &src,bitmap &dst)
 		*srcptr=((*dstptr)>(*srcptr)? (*srcptr)+1 : ((*dstptr)<(*srcptr)? (*srcptr)-1 : (*srcptr)));
 	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
 }
-void crossFade_self(int gap,int time,bitmap &src)
+void crossFade_self(int gap,bitmap &src)
 {
+	static int i=0;
+	int time=65536/6;
 	bitmap myscreen(screen);
 	BITMAP *srcbmp(src),*dstbmp(myscreen);
 	uint8_t *dstbegin=(uint8_t*)(dstbmp->dat),*srcbegin=(uint8_t*)(srcbmp->dat);
@@ -143,6 +146,7 @@ void crossFade_self(int gap,int time,bitmap &src)
 		*dstptr=*srcptr;
 	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
 	myscreen.blit_to(screen);
+    perframe_proc();
 }
 void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 {
@@ -156,8 +160,7 @@ void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 			crossFade_assimilate(fadegap[arg],u,src,dst);
 		else
 			crossFade_desault(fadegap[arg],u,src,dst);
-		crossFade_self(fadegap[arg],u,src);
-        perframe_proc();
+		crossFade_self(fadegap[arg],src);
 		delay(gap);
 	}
 	dst.blit_to(screen,0,0,0,0);
@@ -179,7 +182,7 @@ void show_fbp(int pic,int gap)
 	bitmap buf(NULL,320,200);
 	clear_bitmap(buf);
 	if(pic>0)
-		bitmap(FBP.decode(pic),320,200).blit_to(buf,0,0,0,0);
+		fbp(pic).blit_to(buf,0,0,0,0);
 	if(gap)
 		CrossFadeOut(0x29B0,0x5F,gap,buf);
 	buf.blit_to(screen,0,0,0,0);
@@ -200,7 +203,7 @@ void flush_screen()
 	static bitmap fakebmp(NULL,SCREEN_W,SCREEN_H);
 #undef screen
     //vsync();
-    if(is_out || mutex_switching) return;
+    if(is_out) return;
     mutex_blitting=true;
     blit(fakescreen,fakebmp,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
 	//int sy=(shake_times&1)*shake_grade;
