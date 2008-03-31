@@ -78,7 +78,7 @@ typedef union object_def{
 		struct{
 			int16_t enemy;
 			int16_t voodoo_defence;
-			uint16_t after,before,occur;
+			uint16_t before,after,occur;
 			uint16_t ____reserved;
 		}enemy;
 		struct{

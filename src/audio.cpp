@@ -25,7 +25,7 @@
 #include "adplug/emuopl.h"
 #include "adplug/kemuopl.h"
 
-#define BUFFER_SIZE 5040
+#define BUFFER_SIZE 2520
 
 #define SAMPLE_RATE	44100
 #define CHANNELS	1
@@ -94,7 +94,7 @@ void playrix_timer(void *param)
 	if (begin && p)
 	{
 		update_cache(plr);
-		if(global->get<std::string>("music","opltype")!="real")
+		if(global && global->get<std::string>("music","opltype")!="real")
 		{
 			leaving-=BUFFER_SIZE*CHANNELS;
 			memcpy(p,plr->Buffer,BUFFER_SIZE*CHANNELS*2);
@@ -333,7 +333,7 @@ MIDI *load_midi_mem(int midiseq)
    /* Is the midi inside a .rmi file? */
    if (memcmp(buf, "RIFF", 4) == 0) { /* check for RIFF header */
       sek+=4;//pack_mgetl(fp);
-	   
+
 
 	   while (sek<=len){//!pack_feof(fp)) {
          memcpy(buf,midibuf+sek,4);sek+=4;//pack_fread(buf, 4, fp); /* RMID chunk? */
@@ -404,7 +404,7 @@ playmidi::~playmidi()
 {}
 void playmidi::play(int sub_song,int times)
 {
-	if(global->get<int>("music","volume")){		
+	if(global->get<int>("music","volume")){
 		if(!sub_song){
 			stop();
 			return;
@@ -413,7 +413,7 @@ void playmidi::play(int sub_song,int times)
 		if(pmidi)
 			stop();
 		pmidi=load_midi_mem(sub_song);
-		play_midi(pmidi,(times==0)?1:0);
+		play_midi(pmidi,(times!=1)?1:0);
 	}
 }
 void playmidi::stop(int)

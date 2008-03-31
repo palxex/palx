@@ -44,6 +44,9 @@ namespace{
 			GameLoop_OneCycle(true);
 		}
 
+		if(!running)
+			return;
+
 		//clear scene back
 		scene->clear_scanlines();
 

@@ -64,20 +64,7 @@ private:
 	void make_tile(uint8_t*,int,int,int,BITMAP*);
 };
 
-class sprite_queue{
-public:
-	void clear_active();
-	void calc_team_walking();
-	void our_team_setdraw();
-	void visible_NPC_movment_setdraw();
-	void Redraw_Tiles_or_Fade_to_pic();
-	void flush(bitmap &);
-	typedef std::vector<boost::shared_ptr<sprite> > s_list;
-	typedef std::list<boost::shared_ptr<sprite> > s_set;
-private:
-	s_list active_list;
-	s_set brick_list;
-};
+class sprite_queue;
 struct Scene{
 	palmap scenemap;
 	bitmap scene_buf;
@@ -89,6 +76,22 @@ struct Scene{
 	void get_sprites();
 	void produce_one_screen();
 	void scanline_draw_normal_scene(sprite_queue&,int,BITMAP * =screen);
+};
+
+extern Scene *scene;
+class sprite_queue{
+public:
+	void clear_active();
+	void calc_team_walking();
+	void our_team_setdraw();
+	void visible_NPC_movment_setdraw();
+	void Redraw_Tiles_or_Fade_to_pic(bitmap &dst=scene->scene_buf,BITMAP *src=backbuf);
+	void flush(bitmap &);
+	typedef std::vector<boost::shared_ptr<sprite> > s_list;
+	typedef std::list<boost::shared_ptr<sprite> > s_set;
+private:
+	s_list active_list;
+	s_set brick_list;
 };
 
 #endif

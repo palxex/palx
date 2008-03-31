@@ -115,7 +115,7 @@ void redraw_everything(int time_gap,BITMAP *dst)
 {
 	flag_parallel_mutex=!flag_parallel_mutex;
 	if(flag_battling)
-		battle::get()->battle_produce_screen();
+		battle::get()->draw_battle_scene();
 	else{
 		rest(100);
 		sprite_queue sprites;
@@ -143,7 +143,7 @@ void setup_our_team_data_things()
 		//全攻消除
 		Pal::rpg.roles_properties.attack_all[role]=0;
 		//双攻消除
-		role_status[i][4]=0;
+		role_status_pack[i].pack.twice_attack=0;
 		//重新装备
 		for(int j=0xB;j<=0x10;j++)
 			if(Pal::rpg.role_prop_tables[j][role])

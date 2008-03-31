@@ -216,13 +216,13 @@ namespace{
 	{
 		uint16_t *usrc=(uint16_t *)src.get();
 		files=(usrc[0]-((usrc[usrc[0]-1]<=0 || usrc[usrc[0]-1]*2>=len || usrc[usrc[0]-1]<usrc[usrc[0]-2])?1:0));
-		int16_t length;
+		uint16_t length;
 		if(n == files - 1)
-			length=len-usrc[n]*2;
+			length=len-(uint16_t)(usrc[n]*2);
 		else
 			length=(usrc[n+1]-usrc[n])*2;
 		uint8_t *buf=new uint8_t[length];
-		memcpy(buf,src.get()+usrc[n]*2,length);
+		memcpy(buf,src.get()+(uint16_t)(usrc[n]*2),length);
 		len=length;
 		return buf;
 	}
@@ -349,14 +349,12 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 void global_init::display_setup(bool ext)
 {
 	static PALETTE pal;get_palette(pal);
-	bitmap *bmp;
 	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED);
 	if(!ext){
 		if(CARD==GFX_AUTODETECT)
 			CARD=GFX_AUTODETECT_WINDOWED;
 		else if(CARD==GFX_AUTODETECT_WINDOWED)
 			CARD=GFX_AUTODETECT;
-		bmp=new bitmap(screen);
 	}
 	if(get<int>("display","scale")<1)
 		set<int>("display","scale",1);
@@ -371,10 +369,12 @@ void global_init::display_setup(bool ext)
 	set_color_depth(8);
 	set<bool>("display","fullscreen",CARD==GFX_AUTODETECT);
 	if(!ext){
-		bmp->blit_to(screen);
-		perframe_proc();
-		delete bmp;
+		flush_screen();
 	}
+}
+global_init::~global_init()
+{
+	global=NULL;
 }
 int global_init::operator ()()
 {

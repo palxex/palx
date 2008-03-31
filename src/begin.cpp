@@ -21,6 +21,7 @@
 #include "UI.h"
 #include "timing.h"
 #include "internal.h"
+#include "scene.h"
 
 using namespace Pal;
 
@@ -29,8 +30,8 @@ void startup_splash()
 	clear_keybuf();
 	pat.read(1);
 	bitmap cat(0,SCREEN_W,SCREEN_H*2);
-	bitmap(FBP.decode(0x26),320,200).blit_to(cat,0,0,0,0);
-	bitmap(FBP.decode(0x27),320,200).blit_to(cat,0,0,0,200);
+	fbp(0x26).blit_to(cat,0,0,0,0);
+	fbp(0x27).blit_to(cat,0,0,0,200);
 
 	sprite_prim goose(MGO,0x49),title(MGO,0x47);
 	uint16_t &title_height=((uint16_t *)MGO.decode(0x47))[3],max_height=title_height,temp_height=8;

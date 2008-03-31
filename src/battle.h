@@ -20,7 +20,20 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
-extern int role_status[TEAMROLES][9];
+extern union _role_status{
+	int list[10];
+	struct {
+		int crazy;
+		int fixed;
+		int sleep;
+		int seal;
+		int dumn;
+		int high_attack;
+		int high_defence;
+		int high_speed;
+		int twice_attack;
+	}pack;
+}role_status_pack[TEAMROLES];
 extern struct _battle_role_data{
 	int battle_avatar;
 	int pos_x,pos_y;
@@ -50,6 +63,7 @@ extern struct _battle_enemy_data{
 #pragma pack()
 }battle_enemy_data[TEAMROLES];
 
+extern bool flag_autobattle;
 
 class battle{
 	struct _role_attack{
@@ -67,11 +81,13 @@ class battle{
 		bool exist;
 	}battle_numbers[12];
 
+	int enemy_HP_r[5];
+
 	int affected_enemies[TEAMROLES],affected_roles[TEAMROLES];
 
 	static battle *thebattle;
 
-	bitmap battlescene;
+	bitmap battlescene,battlebuf;
 	int enemy_team,script_escape;
 	std::map<int,sprite_prim> team_images;
 	std::map<int,sprite_prim> enemy_images;
@@ -83,6 +99,7 @@ class battle{
 	void setup_role_status();
 	void draw(int delay,int time);
 public:
+	int magic_wave,battle_wave;
 	int endbattle_method,battle_result,escape_flag;
 	static battle *get(){
 		if(thebattle)
@@ -92,7 +109,6 @@ public:
 	}
 
 	static int max_blow_away;
-	int magic_wave,battle_wave;
 
 	battle(int team,int script);
 	~battle();
@@ -100,7 +116,16 @@ public:
 	void check_end_battle();
 
 	void load_enemy(int enemy_pos,int enemy_id);
-	void battle_produce_screen();
+	void battle_produce_screen(BITMAP *buf);
+	void draw_battle_scene();
+	void draw_battle_scene_selecting();
+
+	int bout_selecting();
+
+	int get_member_alive();
+	int get_enemy_alive();
+
+	int select_enemy();
 private:
 	bool flag_withdraw;
 	int effect_height;
@@ -111,6 +136,9 @@ private:
 	int role_invisible_rounds;
 	int enemy_poses_count;
 	int enemy_exps,enemy_money;
+	bool need_battle;
+	int role_counter;
+	bool flag_repeat;
 };
 int process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H

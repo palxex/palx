@@ -86,7 +86,7 @@ void GameLoop_OneCycle(bool trigger)
                         {
                             if (iter->frames)
                             {
-                                clear_keybuf();
+                                clear_keybuf();memset((void*)key,0,KEY_MAX);
                                 stop_and_update_frame();
                                 iter->curr_frame=0;
                                 iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
@@ -177,6 +177,7 @@ void clear_effective(int16_t p1,int16_t p2)
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
     //printf("%s\n",scr_desc(func,param).c_str());
+	static sprite_prim scene_sprite;
     const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
     EVENT_OBJECT &obj=evtobjs[object];
 #define curr_obj (param1<0?obj:evtobjs[param1])
@@ -990,13 +991,17 @@ __walk_role:
         NPC_walk_one_step(obj,0);
         break;
 	case 0x88:
-		//not implemented
+		{
+			int money=(rpg.coins<5000?rpg.coins:5000);
+			magics[rpg.objects[param1].magic.magic].base_damage=money*2/5;
+			rpg.coins-=money;
+		}
 		break;
 	case 0x89:
 		battle::get()->endbattle_method=(param1?param1:-1);
 		break;
 	case 0x8a:
-		//not implemented
+		flag_autobattle=9;
 		break;
     case 0x8b:
         pat.read(param1);
@@ -1052,7 +1057,55 @@ __walk_role:
 			id=param2-1;
 		break;
 	case 0x96:
-		//not implemented
+		{
+			bitmap buf(NULL,SCREEN_W,SCREEN_H);
+			bitmap cat(NULL,320,400);
+			bitmap(FBP.decode(0x3D),320,200).blit_to(cat,0,0,0,0);
+			bitmap(FBP.decode(0x3E),320,200).blit_to(cat,0,0,0,200);
+
+			sprite_prim floodDevil(MGO,0x23B);
+			sprite_prim saintLingr(MGO,0x23C);
+
+			int floodDevil_y=-400;
+			int saintLingr_y=0xDC;
+
+			int frame=0;
+			int lines=200;
+			int factor=0;
+			for(int i=0;i<0x18F;i++){
+				blit(cat,buf,0,std::max(lines-=(i%2),0),0,0,SCREEN_W,SCREEN_H);
+				wave_screen(buf,buf,2,SCREEN_H);
+				{
+					floodDevil.getsprite(0)->blit_to(buf,0,floodDevil_y);
+					floodDevil.getsprite(1)->blit_to(buf,0,floodDevil_y+200);
+					if(floodDevil_y<=10)
+						floodDevil_y++;
+
+					frame=(frame+1)&3;
+					if((saintLingr_y-=(frame&1))<0x50)
+						saintLingr_y=0x50;
+					saintLingr.getsprite(frame)->blit_to(buf,0xE6,saintLingr_y);
+				}
+				if(factor<=0x40 && mutex_can_change_palette){
+					factor++;
+					PALETTE pal;
+					memcpy(pal,pat.get(rpg.palette_offset),sizeof(PALETTE));
+					for(int i=0;i<0x100;i++)
+						pal[i].r=(pal[i].r*factor)>>6,
+						pal[i].g=(pal[i].g*factor)>>6,
+						pal[i].b=(pal[i].b*factor)>>6;
+					set_palette(pal);
+				}
+				buf.blit_to(screen);
+				perframe_proc();
+				delay(5);
+			}
+			mutex_can_change_palette=false;
+
+			flag_to_load|=2;
+			scene->scenemap.change(0);
+			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
+		}
 		break;
     case 0x97:
         npc_speed=8;
@@ -1130,6 +1183,9 @@ __walk_role:
         break;
     case 0xa0:
         clear_bitmap(screen);
+		clear_bitmap(scene->scene_buf);
+		clear_bitmap(bakscreen);
+		clear_bitmap(backbuf);
 		running=0;
         break;
 	case 0xa1:
@@ -1151,12 +1207,91 @@ __walk_role:
 			musicplayer->play(param2,param3);
 		break;
 	case 0xa4:
-		//not implemented
+		{
+			bitmap cat(NULL,320,400);
+			bitmap(FBP.decode(param1),320,200).blit_to(cat,0,0,0,0);
+			bitmap(FBP.decode(param1+1),320,200).blit_to(cat,0,0,0,200);
+
+			if(param2>0)
+				scene_sprite.getsource(MGO,param2);
+
+			int frame=0;
+			int lines=200;
+			int factor=0;
+			int height=0;
+			int freq=(param3?param3:10);
+			for(int i=0;i<200;i++){
+				blit(cat,scene->scene_buf,0,std::max(--lines,0),0,0,SCREEN_W,SCREEN_H);
+				if(param2){
+					scene_sprite.getsprite(frame)->blit_to(scene->scene_buf,0,0);
+					frame=(frame+1)%scene_sprite.frames();
+				}
+				if(factor<=0x40 && mutex_can_change_palette){
+					factor++;
+					PALETTE pal;
+					memcpy(pal,pat.get(rpg.palette_offset),sizeof(PALETTE));
+					for(int i=0;i<0x100;i++)
+						pal[i].r=(pal[i].r*factor)>>6,
+						pal[i].g=(pal[i].g*factor)>>6,
+						pal[i].b=(pal[i].b*factor)>>6;
+					set_palette(pal);
+				}
+				scene->scene_buf.blit_to(screen);
+				perframe_proc();
+				delay(100/freq);
+			}
+			mutex_can_change_palette=false;
+
+			flag_to_load|=2;
+			scene->scenemap.change(0);
+			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
+		}
 		break;
     case 0xa5:
+		{
+			int factor=0;
+			int freq=(param3?param3:10);
+			int frame=0;
+			sprite_queue queue;
+
+			redraw_flag=2;
+			fade_div=1;
+			fade_timing=0;
+
+			bitmap buf(NULL,SCREEN_W,SCREEN_H);
+			bitmap(FBP.decode(param1),320,200).blit_to(backbuf);
+			if(param2>0)
+				scene_sprite.getsource(MGO,param2);
+
+			for(int i=1;i<=100;i++){
+				queue.Redraw_Tiles_or_Fade_to_pic();
+				scene->scene_buf.blit_to(buf);
+				if(param2){
+					scene_sprite.getsprite(frame)->blit_to(buf,0,0);
+					frame=(frame+1)%scene_sprite.frames();
+				}
+				if(factor<=0x40 && mutex_can_change_palette){
+					factor++;
+					static PALETTE pal;
+					get_palette(pal);
+					for(int i=0;i<0x100;i++)
+						pal[i].r=(pal[i].r*factor)>>6,
+						pal[i].g=(pal[i].g*factor)>>6,
+						pal[i].b=(pal[i].b*factor)>>6;
+					set_palette(pal);
+				}
+				buf.blit_to(screen);
+				perframe_proc();
+				delay(100/freq);
+			}
+
+			flag_to_load|=2;
+			scene->scenemap.change(0);
+			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
+		}
         break;
     case 0xa6:
-        backup_screen();
+        blit(screen,scene->scene_buf,0,0,0,0,SCREEN_W,SCREEN_H);
         break;
     }
 }
@@ -1202,8 +1337,9 @@ uint16_t process_script(uint16_t id,int16_t object)
                 current_dialog_lines=0;
                 restore_screen();
             }
-            else if (current_dialog_lines==0 && flag_pic_level==0)
+			else if (current_dialog_lines==0 && flag_pic_level==0){
                 backup_screen();
+			}
             msg=msges(msg_idxes[param1],msg_idxes[param1+1]);
             if (frame_pos_flag==10)
             {

@@ -96,13 +96,16 @@ public:
 
 int select_rpg(int =0,BITMAP * =screen);
 int select_item(int mask,int ,int selected);
-int select_theurgy(int role,int mask,int selected);
+int select_theurgy(int role,int mask,int selected,bool =true);
 void show_money(int num,int x,int y,int text,bool shadow,BITMAP *bmp=screen);
 void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp=screen);
 void show_num_han(int num,int x,int y,int digits,BITMAP *bmp=screen,bool shadow=true);
 void show_number(int number,int x,int y,int color,BITMAP *bmp=screen);
 void display_role_status(int flag,int role,int x,int y,BITMAP *bmp=screen);
 void show_status_bar(BITMAP *buf=screen);
+
+void role_status();
+int menu_item(int selected,int filter);
 
 int yes_or_no(int word=0x13,int selected=0);
 
