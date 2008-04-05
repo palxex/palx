@@ -31,7 +31,7 @@
 struct scene_map:public bitmap
 {
 	virtual void change(int p)=0;
-	scene_map(const uint8_t *a,int b,int c):bitmap(a,b,c){}
+	scene_map(const uint8_t *a=NULL,int b=SCREEN_W,int c=SCREEN_H):bitmap(a,b,c){}
 protected:
 	long len;
 };
@@ -89,6 +89,9 @@ public:
 	void flush(bitmap &);
 	typedef std::vector<boost::shared_ptr<sprite> > s_list;
 	typedef std::list<boost::shared_ptr<sprite> > s_set;
+	void push(s_list::value_type it){
+		active_list.push_back(it);
+	}
 private:
 	s_list active_list;
 	s_set brick_list;

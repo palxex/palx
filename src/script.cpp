@@ -741,7 +741,7 @@ __ride:
 		//not implemented
 		break;
     case 0x6b:
-		battle::max_blow_away=0;
+		battle::get()->max_blow_away=0;
         break;
     case 0x6c:
         curr_obj.pos_x+=param2;
@@ -1058,10 +1058,10 @@ __walk_role:
 		break;
 	case 0x96:
 		{
-			bitmap buf(NULL,SCREEN_W,SCREEN_H);
+			bitmap buf;
 			bitmap cat(NULL,320,400);
-			bitmap(FBP.decode(0x3D),320,200).blit_to(cat,0,0,0,0);
-			bitmap(FBP.decode(0x3E),320,200).blit_to(cat,0,0,0,200);
+			fbp(0x3D).blit_to(cat,0,0,0,0);
+			fbp(0x3E).blit_to(cat,0,0,0,200);
 
 			sprite_prim floodDevil(MGO,0x23B);
 			sprite_prim saintLingr(MGO,0x23C);
@@ -1144,7 +1144,7 @@ __walk_role:
 			scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
 			scene->produce_one_screen();
 		}else if(param2<0){
-			bitmap backup(0,SCREEN_W,SCREEN_H);
+			bitmap backup;
 			scene->scene_buf.blit_to(backup);
 			scene->produce_one_screen();
 			scene->scenemap.change(0);
@@ -1209,8 +1209,8 @@ __walk_role:
 	case 0xa4:
 		{
 			bitmap cat(NULL,320,400);
-			bitmap(FBP.decode(param1),320,200).blit_to(cat,0,0,0,0);
-			bitmap(FBP.decode(param1+1),320,200).blit_to(cat,0,0,0,200);
+			fbp(param1).blit_to(cat,0,0,0,0);
+			fbp(param1+1).blit_to(cat,0,0,0,200);
 
 			if(param2>0)
 				scene_sprite.getsource(MGO,param2);
@@ -1258,7 +1258,7 @@ __walk_role:
 			fade_div=1;
 			fade_timing=0;
 
-			bitmap buf(NULL,SCREEN_W,SCREEN_H);
+			bitmap buf;
 			bitmap(FBP.decode(param1),320,200).blit_to(backbuf);
 			if(param2>0)
 				scene_sprite.getsource(MGO,param2);

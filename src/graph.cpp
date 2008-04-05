@@ -20,6 +20,7 @@
 #include "allegdef.h"
 #include "internal.h"
 #include "game.h"
+#include "UI.h"
 
 bitmap::bitmap(const uint8_t *src,int w,int h):
 	bmp(create_bitmap(w,h)),width(w),height(h)
@@ -46,6 +47,8 @@ uint8_t *bitmap::getdata()
 bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
 	blit(bmp,dest,source_x,source_y,dest_x,dest_y,std::max(bmp->w,dest->w),std::max(bmp->h,dest->h));
+	if(dest==screen)
+		flush_screen();
 	return true;
 }
 bool do_nothing(int srcVal, uint8* pOutVal, void* pUserData){return false;}
@@ -60,11 +63,12 @@ sprite *sprite::clone()
 {
 	return new sprite(buf);
 }
-void sprite::setXYL(int x,int y,int l)
+sprite *sprite::setXYL(int x,int y,int l)
 {
 	this->x=x-width/2;
 	this->y=y;
 	this->l=l;
+	return this;
 }
 
 void sprite::setfilter(filter_func r,int data)
@@ -104,15 +108,6 @@ bool sprite::blit_to(BITMAP *dest)
 	return true;
 }
 
-bool shadow_filter(int srcVal, uint8* pOutVal, void* pUserData)
-{
-	if(srcVal==-1)
-		return false;
-	uint8_t pix=*pOutVal;
-	*pOutVal=(pix-(pix%0x10/2));
-	return true;
-}
-
 bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 {
 	if(shadow){
@@ -129,11 +124,14 @@ bool sprite::blit_to(BITMAP *dest,int x,int y,bool shadow,int sx,int sy)
 	this->l=0;
 	return blit_to(dest);
 }
-void sprite::blit_filter(BITMAP *dest,int x,int y,filter_func r,int data,bool is)
+void sprite::blit_filter(BITMAP *dest,int x,int y,filter_func r,int data,bool is,bool middlebottom)
 {
 	if(is)
 		setfilter(r,data);
-	blit_to(dest,x,y);
+	if(middlebottom)
+		blit_middlebottom(dest,x,y);
+	else
+		blit_to(dest,x,y);
 	if(is)
 		setfilter();
 }

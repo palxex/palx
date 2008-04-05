@@ -42,7 +42,7 @@ tile &palmap::gettile(int x,int y,int h,int l)
 	if(x<0||y<0||h<0||x>0x40-1||y>0x80-1||h>1) return non_valid;
 	return sprites[x][y][h][l];
 }
-palmap::palmap():scene_map(0,SCREEN_W,SCREEN_H),curr_map(0),sprites(boost::extents[0x40][0x80][2][2])
+palmap::palmap():scene_map(),curr_map(0),sprites(boost::extents[0x40][0x80][2][2])
 {
 	for(int i=0;i<0x40;i++)
 		for(int j=0;j<0x80;j++)
@@ -101,7 +101,7 @@ void palmap::blit_to(BITMAP *dest,int sx,int sy,int dx,int dy)
 	blit(bmp,bmp,sx,sy,dx,dy,bmp->w,bmp->h);
 }
 
-Scene::Scene():scene_buf(0,SCREEN_W,SCREEN_H),team_pos(Pal::rpg.viewport_x+x_scrn_offset,Pal::rpg.viewport_y+y_scrn_offset)
+Scene::Scene():team_pos(Pal::rpg.viewport_x+x_scrn_offset,Pal::rpg.viewport_y+y_scrn_offset)
 {}
 void Scene::clear_scanlines()
 {
@@ -286,7 +286,7 @@ void Scene::produce_one_screen()
 }
 void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap,BITMAP *dst)
 {
-	bitmap scanline(0,SCREEN_W,SCREEN_H);
+	bitmap scanline;
 	if((Pal::rpg.wave_grade+=wave_progression)>0 && Pal::rpg.wave_grade<0x100)
 		wave_screen(scene_buf,scanline,Pal::rpg.wave_grade,200);
 	else{

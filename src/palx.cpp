@@ -31,9 +31,9 @@ int main(int argc, char *argv[])
 {
 	global_init _global(argc, argv);global=&_global;
 	int save=_global();
-			bitmap _fakescreen(NULL,SCREEN_W,SCREEN_H);fakescreen=_fakescreen;clear_bitmap(fakescreen);
-			bitmap _backbuf(NULL,SCREEN_W,SCREEN_H);backbuf=_backbuf;clear_bitmap(backbuf);
-			bitmap _bakscreen(NULL,SCREEN_W,SCREEN_H);bakscreen=_bakscreen;clear_bitmap(bakscreen);
+			bitmap _fakescreen;fakescreen=_fakescreen;clear_bitmap(fakescreen);
+			bitmap _backbuf;backbuf=_backbuf;clear_bitmap(backbuf);
+			bitmap _bakscreen;bakscreen=_bakscreen;clear_bitmap(bakscreen);
 
 	using namespace Pal;
 	init_resource();

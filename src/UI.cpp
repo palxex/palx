@@ -26,6 +26,43 @@
 
 using namespace Pal;
 
+
+bool shadow_filter(int srcVal, uint8* pOutVal, void* pUserData)
+{
+	if(srcVal==-1)
+		return false;
+	uint8_t pix=*pOutVal;
+	*pOutVal=(pix-(pix%0x10/2));
+	return true;
+}
+bool fade_filter(int srcVal, uint8* pOutVal, void* pUserData)
+{
+	if(srcVal==-1)
+		return false;
+	int color=*(int*)pUserData;
+	*pOutVal=std::max(srcVal&0xf-color&0xF,0)|(color&0xF0);
+	return true;
+}
+bool brighter_filter(int srcVal, uint8* pOutVal, void* pUserData)
+{
+	if(srcVal==-1)
+		return false;
+	int color=*(int*)pUserData;
+	*pOutVal=std::min((srcVal&0xf)+(color&0xF),0xF)|(color&0xF0);
+	return true;
+}
+bool sadden_filter(int srcVal, uint8* pOutVal, void* pUserData)
+{
+	if(srcVal==-1)
+		return false;
+	int color=*(int*)pUserData;
+	if((srcVal&0xf)-(color&0xF)<0)
+		*pOutVal=0;
+	else
+		*pOutVal=((srcVal&0xf)-(color&0xF))|(color&0xF0);
+	return true;
+}
+
 dialog::dialog(int style,int x,int y,int rows,int columns,bool shadow,BITMAP *bmp)
 {
 	rows--;columns--;
@@ -321,7 +358,7 @@ struct equip_menu:public multi_menu
 	void got_action(menu *abs){
 		if(rpg.objects[rpg.items[selected].item].item.param &mask)
 		{
-			bitmap buf(FBP.decode(1),320,200);
+			bitmap buf(fbp(1));
 			bool ok=false;
 			int role_sele=0,role_max=rpg.team_roles;
 			int equip_selected=rpg.items[selected].item;
@@ -493,14 +530,6 @@ void display_role_status(int flag,int role,int x,int y,BITMAP *buf)
 	for(int i=0x11,y3=y+58;i<=0x15;i++,y3+=18)
 		show_number(get_cons_attrib(role,i),x+50,y3,0,buf);
 }
-bool fade_filter(int srcVal, uint8* pOutVal, void* pUserData)
-{
-	if(srcVal==-1)
-		return false;
-	int color=*(int*)pUserData;
-	*pOutVal=std::max(srcVal&0xf-color&0xF,0)|(color&0xF0);
-	return true;
-}
 void show_status_bar(BITMAP *buf)
 {
 	int start_x=(flag_battling?0x5A:0x2A);
@@ -534,7 +563,7 @@ void show_status_bar(BITMAP *buf)
 int select_rpg(int ori_select,BITMAP *bmp)
 {
 	int selected=ori_select;
-	bitmap cache(0,SCREEN_W,SCREEN_H);
+	bitmap cache;
 	selected=(selected>=1?selected:1);
 	int ok=1;
 	std::vector<std::string> menu_items;

@@ -114,8 +114,10 @@ void Load_Data()
 void redraw_everything(int time_gap,BITMAP *dst)
 {
 	flag_parallel_mutex=!flag_parallel_mutex;
-	if(flag_battling)
-		battle::get()->draw_battle_scene();
+	if(flag_battling){
+		battle::get()->sprites.clear_active();
+		battle::get()->draw_battle_scene(0,1);
+	}
 	else{
 		rest(100);
 		sprite_queue sprites;
