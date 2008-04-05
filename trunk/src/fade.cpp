@@ -136,7 +136,6 @@ void crossFade_desault(int gap,int time,bitmap &src,bitmap &dst)
 }
 void crossFade_self(int gap,bitmap &src)
 {
-	static int i=0;
 	int time=65536/6;
 	bitmap myscreen(screen);
 	BITMAP *srcbmp(src),*dstbmp(myscreen);
@@ -151,7 +150,7 @@ void crossFade_self(int gap,bitmap &src)
 void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 {
     bitmap &dst(const_cast<bitmap &>(_src));
-	bitmap src(NULL,SCREEN_W,SCREEN_H);
+	bitmap src;
 	blit(screen,src,0,0,0,0,SCREEN_W,SCREEN_H);
 	for(int i=0;i<times;i++)
 	{
@@ -192,7 +191,7 @@ void shake_screen()
 {
 #undef screen
 	if(shake_times>0){
-		if(--shake_times<0x10)
+		if(--shake_times<0x10)//TODO: use the actual time.
 			shake_grade=(int)(shake_grade*(15.0/16));
 	}else
         shake_grade=0;
@@ -200,10 +199,10 @@ void shake_screen()
 }
 void flush_screen()
 {
-	static bitmap fakebmp(NULL,SCREEN_W,SCREEN_H);
+	static bitmap fakebmp;
 #undef screen
     //vsync();
-    if(is_out) return;
+    //if(is_out) return;
     mutex_blitting=true;
     blit(fakescreen,fakebmp,0,(shake_times&1)*shake_grade,0,0,SCREEN_W,SCREEN_H);
 	//int sy=(shake_times&1)*shake_grade;
@@ -228,11 +227,11 @@ void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height)
 	blit(buffer,dst,0,0,0,0,SCREEN_W,SCREEN_H);
 	for(int i=0,t=index;i<height*scale;i++,t=(t+1)%32)
 		if(calc.result[t]>=0){
-			blit(buffer,dst,0,i,calc.result[t],i,SCREEN_W-calc.result[t]+1,1);
-			blit(buffer,dst,SCREEN_W-calc.result[t]+1,i,0,i+1,calc.result[t],1);
+			blit(buffer,dst,0,i,calc.result[t],i,SCREEN_W-calc.result[t],1);
+			blit(buffer,dst,SCREEN_W-calc.result[t+1],i,0,i+1,calc.result[t+1],1);
 		}else{
-			blit(buffer,dst,-calc.result[t],i,0,i,SCREEN_W+calc.result[t]+1,1);
-			blit(buffer,dst,0,i,SCREEN_W+calc.result[t]+1,i-1,-calc.result[t],1);
+			blit(buffer,dst,-calc.result[t],i,0,i,SCREEN_W+calc.result[t],1);
+			blit(buffer,dst,0,i,SCREEN_W+calc.result[t-1],i-1,-calc.result[t-1],1);
 		}
 	index=(index+1)%32;
 }

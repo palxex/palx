@@ -77,7 +77,7 @@ struct multi_menu:public menu_tmp
 {
 	int mask,skip,max,max_ori,begin_y,paging,middle;
 	bitmap buf;
-	multi_menu(int _mask,int _skip,int _paging=8):menu_tmp(),mask(_mask),skip(_skip),paging(_paging),middle(paging/2),buf(0,SCREEN_W,SCREEN_H){got=0;}
+	multi_menu(int _mask,int _skip,int _paging=8):menu_tmp(),mask(_mask),skip(_skip),paging(_paging),middle(paging/2){got=0;}
 	int keyloop(menu*);
 	void got_action(menu*);
 	void draw(menu*);
@@ -93,6 +93,8 @@ public:
 	void to_screen();
 };
 
+typedef bool DECODERLECALLBACK(int srcVal, uint8* pOutVal, void* pUserData);
+DECODERLECALLBACK shadow_filter,fade_filter,brighter_filter,sadden_filter;
 
 int select_rpg(int =0,BITMAP * =screen);
 int select_item(int mask,int ,int selected);

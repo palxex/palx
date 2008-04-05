@@ -20,6 +20,10 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
+#include "scene.h"
+
+#define TEAMENEMIES 5
+
 extern union _role_status{
 	int list[10];
 	struct {
@@ -27,13 +31,13 @@ extern union _role_status{
 		int fixed;
 		int sleep;
 		int seal;
-		int dumn;
+		int dummy;
 		int high_attack;
 		int high_defence;
 		int high_speed;
 		int twice_attack;
 	}pack;
-}role_status_pack[TEAMROLES];
+}role_status_pack[TEAMROLES],enemy_status_pack[TEAMENEMIES];
 extern struct _battle_role_data{
 	int battle_avatar;
 	int pos_x,pos_y;
@@ -51,7 +55,7 @@ extern struct _battle_enemy_data{
 	int frame,frame_bak;
 	int offset;
 	int length;
-	int HP;
+	int HP,prev_HP;
 	int id;
 #pragma pack(2)
 	union{
@@ -61,14 +65,27 @@ extern struct _battle_enemy_data{
 		}script;
 	}script;
 #pragma pack()
-}battle_enemy_data[TEAMROLES];
+}battle_enemy_data[TEAMENEMIES];
 
 extern bool flag_autobattle;
 
 class battle{
+	enum ACTION{
+		ATTACK=0,
+		MAGIC_TO_US,
+		MAGIC_TO_ENEMY,
+		USE_ITEM,
+		THROW_ITEM,
+		DEFENCE,
+		AUTO_ATTACK,
+		COSTAR,
+		ESCAPE,
+		CRAZY_ATTACK,
+		ATTACK_ALL
+	};
 	struct _role_attack{
 		int target;
-		int action;
+		ACTION action;
 		int tool;
 		int toolpos;
 		int alive;
@@ -81,9 +98,18 @@ class battle{
 		bool exist;
 	}battle_numbers[12];
 
+	struct {
+		struct {
+			int HP,MP;
+		}roles[TEAMROLES];
+		struct {
+			int HP;
+		}enemies[TEAMENEMIES];
+	}store_for_diff;
+
 	int enemy_HP_r[5];
 
-	int affected_enemies[TEAMROLES],affected_roles[TEAMROLES];
+	bool affected_enemies[TEAMENEMIES],affected_roles[TEAMROLES];
 
 	static battle *thebattle;
 
@@ -97,8 +123,10 @@ class battle{
 
 	void setup_role_enemy_image();
 	void setup_role_status();
-	void draw(int delay,int time);
+
+	int select_an_enemy_randomly();
 public:
+	sprite_queue sprites;
 	int magic_wave,battle_wave;
 	int endbattle_method,battle_result,escape_flag;
 	static battle *get(){
@@ -108,7 +136,7 @@ public:
 			return 0;
 	}
 
-	static int max_blow_away;
+	int max_blow_away;
 
 	battle(int team,int script);
 	~battle();
@@ -117,16 +145,17 @@ public:
 
 	void load_enemy(int enemy_pos,int enemy_id);
 	void battle_produce_screen(BITMAP *buf);
-	void draw_battle_scene();
+	void draw_battle_scene(int delay,int times,BITMAP * =screen);
 	void draw_battle_scene_selecting();
 
-	int bout_selecting();
+	int bout_selecting(int &selected);
 
 	int get_member_alive();
 	int get_enemy_alive();
 
-	int select_enemy();
+	int select_targetting_enemy();
 private:
+	int commanding_role;
 	bool flag_withdraw;
 	int effect_height;
 	bool battle_scene_draw;
@@ -137,8 +166,12 @@ private:
 	int enemy_poses_count;
 	int enemy_exps,enemy_money;
 	bool need_battle;
-	int role_counter;
 	bool flag_repeat;
+	bool enemy_moving_semaphor;
+	int targetting_role,targetting_enemy;
+	int drawlist_parity;
+	int sth_about_y;
+	int effective_y;
 };
 int process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H

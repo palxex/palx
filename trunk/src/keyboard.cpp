@@ -289,7 +289,7 @@ void keyhook(int)
 		get_palette(pal);
 		sprintf(filename,"%s/ScrnShot/%d.bmp",global->get<std::string>("config","path").c_str(),i++);
 		sprintf(mkdircmd,"mkdir %s/ScrnShot",global->get<std::string>("config","path").c_str());
-		system(mkdircmd);
+		//system(mkdircmd);//a console window splash?no...
 		save_bitmap(filename,screen,pal);
 	}
 	if(key[KEY_F3])

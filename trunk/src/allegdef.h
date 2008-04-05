@@ -27,6 +27,9 @@
 #include "pallib.h"
 #include "resource.h"
 
+#include "config.h"
+#include "internal.h"
+
 #include "alfont.h"
 
 #if !defined(WIN32)
@@ -54,7 +57,7 @@ protected:
 	BITMAP *bmp;
 public:
 	int width,height;
-	bitmap(const uint8_t *,int,int);
+	bitmap(const uint8_t * =NULL,int=SCREEN_W,int=SCREEN_H);
 	bitmap(BITMAP *);
 	bitmap(const bitmap &rhs);
 	uint8_t *getdata();
@@ -77,12 +80,12 @@ public:
 	sprite *clone();
 	void setfilter(filter_func r,int data);
 	void setfilter();
-	void setXYL(int,int,int);
+	sprite *setXYL(int,int,int);
 	void blit_middle(BITMAP*,int,int);
 	void blit_middlebottom(BITMAP*,int,int);
 	bool blit_to(BITMAP *);
 	bool blit_to(BITMAP *dest,int,int,bool =false,int =6, int =6);
-	void blit_filter(BITMAP *dest,int,int,filter_func r,int data,bool is);
+	void blit_filter(BITMAP *dest,int,int,filter_func r,int data,bool is,bool m=false);
 };
 class sprite_prim{
 	int id;
