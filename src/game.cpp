@@ -81,7 +81,7 @@ namespace Pal{
 	void timer_proc()
 	{
         time_interrupt_occurs++;
-		if(!is_out && !mutex_switching && !mutex_blitting){
+		if(!mutex_switching && !mutex_blitting){
 			static int pal_lock=0;
 			static PALETTE pal;
 			if(pal_lock++==10){

@@ -47,8 +47,8 @@ uint8_t *bitmap::getdata()
 bool bitmap::blit_to(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
 	blit(bmp,dest,source_x,source_y,dest_x,dest_y,std::max(bmp->w,dest->w),std::max(bmp->h,dest->h));
-	if(dest==screen)
-		flush_screen();
+	//if(dest==screen)
+	//	flush_screen();
 	return true;
 }
 bool do_nothing(int srcVal, uint8* pOutVal, void* pUserData){return false;}

@@ -86,7 +86,6 @@ void startup_splash()
 				pal[j].b=pat.get(0)[j].b*i/0x40;
 			}
 			set_palette(pal);
-			perframe_proc();
 			delay(1);
 		}
 		wait_key(90);

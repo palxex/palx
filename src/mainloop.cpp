@@ -79,8 +79,7 @@ namespace Pal{
         //游戏主循环10fps,画面100fps,音乐70fps。
         while(running){
             rest(1);
-            if(time_interrupt_occurs>=10)
-                mainloop_proc(),time_interrupt_occurs=0;
+                mainloop_proc();
         }
 		keyboard_lowlevel_callback=NULL;
         return 0;

@@ -153,8 +153,10 @@ void battle::battle_produce_screen(BITMAP *buf)
 		if(enemyteams[enemy_team].enemy[i]>0){
 			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_filter(buf,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y,brighter_filter,6,affected_enemies[i],true);
 		}
-	for(int i=Pal::rpg.team_roles;i>=0;i--)
-		team_images[i].getsprite(battle_role_data[i].frame)->blit_middlebottom(buf,battle_role_data[i].pos_x,battle_role_data[i].pos_y);
+	//unimplemented summon tasks
+	if(role_invisible_rounds==0)
+		for(int i=Pal::rpg.team_roles;i>=0;i--)//应按posY排序保证不遮挡。实现到再说
+			team_images[i].getsprite(battle_role_data[i].frame)->blit_middlebottom(buf,battle_role_data[i].pos_x,battle_role_data[i].pos_y);
 
 }
 void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
@@ -222,7 +224,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 				team_images[i].getsprite(battle_role_data[i].frame)->blit_filter(bmp,battle_role_data[i].pos_x,battle_role_data[i].pos_y,brighter_filter,6,true,true);
 		
 		delay(delaytime+5);
-		perframe_proc();
+		shake_screen();
 		drawlist_parity++;
 
 		//battle_produce_screen(bmp);//fake...
@@ -448,9 +450,9 @@ int battle::process()
 				break;
 			case 1:
 				show_money(rpg.coins,10,7,0x15,false);
-				magic_select=select_theurgy(rpg.team[commanding_role].role,role_status_pack[commanding_role].pack.seal?0:2,magic_select,false);
+				if((magic_select=select_theurgy(rpg.team[commanding_role].role,role_status_pack[commanding_role].pack.seal?0:2,magic_select,false))>=0)
+					ok=true;
 				draw_battle_scene_selecting();
-				ok=true;
 				break;
 			case 2:
 				break;
@@ -462,12 +464,12 @@ int battle::process()
 					{
 					draw_battle_scene_selecting();
 					case 0:
-						item_select=menu_item(item_select,1);
-						ok=true;
+						if((item_select=menu_item(item_select,1))>=0)
+							ok=true;
 						break;
 					case 1:
-						item_select=menu_item(item_select,4);
-						ok=true;
+						if((item_select=menu_item(item_select,4))>=0)
+							ok=true;
 						break;
 					}
 					draw_battle_scene_selecting();
