@@ -32,9 +32,9 @@ void play_RNG(int begin,int end,int gap)
 	for(int i=begin;i<=std::min(total_clips-1,end) && running ;i++){
 		Pal::Tools::DecodeRNG(RNG.decode(RNG_num,i),((BITMAP*)cache)->dat);
 		blit(cache,screen,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);
-		pal_fade_in(1);
-        perframe_proc();
 		delay(100/gap);
+		pal_fade_in(1);
+        shake_screen();
 	}
 }
 

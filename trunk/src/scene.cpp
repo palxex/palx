@@ -20,6 +20,7 @@
 #include "scene.h"
 #include "internal.h"
 #include "game.h"
+#include "timing.h"
 #include <algorithm>
 #include <set>
 
@@ -295,6 +296,7 @@ void Scene::scanline_draw_normal_scene(sprite_queue &sprites,int gap,BITMAP *dst
 	}
 	sprites.flush(scanline);
 	scanline.blit_to(dst);
-	perframe_proc();
+	delay(10);
 	pal_fade_in(gap);
+	shake_screen();
 }

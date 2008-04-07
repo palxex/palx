@@ -1237,7 +1237,6 @@ __walk_role:
 					set_palette(pal);
 				}
 				scene->scene_buf.blit_to(screen);
-				perframe_proc();
 				delay(100/freq);
 			}
 			mutex_can_change_palette=false;

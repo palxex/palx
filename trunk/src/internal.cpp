@@ -119,7 +119,6 @@ void redraw_everything(int time_gap,BITMAP *dst)
 		battle::get()->draw_battle_scene(0,1);
 	}
 	else{
-		rest(100);
 		sprite_queue sprites;
 		sprites.visible_NPC_movment_setdraw();
 		sprites.our_team_setdraw();
