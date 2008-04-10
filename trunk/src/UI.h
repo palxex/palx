@@ -21,7 +21,6 @@
 #define UI_H
 
 #include "allegdef.h"
-#include "internal.h"
 #include "game.h"
 #include "scene.h"
 

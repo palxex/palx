@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "timing.h"
 #include "allegdef.h"
-#include "internal.h"
+#include "fade.h"
 
 void wait(uint8_t gap)
 {

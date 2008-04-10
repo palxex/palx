@@ -27,7 +27,6 @@
 #include <cstdio>
 
 #include "allegdef.h"
-#include "internal.h"
 
 namespace Pal{
     extern SETUP_DEF setup;

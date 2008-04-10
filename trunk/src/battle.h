@@ -67,7 +67,7 @@ extern struct _battle_enemy_data{
 #pragma pack()
 }battle_enemy_data[TEAMENEMIES];
 
-extern bool flag_autobattle;
+extern int flag_autobattle;
 
 class battle{
 	enum ACTION{
@@ -89,12 +89,12 @@ class battle{
 		int tool;
 		int toolpos;
 		int alive;
-	}role_attack_table[8];
+	}role_attack_table[8],bak_attack_table[8];
 
 	struct _number{
-		int color;
-		int num;
 		int x,y;
+		int num;
+		int color;
 		bool exist;
 	}battle_numbers[12];
 
@@ -106,6 +106,8 @@ class battle{
 			int HP;
 		}enemies[TEAMENEMIES];
 	}store_for_diff;
+
+	std::map<int,int> vs_table;
 
 	int enemy_HP_r[5];
 
@@ -126,9 +128,16 @@ class battle{
 
 	int select_an_enemy_randomly();
 public:
+	enum END{
+		QUIT=-1,
+		NOT=0,
+		ROLE_FAIL,
+		ROLE_ESCAPE,
+		ENEMY_FAIL,
+	};
 	sprite_queue sprites;
 	int magic_wave,battle_wave;
-	int endbattle_method,battle_result,escape_flag;
+	END endbattle_method,battle_result,escape_flag;
 	static battle *get(){
 		if(thebattle)
 			return thebattle;
@@ -140,8 +149,8 @@ public:
 
 	battle(int team,int script);
 	~battle();
-	int process();
-	void check_end_battle();
+	END process();
+	END check_end_battle();
 
 	void load_enemy(int enemy_pos,int enemy_id);
 	void battle_produce_screen(BITMAP *buf);
@@ -154,6 +163,8 @@ public:
 	int get_enemy_alive();
 
 	int select_targetting_enemy();
+	int flag_invisible;
+	int role_invisible_rounds;
 private:
 	int commanding_role;
 	bool flag_withdraw;
@@ -162,7 +173,6 @@ private:
 	bool flag_high_attack;
 	bool flag_summon;
 	bool flag_selecting;
-	int role_invisible_rounds;
 	int enemy_poses_count;
 	int enemy_exps,enemy_money;
 	bool need_battle;
@@ -172,6 +182,7 @@ private:
 	int drawlist_parity;
 	int sth_about_y;
 	int effective_y;
+	bool flag_second_attacking;
 };
-int process_Battle(uint16_t enemy_team,uint16_t script_escape);
+battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H

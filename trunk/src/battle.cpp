@@ -17,21 +17,27 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "internal.h"
 #include "game.h"
 #include "timing.h"
 #include "battle.h"
 #include "scene.h"
 #include "UI.h"
+#include "item.h"
+#include "fade.h"
 
 using namespace Pal;
 
 union _role_status role_status_pack[TEAMROLES],enemy_status_pack[TEAMENEMIES];
 _battle_role_data battle_role_data[TEAMROLES];
 _battle_enemy_data battle_enemy_data[TEAMENEMIES];
-bool flag_autobattle=false;
+int flag_autobattle=0;
 
 bool instrum_usable[4];//指令可用扩展;从而封攻、令成为可能
+
+int enemy_level_scaler(int enemy,int scaler)
+{
+	return (monsters[rpg.objects[battle_enemy_data[enemy].id].enemy.enemy].level+6)*scaler;
+}
 
 battle *battle::thebattle=NULL;
 
@@ -56,7 +62,7 @@ void battle::load_enemy(int enemy_pos,int enemy_id)
 void battle::setup_role_enemy_image()
 {
 	for(int i=0;i<=rpg.team_roles;i++){
-		team_images[i]=sprite_prim(F,Pal::rpg.roles_properties.battle_avator[Pal::rpg.team[i].role]);
+		team_images[i]=sprite_prim(F,battle_role_data[i].battle_avatar);//Pal::rpg.roles_properties.battle_avator[Pal::rpg.team[i].role]
 		battle_role_data[i].pos_x=role_poses[rpg.team_roles][i].x;
 		battle_role_data[i].pos_y=role_poses[rpg.team_roles][i].y;
 		battle_role_data[i].pos_x_bak=battle_role_data[i].pos_x;
@@ -64,7 +70,7 @@ void battle::setup_role_enemy_image()
 	}
 	for(int i=0;i<enemy_poses_count;i++){
 		if(battle_enemy_data[i].HP>0 && battle_enemy_data[i].id>0){
-			enemy_images[i]=sprite_prim(Pal::ABC,rpg.objects[enemyteams[enemy_team].enemy[i]].general.inbeing);
+			enemy_images[i]=sprite_prim(Pal::ABC,battle_enemy_data[i].battle_avatar);//rpg.objects[enemyteams[enemy_team].enemy[i]].general.inbeing);
 			battle_enemy_data[i].length=enemy_images[i].getsprite(0)->height;
 		}
 		battle_enemy_data[i].pos_x=enemyposes.pos[i][enemy_poses_count-1].x;
@@ -153,10 +159,13 @@ void battle::battle_produce_screen(BITMAP *buf)
 		if(enemyteams[enemy_team].enemy[i]>0){
 			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_filter(buf,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y,brighter_filter,6,affected_enemies[i],true);
 		}
-	//unimplemented summon tasks
-	if(role_invisible_rounds==0)
-		for(int i=Pal::rpg.team_roles;i>=0;i--)//应按posY排序保证不遮挡。实现到再说
-			team_images[i].getsprite(battle_role_data[i].frame)->blit_middlebottom(buf,battle_role_data[i].pos_x,battle_role_data[i].pos_y);
+	
+	if(flag_summon)
+		;
+	else
+		if(role_invisible_rounds==0)
+			for(int i=Pal::rpg.team_roles;i>=0;i--)//应按posY排序保证不遮挡。实现到再说
+				team_images[i].getsprite(battle_role_data[i].frame)->blit_middlebottom(buf,battle_role_data[i].pos_x,battle_role_data[i].pos_y);
 
 }
 void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
@@ -222,7 +231,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 		for(int i=0;i<rpg.team_roles;i++)
 			if(affected_roles[i])
 				team_images[i].getsprite(battle_role_data[i].frame)->blit_filter(bmp,battle_role_data[i].pos_x,battle_role_data[i].pos_y,brighter_filter,6,true,true);
-		
+
 		delay(delaytime+5);
 		shake_screen();
 		drawlist_parity++;
@@ -294,9 +303,9 @@ int battle::bout_selecting(int &selected)
 	}while(running);
 	return 0;
 }
-battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0),battle_wave(battlefields[Pal::rpg.battlefield].waving),endbattle_method(0),battle_result(0),escape_flag(0),
-									max_blow_away(0),flag_withdraw(false),effect_height(200),battle_scene_draw(false),flag_high_attack(false),flag_summon(false),flag_selecting(false),
-									role_invisible_rounds(0),enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200)
+battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0),battle_wave(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
+									max_blow_away(0),role_invisible_rounds(0),flag_withdraw(false),effect_height(200),battle_scene_draw(false),flag_high_attack(false),flag_summon(false),flag_selecting(false),
+									enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false)
 {
 	memset(&store_for_diff,0,sizeof(store_for_diff));
 	memset(affected_enemies,0,sizeof(affected_enemies));
@@ -345,12 +354,13 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	}
 
 	pal_fade_in(0);
-	memset(enemy_HP_r,0,sizeof(enemy_HP_r));
+	memset(store_for_diff.enemies,0,sizeof(store_for_diff.enemies));
 
 	thebattle=this;
 }
-int battle::process()
+battle::END battle::process()
 {
+	int summon_magic=0;
 	while(running && need_battle){
 		static int itemuse_select,item_select,magic_select;
 		//战前脚本
@@ -361,15 +371,15 @@ int battle::process()
 			}
 		if(endbattle_method){
 			battle_result=endbattle_method;//程序退出
-			check_end_battle();
+			return check_end_battle();
 		}
 		if(get_member_alive()==0){
-			battle_result=1;//我方全灭
-			check_end_battle();
+			battle_result=ROLE_FAIL;//我方全灭
+			return check_end_battle();
 		}
 		if(get_enemy_alive()==0){
-			battle_result=3;//敌方全灭
-			check_end_battle();
+			battle_result=ENEMY_FAIL;//敌方全灭
+			return check_end_battle();
 		}
 
 		int instrum_selected=0,instrum_object=0;
@@ -437,7 +447,7 @@ int battle::process()
 				if(commanding_role>0)
 					commanding_role--;
 				else
-					check_end_battle();
+					return check_end_battle();
 				break;
 			case 0:
 				ok=true;
@@ -514,12 +524,155 @@ int battle::process()
 		effective_y=200;
 		draw_battle_scene(0,1);
 
-		delay(1);
+		vs_table.clear();
+		//enemy fill vs_tbl
+		for(int commanding_enemy=0;commanding_enemy<enemy_poses_count;commanding_enemy++)
+		{
+			if(battle_enemy_data[commanding_enemy].HP<=0)
+				continue;
+			int speed=(int)((monsters[rpg.objects[battle_enemy_data[commanding_enemy].id].enemy.enemy].speed+enemy_level_scaler(commanding_enemy,3))*(0.9+rnd1(0.2)));
+			for(int action=0,actions=(rnd1(monsters[rpg.objects[battle_enemy_data[commanding_enemy].id].enemy.enemy].flag_twice_action)>0?1:0);action<=actions;action++){
+				while(vs_table.find(speed)!=vs_table.end())//manual hash...
+					++speed;
+				vs_table[speed]=commanding_enemy+100;
+			}
+		}
+
+		//role fill vs_tbl
+		for(int commanding_role=0;commanding_role<=rpg.team_roles;commanding_role++)
+		{
+			if(!flag_repeat)
+				bak_attack_table[commanding_role]=role_attack_table[commanding_role];
+			int speed=(int)(get_cons_attrib(rpg.team[commanding_role].role,0x14)*(0.9+rnd1(0.2)));
+			switch(role_attack_table[commanding_role].action)
+			{
+			case COSTAR:
+				speed*=10;
+				break;
+			case DEFENCE:
+				speed*=5;
+				break;
+			case MAGIC_TO_US:
+			case USE_ITEM:
+				speed*=3;
+				break;
+			case ESCAPE:
+				speed/=2;
+				break;
+			default:
+				if(role_status_pack[commanding_role].pack.high_speed)
+					speed*=3;
+				if(battle_role_data[commanding_role].battle_avatar==1)//weak
+					speed/=2;
+				if(battle_role_data[commanding_role].battle_avatar==2)//dead
+					speed=0;
+				break;
+			}
+			if(!speed)
+				continue;
+			while(vs_table.find(speed)!=vs_table.end())
+				++speed;
+			vs_table[speed]=commanding_role;
+		}//留神因为vs_table的不同定义导致的后期动态问题
+
+		//action loop
+		for(std::map<int,int>::iterator vs_action=vs_table.begin();vs_action!=vs_table.end();++vs_action)
+		{
+			flag_invisible=0;
+			flag_second_attacking=false;
+			if((*vs_action).second>100){
+				//enemy action
+				if(role_invisible_rounds==0)
+				{
+
+				}
+			}
+			else{
+				//role action
+			}
+
+			for(int i=0;i<=4;i++)
+				store_for_diff.enemies[i].HP=battle_enemy_data[i].HP;
+
+			if(flag_invisible){
+				clear_effective(0x41,1);
+				flag_invisible=0;
+			}
+
+			for(int i=0;i<12;i++)
+				battle_numbers[i].exist=false;
+
+			if(flag_summon){
+				setup_role_enemy_image();
+				flag_summon=false;
+				serials_of_fade(summon_magic);
+			}
+
+			if(flag_withdraw && get_enemy_alive()>0){
+				;//got back when got attacked;
+				flag_withdraw=false;
+			}
+
+			setup_role_status();
+
+			if(get_member_alive()==0){
+				battle_result=ROLE_FAIL;
+				return check_end_battle();
+			}
+			if(get_enemy_alive()==0){
+				battle_result=ENEMY_FAIL;
+				return check_end_battle();
+			}
+			if(escape_flag){
+				battle_result=escape_flag;
+				return check_end_battle();
+			}
+		}
+
+		//敌我中毒、伤害显示
+
+		draw_battle_scene(0,10);//10注意
+
+		//备份下一轮的diff数据
+
+		if(role_invisible_rounds)
+			if(role_invisible_rounds--)
+				flag_invisible=1;
+
+		if(flag_invisible){
+			clear_effective(0x41,1);
+			flag_invisible=0;
+		}
+
+		if(flag_autobattle<=2)
+			if(key[KEY_ESC] || key[KEY_INSERT])
+				flag_autobattle=0;
 	}
-	return battle_result;
+	return check_end_battle();
 }
-void battle::check_end_battle(){
+battle::END battle::check_end_battle(){
 	need_battle=false;
+	switch(battle_result){
+		case ROLE_FAIL:
+			setup_role_status();
+			draw_battle_scene(0,1);
+			break;
+		case ENEMY_FAIL:
+			if(enemy_money || enemy_exps){
+				musicplayer->play(script_escape?3:2);
+				//display_money();
+				//display_exps();
+			}
+		default:
+			break;
+	}
+	for(int i=0;i<enemy_poses_count;i++)
+	{
+		uint16_t &postbattle_script=battle_enemy_data[i].script.script.after;
+		postbattle_script=process_script(postbattle_script,i);
+	}
+	//升级等
+	return battle_result;
 }
 battle::~battle()
 {
@@ -527,7 +680,7 @@ battle::~battle()
 	flag_to_load|=3;
 }
 
-int process_Battle(uint16_t enemy_team,uint16_t script_escape)
+battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape)
 {
 	return battle(enemy_team,script_escape).process();
 }

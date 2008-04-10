@@ -21,6 +21,7 @@
 #include "config.h"
 #include "game.h"
 #include "timing.h"
+#include "fade.h"
 #include <stack>
  class __scancode_map{
 		std::map<int,int> mymap;

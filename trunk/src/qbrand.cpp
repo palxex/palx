@@ -39,7 +39,7 @@ float rnd0()
 	seed=(seed*a+c)%d;
 	return (float)seed/d;
 }
-int rnd1(int s)
+int rnd1(double s)
 {
     return (int)(s*rnd0());
 }
