@@ -1238,6 +1238,7 @@ __walk_role:
 				}
 				scene->scene_buf.blit_to(screen);
 				delay(100/freq);
+				flush_screen();
 			}
 			mutex_can_change_palette=false;
 
