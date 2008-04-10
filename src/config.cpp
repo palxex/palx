@@ -23,8 +23,7 @@
 
 #include "resource.h"
 #include "allegdef.h"
-#include "internal.h"
-//#include "UI.h"
+#include "fade.h"
 #include "pallib.h"
 #include "config.h"
 

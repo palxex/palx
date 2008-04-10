@@ -18,7 +18,6 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
-#include "internal.h"
 #include "game.h"
 #include "UI.h"
 

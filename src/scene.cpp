@@ -18,9 +18,10 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "scene.h"
-#include "internal.h"
 #include "game.h"
 #include "timing.h"
+#include "fade.h"
+
 #include <algorithm>
 #include <set>
 

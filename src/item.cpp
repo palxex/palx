@@ -18,7 +18,6 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include <algorithm>
-#include "internal.h"
 #include "game.h"
 
 int role_parts[6][17][74];

@@ -17,13 +17,13 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "internal.h"
 #include "allegdef.h"
 #include "scene.h"
 #include "game.h"
 #include "config.h"
 #include "item.h"
 #include "battle.h"
+#include "fade.h"
 
 bool flag_battling=false;
 

@@ -18,10 +18,10 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
-#include "internal.h"
 #include "game.h"
 #include "timing.h"
 #include "UI.h"
+#include "fade.h"
 
 uint32_t current_dialog_lines = 0;
 uint32_t glbvar_fontcolor  = 0x4F;

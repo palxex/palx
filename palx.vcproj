@@ -408,6 +408,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\src\fade.h"
+						>
+					</File>
+					<File
 						RelativePath=".\src\integer.h"
 						>
 					</File>

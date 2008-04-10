@@ -17,7 +17,6 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "internal.h"
 #include "resource.h"
 #include "game.h"
 #include "scene.h"

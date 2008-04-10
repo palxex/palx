@@ -17,7 +17,6 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "internal.h"
 #include "structs.h"
 #include "game.h"
 #include "scene.h"
@@ -25,6 +24,7 @@
 #include "UI.h"
 #include "battle.h"
 #include "item.h"
+#include "fade.h"
 
 #include <stdlib.h>
 
@@ -165,7 +165,7 @@ void clear_effective(int16_t p1,int16_t p2)
 	int during=(p1?p1:88);
 	int unknown;
 	if(flag_battling){
-		//battle::get()->draw()//?
+		battle::get()->battle_produce_screen(backbuf);
 		unknown=0x2364*scale*scale;
 	}else{
 		scene->produce_one_screen();
@@ -423,8 +423,8 @@ __walk_npc:
     case 0x30:
         //not implemented
         break;
-    case 0x31:
-        //not implemented
+    case 0x31://ChangeCurrentHeroBattleSprite
+		battle_role_data[object].battle_avatar=param1;
         break;
     case 0x32:
         if(flag_battling)
@@ -691,8 +691,9 @@ __ride:
 	case 0x5b:
 		//not implemented
 		break;
-	case 0x5c:
-		//not implemented
+	case 0x5c://HeroInvisibleInBattle
+		battle::get()->role_invisible_rounds=(param1?param1:1);
+		battle::get()->flag_invisible=-1;
 		break;
 	case 0x5d:
 		//not implemented
@@ -998,7 +999,7 @@ __walk_role:
 		}
 		break;
 	case 0x89:
-		battle::get()->endbattle_method=(param1?param1:-1);
+		battle::get()->endbattle_method=(battle::END)(param1?param1:battle::QUIT);
 		break;
 	case 0x8a:
 		flag_autobattle=9;
@@ -1218,7 +1219,6 @@ __walk_role:
 			int frame=0;
 			int lines=200;
 			int factor=0;
-			int height=0;
 			int freq=(param3?param3:10);
 			for(int i=0;i<200;i++){
 				blit(cat,scene->scene_buf,0,std::max(--lines,0),0,0,SCREEN_W,SCREEN_H);
@@ -1435,17 +1435,19 @@ uint16_t process_script(uint16_t id,int16_t object)
             //printf("开战 第%x组敌人 胜利脚本%x 逃跑脚本%x\n",param1,param2,param3);
             if (current_dialog_lines>0)
                 show_wait_icon();
-            i=process_Battle(param1,param3);
-            if ( param2 && i == 1)
-            {
-                id = param2;
-                continue;
-            }
-            if ( param3 && i == 2)
-            {
-                id = param3;
-                continue;
-            }
+            switch(process_Battle(param1,param3))
+			{
+			case battle::ROLE_FAIL:
+				if(param2)
+					id=param2;
+				continue;
+			case battle::ROLE_ESCAPE:
+				if(param3)
+					id=param3;
+				continue;
+			default:
+				break;
+			}
             break;
         case 8:
             next_id = id+1;

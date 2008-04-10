@@ -22,6 +22,7 @@
 #include "game.h"
 #include "begin.h"
 #include "config.h"
+#include "fade.h"
 
 #include <iostream>
 #include <cstdlib>

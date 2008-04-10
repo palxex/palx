@@ -20,7 +20,7 @@
 #include "resource.h"
 #include "pallib.h"
 #include "timing.h"
-#include "internal.h"
+#include "fade.h"
 
 int RNG_num;
 void play_RNG(int begin,int end,int gap)

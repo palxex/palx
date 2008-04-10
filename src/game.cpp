@@ -19,20 +19,15 @@
  ***************************************************************************/
 #include "game.h"
 #include "alfont.h"
-#include "internal.h"
 #include "scene.h"
 #include "config.h"
+#include "fade.h"
 
 using namespace std;
 using namespace boost;
 volatile uint8_t time_interrupt_occurs;
 int mutex_paletting=0,mutex_blitting=0,mutex_switching=0;
 int scale=1;
-    void perframe_proc()
-    {
-        switch_proc();
-        shake_screen();
-    }
 namespace Pal{
 	palette pat;
 	RPG rpg;

@@ -73,9 +73,9 @@ extern std::vector<sprite_prim> mgos;
 extern std::map<int,int> team_mgos;
 extern std::map<int,int> npc_mgos;
 
-extern void randomize();
-extern float rnd0();
-extern int rnd1(int);
+void randomize();
+float rnd0();
+int rnd1(double);
 
 extern int scale;
 extern int x_off,y_off;
@@ -85,46 +85,28 @@ void Load_Data();
 void GameLoop_OneCycle(bool);
 bool process_Menu();
 void process_Explore();
-extern uint16_t process_script(uint16_t script,int16_t object);
-extern uint16_t process_autoscript(uint16_t script,int16_t object);
+uint16_t process_script(uint16_t script,int16_t object);
+uint16_t process_autoscript(uint16_t script,int16_t object);
 
-extern void load_team_mgo();
-extern void load_NPC_mgo();
-extern void setup_our_team_data_things();
-extern void record_step();
-extern void calc_trace_frames();
-extern void team_walk_one_step();
-extern void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
-extern void stop_and_update_frame();
-extern void calc_followers_screen_pos();
-extern int calc_faceto(int x_diff,int y_diff);
-extern bool barrier_check(uint16_t self,int x,int y,bool =true);
+void load_team_mgo();
+void load_NPC_mgo();
+void setup_our_team_data_things();
+void record_step();
+void calc_trace_frames();
+void team_walk_one_step();
+void NPC_walk_one_step(EVENT_OBJECT &obj,int speed);
+void stop_and_update_frame();
+void calc_followers_screen_pos();
+int calc_faceto(int x_diff,int y_diff);
+bool barrier_check(uint16_t self,int x,int y,bool =true);
 extern bool no_barrier;
-
-extern bool mutex_can_change_palette;
-extern int mutex_paletting,mutex_blitting;
-extern int shake_times,shake_grade;
-extern void pal_fade_out(int gap);
-extern void pal_fade_in(int gap);
-extern void fade_inout(int);
-class bitmap;
-extern void crossFade_assimilate(int gap,int time,bitmap &dst,bitmap &jitter);
-extern void crossFade_desault(int gap,int time,bitmap &dst,bitmap &jitter);
-extern void CrossFadeOut(int u,int times,int gap,const bitmap &buf);
-extern void crossFade_self(int gap,bitmap &src);
-extern void show_fbp(int,int);
-extern void shake_screen();
-extern void flush_screen();
-extern void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height);
-extern int wave_progression;
 
 extern int CARD;
 extern int mutex_switching;
-extern void switch_proc();
+void switch_proc();
 
 extern int RNG_num;
-extern void play_RNG(int begin,int end,int gap);
-void perframe_proc();
+void play_RNG(int begin,int end,int gap);
 
 extern bool prelimit_OK;
 

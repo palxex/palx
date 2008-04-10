@@ -20,8 +20,8 @@
 #include "begin.h"
 #include "UI.h"
 #include "timing.h"
-#include "internal.h"
 #include "scene.h"
+#include "fade.h"
 
 using namespace Pal;
 

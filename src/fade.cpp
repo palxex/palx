@@ -18,13 +18,18 @@
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
 #include "allegdef.h"
-#include "internal.h"
 #include "game.h"
 #include "timing.h"
 #include "scene.h"
+#include "fade.h"
 
 using namespace Pal;
 
+void perframe_proc()
+{
+	switch_proc();
+    shake_screen();
+}
 bool mutex_can_change_palette=true;
 void pal_fade_out(int t)
 {
@@ -146,6 +151,9 @@ void crossFade_self(int gap,bitmap &src)
 	while(time-- && (srcptr+=6) && (dstptr+=6) && srcptr<srcbegin+srcbmp->w*srcbmp->h && dstptr<dstbegin+dstbmp->w*dstbmp->h);
 	myscreen.blit_to(screen);
     perframe_proc();
+}
+void serials_of_fade(int thurgy)
+{
 }
 void CrossFadeOut(int u,int times,int gap,const bitmap &_src)
 {
