@@ -163,8 +163,14 @@ public:
 	int get_enemy_alive();
 
 	int select_targetting_enemy();
+	int select_a_living_role_randomly();
+
+	void enemy_attack_role(int,int);
+
 	int flag_invisible;
 	int role_invisible_rounds;
+	int twoside_counter;
+	bool flag_attacking_hero;
 private:
 	int commanding_role;
 	bool flag_withdraw;
