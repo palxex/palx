@@ -91,7 +91,7 @@ void playrix_timer(void *param)
 			vocs--;
 		}
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
-	if (begin && p)
+	if (running && begin && p)
 	{
 		update_cache(plr);
 		if(global && global->get<std::string>("music","opltype")!="real")

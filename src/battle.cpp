@@ -34,9 +34,13 @@ int flag_autobattle=0;
 
 bool instrum_usable[4];//指令可用扩展;从而封攻、令成为可能
 
+MONSTER &get_monster(int pos)
+{
+	return monsters[rpg.objects[battle_enemy_data[pos].id].enemy.enemy];
+}
 int enemy_level_scaler(int enemy,int scaler)
 {
-	return (monsters[rpg.objects[battle_enemy_data[enemy].id].enemy.enemy].level+6)*scaler;
+	return (get_monster(enemy).level+6)*scaler;
 }
 
 battle *battle::thebattle=NULL;
@@ -74,7 +78,7 @@ void battle::setup_role_enemy_image()
 			battle_enemy_data[i].length=enemy_images[i].getsprite(0)->height;
 		}
 		battle_enemy_data[i].pos_x=enemyposes.pos[i][enemy_poses_count-1].x;
-		battle_enemy_data[i].pos_y=enemyposes.pos[i][enemy_poses_count-1].y+monsters[rpg.objects[battle_enemy_data[i].id].enemy.enemy].pos_y_offset;
+		battle_enemy_data[i].pos_y=enemyposes.pos[i][enemy_poses_count-1].y+get_monster(i).pos_y_offset;
 		battle_enemy_data[i].pos_x_bak=battle_enemy_data[i].pos_x;
 		battle_enemy_data[i].pos_y_bak=battle_enemy_data[i].pos_y;
 		battle_enemy_data[i].frame=battle_enemy_data[i].frame_bak=0;
@@ -150,6 +154,14 @@ int battle::select_targetting_enemy()
 		draw_battle_scene(0,1);
 	}
 	return targetting_enemy=-1;
+}
+int battle::select_a_living_role_randomly()
+{
+	int selected;
+	do
+		selected=rnd1(enemy_poses_count);
+	while(rpg.roles_properties.HP[rpg.team[selected].role]<=0);
+	return selected;
 }
 
 void battle::battle_produce_screen(BITMAP *buf)
@@ -304,7 +316,8 @@ int battle::bout_selecting(int &selected)
 	return 0;
 }
 battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0),battle_wave(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
-									max_blow_away(0),role_invisible_rounds(0),flag_withdraw(false),effect_height(200),battle_scene_draw(false),flag_high_attack(false),flag_summon(false),flag_selecting(false),
+									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),
+									flag_withdraw(false),effect_height(200),battle_scene_draw(false),flag_high_attack(false),flag_summon(false),flag_selecting(false),
 									enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false)
 {
 	memset(&store_for_diff,0,sizeof(store_for_diff));
@@ -446,8 +459,6 @@ battle::END battle::process()
 			case -1:
 				if(commanding_role>0)
 					commanding_role--;
-				else
-					return check_end_battle();
 				break;
 			case 0:
 				ok=true;
@@ -484,6 +495,9 @@ battle::END battle::process()
 					}
 					draw_battle_scene_selecting();
 					break;
+				case 3:
+					battle_result=ENEMY_FAIL;
+					return check_end_battle();
 				case 4:
 					role_status();
 					break;
@@ -530,8 +544,8 @@ battle::END battle::process()
 		{
 			if(battle_enemy_data[commanding_enemy].HP<=0)
 				continue;
-			int speed=(int)((monsters[rpg.objects[battle_enemy_data[commanding_enemy].id].enemy.enemy].speed+enemy_level_scaler(commanding_enemy,3))*(0.9+rnd1(0.2)));
-			for(int action=0,actions=(rnd1(monsters[rpg.objects[battle_enemy_data[commanding_enemy].id].enemy.enemy].flag_twice_action)>0?1:0);action<=actions;action++){
+			int speed=(int)((get_monster(commanding_enemy).speed+enemy_level_scaler(commanding_enemy,3))*(0.9+rnd1(0.2)));
+			for(int action=0,actions=(rnd1(get_monster(commanding_enemy).flag_twice_action)>0?1:0);action<=actions;action++){
 				while(vs_table.find(speed)!=vs_table.end())//manual hash...
 					++speed;
 				vs_table[speed]=commanding_enemy+100;
@@ -576,15 +590,20 @@ battle::END battle::process()
 		}//留神因为vs_table的不同定义导致的后期动态问题
 
 		//action loop
-		for(std::map<int,int>::iterator vs_action=vs_table.begin();vs_action!=vs_table.end();++vs_action)
+		for(std::map<int,int>::iterator vs_action=vs_table.begin(),prev_action=vs_action;vs_action!=vs_table.end();prev_action=(vs_action++))
 		{
 			flag_invisible=0;
 			flag_second_attacking=false;
-			if((*vs_action).second>100){
+			if(vs_action->second>=100){
 				//enemy action
-				if(role_invisible_rounds==0)
-				{
-
+				if(role_invisible_rounds==0){
+					twoside_counter=vs_action->second-100;
+					if(enemy_status_pack[twoside_counter].pack.fixed==0 && enemy_status_pack[twoside_counter].pack.sleep==0){
+						if(vs_action!=vs_table.begin() && vs_action->second==prev_action->second)
+							flag_second_attacking=true;
+						if(battle_enemy_data[twoside_counter].HP>0)
+							enemy_attack_role(twoside_counter,select_a_living_role_randomly());
+					}
 				}
 			}
 			else{
@@ -652,6 +671,7 @@ battle::END battle::process()
 }
 battle::END battle::check_end_battle(){
 	need_battle=false;
+	flag_battling=false;
 	switch(battle_result){
 		case ROLE_FAIL:
 			setup_role_status();
@@ -678,6 +698,62 @@ battle::~battle()
 {
 	thebattle=NULL;
 	flag_to_load|=3;
+}
+enum STATUS{ NON_NORMAL,WEAK,NORMAL };
+STATUS role_status_determine(int role_pos)
+{
+	if(role_status_pack[role_pos].pack.crazy || role_status_pack[role_pos].pack.fixed || role_status_pack[role_pos].pack.sleep || rpg.roles_properties.HP[rpg.team[role_pos].role]<=0)
+		return NON_NORMAL;
+	if(battle_role_data[role_pos].battle_avatar==1)
+		return WEAK;
+	else
+		return NORMAL;
+}
+void enemy_phisical_attack(int enemy_pos,int role_pos,int force)
+{
+	int role_defence=get_cons_attrib(rpg.team[role_pos].role,0x13);
+	if(battle_role_data[role_pos].frame==3)
+		role_defence*=2;
+	int modulated_who_care=-rnd1(0.85);
+	if(role_status_determine(role_pos)<=1)
+		if(modulated_who_care==-1){
+			modulated_who_care=1;
+			int rescurer=-1;
+			for(int i=0;i<=rpg.team_roles;i++)
+				if(rpg.roles_properties.rescuer[rpg.team[role_pos].role]==rpg.team[i].role)
+					rescurer=i;
+			if(rescurer>=0 && role_status_determine(rescurer)>1)
+				modulated_who_care=-(rescurer+10);
+		}else
+			modulated_who_care=1;
+	voc(SFX.decode(get_monster(enemy_pos).attack_sfx)).play();
+}
+void battle::enemy_attack_role(int enemy_pos,int role_pos){
+	flag_attacking_hero=true;
+	int use_magic,rnd_1=0;
+	if(enemy_status_pack[enemy_pos].pack.crazy)
+		;
+	else{
+		uint16_t &battle_script=battle_enemy_data[enemy_pos].script.script.when;
+		battle_script=process_script(battle_script,enemy_pos);
+		if( rnd1(10) >= get_monster(enemy_pos).magic_freq )
+			use_magic=get_monster(enemy_pos).magic;
+		else
+			use_magic=0;
+		if(use_magic<=0 || enemy_status_pack[enemy_pos].pack.seal)
+			use_magic=0,
+			rnd_1=rnd0();
+		if(use_magic<0 || rnd_1)
+			return;
+		if(use_magic==0){
+			//phisical
+			int force=get_monster(enemy_pos).force+enemy_level_scaler(enemy_pos,6);
+			enemy_phisical_attack(enemy_pos,role_pos,force);
+		}
+		else{
+			//magic
+		}
+	}
 }
 
 battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape)

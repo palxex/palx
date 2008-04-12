@@ -27,21 +27,18 @@ bool running=true;
 namespace{
 	void mainloop_proc()
 	{
-		static bool first=true;
-		if(first || flag_to_load)
-			Load_Data();
-		first=false;
+		PAL_VKEY keygot=PAL_VK_NONE;
+		do{
+			if(flag_to_load)
+				Load_Data();
 
-		//Parse Key
-		PAL_VKEY keygot=get_key_lowlevel();
-
-        flag_to_load=0;
-		GameLoop_OneCycle(true);
-		if(flag_to_load){
-			Load_Data();
+			//Parse Key
 			keygot=get_key_lowlevel();
+			clear_keybuf();memset((void*)key,0,KEY_MAX);
+
+			flag_to_load=0;
 			GameLoop_OneCycle(true);
-		}
+		}while(flag_to_load);
 
 		if(!running)
 			return;
@@ -60,15 +57,17 @@ namespace{
 		sprites.Redraw_Tiles_or_Fade_to_pic();
 
 		scene->scanline_draw_normal_scene(sprites,1);
+
+			//Parse Key
+			keygot=get_key_lowlevel();
+			clear_keybuf();memset((void*)key,0,KEY_MAX);
+
 		if(keygot==PAL_VK_EXPLORE)
 			process_Explore();
 		if(keygot==PAL_VK_MENU)
 			running=process_Menu();
 
 		flag_parallel_mutex=!flag_parallel_mutex;
-
-		if(flag_to_load)
-			first=true;
 	}
 	END_OF_FUNCTION(mainloop_proc);
 }
@@ -76,10 +75,8 @@ namespace{
 namespace Pal{
     int run(){
         //游戏主循环10fps,画面100fps,音乐70fps。
-        while(running){
-            rest(1);
-                mainloop_proc();
-        }
+        while(running)
+            mainloop_proc();
 		keyboard_lowlevel_callback=NULL;
         return 0;
     }
