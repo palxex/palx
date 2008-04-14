@@ -103,6 +103,7 @@
 		<Unit filename="src\allegdef.h" />
 		<Unit filename="src\audio.cpp" />
 		<Unit filename="src\battle.cpp" />
+		<Unit filename="src\battle.h" />
 		<Unit filename="src\begin.cpp" />
 		<Unit filename="src\begin.h" />
 		<Unit filename="src\celestial.cpp" />

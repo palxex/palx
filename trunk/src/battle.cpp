@@ -459,6 +459,10 @@ battle::END battle::process()
 			case -1:
 				if(commanding_role>0)
 					commanding_role--;
+				else{
+					battle_result=ENEMY_FAIL;
+					return check_end_battle();
+				}
 				break;
 			case 0:
 				ok=true;
