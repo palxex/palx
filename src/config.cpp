@@ -27,26 +27,56 @@
 #include "pallib.h"
 #include "config.h"
 
-#if defined (WIN32)
-#   define FONT_PATH "%WINDIR%/fonts/mingliu.ttc"
-#   define LOCALE "chinese"
-#   define CONF "palx.conf"
-#	define RESOURCE "."
-#elif defined __MSDOS__
-#   define FONT_PATH "mingliu.ttc"
-#   define LOCALE "BIG5"
-#   define CONF "palx.cfg"
-#	define RESOURCE "."
-#elif defined __APPLE__
-#   define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
-#   define LOCALE "BIG5"
-#   define CONF "~/.palxrc"
-#	define RESOURCE ".."
-#else   //predicate *NIX
-#   define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
-#   define LOCALE "BIG5"
-#   define CONF "~/.palxrc"
-#	define RESOURCE "."
+#ifdef PAL_WIN95
+#   define CONFIG_SETUP "false"
+#   define FONT_TYPE "truetype"
+#   define MUSIC_TYPE "midi"
+#   if defined (WIN32)
+#       define FONT_PATH "%WINDIR%/fonts/simsun.ttc"
+#       define CONFIG_ENCODE "chs"
+#       define CONF "palxw95.conf"
+#   	define CONFIG_PATH "."
+#   elif defined __MSDOS__
+#       define FONT_PATH "mingliu.ttc"
+#       define CONFIG_ENCODE "GBK"
+#       define CONF "palxw95.cfg"
+#	    define CONFIG_PATH "."
+#   elif defined __APPLE__
+#       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
+#       define CONFIG_ENCODE "GBK"
+#       define CONF "~/.palxw95rc"
+#	    define CONFIG_PATH ".."
+#   else   //predicate *NIX
+#       define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
+#       define CONFIG_ENCODE "GBK"
+#       define CONF "~/.palxw95rc"
+#	    define CONFIG_PATH "."
+#   endif
+#else //only two NOW
+#   define CONFIG_SETUP "true"
+#   define FONT_TYPE "fon"
+#   define MUSIC_TYPE "rix"
+#   if defined (WIN32)
+#       define FONT_PATH "%WINDIR%/fonts/mingliu.ttc"
+#      define CONFIG_ENCODE "chinese"
+#       define CONF "palx.conf"
+#   	define CONFIG_PATH "."
+#   elif defined __MSDOS__
+#       define FONT_PATH "mingliu.ttc"
+#       define CONFIG_ENCODE "BIG5"
+#       define CONF "palx.cfg"
+#	    define CONFIG_PATH "."
+#   elif defined __APPLE__
+#       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
+#       define CONFIG_ENCODE "BIG5"
+#       define CONF "~/.palxrc"
+#	    define CONFIG_PATH ".."
+#   else   //predicate *NIX
+#       define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
+#       define CONFIG_ENCODE "BIG5"
+#       define CONF "~/.palxrc"
+#	    define CONFIG_PATH "."
+#   endif
 #endif
 
 using namespace std;
@@ -66,7 +96,7 @@ string env_expand(string name)
 ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 {
 	ini_parser::section::configmap configprop;
-	configprop["path"].value=RESOURCE;
+	configprop["path"].value=CONFIG_PATH;
 	configprop["path"].comment="资源路径";
 	configprop["setup"].value="true";
 	configprop["setup"].comment="Bool;是否用setup.dat里的设置覆盖这里的对应设置";
@@ -74,9 +104,7 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	configprop["allow_memory"].comment="Bool;是否允许跨进程记忆最后存档";
 	configprop["last"].value="";
 	configprop["last"].comment="Int;最后载入的存档";
-	configprop["resource"].value="dos";
-	configprop["resource"].comment="dos/win95/ss(?)";
-	configprop["encode"].value=LOCALE;
+	configprop["encode"].value=CONFIG_ENCODE;
 	configprop["encode"].comment="win32:chs/cht;linux/mac/dos/...(iconv):GBK/BIG5";
 	configprop["switch_off"].value="true";
 	configprop["switch_off"].comment="控制切换出窗口时程序是否继续执行";
@@ -103,14 +131,14 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	sections["display"]=display;
 
 	ini_parser::section::configmap fontprop;
-	fontprop["type"].value="truetype";
+	fontprop["type"].value=FONT_TYPE;
 	fontprop["type"].comment="truetype: ttf/ttc; fon: wor16.fon";
 	fontprop["path"].value=FONT_PATH;
 	section font("font",fontprop);
 	sections["font"]=font;
 
 	ini_parser::section::configmap musicprop;
-	musicprop["type"].value="rix";
+	musicprop["type"].value=MUSIC_TYPE;
 	musicprop["type"].comment="rix/mid/foreverCD,+gameCD,+gameCDmp3，或任意混合。foreverCD指永恒回忆录之FM曲集";
 	musicprop["opltype"].value="mame";
 	musicprop["opltype"].comment="real/mame/ken;真机OPL芯片/MAME版模拟/Ken版模拟FM音乐";
@@ -176,8 +204,23 @@ namespace{
 		len=length;
 		return buf;
 	}
+	const char *dos2w95(const char *midi,int n)
+	{
+		static string path;
+		path=midi;
+		path.replace(path.find("MIDI.MKF"),path.size(),"Musics");
+		char num[4];
+		sprintf(num,"%03d",n);
+		path.append("/").append(num).append(".MID");
+		return path.c_str();
+	}
 	uint8_t *demkf_ptr(const char *file,int n,long &len)
 	{
+	    #ifdef PAL_WIN95
+		int size=0;
+		if(string(file).find("MIDI.MKF")!=string::npos)
+			return denone_file(dos2w95(file,n),len);
+        #endif
 		int32_t offset=n*4,length;
 		FILE *fp=fopen(file,"rb");
 		fseek(fp,offset,SEEK_SET);
@@ -217,11 +260,19 @@ namespace{
 		files=(usrc[0]-((usrc[usrc[0]-1]<=0 || usrc[usrc[0]-1]*2>=len || usrc[usrc[0]-1]<usrc[usrc[0]-2])?1:0));
 		uint16_t length;
 		if(n == files - 1)
-			length=len-(uint16_t)(usrc[n]*2);
+			length=len-
+#ifndef PAL_WIN95
+			(uint16_t)
+#endif
+			(usrc[n]*2);
 		else
 			length=(usrc[n+1]-usrc[n])*2;
 		uint8_t *buf=new uint8_t[length];
-		memcpy(buf,src.get()+(uint16_t)(usrc[n]*2),length);
+		memcpy(buf,src.get()+
+#ifndef PAL_WIN95
+			(uint16_t)
+#endif
+			(usrc[n]*2),length);
 		len=length;
 		return buf;
 	}
@@ -314,16 +365,18 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 	//version dispatch
 	boost::function<uint8_t *(shared_array<uint8_t> ,long &)> extract_ptr;
 	boost::function<shared_array<uint8_t>(shared_array<uint8_t> ,long &)> extract_sp;
-	if(get<string>("config","resource")=="dos")
-		extract_ptr=deyj1_ptr,extract_sp=deyj1_sp,sfx_file="VOC.MKF";
-	else if(get<string>("config","resource")=="win95")
-		extract_ptr=deyj2_ptr,extract_sp=deyj2_sp,sfx_file="SOUNDS.MKF";
+#ifndef PAL_WIN95
+	extract_ptr=deyj1_ptr,extract_sp=deyj1_sp,sfx_file="VOC.MKF";
+#else
+	extract_ptr=deyj2_ptr,extract_sp=deyj2_sp,sfx_file="SOUNDS.MKF";
+#endif
 
 	if(get<string>("config","encode")=="")
-	  if(get<string>("config","resource")=="dos")
-	    set<string>("config","encode",LOCALE);
-	  else if(get<string>("config","resource")=="win95")
+#ifndef PAL_WIN95
+	    set<string>("config","encode",CONFIG_ENCODE);
+#else
 	    set<string>("config","encode","GBK");
+#endif
 
 	if(!get<int>("debug","fps"))
 		set<int>("debug","fps",20);

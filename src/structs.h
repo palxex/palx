@@ -57,35 +57,53 @@ typedef union object_def{
 			int16_t attrib;
 			uint16_t script[3];
 			int16_t param;
+			#ifdef PAL_WIN95
+			uint16_t desc_script;
+			#endif
 		}general;
 		struct{
 			uint16_t _reserved[2];
 			uint16_t other_dead,self_hurt,reserved;
 			uint16_t ___reserved;
+			#ifdef PAL_WIN95
+			uint16_t desc_script;
+			#endif
 		}role;
 		struct{
 			int16_t image;
 			int16_t value;
 			uint16_t use,equip,chuck;
 			uint16_t param;
+			#ifdef PAL_WIN95
+			uint16_t desc_script;
+			#endif
 		}item;
 		struct{
 			int16_t magic;
 			uint16_t ___reserved;
 			uint16_t post,occur,reserved;
 			uint16_t param;
+			#ifdef PAL_WIN95
+			uint16_t desc_script;
+			#endif
 		}magic;
 		struct{
 			int16_t enemy;
 			int16_t voodoo_defence;
 			uint16_t before,after,occur;
 			uint16_t ____reserved;
+			#ifdef PAL_WIN95
+			uint16_t desc_script;
+			#endif
 		}enemy;
 		struct{
 			int16_t toxicity;
 			int16_t color;
 			uint16_t to_role,reserved,to_enemy;
 			int16_t _____reserved;
+			#ifdef PAL_WIN95
+			uint16_t desc_script;
+			#endif
 		}poison;
 }OBJECT;
 
@@ -194,7 +212,11 @@ typedef struct rpg_def{
 	}items[0x100];
 	SCENE	scenes[300];
 	OBJECT	objects[600];
+	#ifndef PAL_WIN95
 	EVENT_OBJECT	evtobjs[5332];
+	#else
+	EVENT_OBJECT    evtobjs[5077];
+	#endif
 }RPG;
 
 typedef struct{ int16_t item[9]; } SHOP;
@@ -339,7 +361,7 @@ unsigned short int use_files_on_CD;
 					else
 						y++;
 				}
-			} 
+			}
 			return *this;
 		}
 		position &toXY(){	if(status){		x=x*32+h*16;y=y*16+h*8;status=false;}    return *this;}

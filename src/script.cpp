@@ -531,13 +531,9 @@ __walk_npc:
         //not implemented
 		break;
     case 0x43:
-        if (param1)
-        {
-            if(rpg.music!=param1)
-                musicplayer->play(rpg.music=param1,param2);
-        }
-        else
-            musicplayer->stop();
+        if(rpg.music!=param1 || !param1)
+            musicplayer->play(rpg.music=param1,param2);
+		rpg.music=param1;
         break;
     case 0x44:
         npc_speed=4;
@@ -1298,10 +1294,13 @@ __walk_role:
 
 cut_msg_impl msges;
 cut_msg_impl objs;
+bool is_colon(char *msg)
+{
+	uint16_t gbk_colon=0xC3A1,big5_colon=0x47A1;
+	return strncmp(msg+strlen(msg)-2,(const char *)&big5_colon,2)==0 || strncmp(msg+strlen(msg)-2,(const char *)&gbk_colon,2)==0;
+}
 uint16_t process_script(uint16_t id,int16_t object)
 {
-    static char *msg,colon[3];
-    static int i=sprintf(colon,msges(0xc94,0xc96));
 	prelimit_OK=true;
     EVENT_OBJECT &obj=evtobjs[object];
     uint16_t next_id=id;
@@ -1329,30 +1328,32 @@ uint16_t process_script(uint16_t id,int16_t object)
             //printf("停止执行\n");
             ok=false;
             break;
-        case -1:
-            //printf("显示对话 `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
-            if (current_dialog_lines>3)
-            {
-                show_wait_icon();
-                current_dialog_lines=0;
-                restore_screen();
-            }
-			else if (current_dialog_lines==0 && flag_pic_level==0){
-                backup_screen();
+		case -1:
+			{
+				//printf("显示对话 `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
+				if (current_dialog_lines>3)
+				{
+					show_wait_icon();
+					current_dialog_lines=0;
+					restore_screen();
+				}
+				else if (current_dialog_lines==0 && flag_pic_level==0){
+					backup_screen();
+				}
+				char *msg=msges(msg_idxes[param1],msg_idxes[param1+1]);
+				if (frame_pos_flag==10)
+				{
+					frame_text_x-=strlen(msg)/2*8;
+					single_dialog(frame_text_x,frame_text_y,strlen(msg)/2,bitmap(screen)).to_screen();
+					dialog_string(msg,frame_text_x+10,frame_text_y+10,0,false);
+					wait_key(140);
+				}
+				else if (current_dialog_lines==0 && is_colon(msg))
+					dialog_string(msg,dialog_x,dialog_y,0x8C,true);
+				else
+					draw_oneline_m_text(msg,frame_text_x,frame_text_y+(current_dialog_lines++)*(frame_pos_flag?16:18));
+				break;
 			}
-            msg=msges(msg_idxes[param1],msg_idxes[param1+1]);
-            if (frame_pos_flag==10)
-            {
-                frame_text_x-=strlen(msg)/2*8;
-                single_dialog(frame_text_x,frame_text_y,strlen(msg)/2,bitmap(screen)).to_screen();
-                dialog_string(msg,frame_text_x+10,frame_text_y+10,0,false);
-                wait_key(140);
-            }
-            else if (current_dialog_lines==0 && memcmp(msg+strlen(msg)-2,&colon,2)==0)
-                dialog_string(msg,dialog_x,dialog_y,0x8C,true);
-            else
-                draw_oneline_m_text(msg,frame_text_x,frame_text_y+(current_dialog_lines++)*(frame_pos_flag?16:18));
-            break;
         case 1:
             //printf("停止执行，将调用地址替换为下一条命令\n");
             ok=false;
