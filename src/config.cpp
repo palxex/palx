@@ -98,7 +98,7 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	ini_parser::section::configmap configprop;
 	configprop["path"].value=CONFIG_PATH;
 	configprop["path"].comment="资源路径";
-	configprop["setup"].value="true";
+	configprop["setup"].value=CONFIG_SETUP;
 	configprop["setup"].comment="Bool;是否用setup.dat里的设置覆盖这里的对应设置";
 	configprop["allow_memory"].value="false";
 	configprop["allow_memory"].comment="Bool;是否允许跨进程记忆最后存档";
@@ -195,6 +195,10 @@ namespace{
 	{
 		int32_t length;
 		FILE *fp=fopen(file,"rb");
+		if(!fp){
+			allegro_message("%s not found",file);
+			return NULL;
+		}
 		fseek(fp,0,SEEK_END);
 		length=ftell(fp);
 		rewind(fp);
@@ -223,6 +227,10 @@ namespace{
         #endif
 		int32_t offset=n*4,length;
 		FILE *fp=fopen(file,"rb");
+		if(!fp){
+			allegro_message("%s not found",file);
+			return NULL;
+		}
 		fseek(fp,offset,SEEK_SET);
 		fread(&offset,4,1,fp);
 		fread(&length,4,1,fp);length-=offset;
