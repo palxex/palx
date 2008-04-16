@@ -157,7 +157,7 @@ palerrno_t Pal::Tools::DecodeYJ1(const void* Source, void*& Destination, uint32&
 
 	if (Source == NULL)
 		return PAL_EMPTY_POINTER;
-	if (hdr->Signature != '1_JY')
+	if (memcmp((char*)&hdr->Signature , "1_JY",4))
 		return PAL_INVALID_DATA;
 
 	do
@@ -853,7 +853,7 @@ palerrno_t Pal::Tools::EncodeYJ1(const void* Source, uint32 SourceLength, void*&
 	if (Source == NULL || SourceLength == 0)
 		return PAL_EMPTY_POINTER;
 
-	hdr.Signature = '1_JY';
+	strncpy((char*)&hdr.Signature , "1_JY",4);
 	hdr.UncompressedLength = srclen;
 	hdr.CompressedLength = 0;
 	hdr.BlockCount = (srclen & 0x3fff) ? (srclen >> 14) + 1 : (srclen >> 14);

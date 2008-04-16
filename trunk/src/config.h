@@ -29,7 +29,7 @@
 #include <map>
 #include <string>
 
-#ifdef __MINGW32__  //mingw hack. unknown bug on the ifstream tellg that makes it actually moved the pointer.
+#if defined(__MINGW32__) || defined(__DJGPP__) //mingw hack. unknown bug on the ifstream tellg that makes it actually moved the pointer.
 #   define getpos()
 #   define retpos() is.seekg(-80,std::ios_base::cur)
 #else

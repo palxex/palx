@@ -23,21 +23,21 @@
 #include "UI.h"
 #include "fade.h"
 
-uint32_t current_dialog_lines = 0;
-uint32_t glbvar_fontcolor  = 0x4F;
-uint32_t font_color_yellow = 0x2D;
-uint32_t font_color_red    = 0x1A;
-uint32_t font_color_cyan   = 0x8D;
-uint32_t font_color_cyan_1 = 0x8C;
-uint32_t frame_pos_flag = 1;
-uint32_t dialog_x = 12;
-uint32_t dialog_y = 8;
-uint32_t frame_text_x = 0x2C;
-uint32_t frame_text_y = 0x1A;
+int current_dialog_lines = 0;
+int glbvar_fontcolor  = 0x4F;
+int font_color_yellow = 0x2D;
+int font_color_red    = 0x1A;
+int font_color_cyan   = 0x8D;
+int font_color_cyan_1 = 0x8C;
+int frame_pos_flag = 1;
+int dialog_x = 12;
+int dialog_y = 8;
+int frame_text_x = 0x2C;
+int frame_text_y = 0x1A;
 
-uint32_t icon_x=0;
-uint32_t icon_y=0;
-uint32_t icon=0;
+int icon_x=0;
+int icon_y=0;
+int icon=0;
 
 int delay_centisecond=3;
 bool keepon_delay=true;

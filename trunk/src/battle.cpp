@@ -484,6 +484,9 @@ battle::END battle::process()
 			case 3:
 				switch(menu(4,0x10,5,0x38,2)(single_menu(),0))
 				{
+				case -1:
+					draw_battle_scene_selecting();
+					break;
 				case 1:
 					switch(itemuse_select=menu(0x18,0x32,2,0x17,2)(single_menu(),itemuse_select))
 					{
@@ -504,6 +507,7 @@ battle::END battle::process()
 					return check_end_battle();
 				case 4:
 					role_status();
+					draw_battle_scene_selecting();
 					break;
 				default:
 					break;
