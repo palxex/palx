@@ -54,17 +54,17 @@ extern int flag_pic_level;
 
 extern int dialog_type;
 
-extern uint32_t current_dialog_lines;
-extern uint32_t glbvar_fontcolor;
-extern uint32_t font_color_yellow;
-extern uint32_t font_color_red;
-extern uint32_t font_color_cyan;
-extern uint32_t font_color_cyan_1;
-extern uint32_t frame_pos_flag;
-extern uint32_t dialog_x;
-extern uint32_t dialog_y;
-extern uint32_t frame_text_x;
-extern uint32_t frame_text_y;
+extern int current_dialog_lines;
+extern int glbvar_fontcolor;
+extern int font_color_yellow;
+extern int font_color_red;
+extern int font_color_cyan;
+extern int font_color_cyan_1;
+extern int frame_pos_flag;
+extern int dialog_x;
+extern int dialog_y;
+extern int frame_text_x;
+extern int frame_text_y;
 extern int CARD;
 extern bool mask_use_CD;
 

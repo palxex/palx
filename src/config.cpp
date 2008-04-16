@@ -36,21 +36,29 @@
 #       define CONFIG_ENCODE "chs"
 #       define CONF "palxw95.conf"
 #   	define CONFIG_PATH "."
+#		define DISPLAY_SCALE "2"
+#		define DISPLAY_FULLSCREEN "false"
 #   elif defined __MSDOS__
 #       define FONT_PATH "mingliu.ttc"
 #       define CONFIG_ENCODE "GBK"
 #       define CONF "palxw95.cfg"
 #	    define CONFIG_PATH "."
+#		define DISPLAY_SCALE "1"
+#		define DISPLAY_FULLSCREEN "true"
 #   elif defined __APPLE__
 #       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
 #       define CONFIG_ENCODE "GBK"
 #       define CONF "~/.palxw95rc"
 #	    define CONFIG_PATH ".."
+#		define DISPLAY_SCALE "2"
+#		define DISPLAY_FULLSCREEN "false"
 #   else   //predicate *NIX
 #       define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
 #       define CONFIG_ENCODE "GBK"
 #       define CONF "~/.palxw95rc"
 #	    define CONFIG_PATH "."
+#		define DISPLAY_SCALE "2"
+#		define DISPLAY_FULLSCREEN "false"
 #   endif
 #else //only two NOW
 #   define CONFIG_SETUP "true"
@@ -61,21 +69,29 @@
 #      define CONFIG_ENCODE "chinese"
 #       define CONF "palx.conf"
 #   	define CONFIG_PATH "."
+#		define DISPLAY_SCALE "2"
+#		define DISPLAY_FULLSCREEN "false"
 #   elif defined __MSDOS__
 #       define FONT_PATH "mingliu.ttc"
 #       define CONFIG_ENCODE "BIG5"
 #       define CONF "palx.cfg"
 #	    define CONFIG_PATH "."
+#		define DISPLAY_SCALE "1"
+#		define DISPLAY_FULLSCREEN "true"
 #   elif defined __APPLE__
 #       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
 #       define CONFIG_ENCODE "BIG5"
 #       define CONF "~/.palxrc"
 #	    define CONFIG_PATH ".."
+#		define DISPLAY_SCALE "2"
+#		define DISPLAY_FULLSCREEN "false"
 #   else   //predicate *NIX
 #       define FONT_PATH "/usr/share/fonts/truetype/arphic/uming.ttf" //ubuntu gutsy gibbon;other distribution has other position but I don't know the unified method to determine it.
 #       define CONFIG_ENCODE "BIG5"
 #       define CONF "~/.palxrc"
 #	    define CONFIG_PATH "."
+#		define DISPLAY_SCALE "2"
+#		define DISPLAY_FULLSCREEN "false"
 #   endif
 #endif
 
@@ -123,9 +139,9 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	displayprop["height"].value="200";
 	displayprop["height"].comment="粒度;320x200正整数倍.";
 	displayprop["width"].value="320";
-	displayprop["scale"].value="2";
+	displayprop["scale"].value=DISPLAY_SCALE;
 	displayprop["scale"].comment="1,2;etc.";
-	displayprop["fullscreen"].value="false";
+	displayprop["fullscreen"].value=DISPLAY_FULLSCREEN;
 	displayprop["fullscreen"].comment="Bool ;全屏";
 	section display("display",displayprop);
 	sections["display"]=display;
@@ -197,6 +213,7 @@ namespace{
 		FILE *fp=fopen(file,"rb");
 		if(!fp){
 			allegro_message("%s not found",file);
+			running=false;
 			return NULL;
 		}
 		fseek(fp,0,SEEK_END);
@@ -229,6 +246,7 @@ namespace{
 		FILE *fp=fopen(file,"rb");
 		if(!fp){
 			allegro_message("%s not found",file);
+			running=false;
 			return NULL;
 		}
 		fseek(fp,offset,SEEK_SET);
@@ -386,9 +404,6 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 	    set<string>("config","encode","GBK");
 #endif
 
-	if(!get<int>("debug","fps"))
-		set<int>("debug","fps",20);
-
 	if(get<string>("debug","resource")=="mkf")
 	{
 		de_none			=bind(denone_file,_1,_4);
@@ -408,6 +423,9 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 }
 void global_init::display_setup(bool ext)
 {
+#ifdef __MSDOS__
+	ext=true;
+#endif
 	static PALETTE pal;get_palette(pal);
 	CARD=(get<bool>("display","fullscreen")?GFX_AUTODETECT:GFX_AUTODETECT_WINDOWED);
 	if(!ext){

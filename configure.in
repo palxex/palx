@@ -3,7 +3,6 @@
 
 AC_PREREQ(2.56)
 AC_INIT(palx, 0.3, palxex@gmail.com)
-AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 
 dnl Checks for programs.
