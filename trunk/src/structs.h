@@ -250,7 +250,7 @@ typedef struct {
 	int16_t lucky;
 	int16_t poison_defence;
 	int16_t storm_defence;
-	int16_t lignt_defence;
+	int16_t light_defence;
 	int16_t flood_defence;
 	int16_t flame_defence;
 	int16_t earth_defence;
