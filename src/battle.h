@@ -107,7 +107,7 @@ class battle{
 		}enemies[TEAMENEMIES];
 	}store_for_diff;
 
-	std::map<int,int> vs_table;
+	std::multimap<int,int> vs_table;
 
 	int enemy_HP_r[5];
 

@@ -850,7 +850,12 @@ bool process_Menu()
 		case 2:
 			if((music_selected=yes_or_no(0x11,music_selected))<0)
                 break;
-			musicplayer->setvolume((music_selected==1)?255:0);
+            {
+                int vol=((music_selected==1)?255:0);
+                global->set<int>("music","volume",vol);
+                set_volume(vol,vol);
+                musicplayer->setvolume(vol);
+            }
 			break;
 		case 3:
 			if((sfx_selected=yes_or_no(0x11,sfx_selected))<0)

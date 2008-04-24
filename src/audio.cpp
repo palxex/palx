@@ -175,7 +175,6 @@ void playrix::stop(int gap)
 
 void playrix::setvolume(int vol)
 {
-    global->set<int>("music","volume",vol);
 	max_vol=vol;
 	if(global->get<std::string>("music","opltype")!="real")
 		voice_set_volume(stream->voice,vol);
@@ -424,9 +423,8 @@ void playmidi::stop(int)
 }
 void playmidi::setvolume(int vol)
 {
-	global->set<int>("music","volume",vol);
 	if(vol<=0)
 		stop();
-	else
+	else if(!pmidi)
 		play(subsong);
 }

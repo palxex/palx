@@ -553,11 +553,8 @@ battle::END battle::process()
 			if(battle_enemy_data[commanding_enemy].HP<=0)
 				continue;
 			int speed=(int)((get_monster(commanding_enemy).speed+enemy_level_scaler(commanding_enemy,3))*(0.9+rnd1(0.2)));
-			for(int action=0,actions=(rnd1(get_monster(commanding_enemy).flag_twice_action)>0?1:0);action<=actions;action++){
-				while(vs_table.find(speed)!=vs_table.end())//manual hash...
-					++speed;
-				vs_table[speed]=commanding_enemy+100;
-			}
+			for(int action=0,actions=(rnd1(get_monster(commanding_enemy).flag_twice_action)>0?1:0);action<=actions;action++)
+				vs_table.insert(std::make_pair(speed,commanding_enemy+100));
 		}
 
 		//role fill vs_tbl
@@ -592,13 +589,11 @@ battle::END battle::process()
 			}
 			if(!speed)
 				continue;
-			while(vs_table.find(speed)!=vs_table.end())
-				++speed;
-			vs_table[speed]=commanding_role;
+			vs_table.insert(std::make_pair(speed,commanding_role));
 		}//留神因为vs_table的不同定义导致的后期动态问题
 
 		//action loop
-		for(std::map<int,int>::iterator vs_action=vs_table.begin(),prev_action=vs_action;vs_action!=vs_table.end();prev_action=(vs_action++))
+		for(std::multimap<int,int>::iterator vs_action=vs_table.begin(),prev_action=vs_action;vs_action!=vs_table.end();prev_action=(vs_action++))
 		{
 			flag_invisible=0;
 			flag_second_attacking=false;

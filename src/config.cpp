@@ -483,6 +483,7 @@ int global_init::operator ()()
 	allegro_init();
 	display_setup();
 	install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL);
+	set_volume(get<int>("music","volume"),get<int>("music","volume"));
 	install_timer();
 	install_keyboard();keyboard_lowlevel_callback = key_watcher;
 	//install_mouse();enable_hardware_cursor();select_mouse_cursor(MOUSE_CURSOR_ARROW);show_mouse(screen);
