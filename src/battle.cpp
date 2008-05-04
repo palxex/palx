@@ -200,7 +200,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 				continue;
 			if(!frames)
 				continue;
-			if(enemy_moving_semaphor && frames<99 && !( enemy_status_pack[e].pack.fixed || enemy_status_pack[e].pack.sleep)	&& (drawlist_parity%frames))
+			if(enemy_moving_semaphor && frames<99 && !( enemy_status_pack[e].pack.fixed || enemy_status_pack[e].pack.sleep)	&& (drawlist_parity%(frames*2)==0))//manually slow down,origin doesn't *2
 				battle_enemy_data[e].frame=(battle_enemy_data[e].frame+1)%monsters[enemy].stand_frames;
 			if(flag_selecting && (drawlist_parity&1) && (targetting_enemy == e))
 				affected_enemies[e]=1;
