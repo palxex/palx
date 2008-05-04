@@ -93,7 +93,7 @@ public:
 };
 
 typedef bool DECODERLECALLBACK(int srcVal, uint8* pOutVal, void* pUserData);
-DECODERLECALLBACK shadow_filter,fade_filter,brighter_filter,sadden_filter;
+DECODERLECALLBACK shadow_filter,brighter_filter,sadden_filter;
 
 int select_rpg(int =0,BITMAP * =screen);
 int select_item(int mask,int ,int selected);

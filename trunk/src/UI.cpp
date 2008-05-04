@@ -35,20 +35,12 @@ bool shadow_filter(int srcVal, uint8* pOutVal, void* pUserData)
 	*pOutVal=(pix-(pix%0x10/2));
 	return true;
 }
-bool fade_filter(int srcVal, uint8* pOutVal, void* pUserData)
-{
-	if(srcVal==-1)
-		return false;
-	int color=*(int*)pUserData;
-	*pOutVal=std::max(srcVal&0xf-color&0xF,0)|(color&0xF0);
-	return true;
-}
 bool brighter_filter(int srcVal, uint8* pOutVal, void* pUserData)
 {
 	if(srcVal==-1)
 		return false;
 	int color=*(int*)pUserData;
-	*pOutVal=std::min((srcVal&0xf)+(color&0xF),0xF)|(color&0xF0);
+	*pOutVal=(std::min((srcVal&0xf)+(color&0xF),0xF)|(srcVal&0xF0));
 	return true;
 }
 bool sadden_filter(int srcVal, uint8* pOutVal, void* pUserData)
@@ -546,7 +538,7 @@ void show_status_bar(BITMAP *buf)
 		UIpics.getsprite(18)->blit_to(buf,x,0xA5);
 		{
 			if(color)
-				UIpics.getsprite(48+role)->setfilter(fade_filter,color);
+				UIpics.getsprite(48+role)->setfilter(sadden_filter,color);
 			else
 				UIpics.getsprite(48+role)->setfilter();
 			UIpics.getsprite(48+role)->blit_to(buf,x-3,y);
