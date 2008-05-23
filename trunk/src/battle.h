@@ -189,6 +189,8 @@ private:
 	int sth_about_y;
 	int effective_y;
 	bool flag_second_attacking;
+	int auto_selected_enemy;
+	int battle_sfx;
 };
 battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H
