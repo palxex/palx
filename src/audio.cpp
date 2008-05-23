@@ -297,7 +297,6 @@ void voc::play()
 		voices[vocs++]=play_sample(spl,max_vol,128,1000,0);
 }
 bool not_midi=false;
-#include <allegro/internal/aintern.h>
 
 void b2l_memcpy(uint8_t *dst,const uint8_t *src,size_t size)
 {
@@ -315,7 +314,7 @@ MIDI *load_midi_mem(int midiseq)
    MIDI *midi;
    int num_tracks=0;
 
-   midi = (MIDI*)_AL_MALLOC(sizeof(MIDI));              /* get some memory */
+   midi = (MIDI*)malloc(sizeof(MIDI));              /* get some memory */
    if (!midi) {
 	   not_midi=true;
       return NULL;
@@ -372,7 +371,7 @@ MIDI *load_midi_mem(int midiseq)
       b2l_memcpy((uint8_t*)&data,midibuf+sek,4);sek+=4;//pack_mgetl(fp);                 /* length of track chunk */
       midi->track[c].len = data;
 
-      midi->track[c].data = (uint8_t*)_AL_MALLOC_ATOMIC(data); /* allocate memory */
+      midi->track[c].data = (uint8_t*)malloc(data); /* allocate memory */
       if (!midi->track[c].data)
 	 goto err;
 					     /* finally, read track data */

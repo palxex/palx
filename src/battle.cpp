@@ -318,7 +318,8 @@ int battle::bout_selecting(int &selected)
 battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0),battle_wave(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
 									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),
 									flag_withdraw(false),effect_height(200),battle_scene_draw(false),flag_high_attack(false),flag_summon(false),flag_selecting(false),
-									enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false)
+									enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false),
+									auto_selected_enemy(0),battle_sfx(0)
 {
 	memset(&store_for_diff,0,sizeof(store_for_diff));
 	memset(affected_enemies,0,sizeof(affected_enemies));
@@ -487,6 +488,9 @@ battle::END battle::process()
 				case -1:
 					draw_battle_scene_selecting();
 					break;
+				case 0:
+					auto_selected_enemy = select_an_enemy_randomly();
+					break;
 				case 1:
 					switch(itemuse_select=menu(0x18,0x32,2,0x17,2)(single_menu(),itemuse_select))
 					{
@@ -513,7 +517,7 @@ battle::END battle::process()
 					break;
 				}
 				break;
-			case PAL_VK_REPEAT+100:
+			case PAL_VK_REPEAT+100://fill!!!
 				break;
 			case PAL_VK_AUTO+100:
 				break;
@@ -611,6 +615,59 @@ battle::END battle::process()
 			}
 			else{
 				//role action
+				twoside_counter=vs_action->second;
+				int attacking_role=rpg.team[twoside_counter].role;
+				if(twoside_counter>=0 && (rpg.roles_properties.HP[attacking_role]>0 || role_status_pack[twoside_counter].pack.dummy>0)
+					&& role_status_pack[twoside_counter].pack.sleep<=0 && role_status_pack[twoside_counter].pack.fixed<=0)
+				{
+					if(flag_autobattle>=2){
+						role_attack_table[twoside_counter].target=auto_selected_enemy;
+						if(flag_autobattle==2)//菜单:围攻
+							role_attack_table[twoside_counter].action=ATTACK;
+						else if(flag_autobattle==9){//自动战
+							role_attack_table[twoside_counter].action=MAGIC_TO_ENEMY;
+							role_attack_table[twoside_counter].tool=rpg.roles_properties.magics[rnd1(4)][attacking_role];//只能自动前4招……
+						}
+					}
+					if(role_status_pack[twoside_counter].pack.crazy>0)
+						role_attack_table[twoside_counter].action=CRAZY_ATTACK;
+					int target_enemy=role_attack_table[twoside_counter].target;
+					while(battle_enemy_data[target_enemy].HP<=0)
+						target_enemy=(target_enemy+1)%enemy_poses_count;
+					flag_withdraw=false;flag_attacking_hero=false;battle_sfx=0;
+					int enemies_before=get_enemy_alive();
+					for(int i=0;i<5;i++)
+						store_for_diff.enemies[i].HP=battle_enemy_data[i].HP;
+					switch(role_attack_table[twoside_counter].action)//fill!!!
+					{
+					case ATTACK:
+						break;
+					case MAGIC_TO_US:
+						break;
+					case MAGIC_TO_ENEMY:
+						break;
+					case USE_ITEM:
+						break;
+					case THROW_ITEM:
+						break;
+					case DEFENCE:
+						break;
+					case AUTO_ATTACK:
+						break;
+					case COSTAR:
+						break;
+					case ESCAPE:
+						break;
+					case CRAZY_ATTACK:
+						break;
+					case ATTACK_ALL:
+						break;
+					default:
+						break;
+					}
+					if(get_enemy_alive()!=enemies_before)
+						voc(SFX.decode(battle_sfx)).play();
+				}
 			}
 
 			for(int i=0;i<=4;i++)
