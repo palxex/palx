@@ -226,7 +226,7 @@ typedef struct {
 	int16_t magic_frames;
 	int16_t attack_frames;
 	int16_t unknown1;
-	int16_t unknown2;
+	int16_t draw_times;
 	int16_t pos_y_offset;
 	int16_t attack_sfx;//?
 	int16_t unknown3;
@@ -249,11 +249,16 @@ typedef struct {
 	int16_t speed;
 	int16_t lucky;
 	int16_t poison_defence;
-	int16_t storm_defence;
-	int16_t light_defence;
-	int16_t flood_defence;
-	int16_t flame_defence;
-	int16_t earth_defence;
+	union{
+		struct{
+			int16_t storm_defence;
+			int16_t light_defence;
+			int16_t flood_defence;
+			int16_t flame_defence;
+			int16_t earth_defence;
+		}five_elem_defences;
+		int16_t elem_defences[5];
+	};
 	int16_t weapon_defence;
 	int16_t flag_twice_action;
 	int16_t gourd_value;
@@ -283,11 +288,16 @@ typedef struct {
 
 typedef struct {
 	int16_t waving;
-	int16_t storm;
-	int16_t light;
-	int16_t flood;
-	int16_t flame;
-	int16_t earth;
+	union{
+		struct{
+			int16_t storm;
+			int16_t light;
+			int16_t flood;
+			int16_t flame;
+			int16_t earth;
+		}five_elem;
+		int16_t elem_property[5];
+	};
 }BATTLE_FIELD;
 
 struct _LEARN{

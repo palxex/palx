@@ -34,12 +34,16 @@ void randomize()
 	uint64_t u=*reinterpret_cast<uint64_t*>(&f);
 	seed=((u>>48)^((u>>32)&0xffff))<<8;
 }
-float rnd0()
+int round(double f)
+{
+	return ((f-(int)f)>0.5)?((int)f+1):(int)f;
+}
+double rnd0()
 {
 	seed=(seed*a+c)%d;
-	return (float)seed/d;
+	return (double)seed/d;
 }
-int rnd1(double s)
+double rnd1(double s)
 {
-    return (int)(s*rnd0());
+    return s*rnd0();
 }

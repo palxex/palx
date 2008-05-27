@@ -64,7 +64,6 @@ public:
 	virtual ~bitmap();
 	operator BITMAP *() const {return bmp;}
 	bool blit_to(BITMAP *dest,int source_x=0,int source_y=0,int dest_x=0,int dest_y=0);
-	friend void draw_battle_scene(int);
 };
 class sprite{
 	uint8_t *buf;
@@ -181,8 +180,10 @@ class voc{
 	SAMPLE *spl;
 	SAMPLE *load_voc_mem(uint8_t *f);
 	int max_vol;
+	void init(uint8_t *);
 public:
 	voc(uint8_t *);
+	voc(int);
 	void play();
 };
 extern boost::shared_ptr<player> musicplayer,cdplayer;
