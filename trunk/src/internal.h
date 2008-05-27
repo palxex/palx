@@ -74,8 +74,9 @@ extern std::map<int,int> team_mgos;
 extern std::map<int,int> npc_mgos;
 
 void randomize();
-float rnd0();
-int rnd1(double);
+int round(double f);
+double rnd0();
+double rnd1(double);
 
 extern int scale;
 extern int x_off,y_off;

@@ -522,6 +522,7 @@ void display_role_status(int flag,int role,int x,int y,BITMAP *buf)
 	for(int i=0x11,y3=y+58;i<=0x15;i++,y3+=18)
 		show_number(get_cons_attrib(role,i),x+50,y3,0,buf);
 }
+#include "battle.h"
 void show_status_bar(BITMAP *buf)
 {
 	int start_x=(flag_battling?0x5A:0x2A);
@@ -529,7 +530,8 @@ void show_status_bar(BITMAP *buf)
 	{
 		int role=rpg.team[i].role;
 		int x=start_x+i*0x4E,y=0xA0;
-		int color=0;
+		int &color=battle_role_data[i].face_color;
+		color=0;
 		for(int it=0,max=-1;it<16;it++)
 			if(rpg.objects[rpg.poison_stack[it][i].poison].poison.toxicity>max)
 				max=rpg.objects[rpg.poison_stack[it][i].poison].poison.toxicity,

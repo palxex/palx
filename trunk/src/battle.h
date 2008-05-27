@@ -166,6 +166,9 @@ public:
 	int select_a_living_role_randomly();
 
 	void enemy_attack_role(int,int);
+	void enemy_phisical_attack(int enemy_pos,int role_pos,int force);
+	void enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos);
+	void enemy_fire_magic(int enemy_pos);
 
 	int flag_invisible;
 	int role_invisible_rounds;

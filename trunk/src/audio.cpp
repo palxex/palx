@@ -184,8 +184,20 @@ void playrix::setvolume(int vol)
 		begin=true;
 }
 
-voc::voc(uint8_t *f):spl(load_voc_mem(f)),max_vol(global->get<int>("music","volume_sfx"))
-{}
+void voc::init(uint8_t *f)
+{
+	spl=load_voc_mem(f);
+	max_vol=global->get<int>("music","volume_sfx");
+}
+
+voc::voc(uint8_t *f)
+{
+	init(f);
+}
+voc::voc(int id)
+{
+	init(Pal::SFX.decode(id));
+}
 
 bool not_voc=false;
 SAMPLE *voc::load_voc_mem(uint8_t *src)
