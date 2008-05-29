@@ -84,12 +84,7 @@ void playrix_timer(void *param)
 		begin=false;
 		//memset(plr->stream->samp->data,0,plr->stream->samp->len*plr->stream->samp->bits/8);
 	}
-	for(int i=0;i<vocs;i++)
-		if (!voice_check(voices[i])){
-			destroy_sample(voice_check(voices[i]));
-			std::copy(voices+i+1,voices+MAX_VOICES,voices+i);
-			vocs--;
-		}
+	voc::stop();
 	short *p = (short*)get_audio_stream_buffer(plr->stream);
 	if (running && begin && p)
 	{
@@ -307,6 +302,15 @@ void voc::play()
 {
 	if(!not_voc && max_vol)
 		voices[vocs++]=play_sample(spl,max_vol,128,1000,0);
+}
+void voc::stop()
+{
+	for(int i=0;i<vocs;i++)
+		if(!voice_check(voices[i])){
+			destroy_sample(voice_check(voices[i]));
+			std::copy(voices+i+1,voices+MAX_VOICES,voices+i);
+			vocs--;
+		}
 }
 bool not_midi=false;
 

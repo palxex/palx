@@ -36,7 +36,7 @@ void serials_of_fade(int thurgy);
 void show_fbp(int,int);
 void shake_screen();
 void flush_screen();
-void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height);
+void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height,int y=0);
 void clear_effective(int16_t p1,int16_t p2);
 
 void perframe_proc();

@@ -163,16 +163,18 @@ void process_Explore()
 void clear_effective(int16_t p1,int16_t p2)
 {
 	int during=(p1?p1:88);
-	int unknown;
+	int pixels;
 	if(flag_battling){
 		battle::get()->battle_produce_screen(backbuf);
-		unknown=0x2364*scale*scale;
+		pixels=0x2364*scale*scale;
 	}else{
 		scene->produce_one_screen();
 		redraw_everything(0,backbuf);
-		unknown=0x29AC*scale*scale;
+		pixels=0x29AC*scale*scale;
 	}
-	CrossFadeOut(unknown,during,p2,(bitmap)backbuf);
+	CrossFadeOut(pixels,during,p2,(bitmap)backbuf);
+	if(flag_battling)
+		battle::get()->restoreBackground();
 }
 void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
 {
@@ -809,7 +811,7 @@ __walk_role:
 		//not implemented
 		break;
     case 0x73:
-        clear_effective(param2,param1>0?param1:1);//not implement yet
+        clear_effective(param2,param1>0?param1:1);
         break;
 	case 0x74:
 		//not implemented

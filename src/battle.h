@@ -21,6 +21,7 @@
 #define BATTLE_H
 
 #include "scene.h"
+#include "structs.h"
 
 #define TEAMENEMIES 5
 
@@ -66,7 +67,7 @@ extern struct _battle_enemy_data{
 	}script;
 #pragma pack()
 }battle_enemy_data[TEAMENEMIES];
-
+extern RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 extern int flag_autobattle;
 
 class battle{
@@ -136,7 +137,7 @@ public:
 		ENEMY_FAIL,
 	};
 	sprite_queue sprites;
-	int magic_wave,battle_wave;
+	int magic_waving,battlefield_waving;
 	END endbattle_method,battle_result,escape_flag;
 	static battle *get(){
 		if(thebattle)
@@ -151,6 +152,12 @@ public:
 	~battle();
 	END process();
 	END check_end_battle();
+	void backupBackground(){
+		battlescene.blit_to(battlebuf);
+	}
+	void restoreBackground(){
+		battlebuf.blit_to(battlescene);
+	}
 
 	void load_enemy(int enemy_pos,int enemy_id);
 	void battle_produce_screen(BITMAP *buf);
@@ -169,17 +176,22 @@ public:
 	void enemy_phisical_attack(int enemy_pos,int role_pos,int force);
 	void enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos);
 	void enemy_fire_magic(int enemy_pos);
+	void magic_fire(int delay,int magic_id);
+	void add_occuring_magic_to_drawlist(bool flag);
 
 	int flag_invisible;
 	int role_invisible_rounds;
 	int twoside_counter;
 	bool flag_attacking_hero;
+	void load_theurgy_image(int id){
+		magic_img=Pal::magics[id].effect;
+	}
 private:
 	int commanding_role;
 	bool flag_withdraw;
 	int effect_height;
 	bool battle_scene_draw;
-	bool flag_high_attack;
+	int magic_image_occurs;
 	bool flag_summon;
 	bool flag_selecting;
 	int enemy_poses_count;
@@ -194,6 +206,9 @@ private:
 	bool flag_second_attacking;
 	int auto_selected_enemy;
 	int battle_sfx;
+	int magic_frame;
+	int shake_viewport_y;
+	int magic_img;
 };
 battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H

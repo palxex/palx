@@ -200,7 +200,7 @@ typedef struct rpg_def{
 	    ROLES_PROP roles_properties;
 	    roles role_prop_tables[sizeof(ROLES_PROP)/sizeof(roles)];
 	};
-	struct {
+	struct POISON_DEF{
 		int16_t poison;
 		int16_t script;
 	}poison_stack[16][TEAMROLES];
@@ -225,11 +225,11 @@ typedef struct {
 	int16_t stand_frames;
 	int16_t magic_frames;
 	int16_t attack_frames;
-	int16_t unknown1;
+	int16_t vibra_frames;
 	int16_t draw_times;
 	int16_t pos_y_offset;
-	int16_t attack_sfx;//?
-	int16_t unknown3;
+	int16_t attack_sfx;
+	int16_t action_sfx;
 	int16_t magic_sfx;
 	int16_t death_sfx;
 	int16_t yahoo_sfx;
