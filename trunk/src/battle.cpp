@@ -30,9 +30,11 @@ using namespace Pal;
 union _role_status role_status_pack[TEAMROLES],enemy_status_pack[TEAMENEMIES];
 _battle_role_data battle_role_data[TEAMROLES];
 _battle_enemy_data battle_enemy_data[TEAMENEMIES];
+RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 int flag_autobattle=0;
 
 bool instrum_usable[4];//指令可用扩展;从而封攻、令成为可能
+int x[4],y[4],s[4];
 
 MONSTER &get_monster(int pos)
 {
@@ -54,7 +56,7 @@ int calc_base_damage(double D,double A)
 	return round(damage);
 }
 int calc_final_damage(double A,int enemy,int magic)
-{	
+{
 	double D=get_monster(enemy).defence+enemy_level_scaler(enemy,4);
 	double damage=calc_base_damage(A*(1+rnd1(0.1)),D);
 	damage=damage/2+Pal::magics[magic].base_damage;
@@ -193,7 +195,7 @@ void battle::battle_produce_screen(BITMAP *buf)
 		if(enemyteams[enemy_team].enemy[i]>0){
 			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_filter(buf,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y,brighter_filter,6,affected_enemies[i],true);
 		}
-	
+
 	if(flag_summon)
 		;
 	else
@@ -210,19 +212,19 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 	for(int t=1;t<=times;t++)
 	{
 		bitmap scanline(0,SCREEN_W,effective_y);
-		if(battle_wave+magic_wave)
-			wave_screen(battlescene,scanline,battle_wave+magic_wave,effective_y);
+		if(battlefield_waving+magic_waving)
+			wave_screen(battlescene,scanline,battlefield_waving+magic_waving,effective_y,shake_viewport_y);
 		else
-			battlescene.blit_to(scanline);
+			battlescene.blit_to(scanline,0,shake_viewport_y,0,0);
 		for(int e=enemy_poses_count-1;e>=0;e--)
 		{
 			int enemy=rpg.objects[enemyteams[enemy_team].enemy[e]].enemy.enemy;
-			int frames=monsters[enemy].stand_frames;
+			int frames=monsters[enemy].vibra_frames;
 			if(battle_enemy_data[e].HP<=0 && store_for_diff.enemies[e].HP<=0)
 				continue;
 			if(!frames)
 				continue;
-			if(enemy_moving_semaphor && frames<99 && !( enemy_status_pack[e].pack.fixed || enemy_status_pack[e].pack.sleep)	&& (drawlist_parity%(frames*2)==0))//manually slow down,origin doesn't *2
+			if(enemy_moving_semaphor && frames<99 && !( enemy_status_pack[e].pack.fixed || enemy_status_pack[e].pack.sleep)	&& (drawlist_parity%(frames)==0))//manually slow down,origin doesn't *2
 				battle_enemy_data[e].frame=(battle_enemy_data[e].frame+1)%monsters[enemy].stand_frames;
 			if(flag_selecting && (drawlist_parity&1) && (targetting_enemy == e))
 				affected_enemies[e]=1;
@@ -235,7 +237,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 		}
 		if(flag_summon)
 			;//add_summon_img
-		else
+		else{
 			for(int r=rpg.team_roles;r>=0;r--)
 			{
 				int crazybits=0;
@@ -254,6 +256,8 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 						sprites.push(boost::shared_ptr<sprite>(UIpics.getsprite(68+(drawlist_parity&1))->clone()->setXYL(battle_role_data[r].pos_x-4,battle_role_data[r].pos_y,0x44)));
 				}
 			}
+		}
+		add_occuring_magic_to_drawlist(false);
 
 		sprites.flush(scanline);
 		sprites.clear_active();
@@ -337,11 +341,11 @@ int battle::bout_selecting(int &selected)
 	}while(running);
 	return 0;
 }
-battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_wave(0),battle_wave(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
+battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_waving(0),battlefield_waving(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
 									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),
-									flag_withdraw(false),effect_height(200),battle_scene_draw(false),flag_high_attack(false),flag_summon(false),flag_selecting(false),
+									flag_withdraw(false),effect_height(200),battle_scene_draw(false),magic_image_occurs(0),flag_summon(false),flag_selecting(false),
 									enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false),
-									auto_selected_enemy(0),battle_sfx(0)
+									auto_selected_enemy(0),battle_sfx(0),magic_frame(0),shake_viewport_y(0),magic_img(0)
 {
 	memset(&store_for_diff,0,sizeof(store_for_diff));
 	memset(affected_enemies,0,sizeof(affected_enemies));
@@ -383,13 +387,16 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	musicplayer->play(Pal::rpg.battle_music);
 
 	fbp(Pal::rpg.battlefield).blit_to(battlescene);
-	battle_produce_screen(battlebuf);
+	backupBackground();
+	bitmap battle_screen;
+	battle_produce_screen(battle_screen);
 	for(int i=0;i<=5;i++){
-		crossFade_self(i,battlebuf);
+		crossFade_self(i,battle_screen);
 		delay(6);
 	}
 
 	pal_fade_in(0);
+	restoreBackground();
 	memset(store_for_diff.enemies,0,sizeof(store_for_diff.enemies));
 
 	thebattle=this;
@@ -438,7 +445,7 @@ battle::END battle::process()
 		for(commanding_role=0;commanding_role<=rpg.team_roles && running;)
 		{
 			enemy_moving_semaphor=true;
-			flag_high_attack=false;
+			magic_image_occurs=0;
 			if(role_status_pack[commanding_role].pack.dummy){
 				role_attack_table[commanding_role].target=select_an_enemy_randomly();
 				role_attack_table[commanding_role].action=ATTACK;
@@ -729,6 +736,7 @@ battle::END battle::process()
 				return check_end_battle();
 			}
 		}
+		int times=2;
 
 		//敌我中毒、伤害显示
 
@@ -778,6 +786,13 @@ battle::END battle::check_end_battle(){
 }
 battle::~battle()
 {
+	memset(battle_enemy_data,0,sizeof(battle_enemy_data));
+	memset(battle_role_data,0,sizeof(battle_role_data));
+	memset(enemy_poison_stack,0,sizeof(enemy_poison_stack));
+	memset(rpg.poison_stack,0,sizeof(rpg.poison_stack));
+	memset(enemy_status_pack,0,sizeof(enemy_status_pack));
+	memset(role_status_pack,0,sizeof(role_status_pack));
+	flag_autobattle=0;
 	thebattle=NULL;
 	flag_to_load|=3;
 }
@@ -823,7 +838,7 @@ void battle::enemy_phisical_attack(int enemy_pos,int role_pos,int force)
 		battle_enemy_data[enemy_pos].pos_x -= 1;
 		draw_battle_scene(0,1);
 	}
-	voc(get_monster(enemy_pos).unknown3).play();
+	voc(get_monster(enemy_pos).action_sfx).play();
 	draw_battle_scene(0,1);
 	enemy_moving_semaphor=false;
 	battle_enemy_data[enemy_pos].pos_x=battle_role_data[role_pos].pos_x-44;
@@ -885,15 +900,16 @@ void battle::enemy_phisical_attack(int enemy_pos,int role_pos,int force)
 	battle_role_data[role_pos].frame = battle_role_data[role_pos].frame_bak;
 	draw_battle_scene(0,1);
 	int poison_defence=get_cons_attrib(rpg.team[role_pos].role,0x16);
-	if(modulated_who_care>=0 
-		&& get_monster(enemy_pos).attack_equ_freq > rnd1(10) 
+	if(modulated_who_care>=0
+		&& get_monster(enemy_pos).attack_equ_freq > rnd1(10)
 		&& rnd1(100)>poison_defence){
 			uint16_t &poison_script=rpg.objects[get_monster(enemy_pos).attack_equ_item].item.use;
 			process_script(poison_script,role_pos);
 	}
 }
-void battle::enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos)
+void battle::enemy_magical_attack(int force,int magic_id,int role_pos,int enemy_pos)
 {
+	MAGIC &magic=magics[rpg.objects[magic_id].magic.magic];
 	enemy_moving_semaphor=false;
 	battle_enemy_data[enemy_pos].pos_x += 0xC;
 	battle_enemy_data[enemy_pos].pos_y += 6;
@@ -901,11 +917,134 @@ void battle::enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos
 	battle_enemy_data[enemy_pos].pos_x += 4;
 	battle_enemy_data[enemy_pos].pos_y += 2;
 	draw_battle_scene(0,1);
-	int vx=battle_enemy_data[enemy_pos].pos_x-1,vy=battle_enemy_data[enemy_pos].pos_y-1;
 	enemy_fire_magic(enemy_pos);
+	load_theurgy_image(rpg.objects[magic_id].magic.magic);
 	if(!flag_second_attacking)
 		delay(20);
-
+	int magic_begin=get_monster(enemy_pos).stand_frames+get_monster(enemy_pos).magic_frames-1,magic_end=magic_begin+get_monster(enemy_pos).attack_frames;
+	for(int i=magic_begin;i<=magic_end;i++)
+	{
+		battle_enemy_data[enemy_pos].frame=i;
+		draw_battle_scene(0,get_monster(enemy_pos).draw_times);
+	}
+	switch(magic.behavior)
+	{
+	case 3://全屏
+		magic_image_occurs=1;
+		x[1]=magic.x_offset+0xA0;
+		y[1]=magic.y_offset+0xC8;
+		s[1]=magic.summon_effect;
+		break;
+	case 2://一方
+		magic_image_occurs=1;
+		x[1]=magic.x_offset+0xF0;
+		y[1]=magic.y_offset+0x96;
+		s[1]=magic.summon_effect;
+		break;
+	case 1://三叠
+		magic_image_occurs=3;
+		x[1]=0xB4;
+		y[1]=0xB4;
+		x[2]=0xEA;
+		y[2]=0xAA;
+		x[3]=0x10E;
+		y[3]=0x92;
+		for(int i=1;i<=magic_image_occurs;i++)
+			x[i]+=magic.x_offset,
+			y[i]+=magic.y_offset,
+			s[i]=magic.summon_effect;
+		break;
+	case 0://定点
+		magic_image_occurs=1;
+		x[1]=battle_role_data[role_pos].pos_x+magic.x_offset;
+		y[1]=battle_role_data[role_pos].pos_y+magic.y_offset;
+		s[1]=magic.summon_effect;
+		break;
+	default:
+		break;
+	}
+	uint16_t &prev_script=rpg.objects[magic_id].magic.occur;
+	process_script(prev_script,role_pos);
+	if(magic.delay>0){
+		battle_enemy_data[enemy_pos].frame=magic_begin;
+		for(int i=0;i<magic.delay;i++)
+			draw_battle_scene(magic.speed,1);
+		for(int i=magic_begin;i<=magic_end;i++){
+			battle_enemy_data[enemy_pos].frame=i;
+			draw_battle_scene(0,get_monster(enemy_pos).draw_times);
+		}
+	}
+	int buf[40];memset(buf,0,sizeof(buf));
+	int rnd=0;
+	if(magic.behavior>0){
+		for(int r=0;r<=rpg.team_roles;r++)
+			if(rpg.roles_properties.HP[rpg.team[r].role]>0){
+				buf[20+r]=0;
+				if(battle_role_data[r].frame==3)
+					buf[20+r]=2;
+				if(role_status_pack[r].pack.high_defence>0)
+					buf[20+r]*=2;
+				buf[r]=-1;
+				rnd=-round(rnd1(0.75));
+				if(role_status_determine(r)<2)
+					rnd=1;
+				if(rnd==-1)
+					continue;
+				battle_role_data[r].frame=3;
+				buf[20+r]++;
+			}
+	}else{
+		buf[role_pos]=-1;
+		buf[20+role_pos]=1;
+		if(battle_role_data[role_pos].frame==3)
+			battle_role_data[role_pos].frame=2;
+		if(role_status_pack[role_pos].pack.high_defence>0)
+			buf[20+role_pos]*=2;
+		rnd=-round(rnd1(0.75));
+		if(battle_role_data[role_pos].frame==1 || (role_status_pack[role_pos].pack.fixed>0 || role_status_pack[role_pos].pack.sleep>0))
+			rnd=1;
+		if(rnd==-1){
+			battle_role_data[role_pos].frame=3;
+			buf[20+role_pos]++;
+		}
+	}
+	magic_fire(magic.delay,magic_id);
+}
+void battle::magic_fire(int frame,int magic_id)
+{
+	MAGIC &magic=magics[rpg.objects[magic_id].magic.magic];
+	voc(magic.sfx).play();
+	magic_waving=magic.waving;
+	int frames=FIRE.slices(magic.effect);
+	for(int i=0;i<=magic.action_lasting;i++){
+		voc::stop();
+		voc(magic.sfx).play();
+		magic_frame=frame;
+		while(magic_frame<frames){
+			draw_battle_scene(magic.speed,1);
+			magic_frame++;
+		}
+	}
+	magic_frame--;
+	shake_viewport_y=16;
+	for(int i=1;i<=magic.shaking;i++){
+		draw_battle_scene(0,1);
+		shake_viewport_y=10+round(rnd1(6));
+	}
+	shake_viewport_y=0;
+	magic_waving=0;
+	if(battlefield_waving<9 && magic.effect_lasting){
+		add_occuring_magic_to_drawlist(true);
+		backupBackground();
+	}
+}
+void battle::add_occuring_magic_to_drawlist(bool flag)
+{
+	for(int i=1;i<=magic_image_occurs;i++)
+		if(flag)
+			sprite_prim(FIRE,magic_img).getsprite(magic_frame)->blit_middlebottom(battlescene,x[i],y[i]-shake_viewport_y);
+		else
+			sprites.push(boost::shared_ptr<sprite>(sprite_prim(FIRE,magic_img).getsprite(magic_frame)->clone()->setXYL(x[i],y[i]+s[i]-shake_viewport_y,s[i])));
 }
 void battle::enemy_fire_magic(int enemy_pos)
 {

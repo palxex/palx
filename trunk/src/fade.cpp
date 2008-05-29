@@ -228,11 +228,11 @@ struct calc_waving
 			result[i+16]=-result[i];
 	}
 };
-void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height)
+void wave_screen(bitmap &buffer,bitmap &dst,int grade,int height,int y)
 {
 	static int index=0;
 	calc_waving calc(grade);
-	blit(buffer,dst,0,0,0,0,SCREEN_W,SCREEN_H);
+	blit(buffer,dst,0,y,0,0,SCREEN_W,SCREEN_H);
 	for(int i=0,t=index;i<height*scale;i++,t=(t+1)%32)
 		if(calc.result[t]>=0){
 			blit(buffer,dst,0,i,calc.result[t],i,SCREEN_W-calc.result[t],1);

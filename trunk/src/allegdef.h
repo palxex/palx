@@ -185,6 +185,7 @@ public:
 	voc(uint8_t *);
 	voc(int);
 	void play();
+	static void stop();
 };
 extern boost::shared_ptr<player> musicplayer,cdplayer;
 
