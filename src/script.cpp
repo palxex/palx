@@ -1442,13 +1442,17 @@ uint16_t process_script(uint16_t id,int16_t object)
             switch(process_Battle(param1,param3))
 			{
 			case battle::ROLE_FAIL:
-				if(param2)
+				if(param2){
 					id=param2;
-				continue;
+					continue;
+				}else
+					break;
 			case battle::ROLE_ESCAPE:
-				if(param3)
+				if(param3){
 					id=param3;
-				continue;
+					continue;
+				}else
+					break;
 			default:
 				break;
 			}
