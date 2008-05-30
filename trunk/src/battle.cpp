@@ -866,9 +866,9 @@ void battle::enemy_phisical_attack(int enemy_pos,int role_pos,int force)
 	}
 	if(modulated_who_care==0)
 		battle_role_data[role_pos].frame=4;
-	if(modulated_who_care>0){
+	if(modulated_who_care>=0){
 		affected_roles[role_pos]=true;
-		final_damage=calc_base_damage(role_defence,force+rnd0())*(1+rnd1(1.0/8))+rnd0();
+		final_damage=calc_base_damage(role_defence,force+rnd0())*(1+rnd1(1.0/8))+round(rnd0());
 		if(role_status_pack[role_pos].pack.high_defence)
 			final_damage/=2;
 		if(rpg.roles_properties.HP[rpg.team[role_pos].role] < final_damage)
@@ -907,7 +907,7 @@ void battle::enemy_phisical_attack(int enemy_pos,int role_pos,int force)
 			process_script(poison_script,role_pos);
 	}
 }
-void battle::enemy_magical_attack(int force,int magic_id,int role_pos,int enemy_pos)
+void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int enemy_pos)
 {
 	MAGIC &magic=magics[rpg.objects[magic_id].magic.magic];
 	enemy_moving_semaphor=false;
@@ -974,41 +974,102 @@ void battle::enemy_magical_attack(int force,int magic_id,int role_pos,int enemy_
 			draw_battle_scene(0,get_monster(enemy_pos).draw_times);
 		}
 	}
-	int buf[40];memset(buf,0,sizeof(buf));
+	int role_exist[5];int defend_multiple[5];
+	memset(role_exist,0,sizeof(role_exist));
+	memset(defend_multiple,0,sizeof(defend_multiple));
 	int rnd=0;
 	if(magic.behavior>0){
 		for(int r=0;r<=rpg.team_roles;r++)
 			if(rpg.roles_properties.HP[rpg.team[r].role]>0){
-				buf[20+r]=0;
+				role_exist[r]=0;
+				defend_multiple[r]=1;
 				if(battle_role_data[r].frame==3)
-					buf[20+r]=2;
+					defend_multiple[r]=2;
 				if(role_status_pack[r].pack.high_defence>0)
-					buf[20+r]*=2;
-				buf[r]=-1;
+					defend_multiple[r]*=2;
+				role_exist[r]=-1;
 				rnd=-round(rnd1(0.75));
 				if(role_status_determine(r)<2)
 					rnd=1;
-				if(rnd==-1)
+				if(rnd!=-1)
 					continue;
 				battle_role_data[r].frame=3;
-				buf[20+r]++;
+				defend_multiple[r]++;
 			}
 	}else{
-		buf[role_pos]=-1;
-		buf[20+role_pos]=1;
+		role_exist[role_pos]=-1;
+		defend_multiple[role_pos]=1;
 		if(battle_role_data[role_pos].frame==3)
-			battle_role_data[role_pos].frame=2;
+			defend_multiple[role_pos]=2;
 		if(role_status_pack[role_pos].pack.high_defence>0)
-			buf[20+role_pos]*=2;
+			defend_multiple[role_pos]*=2;
 		rnd=-round(rnd1(0.75));
 		if(battle_role_data[role_pos].frame==1 || (role_status_pack[role_pos].pack.fixed>0 || role_status_pack[role_pos].pack.sleep>0))
 			rnd=1;
 		if(rnd==-1){
 			battle_role_data[role_pos].frame=3;
-			buf[20+role_pos]++;
+			defend_multiple[role_pos]++;
 		}
 	}
 	magic_fire(magic.delay,magic_id);
+	magic_image_occurs=0;
+	for(int i=0;i<=rpg.team_roles;i++){
+		int force = ori_force+round(rnd1(4));
+		if(role_exist[i]){
+			if(role_exist[i] & magic.elem_attr){
+				int damage = force+calc_base_damage(get_cons_attrib(i,0x13),force)/2;
+				damage/=defend_multiple[i];
+				switch(int elem=magic.elem_attr){
+					case 6:
+						elem=0;
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+						damage=damage*(100-get_cons_attrib(i,elem+0x16))/100;
+						if(elem)
+							damage=damage*(10+Pal::battlefields[rpg.battlefield].elem_property[elem])/10;
+						break;
+					default:
+						break;
+				}
+				if(rpg.roles_properties.HP[rpg.team[i].role] < damage)
+					damage=rpg.roles_properties.HP[rpg.team[i].role];
+				if(damage<0)
+					damage=0;
+				rpg.roles_properties.HP[rpg.team[i].role] -= damage;
+				if(rpg.roles_properties.HP[rpg.team[i].role] <= 0)
+					voc(rpg.roles_properties.sfx_death[rpg.team[i].role]).play();
+				//display_damage_number();
+			}
+		}
+	}
+	for(int i=0,gap=16;i<5;i++){
+		for(int r=0;r<=rpg.team_roles;r++)
+			if(role_exist[r]){
+				if(defend_multiple[r]<4){
+					battle_role_data[r].frame=4;
+					if(i>0){
+						battle_role_data[r].pos_x+=gap;
+						battle_role_data[r].pos_y+=gap/2;
+					}
+				}
+				if(i<3){
+					affected_roles[r]=true;
+				}
+			}
+		gap>>=1;
+		draw_battle_scene(0,1);
+	}
+	battle_enemy_data[enemy_pos].frame=0;
+	battle_enemy_data[enemy_pos].pos_x = battle_enemy_data[enemy_pos].pos_x_bak;
+	battle_enemy_data[enemy_pos].pos_y = battle_enemy_data[enemy_pos].pos_y_bak;
+	draw_battle_scene(0,1);
+	for(int r=0;r<=rpg.team_roles;r++)
+		if(role_exist[r])
+			battle_role_data[r].frame=battle_role_data[r].frame_bak;
+	enemy_moving_semaphor=true;
 }
 void battle::magic_fire(int frame,int magic_id)
 {
