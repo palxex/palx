@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
 		for(int i=0;i<5;i++)
 			for(int j=0;j<8;j++)
 				if(j)
-					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i]+rnd1(2)+2,
-					rpg.roles_exp[j][i].exp=rnd1(20);
+					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i]+round(rnd1(2))+2,
+					rpg.roles_exp[j][i].exp=round(rnd1(20));
 				else
 					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i],
 					rpg.roles_exp[j][i].exp=0;
