@@ -208,7 +208,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 {
 	if(times==0)
 		times=1;
-	stage_blow_away+=rnd1(max_blow_away);
+	stage_blow_away+=round(rnd1(max_blow_away));
 	for(int t=1;t<=times;t++)
 	{
 		bitmap scanline(0,SCREEN_W,effective_y);
@@ -230,7 +230,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 				affected_enemies[e]=1;
 			int crazybits=0;
 			if(enemy_status_pack[e].pack.crazy)
-				crazybits=rnd1(3);
+				crazybits=round(rnd1(3));
 			boost::shared_ptr<sprite> it=boost::shared_ptr<sprite>(enemy_images[e].getsprite(battle_enemy_data[e].frame)->clone());
 			it->setXYL(battle_enemy_data[e].pos_x+crazybits+stage_blow_away,battle_enemy_data[e].pos_y+sth_about_y+stage_blow_away/2,0);
 			sprites.push(it);
@@ -242,7 +242,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 			{
 				int crazybits=0;
 				if(role_status_pack[r].pack.crazy)
-					crazybits=rnd1(3);
+					crazybits=round(rnd1(3));
 				if(role_invisible_rounds==0){
 					boost::shared_ptr<sprite> it=boost::shared_ptr<sprite>(team_images[r].getsprite(battle_role_data[r].frame)->clone());
 					it->setXYL(battle_role_data[r].pos_x+crazybits,battle_role_data[r].pos_y,0);
@@ -586,7 +586,7 @@ battle::END battle::process()
 			if(battle_enemy_data[commanding_enemy].HP<=0)
 				continue;
 			int speed=(int)((get_monster(commanding_enemy).speed+enemy_level_scaler(commanding_enemy,3))*(0.9+rnd1(0.2)));
-			for(int action=0,actions=(rnd1(get_monster(commanding_enemy).flag_twice_action)>0?1:0);action<=actions;action++)
+			for(int action=0,actions=round(rnd1(get_monster(commanding_enemy).flag_twice_action)>0?1:0);action<=actions;action++)
 				vs_table.insert(std::make_pair(speed,commanding_enemy+100));
 		}
 
@@ -868,7 +868,7 @@ void battle::enemy_phisical_attack(int enemy_pos,int role_pos,int force)
 		battle_role_data[role_pos].frame=4;
 	if(modulated_who_care>=0){
 		affected_roles[role_pos]=true;
-		final_damage=calc_base_damage(role_defence,force+rnd0())*(1+rnd1(1.0/8))+round(rnd0());
+		final_damage=calc_base_damage(role_defence,force+round(rnd0()))*(1+rnd1(1.0/8))+round(rnd0());
 		if(role_status_pack[role_pos].pack.high_defence)
 			final_damage/=2;
 		if(rpg.roles_properties.HP[rpg.team[role_pos].role] < final_damage)

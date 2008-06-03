@@ -614,7 +614,7 @@ __ride:
 				int x_off=obj.pos_x-scene->team_pos.toXY().x,y_off=obj.pos_y-scene->team_pos.toXY().y;
 				position pos(obj.pos_x,obj.pos_y);pos.toXYH();pos.toXY();
 				if(abs(x_off)+2*abs(y_off)<guard_field*32*rpg.chase_range){
-					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(rnd0()?-1:1),y_off?-y_off:(rnd0()?-1:1));
+					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(round(rnd0())?-1:1),y_off?-y_off:(round(rnd0())?-1:1));
 					if(param3)
 						obj.direction=d,
 						npc_speed=chase_speed;
