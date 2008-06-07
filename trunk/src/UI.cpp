@@ -26,6 +26,7 @@
 
 using namespace Pal;
 
+int __zero_ref=0;
 
 bool shadow_filter(int srcVal, uint8* pOutVal, void* pUserData)
 {
@@ -107,7 +108,7 @@ menu::menu(int x,int y,std::vector<std::string> &strs,int chars,int length,int s
 	menu_items.swap(strs);
 	blit(bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
-int menu::operator()(const menu_tmp &con,int _selected)
+int menu::operator()(const menu_tmp &con,const int &_selected)
 {
 	return const_cast<menu_tmp&>(con).select(this,_selected);
 }
@@ -123,7 +124,7 @@ void menu_tmp::post_action(menu *abs)
 {
     blit(abs->bak,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
-int single_menu::select(menu *abs,int _selected)
+int single_menu::select(menu *abs,const int &_selected)
 {
 	selected=(_selected>=0?_selected:0);
 	prev_action(abs);
@@ -136,7 +137,7 @@ int single_menu::select(menu *abs,int _selected)
 			return -1;
 	}while(running && got--);
 	post_action(abs);
-	return selected;
+	return const_cast<int&>(_selected) = selected;
 }
 void single_menu::draw(menu *abs)
 {
@@ -197,7 +198,7 @@ void multi_menu::draw(menu *abs){
 	UIpics.getsprite(69)->blit_to(buf,16+100*(selected%3)+24,begin_y+12+(selected/3-offset)*18+11,true,3,2);
 	blit(buf,screen,0,0,0,0,SCREEN_W,SCREEN_H);
 }
-int multi_menu::select(menu *abs,int _selected)
+int multi_menu::select(menu *abs,const int &_selected)
 {
 	prev_action(abs);
 	selected=((_selected<=max && _selected>=0)?_selected:0);
@@ -206,8 +207,10 @@ int multi_menu::select(menu *abs,int _selected)
 		if(keyloop(abs)==-1)
 			return -1;
 	}while(running && !got);
+	int target=rpg.items[selected].item;
 	post_action(abs);
-	return selected;
+	const_cast<int&>(_selected) = selected;
+	return target;
 }
 int multi_menu::keyloop(menu *abs)
 {
@@ -255,10 +258,14 @@ struct magic_menu:public multi_menu
 		blit(screen,abs->bak,0,0,0,0,SCREEN_W,SCREEN_H);
 		begin_y=45;
 	}
-	int select(menu *abs,int _selected)
+	int select(menu *abs,const int &_selected)
 	{
 		prev_action(abs);
-		selected=((_selected<=max && _selected>=0)?_selected:0);
+		if(selected<0)
+			selected=0;
+		else if(selected>max)
+			selected=max;
+		int target;
 		while(running){
 			do{
 				draw(abs);
@@ -266,12 +273,14 @@ struct magic_menu:public multi_menu
 					return -1;
 			}while(running && !got);
 			got=0;
+			target=rpg.roles_properties.magics[selected][role];
 			if(after)
 				post_action(abs);
 			else
 				break;
 		}
-		return selected;
+		const_cast<int&>(_selected) = selected;
+		return target;
 	}
 	void got_action(menu*){
 		if(rpg.objects[rpg.roles_properties.magics[selected][role]].magic.param&mask  && rpg.roles_properties.MP[role]>=magics[rpg.objects[rpg.roles_properties.magics[selected][role]].magic.magic].power_used)
@@ -604,11 +613,11 @@ int select_rpg(int ori_select,BITMAP *bmp)
 	}while(running && ok);
 	return selected;
 }
-int select_theurgy(int role,int mask,int selected,bool after)
+int select_theurgy(int role,int mask,int &selected,bool after)
 {
 	return menu(0xA,0x2D,5,0,17,9,false)(magic_menu(role,mask,after),selected);
 }
-int yes_or_no(int word,int selected)
+int yes_or_no(int word,int &selected)
 {
 	bitmap buf(screen);
 	bool got=false;
@@ -786,7 +795,7 @@ void role_status()
 		cur_role=rpg.team[selected=((selected<0)?0:((selected>rpg.team_roles)?rpg.team_roles:selected))].role;
 	}while(ok && running);
 }
-int menu_item(int selected,int filter)
+int menu_item(int &selected,int filter)
 {
 	return menu(2,-8,8,0,18,9,false)(use_menu(filter,-1),selected);
 }
@@ -807,22 +816,22 @@ bool process_Menu()
 				std::vector<std::string> names;
 				for(int i=0;i<=rpg.team_roles;i++)
 					names.push_back(objs(rpg.roles_properties.name[rpg.team[i].role]));
-				role_select=menu(0x2c,0x40,names,3)(single_menu(),role_select);
+				menu(0x2c,0x40,names,3)(single_menu(),role_select);
 			}
 			else
 				role_select=0;
 			if(role_select>=0)
-				magic_select=select_theurgy(rpg.team[role_select].role,1,magic_select);
+				select_theurgy(rpg.team[role_select].role,1,magic_select);
 		}
 		break;
 	case 2:
 		switch(itemuse_select=menu(0x1e,0x3c,2,0x16,2)(single_menu(),itemuse_select))
 		{
 		case 0:
-			item_select=menu(2,33,8,0,18,9,false)(equip_menu(),item_select);
+			menu(2,33,8,0,18,9,false)(equip_menu(),item_select);
 			break;
 		case 1:
-			item_select=menu(2,33,8,0,18,9,false)(use_menu(),item_select);
+			menu(2,33,8,0,18,9,false)(use_menu(),item_select);
 			break;
 		}
 		break;
@@ -842,7 +851,7 @@ bool process_Menu()
 				return true;
 			break;
 		case 2:
-			if((music_selected=yes_or_no(0x11,music_selected))<0)
+			if((yes_or_no(0x11,music_selected))<0)
                 break;
             {
                 int vol=((music_selected==1)?255:0);
@@ -852,7 +861,7 @@ bool process_Menu()
             }
 			break;
 		case 3:
-			if((sfx_selected=yes_or_no(0x11,sfx_selected))<0)
+			if((yes_or_no(0x11,sfx_selected))<0)
                 break;
 			global->set<int>("music","volume_sfx",(sfx_selected==1)?255:0);
 			break;

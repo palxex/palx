@@ -728,7 +728,8 @@ __ride:
 		//not implemented
 		break;
 	case 0x67:
-		//not implemented
+		monsters[rpg.objects[battle_enemy_data[object].id].enemy.enemy].magic=param1;
+		monsters[rpg.objects[battle_enemy_data[object].id].enemy.enemy].magic_freq=(param2==0?10:param2);
 		break;
 	case 0x68:
 		//not implemented

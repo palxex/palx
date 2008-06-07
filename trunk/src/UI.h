@@ -30,6 +30,7 @@
 extern void show_wait_icon();
 extern void dialog_string(const char *str,int x,int y,int color,bool shadow,BITMAP *bmp=screen);
 extern void draw_oneline_m_text(char *str,int x,int y);
+extern int __zero_ref;
 class dialog
 {
 	sprite *border[3][3];
@@ -48,7 +49,7 @@ struct menu
 public:
 	menu(int x,int y,int menus,int begin,int chars,int style=0,bool shadow=true);
 	menu(int x,int y,std::vector<std::string> &strs,int chars,int length=-1,int =0);
-	int operator()(const menu_tmp &,int selected=0);
+	int operator()(const menu_tmp &,const int &selected=__zero_ref);
 	~menu();
 };
 struct menu_tmp
@@ -59,7 +60,7 @@ struct menu_tmp
 	menu_tmp():got(-1),color_selecting(0xFA){}
 	virtual void prev_action(menu*);
 	virtual void post_action(menu*);
-	virtual int select(menu*,int)=0;
+	virtual int select(menu*,const int&)=0;
 	virtual void draw(menu*)=0;
 	virtual int keyloop(menu*)=0;
 	virtual void got_action(menu*)=0;
@@ -68,7 +69,7 @@ struct menu_tmp
 struct single_menu:public menu_tmp
 {
 	void draw(menu*);
-	int select(menu*,int);
+	int select(menu*,const int&);
 	int keyloop(menu*);
 	void got_action(menu*);
 };
@@ -80,7 +81,7 @@ struct multi_menu:public menu_tmp
 	int keyloop(menu*);
 	void got_action(menu*);
 	void draw(menu*);
-	int select(menu*,int selected);
+	int select(menu*,const int &selected);
 };
 
 class single_dialog
@@ -96,8 +97,7 @@ typedef bool DECODERLECALLBACK(int srcVal, uint8* pOutVal, void* pUserData);
 DECODERLECALLBACK shadow_filter,brighter_filter,sadden_filter;
 
 int select_rpg(int =0,BITMAP * =screen);
-int select_item(int mask,int ,int selected);
-int select_theurgy(int role,int mask,int selected,bool =true);
+int select_theurgy(int role,int mask,int &selected,bool =true);
 void show_money(int num,int x,int y,int text,bool shadow,BITMAP *bmp=screen);
 void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp=screen);
 void show_num_han(int num,int x,int y,int digits,BITMAP *bmp=screen,bool shadow=true);
@@ -106,10 +106,11 @@ void display_role_status(int flag,int role,int x,int y,BITMAP *bmp=screen);
 void show_status_bar(BITMAP *buf=screen);
 
 void role_status();
-int menu_item(int selected,int filter);
+int menu_item(int &selected,int filter);
 
-int yes_or_no(int word=0x13,int selected=0);
+int yes_or_no(int word=0x13,int &selected=__zero_ref);
 
 void shop(int);
 void hockshop();
+
 #endif
