@@ -73,6 +73,22 @@ struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},
 
 int enemy_sequence[5]={2,1,0,4,3};
 
+void battle::display_damage_number(int color,int num,int x,int y)
+{
+	if(num)
+		for(int i=0;i<12;i++)
+			if(battle_numbers[i].times<=0){
+				battle_numbers[i].num=num;
+				battle_numbers[i].times=10;
+				battle_numbers[i].x=x;
+				battle_numbers[i].y=y;
+				battle_numbers[i].color=color;
+				if(battle_numbers[i].y<15)
+					battle_numbers[i].y=15;
+				break;
+			}
+}
+
 void battle::load_enemy(int enemy_pos,int enemy_id)
 {
 	battle_enemy_data[enemy_pos].id=enemy_id;
@@ -112,7 +128,7 @@ void battle::setup_role_status()
 	for(int i=0;i<=rpg.team_roles;i++){
 		int role=rpg.team[i].role;
 		battle_role_data[i].frame=battle_role_data[i].prev_frame;
-		role_attack_table[i].alive=0;
+		role_action_table[i].alive=0;
 		if(rpg.roles_properties.HP[role]<100 && rpg.roles_properties.HP[role]<=rpg.roles_properties.HP_max[role]/5)
 			battle_role_data[i].frame=1;
 		if(role_status_pack[i].pack.sleep)
@@ -122,7 +138,7 @@ void battle::setup_role_status()
 		if(rpg.roles_properties.HP[role]<=0){
 			battle_role_data[i].frame=2;
 			if(battle_role_data[i].frame_bak!=2)
-				role_attack_table[i].alive=-1;
+				role_action_table[i].alive=-1;
 		}
 		battle_role_data[i].frame_bak=battle_role_data[i].frame;
 		if(battle_role_data[i].frame<1){
@@ -179,11 +195,14 @@ int battle::select_targetting_enemy()
 	}
 	return targetting_enemy=-1;
 }
+int battle::select_targetting_role(){
+	return 0;
+}
 int battle::select_a_living_role_randomly()
 {
 	int selected;
 	do
-		selected=round(rnd1(enemy_poses_count));
+		selected=round(rnd1(rpg.team_roles));
 	while(selected>rpg.team_roles || rpg.roles_properties.HP[rpg.team[selected].role]<=0);
 	return selected;
 }
@@ -192,7 +211,7 @@ void battle::battle_produce_screen(BITMAP *buf)
 {
 	battlescene.blit_to(buf);
 	for(int i=enemy_poses_count-1;i>=0;i--)
-		if(enemyteams[enemy_team].enemy[i]>0){
+		if(battle_enemy_data[i].HP>0){
 			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_filter(buf,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y,brighter_filter,6,affected_enemies[i],true);
 		}
 
@@ -258,6 +277,16 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 			}
 		}
 		add_occuring_magic_to_drawlist(false);
+		for(int i=0;i<12;i++)
+			if(battle_numbers[i].times){
+				int num=battle_numbers[i].num,posx=battle_numbers[i].x+6,layer=999,color=(battle_numbers[i].color==0?0x13:(battle_numbers[i].color==1?0x1D:(battle_numbers[i].color==2?0x38:0)));
+				if(num>=0)
+					do
+						sprites.push(boost::shared_ptr<sprite>(Pal::UIpics.getsprite(color+num%10)->clone()->setXYL(posx-=6,battle_numbers[i].y+layer,layer)));
+					while((num/=10)>0);
+				battle_numbers[i].times--;
+				battle_numbers[i].y--;
+			}
 
 		sprites.flush(scanline);
 		sprites.clear_active();
@@ -350,6 +379,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	memset(&store_for_diff,0,sizeof(store_for_diff));
 	memset(affected_enemies,0,sizeof(affected_enemies));
 	memset(affected_roles,0,sizeof(affected_roles));
+	memset(battle_numbers,0,sizeof(battle_numbers));
 
 	//确保我方没有开战即死
 	for(int i=0;i<=rpg.team_roles;i++)
@@ -364,7 +394,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	sprites.clear_active();
 
 	for(int i=0;i<12;i++)
-		battle_numbers[i].exist=false;
+		battle_numbers[i].times=0;
 	//隐藏经验纪录清空,原版盖罗娇不清,修正
 	for(int i=0;i<6;i++)
 		for(int j=0;j<8;j++)
@@ -432,7 +462,7 @@ battle::END battle::process()
 		for(int i=0;i<0x100;i++)
 			Pal::rpg.items[i].using_amount=0;
 
-		memset(role_attack_table,0,sizeof(role_attack_table));
+		memset(role_action_table,0,sizeof(role_action_table));
 
 		if(flag_autobattle==0){
 			for(int i=0;i<=rpg.team_roles;i++)
@@ -447,8 +477,8 @@ battle::END battle::process()
 			enemy_moving_semaphor=true;
 			magic_image_occurs=0;
 			if(role_status_pack[commanding_role].pack.dummy){
-				role_attack_table[commanding_role].target=select_an_enemy_randomly();
-				role_attack_table[commanding_role].action=ATTACK;
+				role_action_table[commanding_role].target=select_an_enemy_randomly();
+				role_action_table[commanding_role].action=ATTACK;
 				commanding_role++;
 				continue;//MASK:not completely port. Original version don't reset the first bools again.
 			}
@@ -464,10 +494,10 @@ battle::END battle::process()
 
 			//消灭上回合用掉的东东的记录
 			for(int i=commanding_role;i<=rpg.team_roles;i++)
-				if(role_attack_table[i].action==USE_ITEM || role_attack_table[i].action==THROW_ITEM){
-					if(rpg.items[role_attack_table[i].target].using_amount)
-						rpg.items[role_attack_table[i].target].using_amount--;
-					role_attack_table[i].action=ATTACK;//？那R……
+				if(role_action_table[i].action==USE_ITEM || role_action_table[i].action==THROW_ITEM){
+					if(rpg.items[role_action_table[i].target].using_amount)
+						rpg.items[role_action_table[i].target].using_amount--;
+					role_action_table[i].action=ATTACK;//？那R……
 				}
 
 			if(flag_autobattle)
@@ -497,53 +527,144 @@ battle::END battle::process()
 			case 0:
 				ok=true;
 				if(rpg.roles_properties.attack_all[rpg.team[commanding_role].role])
-					role_attack_table[commanding_role].action=ATTACK_ALL;
-				else if((targetting_enemy=select_targetting_enemy())>=0)
-					role_attack_table[commanding_role].action=ATTACK;
+					role_action_table[commanding_role].action=ATTACK_ALL;
+				else if((targetting_enemy=select_targetting_enemy())>=0){
+					role_action_table[commanding_role].target=targetting_enemy;
+					role_action_table[commanding_role].action=ATTACK;
+				}
 				else
 					ok=false;
 				break;
 			case 1:
-				show_money(rpg.coins,10,7,0x15,false);
-				if((magic_select=select_theurgy(rpg.team[commanding_role].role,role_status_pack[commanding_role].pack.seal?0:2,magic_select,false))>=0)
-					ok=true;
-				draw_battle_scene_selecting();
-				break;
+				{
+					bool tk;
+					do{
+						tk=false;
+						show_money(rpg.coins,10,7,0x15,false);
+						magic_select=select_theurgy(rpg.team[commanding_role].role,role_status_pack[commanding_role].pack.seal?0:2,instrum_object,false);
+						draw_battle_scene_selecting();
+						if(instrum_object>=0){
+							role_action_table[commanding_role].tool=magic_select;
+							role_action_table[commanding_role].toolpos=instrum_object;
+							ok=true;
+							int prop=rpg.objects[rpg.roles_properties.magics[instrum_object][rpg.team[commanding_role].role]].magic.param;
+							if((prop>>TARGET_ENEMY)&1){
+								if((prop>>OBJECT_ALL)&1){
+									int enemy=select_targetting_enemy();
+									if(enemy<0){
+										tk=true;
+										continue;
+									}
+									else
+										role_action_table[commanding_role].target=enemy;
+								}else
+									role_action_table[commanding_role].target=commanding_role;
+							}else{
+							}
+						}
+					}while(tk);
+					break;
+				}
 			case 2:
+				{
+					int target;
+					if( (rpg.objects[battle_role_data[commanding_role].contract_magic].magic.param>>OBJECT_ALL) &1)
+						target=select_targetting_enemy();
+					else
+						target=0;
+					if(target>=0){
+						for(int r=0;r<=rpg.team_roles;r++)
+							role_action_table[commanding_role].action=(ACTION)-1;
+						role_action_table[commanding_role].action=COSTAR;
+						commanding_role=rpg.team_roles;
+						ok=true;
+					}
+				}
 				break;
 			case 3:
-				switch(menu(4,0x10,5,0x38,2)(single_menu(),0))
 				{
-				case -1:
-					draw_battle_scene_selecting();
-					break;
-				case 0:
-					auto_selected_enemy = select_an_enemy_randomly();
-					break;
-				case 1:
-					switch(itemuse_select=menu(0x18,0x32,2,0x17,2)(single_menu(),itemuse_select))
-					{
-					draw_battle_scene_selecting();
-					case 0:
-						if((item_select=menu_item(item_select,1))>=0)
-							ok=true;
-						break;
-					case 1:
-						if((item_select=menu_item(item_select,4))>=0)
-							ok=true;
-						break;
-					}
-					draw_battle_scene_selecting();
-					break;
-				case 3:
-					battle_result=ENEMY_FAIL;
-					return check_end_battle();
-				case 4:
-					role_status();
-					draw_battle_scene_selecting();
-					break;
-				default:
-					break;
+					bool tk;
+					do{
+						tk=false;
+						int tk2;
+						switch(tk2=menu(4,0x10,5,0x38,2)(single_menu(),0))
+						{
+						case -2:
+						case -1:
+							draw_battle_scene_selecting();
+							break;
+						case 0:
+							auto_selected_enemy = select_an_enemy_randomly();
+							break;
+						case 1:
+							{
+refresh:
+								int item;
+								switch(menu(0x18,0x32,2,0x17,2)(single_menu(),itemuse_select))
+								{
+								draw_battle_scene_selecting();
+								case 0:
+									if((item=menu_item(item_select,1))>=0){
+										ok=true;
+										int target;
+										if( (rpg.objects[item].item.param>>4) &1)
+											target=-1;
+										else
+											target=select_targetting_role();
+										role_action_table[commanding_role].action=USE_ITEM;
+										role_action_table[commanding_role].target=target;
+									}
+									break;
+								case 1:
+									if((item=menu_item(item_select,4))>=0){
+										ok=true;
+										int target;
+										if( (rpg.objects[item].item.param>>4) &1)
+											target=commanding_role;
+										else
+											target=select_targetting_enemy();
+										role_action_table[commanding_role].action=THROW_ITEM;
+										role_action_table[commanding_role].target=target;
+									}
+									break;
+								default:
+									tk=true;
+									continue;
+								}
+								draw_battle_scene_selecting();
+								if(itemuse_select==-2)//finally,has to use goto logic.
+									goto refresh;
+								if(item>=0){
+									role_action_table[commanding_role].toolpos=item_select;
+									role_action_table[commanding_role].tool=item;
+									rpg.items[item_select].using_amount++;
+								}else{
+									tk=true;
+									continue;
+								}
+							}
+							break;
+						case 2:
+							role_action_table[commanding_role].action=DEFENCE;
+							break;
+						case 3:
+							for(int r=commanding_role;r<=rpg.team_roles;r++)
+								role_action_table[r].action=ESCAPE;
+							break;
+						case 4://
+							role_status();
+							draw_battle_scene_selecting();
+							break;
+						default:
+							break;
+						}
+						if(tk2!=4){
+							if(role_action_table[commanding_role].action==ESCAPE)//duplicated
+								commanding_role=rpg.team_roles;
+							instrum_selected=0;instrum_object=0;
+							draw_battle_scene_selecting();
+						}
+					}while(tk);
 				}
 				break;
 			case PAL_VK_REPEAT+100://fill!!!
@@ -563,7 +684,7 @@ battle::END battle::process()
 			case PAL_VK_FORCE+100:
 				break;
 			default:
-				if(role_attack_table[commanding_role].action==ESCAPE)
+				if(role_action_table[commanding_role].action==ESCAPE)
 					commanding_role=rpg.team_roles;
 				instrum_selected=0;instrum_object=0;
 				draw_battle_scene_selecting();
@@ -571,8 +692,12 @@ battle::END battle::process()
 			}
 			if(!need_battle)
 				break;
-			if(ok)
+			if(ok){				
+				if(role_action_table[commanding_role].action==ESCAPE)//duplicate code,but how to eliminate...
+					commanding_role=rpg.team_roles;
 				commanding_role++;
+				instrum_selected=0;instrum_object=0;
+			}
 			perframe_proc();
 		}
 		flag_selecting=false;
@@ -594,9 +719,9 @@ battle::END battle::process()
 		for(int commanding_role=0;commanding_role<=rpg.team_roles;commanding_role++)
 		{
 			if(!flag_repeat)
-				bak_attack_table[commanding_role]=role_attack_table[commanding_role];
+				bak_action_table[commanding_role]=role_action_table[commanding_role];
 			int speed=(int)(get_cons_attrib(rpg.team[commanding_role].role,0x14)*(0.9+rnd1(0.2)));
-			switch(role_attack_table[commanding_role].action)
+			switch(role_action_table[commanding_role].action)
 			{
 			case COSTAR:
 				speed*=10;
@@ -650,24 +775,24 @@ battle::END battle::process()
 					&& role_status_pack[twoside_counter].pack.sleep<=0 && role_status_pack[twoside_counter].pack.fixed<=0)
 				{
 					if(flag_autobattle>=2){
-						role_attack_table[twoside_counter].target=auto_selected_enemy;
+						role_action_table[twoside_counter].target=auto_selected_enemy;
 						if(flag_autobattle==2)//菜单:围攻
-							role_attack_table[twoside_counter].action=ATTACK;
+							role_action_table[twoside_counter].action=ATTACK;
 						else if(flag_autobattle==9){//自动战
-							role_attack_table[twoside_counter].action=MAGIC_TO_ENEMY;
-							role_attack_table[twoside_counter].tool=rpg.roles_properties.magics[round(rnd1(4))][attacking_role];//只能自动前4招……
+							role_action_table[twoside_counter].action=MAGIC_TO_ENEMY;
+							role_action_table[twoside_counter].tool=rpg.roles_properties.magics[round(rnd1(4))][attacking_role];//只能自动前4招……
 						}
 					}
 					if(role_status_pack[twoside_counter].pack.crazy>0)
-						role_attack_table[twoside_counter].action=CRAZY_ATTACK;
-					int target_enemy=role_attack_table[twoside_counter].target;
+						role_action_table[twoside_counter].action=CRAZY_ATTACK;
+					int target_enemy=role_action_table[twoside_counter].target;
 					while(battle_enemy_data[target_enemy].HP<=0)
 						target_enemy=(target_enemy+1)%enemy_poses_count;
 					flag_withdraw=false;flag_attacking_hero=false;battle_sfx=0;
 					int enemies_before=get_enemy_alive();
 					for(int i=0;i<5;i++)
 						store_for_diff.enemies[i].HP=battle_enemy_data[i].HP;
-					switch(role_attack_table[twoside_counter].action)//fill!!!
+					switch(int action=role_action_table[twoside_counter].action)//fill!!!
 					{
 					case ATTACK:
 						break;
@@ -708,7 +833,7 @@ battle::END battle::process()
 			}
 
 			for(int i=0;i<12;i++)
-				battle_numbers[i].exist=false;
+				battle_numbers[i].times=0;
 
 			if(flag_summon){
 				setup_role_enemy_image();
@@ -874,7 +999,7 @@ void battle::enemy_phisical_attack(int enemy_pos,int role_pos,int force)
 		if(rpg.roles_properties.HP[rpg.team[role_pos].role] < final_damage)
 			final_damage=rpg.roles_properties.HP[rpg.team[role_pos].role];
 		rpg.roles_properties.HP[rpg.team[role_pos].role]-=final_damage;
-		//display_damage_number(1,final_damage,battle_role_data[role_pos].pos_y-0x46,battle_role_data[role_pos].pos_x);
+		display_damage_number(1,final_damage,battle_role_data[role_pos].pos_x,battle_role_data[role_pos].pos_y-0x46);
 	}
 	voc(sfx).play();
 	draw_battle_scene(0,1);
@@ -1016,10 +1141,9 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 	for(int i=0;i<=rpg.team_roles;i++){
 		int force = ori_force+round(rnd1(4));
 		if(role_exist[i]){
-			if(role_exist[i] & magic.elem_attr){
-				int damage = force+calc_base_damage(get_cons_attrib(i,0x13),force)/2;
-				damage/=defend_multiple[i];
-				switch(int elem=magic.elem_attr){
+			int damage = force+calc_base_damage(get_cons_attrib(i,0x13),force)/2;
+			damage/=defend_multiple[i];
+			switch(int elem=magic.elem_attr){
 					case 6:
 						elem=0;
 					case 1:
@@ -1033,16 +1157,15 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 						break;
 					default:
 						break;
-				}
-				if(rpg.roles_properties.HP[rpg.team[i].role] < damage)
-					damage=rpg.roles_properties.HP[rpg.team[i].role];
-				if(damage<0)
-					damage=0;
-				rpg.roles_properties.HP[rpg.team[i].role] -= damage;
-				if(rpg.roles_properties.HP[rpg.team[i].role] <= 0)
-					voc(rpg.roles_properties.sfx_death[rpg.team[i].role]).play();
-				//display_damage_number();
 			}
+			if(rpg.roles_properties.HP[rpg.team[i].role] < damage)
+				damage=rpg.roles_properties.HP[rpg.team[i].role];
+			if(damage<0)
+				damage=0;
+			rpg.roles_properties.HP[rpg.team[i].role] -= damage;
+			if(rpg.roles_properties.HP[rpg.team[i].role] <= 0)
+				voc(rpg.roles_properties.sfx_death[rpg.team[i].role]).play();
+			display_damage_number(1,damage,battle_role_data[i].pos_x,battle_role_data[i].pos_y-0x46);
 		}
 	}
 	for(int i=0,gap=16;i<5;i++){
@@ -1166,7 +1289,7 @@ void battle::enemy_attack_role(int enemy_pos,int role_pos){
 		setup_role_status();
 		for(int i=1,offset=10;i<=5;i++){
 			for(int r=0;r<=rpg.team_roles;r++)
-				if(role_attack_table[i].alive==-1){
+				if(role_action_table[i].alive==-1){
 					battle_role_data[role_pos].pos_x += offset;
 					battle_role_data[role_pos].pos_y += offset/2;
 					for(int r2=0;r2<rpg.team_roles;r2++)

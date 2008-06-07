@@ -69,6 +69,7 @@ extern struct _battle_enemy_data{
 }battle_enemy_data[TEAMENEMIES];
 extern RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 extern int flag_autobattle;
+enum MAGIC_PROP{NONE,ON_SCENE,ON_BATTLE,UNKNOWN,TARGET_ENEMY,OBJECT_ALL};
 
 class battle{
 	enum ACTION{
@@ -90,13 +91,13 @@ class battle{
 		int tool;
 		int toolpos;
 		int alive;
-	}role_attack_table[8],bak_attack_table[8];
+	}role_action_table[8],bak_action_table[8];
 
 	struct _number{
 		int x,y;
 		int num;
 		int color;
-		bool exist;
+		int times;
 	}battle_numbers[12];
 
 	struct {
@@ -128,6 +129,8 @@ class battle{
 	void setup_role_status();
 
 	int select_an_enemy_randomly();
+
+	void display_damage_number(int color,int num,int x,int y);
 public:
 	enum END{
 		QUIT=-1,
@@ -170,6 +173,7 @@ public:
 	int get_enemy_alive();
 
 	int select_targetting_enemy();
+	int select_targetting_role();
 	int select_a_living_role_randomly();
 
 	void enemy_attack_role(int,int);
