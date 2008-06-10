@@ -127,6 +127,7 @@ void menu_tmp::post_action(menu *abs)
 int single_menu::select(menu *abs,const int &_selected)
 {
 	selected=(_selected>=0?_selected:0);
+	int &sld=const_cast<int&>(_selected);
 	prev_action(abs);
 	do{
 		draw(abs);
@@ -134,10 +135,10 @@ int single_menu::select(menu *abs,const int &_selected)
 		if(s==-2)
 			break;
 		else if(s==-1)
-			return -1;
+			return sld=-1;
 	}while(running && got--);
 	post_action(abs);
-	return const_cast<int&>(_selected) = selected;
+	return sld = selected;
 }
 void single_menu::draw(menu *abs)
 {
@@ -202,14 +203,15 @@ int multi_menu::select(menu *abs,const int &_selected)
 {
 	prev_action(abs);
 	selected=((_selected<=max && _selected>=0)?_selected:0);
+	int &sld=const_cast<int&>(_selected);
 	do{
 		draw(abs);
 		if(keyloop(abs)==-1)
-			return -1;
+			return sld=-1;
 	}while(running && !got);
 	int target=rpg.items[selected].item;
 	post_action(abs);
-	const_cast<int&>(_selected) = selected;
+	sld = selected;
 	return target;
 }
 int multi_menu::keyloop(menu *abs)
@@ -265,12 +267,13 @@ struct magic_menu:public multi_menu
 			selected=0;
 		else if(selected>max)
 			selected=max;
+		int &sld=const_cast<int&>(_selected);
 		int target;
 		while(running){
 			do{
 				draw(abs);
 				if(keyloop(abs)==-1)
-					return -1;
+					return sld=-1;
 			}while(running && !got);
 			got=0;
 			target=rpg.roles_properties.magics[selected][role];
@@ -279,7 +282,7 @@ struct magic_menu:public multi_menu
 			else
 				break;
 		}
-		const_cast<int&>(_selected) = selected;
+		sld = selected;
 		return target;
 	}
 	void got_action(menu*){

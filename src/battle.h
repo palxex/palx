@@ -166,6 +166,7 @@ public:
 	void battle_produce_screen(BITMAP *buf);
 	void draw_battle_scene(int delay,int times,BITMAP * =screen);
 	void draw_battle_scene_selecting();
+	void add_occuring_magic_to_drawlist(bool flag);
 
 	int bout_selecting(int &selected);
 
@@ -181,7 +182,9 @@ public:
 	void enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos);
 	void enemy_fire_magic(int enemy_pos);
 	void magic_fire(int delay,int magic_id);
-	void add_occuring_magic_to_drawlist(bool flag);
+
+	void auto_attack();
+	void use_or_throw(int use,int &select,bool& refresh);
 
 	int flag_invisible;
 	int role_invisible_rounds;
