@@ -376,10 +376,6 @@
 						RelativePath=".\src\script.cpp"
 						>
 					</File>
-					<File
-						RelativePath=".\src\shop.cpp"
-						>
-					</File>
 				</Filter>
 				<Filter
 					Name="graph"
@@ -439,6 +435,10 @@
 				<Filter
 					Name="UI"
 					>
+					<File
+						RelativePath=".\src\shop.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\src\UI.cpp"
 						>

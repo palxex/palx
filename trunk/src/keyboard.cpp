@@ -123,6 +123,7 @@ PAL_VKEY async_getkey()
 PAL_VKEY sync_getkey()
 {
 	PAL_VKEY x=PAL_VK_NONE;
+	clear_keybuf();
 		perframe_proc();
 		while(running && !is_out && !(x=async_getkey()))
 			delay(1);

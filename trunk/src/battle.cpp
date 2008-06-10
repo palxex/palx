@@ -389,7 +389,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	setup_our_team_data_things();
 
 	scene->scenemap.change(0);
-	scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
+	//scene->scenemap.change(Pal::scenes[Pal::rpg.scene_id].id);
 	flag_battling=true;
 	sprites.clear_active();
 
@@ -435,7 +435,8 @@ battle::END battle::process()
 {
 	int summon_magic=0;
 	while(running && need_battle){
-		static int itemuse_select,item_select,magic_select;
+		static int action_select,itemuse_select,item_select,magic_select;
+		int instrum_selected=0,instrum_object=0;
 		//战前脚本
 		for(int i=0;i<enemy_poses_count;i++)
 			if(battle_enemy_data[i].HP>0){
@@ -455,7 +456,6 @@ battle::END battle::process()
 			return check_end_battle();
 		}
 
-		int instrum_selected=0,instrum_object=0;
 		flag_repeat=false;
 
 		//清除物品使用记录
@@ -514,6 +514,7 @@ battle::END battle::process()
 
 
 			bool ok=false;clear_keybuf();
+			bool ck=false;
 			switch(bout_selecting(instrum_selected))
 			{
 			case -1:
@@ -587,69 +588,42 @@ battle::END battle::process()
 					do{
 						tk=false;
 						int tk2;
-						switch(tk2=menu(4,0x10,5,0x38,2)(single_menu(),0))
+						switch(tk2=menu(4,0x10,5,0x38,2)(single_menu(),action_select))
 						{
 						case -2:
 						case -1:
 							draw_battle_scene_selecting();
 							break;
 						case 0:
-							auto_selected_enemy = select_an_enemy_randomly();
+							auto_attack();
+							ok=true;
 							break;
 						case 1:
 							{
-refresh:
-								int item;
-								switch(menu(0x18,0x32,2,0x17,2)(single_menu(),itemuse_select))
-								{
-								draw_battle_scene_selecting();
-								case 0:
-									if((item=menu_item(item_select,1))>=0){
-										ok=true;
-										int target;
-										if( (rpg.objects[item].item.param>>4) &1)
-											target=-1;
-										else
-											target=select_targetting_role();
-										role_action_table[commanding_role].action=USE_ITEM;
-										role_action_table[commanding_role].target=target;
-									}
-									break;
-								case 1:
-									if((item=menu_item(item_select,4))>=0){
-										ok=true;
-										int target;
-										if( (rpg.objects[item].item.param>>4) &1)
-											target=commanding_role;
-										else
-											target=select_targetting_enemy();
-										role_action_table[commanding_role].action=THROW_ITEM;
-										role_action_table[commanding_role].target=target;
-									}
-									break;
-								default:
-									tk=true;
-									continue;
-								}
-								draw_battle_scene_selecting();
-								if(itemuse_select==-2)//finally,has to use goto logic.
-									goto refresh;
-								if(item>=0){
-									role_action_table[commanding_role].toolpos=item_select;
-									role_action_table[commanding_role].tool=item;
-									rpg.items[item_select].using_amount++;
-								}else{
-									tk=true;
-									continue;
-								}
+								bool tk3;
+								do{
+									tk3=false;
+									menu(0x18,0x32,2,0x17,2)(single_menu(),itemuse_select);
+									if(itemuse_select>=0)
+										use_or_throw(itemuse_select,item_select,tk3);
+									else
+										tk=true;
+								}while(tk3);
 							}
+							if(tk){
+								draw_battle_scene_selecting();
+								continue;
+							}
+							ok=true;
 							break;
 						case 2:
 							role_action_table[commanding_role].action=DEFENCE;
+							ok=true;
 							break;
 						case 3:
 							for(int r=commanding_role;r<=rpg.team_roles;r++)
 								role_action_table[r].action=ESCAPE;
+							ok=true;
 							break;
 						case 4://
 							role_status();
@@ -658,30 +632,74 @@ refresh:
 						default:
 							break;
 						}
-						if(tk2!=4){
-							if(role_action_table[commanding_role].action==ESCAPE)//duplicated
-								commanding_role=rpg.team_roles;
-							instrum_selected=0;instrum_object=0;
-							draw_battle_scene_selecting();
-						}
 					}while(tk);
 				}
 				break;
 			case PAL_VK_REPEAT+100://fill!!!
+				flag_repeat=true;
+				for(int r=commanding_role;r<=rpg.team_roles;r++){
+					memcpy(bak_action_table+r,role_action_table+r,sizeof(_role_attack));
+					switch(ACTION &action=role_action_table[r].action){//follow the original order
+					case ATTACK_ALL:
+						if(!rpg.roles_properties.attack_all[r])
+							action=ATTACK;
+						break;
+					case ATTACK:
+						if(rpg.roles_properties.attack_all[r])
+							action=ATTACK_ALL;
+						break;
+					case MAGIC_TO_US:
+					case MAGIC_TO_ENEMY:
+						{
+							int pos=get_magic_pos(r,role_action_table[r].tool);
+							role_action_table[r].toolpos=pos-0x20;
+							if(pos==0 || role_status_pack[r].pack.fixed || (rpg.roles_properties.MP[r]<magics[rpg.objects[role_action_table[r].tool].magic.magic].power_used))
+								if(action==MAGIC_TO_US)
+									action=DEFENCE;
+								else if(action==MAGIC_TO_ENEMY)
+									action=ATTACK;
+						}
+						break;
+					case USE_ITEM:
+					case THROW_ITEM:
+						{
+							int pos=std::find(Pal::rpg.items,Pal::rpg.items+0x100,role_action_table[r].tool)-rpg.items;
+							if(pos!=0x100 || rpg.items[pos].amount < rpg.items[pos].using_amount){//not found,used up; or will use up in this bout
+								role_action_table[r].toolpos=pos;
+								if(action==USE_ITEM)
+									action=DEFENCE;
+								else if(action==THROW_ITEM)
+									action=ATTACK;
+								}
+						}
+						break;
+					}
+				}
 				break;
 			case PAL_VK_AUTO+100:
+				auto_attack();
+				ok=true;
 				break;
 			case PAL_VK_DEFEND+100:
+				role_action_table[commanding_role].action=DEFENCE;
+				ok=true;
 				break;
 			case PAL_VK_USE+100:
+				use_or_throw(0,item_select,ck);
+				ok=true;
 				break;
 			case PAL_VK_THROW+100:
+				use_or_throw(1,item_select,ck);
+				ok=true;
 				break;
 			case PAL_VK_QUIT+100:
+				ok=true;
 				break;
 			case PAL_VK_STATUS+100:
+				ok=true;
 				break;
 			case PAL_VK_FORCE+100:
+				ok=true;
 				break;
 			default:
 				if(role_action_table[commanding_role].action==ESCAPE)
@@ -883,6 +901,75 @@ refresh:
 				flag_autobattle=0;
 	}
 	return check_end_battle();
+}
+void battle::auto_attack(){
+	auto_selected_enemy = select_an_enemy_randomly();
+	for(int i=commanding_role;i<=rpg.team_roles;i++){
+		role_action_table[i].action=AUTO_ATTACK;
+		role_action_table[i].target=auto_selected_enemy;//not instantly?
+	}
+	flag_autobattle=1;
+	flag_selecting=false;
+}
+void battle::use_or_throw(int itemuse_select,int &item_select,bool &refresh){
+	int filter=0;
+	if(itemuse_select==0)
+		filter=1;
+	else
+		filter=4;
+	int item=menu_item(item_select,filter);
+	draw_battle_scene_selecting();
+	if(item_select==-1){
+		refresh=true;
+		return;
+	}
+	bool need_refresh=false;
+	switch(itemuse_select){
+	case -1:
+		need_refresh=true;
+		break;
+	case 0:
+		{
+			int target;
+			if( (rpg.objects[item].item.param>>4) &1)
+				target=-1;
+			else
+				target=select_targetting_role();
+			if(target<0){
+				need_refresh=true;
+				break;
+			}
+			role_action_table[commanding_role].action=USE_ITEM;
+			role_action_table[commanding_role].target=target;
+		}
+		break;
+	case 1:
+		{
+			int target;
+			if( (rpg.objects[item].item.param>>4) &1)
+				target=commanding_role;
+			else
+				target=select_targetting_enemy();
+			if(target<0){
+				need_refresh=true;
+				break;
+			}
+			role_action_table[commanding_role].action=THROW_ITEM;
+			role_action_table[commanding_role].target=target;
+		}
+		break;
+	}
+	if(need_refresh==true){
+		refresh=true;
+		return;
+	}
+	if(item>=0){
+		role_action_table[commanding_role].toolpos=item_select;
+		role_action_table[commanding_role].tool=item;
+		rpg.items[item_select].using_amount++;
+	}else{
+		refresh=true;
+	}
 }
 battle::END battle::check_end_battle(){
 	need_battle=false;
