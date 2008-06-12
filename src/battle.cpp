@@ -68,7 +68,7 @@ int calc_final_damage(double A,int enemy,int magic)
 
 battle *battle::thebattle=NULL;
 
-struct{int x,y;} role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},{234,170},{270,146}},{{160,184},{204,175},{246,160},{278,144}}},
+struct{int x,y;} const role_poses[4][4]={{{240,170}},{{200,176},{256,152}},{{180,180},{234,170},{270,146}},{{160,184},{204,175},{246,160},{278,144}}},
 	instrum_pos[4]={{0x1C,0x8C},{0,0x9B},{0x37,0x9B},{0x1B,0xAA}};
 
 int enemy_sequence[5]={2,1,0,4,3};
@@ -291,6 +291,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 		sprites.flush(scanline);
 		sprites.clear_active();
 		scanline.blit_to(bmp);
+		save_bitmap("save.bmp",bmp,_current_palette);
 
 		for(int i=0;i<enemy_poses_count;i++)
 			if(affected_enemies[i])
@@ -1180,6 +1181,7 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 	if(magic.delay>0){
 		battle_enemy_data[enemy_pos].frame=magic_begin;
 		for(int i=0;i<magic.delay;i++)
+			magic_frame=i,
 			draw_battle_scene(magic.speed,1);
 		for(int i=magic_begin;i<=magic_end;i++){
 			battle_enemy_data[enemy_pos].frame=i;
