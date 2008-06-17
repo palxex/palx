@@ -318,9 +318,9 @@ typedef struct{
 typedef int16_t UPGRADE_EXP[100];
 
 typedef struct {
-	int16_t attack;
 	int16_t magic;
-}EFFECT_IDX[20];
+	int16_t attack;
+}EFFECT_IDX[10];
 typedef struct
 {
 unsigned short int key_left;

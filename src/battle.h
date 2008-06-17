@@ -42,6 +42,7 @@ extern union _role_status{
 extern struct _battle_role_data{
 	int battle_avatar;
 	int pos_x,pos_y;
+	int unknown;
 	int pos_x_bak,pos_y_bak;
 	int frame,frame_bak;
 	int offset,offset_bak;
@@ -109,7 +110,7 @@ class battle{
 		}enemies[TEAMENEMIES];
 	}store_for_diff;
 
-	std::multimap<int,int> vs_table;
+	std::multimap<int,int,std::greater<int> > vs_table;
 
 	int enemy_HP_r[5];
 
@@ -128,7 +129,6 @@ class battle{
 	void setup_role_enemy_image();
 	void setup_role_status();
 
-	int select_an_enemy_randomly();
 
 	void display_damage_number(int color,int num,int x,int y);
 public:
@@ -176,23 +176,28 @@ public:
 	int select_targetting_enemy();
 	int select_targetting_role();
 	int select_a_living_role_randomly();
+	int select_an_enemy_randomly();
 
 	void enemy_attack_role(int,int);
-	void enemy_phisical_attack(int enemy_pos,int role_pos,int force);
+	void enemy_physical_attack(int enemy_pos,int role_pos,int force);
 	void enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos);
 	void enemy_fire_magic(int enemy_pos);
+	void role_physical_attack(int role_pos,int enemy_pos,int &damage,int bouts);
 	void magic_fire(int delay,int magic_id);
+
+	void enemy_crazy_attack_enemy(int from,int target);
+	void role_crazy_attack_team(int from,int target);
 
 	void auto_attack();
 	void use_or_throw(int use,int &select,bool& refresh);
+	void escape();
+	void status();
 
 	int flag_invisible;
 	int role_invisible_rounds;
 	int twoside_counter;
 	bool flag_attacking_hero;
-	void load_theurgy_image(int id){
-		magic_img=Pal::magics[id].effect;
-	}
+	void load_theurgy_image(int id);
 private:
 	int commanding_role;
 	bool flag_withdraw;
@@ -215,7 +220,7 @@ private:
 	int battle_sfx;
 	int magic_frame;
 	int shake_viewport_y;
-	int magic_img;
+	boost::shared_ptr<sprite_prim> magic_img;
 };
 battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H
