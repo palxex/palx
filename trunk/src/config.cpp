@@ -482,7 +482,10 @@ int global_init::operator ()()
 	//allegro init
 	allegro_init();
 	display_setup();
-	install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL);
+
+	int digi_policy=(get<string>("music","type")=="rix"?DIGI_AUTODETECT:DIGI_NONE);
+	int midi_policy=(get<string>("music","type")=="midi"?MIDI_AUTODETECT:MIDI_NONE);
+	install_sound(digi_policy, midi_policy, NULL);
 	set_volume(get<int>("music","volume"),get<int>("music","volume"));
 	install_timer();
 	install_keyboard();keyboard_lowlevel_callback = key_watcher;

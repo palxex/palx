@@ -23,6 +23,14 @@
 #include "scene.h"
 #include "fade.h"
 
+#ifdef PAL_WIN95
+#   define SPLASH 3
+#   define REEL 2
+#else
+#   define SPLASH 0x26
+#   define REEL 0x60
+#endif
+
 using namespace Pal;
 
 void startup_splash()
@@ -30,8 +38,8 @@ void startup_splash()
 	clear_keybuf();
 	pat.read(1);
 	bitmap cat(0,SCREEN_W,SCREEN_H*2);
-	fbp(0x26).blit_to(cat,0,0,0,0);
-	fbp(0x27).blit_to(cat,0,0,0,200);
+	fbp(SPLASH).blit_to(cat,0,0,0,0);
+	fbp(SPLASH+1).blit_to(cat,0,0,0,200);
 
 	sprite_prim goose(MGO,0x49),title(MGO,0x47);
 	uint16_t &title_height=((uint16_t *)MGO.decode(0x47))[3],max_height=title_height,temp_height=8;
@@ -97,7 +105,7 @@ void startup_splash()
 int select_scene()
 {
 	pat.read(0);
-	show_fbp(60,0);
+	show_fbp(REEL,0);
 	musicplayer->play(4);
 	pal_fade_in(1);
 	bool ok=false;
