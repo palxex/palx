@@ -369,10 +369,27 @@ __walk_npc:
 		}
         break;
     case 0x21:
-        //battle rel,not implemented
+		for(int i=(param1?0:object),max=(param1?battle::get()->enemy_poses_count-1:object);i<=max;i++)
+			battle_enemy_data[i].HP-=param2;
         break;
     case 0x22:
-        //battle rel,not implemented
+		{
+			int change=0;
+			for(int i=(param1?0:object),max=(param1?rpg.team_roles:object),ori=0,role=rpg.team[i].role;i<=max;role=rpg.team[i].role,i++,change+=(rpg.roles_properties.HP[role]-ori))
+			{
+				ori=rpg.roles_properties.HP[role];
+				if(ori>0)
+					continue;
+				int revive_hp=rpg.roles_properties.HP_max[role]/10*param2;
+				rpg.roles_properties.HP[role]=(revive_hp?revive_hp:1);
+				for(int t=0;t<=0xF;t++){
+					rpg.poison_stack[t][i].poison=0;
+					if(role_status_pack[i].list[t]<999)
+						role_status_pack[i].list[t]=0;
+				}
+			}
+			prelimit_OK=!!change;
+		}
         break;
     case 0x23:
         for (int i=(param2?param2:0xB);i<=(param2?param2:0x10);i++)
@@ -414,7 +431,21 @@ __walk_npc:
         //not implemented
         break;
     case 0x2d:
-        //not implemented
+		if(param1==4){
+			if(rpg.roles_properties.HP[role]>0){
+				prelimit_OK=false;
+				break;
+			}else{
+				if(role_status_pack[object].pack.dummy<param2)
+					role_status_pack[object].pack.dummy=param2;
+				battle_role_data[object].frame=1;
+				battle::get()->draw_battle_scene(0,4);
+				battle_role_data[object].frame=0;
+			}
+		}else
+			if(param1>4 || role_status_pack[object].list[param1]<=0)
+				if(role_status_pack[object].list[param1]<param2)
+					role_status_pack[object].list[param1]=param2;
         break;
     case 0x2e:
         //not implemented
@@ -645,7 +676,10 @@ __ride:
 		rpg.scene_id=0;
 		break;
 	case 0x4f://fade red
-        //not implemented
+		if(param1<=0){
+
+		}else{//not used in game
+		}
 		break;
     case 0x50:
         pal_fade_out(param1==0?1:param1);
