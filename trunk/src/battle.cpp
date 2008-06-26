@@ -256,9 +256,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 			int crazybits=0;
 			if(enemy_status_pack[e].pack.crazy)
 				crazybits=round(rnd1(3));
-			boost::shared_ptr<sprite> it=boost::shared_ptr<sprite>(enemy_images[e].getsprite(battle_enemy_data[e].frame)->clone());
-			it->setXYL(battle_enemy_data[e].pos_x+crazybits+stage_blow_away,battle_enemy_data[e].pos_y+sth_about_y+stage_blow_away/2,0);
-			sprites.push(it);
+			sprites.push(boost::shared_ptr<sprite>(enemy_images[e].getsprite(battle_enemy_data[e].frame)->clone()->setXYL(battle_enemy_data[e].pos_x+crazybits+stage_blow_away,battle_enemy_data[e].pos_y+sth_about_y+stage_blow_away/2,0)));
 		}
 		if(flag_summon)
 			;//add_summon_img
@@ -269,9 +267,7 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 				if(role_status_pack[r].pack.crazy)
 					crazybits=round(rnd1(3));
 				if(role_invisible_rounds==0){
-					boost::shared_ptr<sprite> it=boost::shared_ptr<sprite>(team_images[r].getsprite(battle_role_data[r].frame)->clone());
-					it->setXYL(battle_role_data[r].pos_x+crazybits,battle_role_data[r].pos_y,0);
-					sprites.push(it);
+					sprites.push(boost::shared_ptr<sprite>(team_images[r].getsprite(battle_role_data[r].frame)->clone()->setXYL(battle_role_data[r].pos_x+crazybits,battle_role_data[r].pos_y,0)));
 				}
 				if(flag_selecting)
 				{
@@ -378,9 +374,9 @@ int battle::bout_selecting(int &selected)
 	return 0;
 }
 battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_waving(0),battlefield_waving(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
-									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),
+									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),enemy_poses_count(0),
 									flag_withdraw(false),effect_height(200),battle_scene_draw(false),magic_image_occurs(0),flag_summon(false),flag_selecting(false),
-									enemy_poses_count(0),enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false),
+									enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false),
 									auto_selected_enemy(0),battle_sfx(0),magic_frame(0),shake_viewport_y(0)
 {
 	memset(&store_for_diff,0,sizeof(store_for_diff));

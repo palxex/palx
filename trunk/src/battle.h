@@ -26,7 +26,7 @@
 #define TEAMENEMIES 5
 
 extern union _role_status{
-	int list[10];
+	int list[16];
 	struct {
 		int crazy;
 		int fixed;
@@ -197,6 +197,7 @@ public:
 	int role_invisible_rounds;
 	int twoside_counter;
 	bool flag_attacking_hero;
+	int enemy_poses_count;
 	void load_theurgy_image(int id);
 private:
 	int commanding_role;
@@ -206,7 +207,6 @@ private:
 	int magic_image_occurs;
 	bool flag_summon;
 	bool flag_selecting;
-	int enemy_poses_count;
 	int enemy_exps,enemy_money;
 	bool need_battle;
 	bool flag_repeat;
