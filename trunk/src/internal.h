@@ -25,13 +25,11 @@
 #include <map>
 
 struct Scene;
-struct BattleScene;
 class playrix;
 class Game;
-class global_init;
+class global_settings;
 extern Scene *scene;
-extern BattleScene *battle_scene;
-extern global_init *global;
+extern global_settings *global;
 
 extern bool flag_battling;
 

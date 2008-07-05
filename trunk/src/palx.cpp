@@ -30,7 +30,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	global_init _global(argc, argv);global=&_global;
+	global_settings _global(argc, argv);global=&_global;
+	if(!running)
+		return -1;
 	int save=_global();
 			bitmap _fakescreen;fakescreen=_fakescreen;clear_bitmap(fakescreen);
 			bitmap _backbuf;backbuf=_backbuf;clear_bitmap(backbuf);
