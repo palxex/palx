@@ -39,7 +39,6 @@ int RPG_screen_wave_grade=0;
 int wave_progression=0;
 
 Scene *scene;
-BattleScene *battle_scene;
 playrix *rix;
 Game *game;
 

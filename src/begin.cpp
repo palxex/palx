@@ -28,7 +28,7 @@
 #   define REEL 2
 #else
 #   define SPLASH 0x26
-#   define REEL 0x60
+#   define REEL 60
 #endif
 
 using namespace Pal;

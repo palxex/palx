@@ -386,8 +386,12 @@ ini_parser getconf(int c,char *v[])
         write_directly=true;
     return ini_parser(name.c_str(),write_directly);
 }
-global_init::global_init(int c,char *v[]):conf(getconf(c,v))
+global_settings::global_settings(int c,char *v[]):conf(getconf(c,v))
 {
+	//only for flush config file
+	if(!running)
+		return;
+
 	//version dispatch
 	boost::function<uint8_t *(shared_array<uint8_t> ,long &)> extract_ptr;
 	boost::function<shared_array<uint8_t>(shared_array<uint8_t> ,long &)> extract_sp;
@@ -421,7 +425,7 @@ global_init::global_init(int c,char *v[]):conf(getconf(c,v))
 		de_mkf_yj1_smkf=de_mkf_mkf_yj1;
 	}
 }
-void global_init::display_setup(bool ext)
+void global_settings::display_setup(bool ext)
 {
 #ifdef __MSDOS__
 	ext=true;
@@ -450,11 +454,11 @@ void global_init::display_setup(bool ext)
 		flush_screen();
 	}
 }
-global_init::~global_init()
+global_settings::~global_settings()
 {
 	global=NULL;
 }
-int global_init::operator ()()
+int global_settings::operator ()()
 {
 	using namespace Pal;
 	string path_root=get<string>("config","path");
@@ -516,4 +520,4 @@ int global_init::operator ()()
 
 	return save;
 }
-global_init *global;
+global_settings *global;

@@ -40,7 +40,7 @@
 std::string env_expand(std::string);
 class ini_parser
 {
-	friend class global_init;
+	friend class global_settings;
 	class section{
 		std::string section_name;
 		std::string section_desc;
@@ -165,12 +165,12 @@ public:
 	}
 };
 
-class global_init{
+class global_settings{
 	ini_parser conf;
 public:
 	std::string sfx_file;
-	global_init(int,char *[]);
-	~global_init();
+	global_settings(int,char *[]);
+	~global_settings();
 	void display_setup(bool =true);
 	template<typename T>
 	T get(const char *sec,const char *name)
