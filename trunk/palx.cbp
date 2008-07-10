@@ -47,8 +47,6 @@
 					<Add library="binio" />
 					<Add library="alleg_s" />
 					<Add library="freetype" />
-					<Add library="kernel32" />
-					<Add library="user32" />
 					<Add library="gdi32" />
 					<Add library="ole32" />
 					<Add library="dinput" />
@@ -56,7 +54,6 @@
 					<Add library="dxguid" />
 					<Add library="winmm" />
 					<Add library="dsound" />
-					<Add library="iconv" />
 				</Linker>
 			</Target>
 			<Target title="Release-w95">
@@ -75,8 +72,6 @@
 					<Add library="binio" />
 					<Add library="alleg_s" />
 					<Add library="freetype" />
-					<Add library="kernel32" />
-					<Add library="user32" />
 					<Add library="gdi32" />
 					<Add library="ole32" />
 					<Add library="dinput" />
@@ -84,7 +79,6 @@
 					<Add library="dxguid" />
 					<Add library="winmm" />
 					<Add library="dsound" />
-					<Add library="iconv" />
 				</Linker>
 			</Target>
 		</Build>

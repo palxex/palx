@@ -81,8 +81,8 @@ void startup_splash()
 				pal[i].b=pat.get(0)[i].b*prog_pale/0x40;
 			}
 			set_palette(pal);
-			perframe_proc();
 		}
+		perframe_proc();
 	}while(running && async_getkey()==PAL_VK_NONE);
 	title_height=max_height;
 	title.getsprite(0)->blit_to(screen,0xFE,10);
