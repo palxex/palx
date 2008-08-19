@@ -235,6 +235,16 @@ palerrno_t Pal::Tools::EncodeRle(const void* pSrc, int nSrcWidth, int nSrcHeight
 						*dest++ = *src; ptr++;
 					}
 				}
+				if(ptr == nDestMaxLen)
+					if(bcur)
+					{
+						// 边界情况:最后一组透明，则需写入
+						*pcount = 0x80 | count;
+					}else
+					{
+						// 边界情况:最后一组非透明，则需写入
+						*pcount = count;
+					}
 			}
 		}
 
