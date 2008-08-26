@@ -28,18 +28,21 @@
 #include <cstdlib>
 using namespace std;
 
+
 int main(int argc, char *argv[])
 {
-	global_settings _global(argc, argv);global=&_global;
+	global_settings::set_param(argc, argv);
+	global=global_settings::instance();
+	global->init();
+	bitmap _fakescreen;fakescreen=_fakescreen;clear_bitmap(fakescreen);
+	bitmap _backbuf;backbuf=_backbuf;clear_bitmap(backbuf);
+	bitmap _bakscreen;bakscreen=_bakscreen;clear_bitmap(bakscreen);
+
 	if(!running)
 		return -1;
-	int save=_global();
-			bitmap _fakescreen;fakescreen=_fakescreen;clear_bitmap(fakescreen);
-			bitmap _backbuf;backbuf=_backbuf;clear_bitmap(backbuf);
-			bitmap _bakscreen;bakscreen=_bakscreen;clear_bitmap(bakscreen);
+	int save=global->get_save();
 
 	using namespace Pal;
-	init_resource();
 	//load save
 	if(save!=0 || (save=begin_scene()()))
 		rpg_to_load=save;
@@ -60,7 +63,7 @@ int main(int argc, char *argv[])
 		pal_fade_out(1);
 	}
 	run();
-	destroy_resource();
+	global_settings::destroy();
 	return 0;
 }
 END_OF_MAIN();

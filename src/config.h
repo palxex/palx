@@ -165,8 +165,14 @@ public:
 	}
 };
 
+class luabinding;
 class global_settings{
-	ini_parser conf;
+	luabinding *m_lua;
+	ini_parser m_conf;
+	int m_save;
+	static int argc;
+	static char **argv;
+	static global_settings *instance_ptr;
 public:
 	std::string sfx_file;
 	global_settings(int,char *[]);
@@ -175,14 +181,29 @@ public:
 	template<typename T>
 	T get(const char *sec,const char *name)
 	{
-		return conf.getSection(sec).get(name,T());
+		return m_conf.getSection(sec).get(name,T());
 	}
 	template<typename T>
 	void set(const char *sec,const char *name,T val)
 	{
-		conf.set(sec,name,val);
+		m_conf.set(sec,name,val);
 	}
-	int operator()();
+	void init();
+	int get_save(){
+	    return m_save;
+	}
+	static void set_param(int _argc,char *_argv[]){
+	    argc=_argc;
+	    argv=_argv;
+	}
+	static global_settings *instance(){
+	    if(instance_ptr==NULL)
+            instance_ptr=new global_settings(argc,argv);
+        return instance_ptr;
+	}
+	static void destroy(){
+	    delete instance_ptr;
+	}
 };
 
 class cut_msg_impl
@@ -211,7 +232,7 @@ public:
 		return buf;
 	}
 	char *operator()(int start)
-	{		
+	{
 		start*=10;
 		int end=start+10;
 		return operator()(start,end);

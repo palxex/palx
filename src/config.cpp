@@ -26,6 +26,8 @@
 #include "fade.h"
 #include "pallib.h"
 #include "config.h"
+#include "luabinding.h"
+#include "game.h"
 
 #ifdef PAL_WIN95
 #   define CONFIG_SETUP "false"
@@ -374,6 +376,11 @@ namespace{
     {
         is_out=true;
     }
+	void luacallback(){
+		luabinding::callback();
+		rest(10);
+	}
+    END_OF_FUNCTION(luacallback)
 }
 
 ini_parser getconf(int c,char *v[])
@@ -386,12 +393,16 @@ ini_parser getconf(int c,char *v[])
         write_directly=true;
     return ini_parser(name.c_str(),write_directly);
 }
-global_settings::global_settings(int c,char *v[]):conf(getconf(c,v))
-{
-	//only for flush config file
-	if(!running)
-		return;
 
+global_settings *global;
+decoder_func de_none,de_mkf,de_mkf_yj1,de_mkf_mkf_yj1,de_mkf_smkf,de_mkf_yj1_smkf;
+
+int global_settings::argc=0;
+char **global_settings::argv=NULL;
+global_settings *global_settings::instance_ptr=NULL;
+
+global_settings::global_settings(int c,char *v[]):m_lua(new luabinding()),m_conf(getconf(c,v)),m_save(0)
+{
 	//version dispatch
 	boost::function<uint8_t *(shared_array<uint8_t> ,long &)> extract_ptr;
 	boost::function<shared_array<uint8_t>(shared_array<uint8_t> ,long &)> extract_sp;
@@ -424,6 +435,7 @@ global_settings::global_settings(int c,char *v[]):conf(getconf(c,v))
 		de_mkf_smkf	=de_mkf_mkf_yj1;
 		de_mkf_yj1_smkf=de_mkf_mkf_yj1;
 	}
+	//init();
 }
 void global_settings::display_setup(bool ext)
 {
@@ -456,10 +468,16 @@ void global_settings::display_setup(bool ext)
 }
 global_settings::~global_settings()
 {
+	Pal::destroy_resource();
 	global=NULL;
+	delete m_lua;
 }
-int global_settings::operator ()()
+void global_settings::init()
 {
+	//only for flush config file
+	if(!running)
+		return;
+
 	using namespace Pal;
 	string path_root=get<string>("config","path");
 	SETUP.set(path_root+"/SETUP.DAT",de_none);
@@ -514,10 +532,11 @@ int global_settings::operator ()()
 
 	randomize();
 
-	int save=0;
 	if(get<bool>("config","allow_memory"))
-		save=get<int>("config","last");
+		m_save=get<int>("config","last");
 
-	return save;
+	Pal::init_resource();
+
+	m_lua->init();
+	install_int(luacallback,100);
 }
-global_settings *global;
