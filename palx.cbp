@@ -81,6 +81,34 @@
 					<Add library="dsound" />
 				</Linker>
 			</Target>
+			<Target title="withLua">
+				<Option output="Release-cb\palx-withlua" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\trunk" />
+				<Option object_output="obj\WithLua\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-DWITH_LUA" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="adplug" />
+					<Add library="binio" />
+					<Add library="alleg_s" />
+					<Add library="freetype" />
+					<Add library="gdi32" />
+					<Add library="ole32" />
+					<Add library="dinput" />
+					<Add library="ddraw" />
+					<Add library="dxguid" />
+					<Add library="winmm" />
+					<Add library="dsound" />
+					<Add library="luabind" />
+					<Add library="lua5.1" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -140,6 +168,12 @@
 		<Unit filename="src\internal.h" />
 		<Unit filename="src\item.cpp" />
 		<Unit filename="src\keyboard.cpp" />
+		<Unit filename="src\luabinding.cpp">
+			<Option target="withLua" />
+		</Unit>
+		<Unit filename="src\luabinding.h">
+			<Option target="withLua" />
+		</Unit>
 		<Unit filename="src\mainloop.cpp" />
 		<Unit filename="src\message.cpp" />
 		<Unit filename="src\palx.cpp" />
