@@ -202,9 +202,9 @@ palerrno_t Pal::Tools::EncodeRle(const void* pSrc, int nSrcWidth, int nSrcHeight
 		reinterpret_cast<uint16*>(pDestRle)[1] = static_cast<uint16>(nSrcHeight);
 		dest += 4; pcount = dest++; count = 0; ptr = 5;
 
-		bprev = pCallback(src[0], 0, 0, pUserData);
 		for(y = 0; y < nSrcHeight && ptr < nDestMaxLen; y++)
 		{
+			bprev = pCallback(src[0], 0, 0, pUserData);
 			for(x = 0; x < nSrcWidth && ptr < nDestMaxLen; x++, src++)
 			{
 				bcur = pCallback(*src, x, y, pUserData);
@@ -217,10 +217,10 @@ palerrno_t Pal::Tools::EncodeRle(const void* pSrc, int nSrcWidth, int nSrcHeight
 						// 不透明，则写入目标值
 						*dest++ = *src; ptr++;
 					}
-					if (count == 0x7f)
+					if (count == 0x7f || x == nSrcWidth-1)
 					{
 						// 到达最大的计数值，先写入
-						*pcount = bcur ? 0xff : 0x7f;
+						*pcount = bcur ? 0x80|count : count;
 						count = 0; pcount = dest++; ptr++;
 					}
 				}
@@ -236,15 +236,8 @@ palerrno_t Pal::Tools::EncodeRle(const void* pSrc, int nSrcWidth, int nSrcHeight
 					}
 				}
 				if(ptr == nDestMaxLen)
-					if(bcur)
-					{
-						// 边界情况:最后一组透明，则需写入
-						*pcount = 0x80 | count;
-					}else
-					{
-						// 边界情况:最后一组非透明，则需写入
-						*pcount = count;
-					}
+					// 边界情况:最后一组写入
+					*pcount =  bcur ? 0x80 | count : count;
 			}
 		}
 
@@ -268,7 +261,7 @@ palerrno_t Pal::Tools::EncodeRle(const void* pSrc, int nSrcWidth, int nSrcHeight
 					count++;
 					if (!bcur)
 						ptr++;	// 不透明
-					if (count == 0x7f)
+					if (count == 0x7f || x == nSrcWidth-1)
 					{
 						// 到达最大的计数值
 						count = 0; ptr++;

@@ -19,8 +19,6 @@
  ***************************************************************************/
 #include "resource.h"
 
-decoder_func de_none,de_mkf,de_mkf_yj1,de_mkf_mkf_yj1,de_mkf_smkf,de_mkf_yj1_smkf;
-
 long cached_res::_len;
 bool cached_res::_decoded;
 
