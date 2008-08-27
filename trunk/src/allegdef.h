@@ -189,10 +189,4 @@ public:
 };
 extern boost::shared_ptr<player> musicplayer,cdplayer;
 
-enum PAL_VKEY { PAL_VK_NONE=0,PAL_VK_MENU=1,PAL_VK_EXPLORE,PAL_VK_DOWN,PAL_VK_LEFT,PAL_VK_UP,PAL_VK_RIGHT,PAL_VK_PGUP,PAL_VK_PGDN,PAL_VK_REPEAT,PAL_VK_AUTO,PAL_VK_DEFEND,PAL_VK_USE,PAL_VK_THROW,PAL_VK_QUIT,PAL_VK_STATUS,PAL_VK_FORCE,PAL_VK_PRINTSCREEN};
-PAL_VKEY async_getkey();
-PAL_VKEY sync_getkey();
-
-PAL_VKEY get_key_lowlevel();
-void key_watcher(int scancode);
 #endif

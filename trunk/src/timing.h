@@ -20,7 +20,8 @@
 #ifndef TIMING_H
 #define TIMING_H
 
-#include "allegdef.h"
+#include "integer.h"
+#include "keyboard.h"
 
 extern volatile uint8_t time_interrupt_occurs;
 void wait(uint8_t cycles);
