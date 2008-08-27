@@ -28,6 +28,7 @@
 #include "config.h"
 #include "luabinding.h"
 #include "game.h"
+#include "keyboard.h"
 
 #ifdef PAL_WIN95
 #   define CONFIG_SETUP "false"
@@ -377,8 +378,8 @@ namespace{
         is_out=true;
     }
 	void luacallback(){
+		remove_int(luacallback);
 		luabinding::callback();
-		rest(10);
 	}
     END_OF_FUNCTION(luacallback)
 }
@@ -538,5 +539,5 @@ void global_settings::init()
 	Pal::init_resource();
 
 	m_lua->init();
-	install_int(luacallback,100);
+	//install_int(luacallback,100);
 }

@@ -45,7 +45,7 @@
 				AdditionalOptions="/wd 4819 /wd 4985"
 				Optimization="0"
 				AdditionalIncludeDirectories="Adplug\Include,PalLibrary\Include,alfont"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
+				PreprocessorDefinitions="WITH_LUA;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_CRTDBG_MAP_ALLOC;_CRTDBG_MAP_ALLOC_NEW"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -519,6 +519,10 @@
 					</File>
 					<File
 						RelativePath=".\src\item.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\keyboard.h"
 						>
 					</File>
 					<File

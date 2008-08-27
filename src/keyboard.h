@@ -17,26 +17,14 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "resource.h"
-#include "pallib.h"
-#include "timing.h"
-#include "fade.h"
-#include "allegdef.h"
+#ifndef KEYBOARD_H_INCLUDED
+#define KEYBOARD_H_INCLUDED
 
-int RNG_num;
-void play_RNG(int begin,int end,int gap)
-{
-	using namespace Pal;
-	int total_clips=RNG.slices(RNG_num);
-	bitmap cache(0,320,200);
-	blit(screen,cache,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);
-	for(int i=begin;i<=std::min(total_clips-1,end) && running ;i++){
-		Pal::Tools::DecodeRNG(RNG.decode(RNG_num,i),((BITMAP*)cache)->dat);
-		blit(cache,screen,0,0,0,0,((BITMAP*)cache)->w,((BITMAP*)cache)->h);
-		delay(100/gap);
-		pal_fade_in(1);
-        shake_screen();
-	}
-}
+enum PAL_VKEY { PAL_VK_NONE=0,PAL_VK_MENU=1,PAL_VK_EXPLORE,PAL_VK_DOWN,PAL_VK_LEFT,PAL_VK_UP,PAL_VK_RIGHT,PAL_VK_PGUP,PAL_VK_PGDN,PAL_VK_REPEAT,PAL_VK_AUTO,PAL_VK_DEFEND,PAL_VK_USE,PAL_VK_THROW,PAL_VK_QUIT,PAL_VK_STATUS,PAL_VK_FORCE,PAL_VK_PRINTSCREEN};
+PAL_VKEY async_getkey();
+PAL_VKEY sync_getkey();
 
+PAL_VKEY get_key_lowlevel();
+void key_watcher(int scancode);
 
+#endif // KEYBOARD_H_INCLUDED

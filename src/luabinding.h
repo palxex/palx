@@ -32,12 +32,8 @@ extern "C"
  class luabinding{
      static lua_State *L;
      public:
-     luabinding(){
-         L=lua_open();
-     }
-     ~luabinding(){
-         lua_close(L);
-     }
+     luabinding();
+     ~luabinding();
      void init();
      static void callback();
  };
