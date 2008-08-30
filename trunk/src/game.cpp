@@ -33,24 +33,24 @@ namespace Pal{
 	RPG rpg;
 	SETUP_DEF setup;
 	//data
-	std::vector<SHOP> shops;
-	std::vector<MONSTER> monsters;
-	std::vector<ENEMYTEAM> enemyteams;
-	std::vector<MAGIC> magics;
-	std::vector<BATTLE_FIELD> battlefields;
-	std::vector<UPGRADE_LEARN> learns;
+	SHOP *shops;
+	MONSTER *monsters;
+	ENEMYTEAM *enemyteams;
+	MAGIC *magics;
+	BATTLE_FIELD *battlefields;
+	UPGRADE_LEARN *learns;
 	sprite_prim UIpics;
 	sprite_prim discharge_effects;
 	sprite_prim message_handles;
-	ENEMY_POSES enemyposes;
-	UPGRADE_EXP upgradexp;
-	EFFECT_IDX effect_idx;
+	ENEMY_POSES *enemyposes_;
+	UPGRADE_EXP *upgradexp_;
+	EFFECT_IDX *effect_idx_;
 
 	//sss
-	std::vector<EVENT_OBJECT> evtobjs;
-	std::vector<SCENE>   scenes;
-	std::vector<int32_t> msg_idxes;
-	std::vector<SCRIPT>  scripts;
+	EVENT_OBJECT *evtobjs=rpg.evtobjs-1;
+	SCENE *scenes=rpg.scenes-1;
+	int32_t *msg_idxes;
+	SCRIPT *scripts;
 
 	template<typename T>
 	inline void reunion(vector<T> &vec,uint8_t *src,const long &len)
@@ -67,6 +67,12 @@ namespace Pal{
 	{
 		T *usrc=(T *)src;
 		memcpy(vec,usrc,len);
+	}
+	template<typename T>
+	inline void reunion(T *&vec,uint8_t *src)
+	{
+		T *usrc=(T *)src;
+		vec=usrc;
 	}
 	template<typename T>
 	inline void reunion(T &vec,uint8_t *src,const long &len)
@@ -110,8 +116,8 @@ namespace Pal{
 
         //load sss&data
         long len=0;
-        EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
-        SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
+        //EVENT_OBJECT teo;memset(&teo,0,sizeof(teo));evtobjs.push_back(teo);
+        //SCENE   tsn;memset(&tsn,0,sizeof(tsn));scenes.push_back(tsn);
 		if(!global->get<bool>("config","setup")){
 			setup.key_left=global->get<int>("keymap","west");
 			setup.key_up=global->get<int>("keymap","north");
@@ -120,31 +126,32 @@ namespace Pal{
 		}else
 			reunion(setup,      SETUP.decode(len), len);
 
-        reunion(evtobjs,	SSS.decode(0,len), len);
-        reunion(scenes,		SSS.decode(1,len), len);
+        reunion(rpg.evtobjs,	SSS.decode(0,len), len);
+        reunion(rpg.scenes,		SSS.decode(1,len), len);
         reunion(rpg.objects,SSS.decode(2,len), len);
-        reunion(msg_idxes,	SSS.decode(3,len), len);
-        reunion(scripts,	SSS.decode(4,len), len);
+        reunion(msg_idxes,	SSS.decode(3,len));
+        reunion(scripts,	SSS.decode(4,len));
 
-        reunion(shops,					DATA.decode(0,len),len);
-        reunion(monsters,				DATA.decode(1,len),len);
-        reunion(enemyteams,				DATA.decode(2,len),len);
+        reunion(shops,					DATA.decode(0,len));
+        reunion(monsters,				DATA.decode(1,len));
+        reunion(enemyteams,				DATA.decode(2,len));
         reunion(rpg.roles_properties,	DATA.decode(3,len),len);
-        reunion(magics,					DATA.decode(4,len),len);
-        reunion(battlefields,			DATA.decode(5,len),len);
-        reunion(learns,					DATA.decode(6,len),len);
+        reunion(magics,					DATA.decode(4,len));
+        reunion(battlefields,			DATA.decode(5,len));
+        reunion(learns,					DATA.decode(6,len));
         //7:not used
         //8:not used
-		//reunion(effect_idx,				DATA.decode(11,len),len);
+		//reunion(effect_idx,				DATA.decode(11,len));
 		//walkaround for mingw, AGAIN.
-		memcpy(effect_idx,              DATA.decode(11,len),40);
-        reunion(enemyposes,				DATA.decode(13,len),len);
-        reunion(upgradexp,				DATA.decode(14,len),len);
+		effect_idx_ = reinterpret_cast<EFFECT_IDX*>(DATA.decode(11,len));
+        reunion(enemyposes_,				DATA.decode(13,len));
+        reunion(upgradexp_,				DATA.decode(14,len));
 
 		DATA.setdecoder(de_mkf_smkf);
         reunion(UIpics,					DATA,9);
         reunion(discharge_effects,		DATA,10);
         reunion(message_handles,		DATA,12);
+		DATA.setdecoder(de_mkf);
 
         flag_to_load=0x1D;
 
@@ -176,15 +183,15 @@ namespace Pal{
             rpg.team[i].y+=0x70*(scale-1);
         }
         map_toload=rpg.scene_id;
-        evtobjs.clear();evtobjs.push_back(EVENT_OBJECT());
-        reunion(evtobjs,(uint8_t*)&rpg.evtobjs,(const long&)sizeof(rpg.evtobjs));
-        scenes.clear();scenes.push_back(SCENE());
-        reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
+        //evtobjs.clear();evtobjs.push_back(EVENT_OBJECT());
+        //reunion(evtobjs,(uint8_t*)&rpg.evtobjs,(const long&)sizeof(rpg.evtobjs));
+        //scenes.clear();scenes.push_back(SCENE());
+        //reunion(scenes,(uint8_t*)&rpg.scenes,(const long&)sizeof(rpg.scenes));
         fclose(fprpg);
         MAP.clear();
         GOP.clear();
         RNG.clear();
-        SSS.clear();
+        //SSS.clear();
         //DATA.clear();
         //ABC.clear();
         //SFX.clear();
@@ -202,8 +209,8 @@ namespace Pal{
         string name=global->get<string>("config","path")+"/"+lexical_cast<string>(id)+".RPG";
 		FILE *fprpg=fopen(name.c_str(),"wb");
 		rpg.save_times=1;
-        copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
-        copy(scenes.begin()+1,scenes.end(),rpg.scenes);
+        //copy(evtobjs.begin()+1,evtobjs.end(),rpg.evtobjs);
+        //copy(scenes.begin()+1,scenes.end(),rpg.scenes);
 
 		int viewport_x=rpg.viewport_x,viewport_y=rpg.viewport_y;
 		rpg.viewport_x+=0xA0*(scale-1),rpg.viewport_y+=0x70*(scale-1);

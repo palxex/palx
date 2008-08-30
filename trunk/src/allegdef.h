@@ -135,6 +135,12 @@ public:
 	PALETTE &get(int);
 	void set(int t);
 };
+namespace Pal{
+	extern palette pat;
+	extern sprite_prim UIpics;
+	extern sprite_prim discharge_effects;
+	extern sprite_prim message_handles;
+};
 class CEmuopl;
 class CrixPlayer;
 struct player{

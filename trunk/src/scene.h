@@ -68,7 +68,7 @@ class sprite_queue;
 struct Scene{
 	palmap scenemap;
 	bitmap scene_buf;
-	std::vector<EVENT_OBJECT>::iterator sprites_begin,sprites_end;
+	EVENT_OBJECT *sprites_begin,*sprites_end;
 	position team_pos;
 	Scene();
 	void clear_scanlines();
