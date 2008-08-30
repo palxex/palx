@@ -25,6 +25,7 @@
 #include "battle.h"
 #include "item.h"
 #include "fade.h"
+#include "allegdef.h"
 
 #include <stdlib.h>
 
@@ -71,7 +72,7 @@ inline int16_t absdec(int16_t &s)
     else if (s<0) s++;
     return s0;
 }
-typedef std::vector<EVENT_OBJECT>::iterator evt_obj;
+typedef EVENT_OBJECT *evt_obj;
 int x_off=0,y_off=0;
 void GameLoop_OneCycle(bool trigger)
 {
@@ -94,7 +95,7 @@ void GameLoop_OneCycle(bool trigger)
                             }
 							x_off=0,y_off=0;
                             uint16_t &triggerscript=iter->trigger_script;
-                            triggerscript=process_script(triggerscript,(int16_t)(iter-evtobjs.begin()));
+                            triggerscript=process_script(triggerscript,iter-evtobjs);
                         }
                     }
                     else if (iter->status<0) //&& in the screen
@@ -106,7 +107,7 @@ void GameLoop_OneCycle(bool trigger)
         {
             if (iter->status!=0)
                 if (uint16_t &autoscript=iter->auto_script)
-                    autoscript=process_autoscript(autoscript,(int16_t)(iter-evtobjs.begin()));
+                    autoscript=process_autoscript(autoscript,iter-evtobjs);
             if (iter->status==2 && iter->image>0 && trigger
                     && abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
                 //check barrier;this means, role status 2 means it takes place
@@ -153,7 +154,7 @@ void process_Explore()
                         rpg.team[t].frame=rpg.team_direction*3;
                     redraw_everything(0);
                 }
-                iter->trigger_script=process_script(iter->trigger_script,iter-evtobjs.begin());
+                iter->trigger_script=process_script(iter->trigger_script,iter-evtobjs);
                 //my def
                 clear_keybuf();
                 rest(50);
@@ -176,11 +177,10 @@ void clear_effective(int16_t p1,int16_t p2)
 	if(flag_battling)
 		battle::get()->restoreBackground();
 }
-void process_script_entry(uint16_t func,int16_t param[],uint16_t &id,int16_t object)
+void process_script_entry(uint16_t func,const int16_t param1,const int16_t param2,const int16_t param3,uint16_t &id,int16_t object)
 {
     //printf("%s\n",scr_desc(func,param).c_str());
 	static sprite_prim scene_sprite;
-    const int16_t &param1=param[0],&param2=param[1],&param3=param[2];
     EVENT_OBJECT &obj=evtobjs[object];
 #define curr_obj (param1<0?obj:evtobjs[param1])
     int role=rpg.team[(object>=0&&object<=4)?object:0].role;
@@ -979,7 +979,7 @@ __walk_role:
         break;
     case 0x81:
         prelimit_OK=false;
-        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0
+        if (param1>=scene->sprites_begin-evtobjs && param1<scene->sprites_end-evtobjs && curr_obj.status>0
             && abs(evtobjs[param1].pos_x-direction_offs[rpg.team_direction][0]-scene->team_pos.toXY().x)+abs(evtobjs[param1].pos_y-direction_offs[rpg.team_direction][1]-scene->team_pos.toXY().y)*2<param2*32+16)
         {
             if(param2>0)
@@ -994,7 +994,7 @@ __walk_role:
         goto __walk_npc;
 	case 0x83:
         prelimit_OK=false;
-        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin() && curr_obj.status>0
+        if (param1>=scene->sprites_begin-evtobjs && param1<scene->sprites_end-evtobjs && curr_obj.status>0
 			&& abs(evtobjs[param1].pos_x-obj.pos_x)+abs(evtobjs[param1].pos_y-obj.pos_y)*2<param2*32+16)
         {
             prelimit_OK=true;
@@ -1004,7 +1004,7 @@ __walk_role:
         break;
 	case 0x84://place obj
 		prelimit_OK=false;
-        if (param1>=scene->sprites_begin-evtobjs.begin() && param1<scene->sprites_end-evtobjs.begin()
+        if (param1>=scene->sprites_begin-evtobjs && param1<scene->sprites_end-evtobjs
 			&& param3?!barrier_check(0,scene->team_pos.toXY().x+direction_offs[rpg.team_direction][0],scene->team_pos.toXY().y+direction_offs[rpg.team_direction][1],false):true)
         {
 			curr_obj.pos_x=scene->team_pos.toXY().x+direction_offs[rpg.team_direction][0];
@@ -1355,7 +1355,7 @@ uint16_t process_script(uint16_t id,int16_t object)
     bool ok=true;
     while (id && ok && running)
     {
-        SCRIPT &curr=scripts[id];
+        const SCRIPT &curr=scripts[id];
 		const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
         //printf("¶ÀÕ¼½Å±¾%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
         switch (curr.func)
@@ -1524,7 +1524,7 @@ uint16_t process_script(uint16_t id,int16_t object)
         default:
             if (current_dialog_lines>0)
                 show_wait_icon();
-            process_script_entry(curr.func,curr.param,id,object);
+            process_script_entry(curr.func,param1,param2,param3,id,object);
         }
         ++id;
     }
@@ -1593,7 +1593,7 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
             obj.scr_jmp_count_auto = 0;
         break;
     default:
-        process_script_entry(curr.func,curr.param,id,object);
+        process_script_entry(curr.func,param1,param2,param3,id,object);
     }
     return id+1;
 }

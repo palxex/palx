@@ -22,6 +22,7 @@
 #include "timing.h"
 #include "scene.h"
 #include "fade.h"
+#include "allegdef.h"
 
 #ifdef PAL_WIN95
 #   define SPLASH 3

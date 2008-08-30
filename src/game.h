@@ -26,31 +26,32 @@
 #include <sstream>
 #include <cstdio>
 
-#include "allegdef.h"
+#include "structs.h"
+#include "internal.h"
 
 namespace Pal{
     extern SETUP_DEF setup;
-	extern palette pat;
 	extern RPG rpg;
 	//data
-	extern std::vector<SHOP> shops;
-	extern std::vector<MONSTER> monsters;
-	extern std::vector<ENEMYTEAM> enemyteams;
-	extern std::vector<MAGIC> magics;
-	extern std::vector<BATTLE_FIELD> battlefields;
-	extern std::vector<UPGRADE_LEARN> learns;
-	extern sprite_prim UIpics;
-	extern sprite_prim discharge_effects;
-	extern sprite_prim message_handles;
-	extern ENEMY_POSES enemyposes;
-	extern UPGRADE_EXP upgradexp;
-	extern EFFECT_IDX effect_idx;
+	extern SHOP *shops;
+	extern MONSTER *monsters;
+	extern ENEMYTEAM *enemyteams;
+	extern MAGIC *magics;
+	extern BATTLE_FIELD *battlefields;
+	extern UPGRADE_LEARN *learns;
+
+	extern ENEMY_POSES *enemyposes_;
+	extern UPGRADE_EXP *upgradexp_;
+	extern EFFECT_IDX *effect_idx_;
+#define enemyposes enemyposes_[0]
+#define upgradexp upgradexp_[0]
+#define effect_idx effect_idx_[0]
 
 	//sss
-	extern std::vector<EVENT_OBJECT> evtobjs;
-	extern std::vector<SCENE>   scenes;
-	extern std::vector<int32_t> msg_idxes;
-	extern std::vector<SCRIPT>  scripts;
+	extern EVENT_OBJECT *evtobjs;
+	extern SCENE *scenes;
+	extern int32_t *msg_idxes;
+	extern SCRIPT *scripts;
 
 	void init_resource();
 	void destroy_resource();

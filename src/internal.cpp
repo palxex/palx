@@ -81,9 +81,9 @@ void Load_Data()
 	rpg.scene_id=map_toload;
 	if(flag_to_load&4){
 		//load evtobjs
-		scene->sprites_begin=evtobjs.begin()+scenes[rpg.scene_id].prev_evtobjs+1;
-		scene->sprites_end  =evtobjs.begin()+scenes[rpg.scene_id+1].prev_evtobjs+1;
-		for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
+		scene->sprites_begin=evtobjs+scenes[rpg.scene_id].prev_evtobjs+1;
+		scene->sprites_end  =evtobjs+scenes[rpg.scene_id+1].prev_evtobjs+1;
+		for(EVENT_OBJECT *i=scene->sprites_begin;i!=scene->sprites_end;i++)
 			if(i->image)
 				i->frames_auto=MGO.slices(i->image);
 	}

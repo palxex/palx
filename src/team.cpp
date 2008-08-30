@@ -55,7 +55,7 @@ void load_team_mgo()
 void load_NPC_mgo()
 {
 	npc_mgos.clear();
-	for(std::vector<EVENT_OBJECT>::iterator i=scene->sprites_begin;i!=scene->sprites_end;i++)
+	for(EVENT_OBJECT *i=scene->sprites_begin;i!=scene->sprites_end;i++)
 		if(i->image)
 			npc_mgos[i-scene->sprites_begin]=load_mgo(i->image);
 }
@@ -161,8 +161,8 @@ bool barrier_check(uint16_t self,int x,int y,bool check)
         return false;
 	bool ret= scene->scenemap.gettile(x/32,y/16,x%32?1:0,0).blocked;
 	if(check)
-		for(std::vector<EVENT_OBJECT>::iterator it=scene->sprites_begin;it<scene->sprites_end;it++)
-			if(it-Pal::evtobjs.begin()!=self && it->status>1 && abs(it->pos_x-x)+abs(it->pos_y-y)*2<16){
+		for(EVENT_OBJECT *it=scene->sprites_begin;it<scene->sprites_end;it++)
+			if(it-Pal::evtobjs!=self && it->status>1 && abs(it->pos_x-x)+abs(it->pos_y-y)*2<16){
 				ret=ret||true;break;
 			}
 	return ret;
