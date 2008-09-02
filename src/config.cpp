@@ -135,6 +135,8 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	debugprop["resource"].comment="资源使用方式;mkf/filesystem";
 	debugprop["allow_frozen"].value="true";
 	debugprop["allow_frozen"].comment="允许冻结启动/停止;true/false";
+	debugprop["console"].value="false";
+	debugprop["console"].comment="启动lua控制台;true/false";
 	section debug("debug",debugprop);
 	sections["debug"]=debug;
 
