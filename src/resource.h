@@ -51,8 +51,6 @@ public:
 	uint8_t *decode(int,bool& ,long& =_len);
 	uint8_t *decode(int,long& =_len);
 	uint8_t *decode(long& =_len);
-	void setlocation(int n,int n2,int location,uint16_t data);
-	int getlocation(int n,int n2,int location);
 	int slices(int);
 	void clear();
 	void clear(int n,int n2);

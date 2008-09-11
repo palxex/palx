@@ -294,7 +294,7 @@ void keyhook(int)
 		//system(mkdircmd);//a console window splash?no...
 		save_bitmap(filename,screen,pal);
 	}
-	if(key[KEY_F3])
+	if(key[KEY_F3] && global && global->get<bool>("debug","allow_frozen"))
         no_barrier=!no_barrier;
 	//rest(1);
 }

@@ -82,33 +82,6 @@ uint8_t *cached_res::decode(long &length)
 }
 #include <iostream>
 using namespace std;
-void cached_res::setlocation(int n,int n2,int location,uint16_t data)
-{
-    if(location%2){
-        cout<<"Please note this function only works on WORD boundary."<<endl;
-        return;
-    }
-    location/=2;
-    bool c;
-    long length;
-    uint16_t *ptr=reinterpret_cast<uint16_t*>(decode(n,n2,c,length));
-    if(location*2<length)
-        ptr[location]=data;
-}
-int cached_res::getlocation(int n,int n2,int location)
-{
-    if(location%2){
-        cout<<"Please note this function only works on WORD boundary."<<endl;
-        return 0;
-    }
-    location/=2;
-    bool c;
-    long length;
-    uint16_t *ptr=reinterpret_cast<uint16_t*>(decode(n,n2,c,length));
-    if(location*2<length)
-        return ptr[location];
-    return 12345678;
-}
 void cached_res::clear(){
 	for(cache_type::iterator i=cache.begin();i!=cache.end();i++)	delete i->second;
 	cache.clear();
