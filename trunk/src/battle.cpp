@@ -1089,7 +1089,7 @@ STATUS role_status_determine(int role_pos)
 {
 	if(role_status_pack[role_pos].pack.crazy || role_status_pack[role_pos].pack.fixed || role_status_pack[role_pos].pack.sleep || rpg.roles_properties.HP[rpg.team[role_pos].role]<=0)
 		return NON_NORMAL;
-	if(battle_role_data[role_pos].battle_avatar==1)
+	if(battle_role_data[role_pos].frame==1)
 		return WEAK;
 	else
 		return NORMAL;
@@ -1123,7 +1123,7 @@ void battle::enemy_physical_attack(int enemy_pos,int role_pos,int force)
 	for(int i=1,max=3-get_monster(enemy_pos).magic_frames;i<=max;i++)
 	{
 		battle_enemy_data[enemy_pos].pos_x -= 2;
-		battle_enemy_data[enemy_pos].pos_x -= 1;
+		battle_enemy_data[enemy_pos].pos_y -= 1; //!!!look at game
 		draw_battle_scene(0,1);
 	}
 	voc(get_monster(enemy_pos).action_sfx).play();
