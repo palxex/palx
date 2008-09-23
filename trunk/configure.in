@@ -8,7 +8,7 @@ AM_INIT_AUTOMAKE
 dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-#AM_PROG_CC_C_O
+AM_PROG_CC_C_O
 
 dnl Check for Allegro Installed
 AM_PATH_ALLEGRO(4.2.0)
@@ -50,6 +50,18 @@ freetype2_CFLAGS="`$PKG_CONFIG freetype2 --cflags`"
 AC_SUBST(freetype2_LIBS)
 AC_SUBST(freetype2_CFLAGS)
 
+dnl lua50
+lua_LIBS="`$PKG_CONFIG lua50 --libs`"
+lua_CFLAGS="`$PKG_CONFIG lua50 --cflags`"
+AC_SUBST(lua_LIBS)
+AC_SUBST(lua_CFLAGS)
+
+dnl luabind
+luabind_LIBS="`$PKG_CONFIG luabind --libs`"
+luabind_CFLAGS="`$PKG_CONFIG luabind --cflags`"
+AC_SUBST(luabind_LIBS)
+AC_SUBST(luabind_CFLAGS)
+
 dnl Some stuff for the icon.
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)
@@ -60,8 +72,8 @@ case "$target" in
        WINDRES=":"
     ;;
 esac
-       AM_CONDITIONAL(HAVE_WINDRES, test "x$WINDRES" != "x:")
-       AC_SUBST(WINDRES)
+AM_CONDITIONAL(HAVE_WINDRES, test "x$WINDRES" != "x:")
+AC_SUBST(WINDRES)
        
 
 AC_CONFIG_FILES([Makefile
