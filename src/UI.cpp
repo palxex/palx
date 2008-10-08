@@ -21,6 +21,7 @@
 #include "timing.h"
 #include "structs.h"
 #include "item.h"
+#include <stdlib.h>
 
 #include <boost/lexical_cast.hpp>
 

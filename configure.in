@@ -57,8 +57,8 @@ AC_SUBST(lua_LIBS)
 AC_SUBST(lua_CFLAGS)
 
 dnl luabind
-luabind_LIBS="`$PKG_CONFIG luabind --libs`"
-luabind_CFLAGS="`$PKG_CONFIG luabind --cflags`"
+luabind_LIBS="-Lluabind"
+luabind_CFLAGS="-I/usr/include/luabind"
 AC_SUBST(luabind_LIBS)
 AC_SUBST(luabind_CFLAGS)
 

@@ -869,6 +869,11 @@ attack_label:
 						}
 						break;
 					case MAGIC_TO_US:
+						{
+							int power=get_cons_attrib(attacking_role,0x12);
+							if(magics[role_action_table[twoside_counter].tool].behavior==8)
+								;
+						}
 						break;
 					case MAGIC_TO_ENEMY:
 						break;

@@ -283,7 +283,7 @@ void registerExports(lua_State *L){
 					.def_readwrite("y",&rpg_def::position::y)
 					.def_readwrite("frame",&rpg_def::position::frame)
 			]
-			.def_readwrite("team",&rpg_def::team)
+			//.def_readwrite("team",&rpg_def::team)
 		,
 		class_<global_settings>("setting")
 			.def("getint",&global_settings::get<int>)
