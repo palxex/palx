@@ -34,6 +34,7 @@ RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 int flag_autobattle=0;
 
 bool instrum_usable[4];//指令可用扩展;从而封攻、令成为可能
+int twoside_affected[5],delayed_damage[5];//延迟伤害
 int x[4],y[4],s[4];
 
 MONSTER &get_monster(int pos)
@@ -202,7 +203,35 @@ int battle::select_targetting_enemy()
 	return targetting_enemy=-1;
 }
 int battle::select_targetting_role(){
-	return 0;
+	if(get_member_alive()==1)
+		for(int i=0;i<=rpg.team_roles;i++)
+			if(rpg.roles_properties.HP[i]>0)
+				return i;
+	int trend=0;
+	targetting_role=0;
+	while(running){
+		switch(async_getkey())
+		{
+		case PAL_VK_LEFT:
+			trend=-1;
+			break;
+		case PAL_VK_RIGHT:
+			trend=1;
+			break;
+		case PAL_VK_MENU:
+			return -1;
+		case PAL_VK_EXPLORE:
+			return targetting_role;
+		default:
+			trend=0;
+			break;
+		}
+		do
+			targetting_role=std::min(std::max(targetting_role+trend,0),(int)rpg.team_roles);
+		while(rpg.roles_properties.HP[targetting_role]<=0);
+		draw_battle_scene(0,1);
+	}
+	return targetting_role=-1;
 }
 int battle::select_a_living_role_randomly()
 {
@@ -211,6 +240,14 @@ int battle::select_a_living_role_randomly()
 		selected=round(rnd1(rpg.team_roles));
 	while(selected>rpg.team_roles || rpg.roles_properties.HP[rpg.team[selected].role]<=0);
 	return selected;
+}
+void battle::bright_every_role(int begin,int end)
+{
+	for(int pass=1;pass<=15;pass++){
+		delay(2);
+		for(int pos=begin;pos<=end;pos++)
+			team_images[pos].getsprite(battle_role_data[pos].frame)->blit_filter(screen,battle_role_data[pos].pos_x,battle_role_data[pos].pos_y,brighter_filter,pass,true,true);
+	}
 }
 
 void battle::battle_produce_screen(BITMAP *buf)
@@ -221,8 +258,9 @@ void battle::battle_produce_screen(BITMAP *buf)
 			enemy_images[i].getsprite(battle_enemy_data[i].frame)->blit_filter(buf,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y,brighter_filter,6,affected_enemies[i],true);
 		}
 
-	if(flag_summon)
-		;
+	if(flag_summon){
+		//drew_scenes_summon
+	}
 	else
 		if(role_invisible_rounds==0)
 			for(int i=Pal::rpg.team_roles;i>=0;i--)//应按posY排序保证不遮挡。实现到再说
@@ -293,7 +331,6 @@ void battle::draw_battle_scene(int delaytime,int times,BITMAP *bmp)
 		sprites.flush(scanline);
 		sprites.clear_active();
 		scanline.blit_to(bmp);
-		save_bitmap("save.bmp",bmp,_current_palette);
 
 		for(int i=0;i<enemy_poses_count;i++)
 			if(affected_enemies[i])
@@ -377,7 +414,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),enemy_poses_count(0),
 									flag_withdraw(false),effect_height(200),battle_scene_draw(false),magic_image_occurs(0),flag_summon(false),flag_selecting(false),
 									enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false),
-									auto_selected_enemy(0),battle_sfx(0),magic_frame(0),shake_viewport_y(0)
+									auto_selected_enemy(0),battle_sfx(0),magic_frame(0),shake_viewport_y(0),drew_scenes_summon(0)
 {
 	memset(&store_for_diff,0,sizeof(store_for_diff));
 	memset(affected_enemies,0,sizeof(affected_enemies));
@@ -554,7 +591,9 @@ battle::END battle::process()
 							ok=true;
 							int prop=rpg.objects[rpg.roles_properties.magics[instrum_object][rpg.team[commanding_role].role]].magic.param;
 							if((prop>>TARGET_ENEMY)&1){
-								if((prop>>OBJECT_ALL)&1){
+								if((prop>>OBJECT_ALL)&1)
+									role_action_table[commanding_role].target=commanding_role;
+								else{
 									int enemy=select_targetting_enemy();
 									if(enemy<0){
 										tk=true;
@@ -562,9 +601,21 @@ battle::END battle::process()
 									}
 									else
 										role_action_table[commanding_role].target=enemy;
-								}else
-									role_action_table[commanding_role].target=commanding_role;
+								}
+								role_action_table[commanding_role].action=MAGIC_TO_ENEMY;
 							}else{
+								if((prop>>OBJECT_ALL)&1)
+									role_action_table[commanding_role].target=commanding_role;
+								else{
+									int role=select_targetting_role();
+									if(role<0){
+										tk=true;
+										continue;
+									}
+									else
+										role_action_table[commanding_role].target=role;
+								}
+								role_action_table[commanding_role].action=MAGIC_TO_US;
 							}
 						}
 					}while(tk);
@@ -748,6 +799,8 @@ battle::END battle::process()
 			}
 			perframe_proc();
 		}
+		if(!running)
+			break;
 		flag_selecting=false;
 		effective_y=200;
 		draw_battle_scene(0,1);
@@ -871,11 +924,54 @@ attack_label:
 					case MAGIC_TO_US:
 						{
 							int power=get_cons_attrib(attacking_role,0x12);
-							if(magics[role_action_table[twoside_counter].tool].behavior==8)
-								;
+							int magic_index=rpg.objects[role_action_table[twoside_counter].tool].magic.magic;
+							role_release_magic_action(twoside_counter,Pal::magics[magic_index].behavior!=8);
+							uint16_t &pre_script=Pal::rpg.objects[role_action_table[twoside_counter].tool].magic.occur;
+							pre_script=process_script(pre_script,twoside_counter);
+							if(prelimit_OK){
+								if(magics[magic_index].behavior==8)
+									bright_every_role(twoside_counter,twoside_counter);
+								if(magics[magic_index].effect>=0)
+									role_release_magic(power,role_action_table[twoside_counter].tool,role_action_table[twoside_counter].target,twoside_counter);
+								rpg.roles_properties.MP[attacking_role]-=magics[magic_index].power_used;
+								show_role_changes(twoside_counter,role_action_table[twoside_counter].tool);
+								if(magics[magic_index].behavior==8){
+									battle_role_data[twoside_counter].pos_x=battle_role_data[twoside_counter].pos_x_bak;
+									battle_role_data[twoside_counter].pos_y=battle_role_data[twoside_counter].pos_y_bak;
+									setup_role_enemy_image();
+									flag_invisible=-1;
+								}
+								rpg.roles_exp[3][attacking_role].count+=round(rnd1(2));
+								rpg.roles_exp[5][attacking_role].count++;
+							}
 						}
 						break;
 					case MAGIC_TO_ENEMY:
+						{
+							flag_summon=false;
+							int power=get_cons_attrib(attacking_role,0x12);
+							int magic_index=rpg.objects[role_action_table[twoside_counter].tool].magic.magic;
+							role_release_magic_action(twoside_counter,magics[magic_index].behavior!=9);
+							uint16_t &pre_script=rpg.objects[role_action_table[twoside_counter].tool].magic.occur;
+							pre_script=process_script(pre_script,twoside_counter);
+							if(prelimit_OK){
+								if(magics[magic_index].behavior==9){
+									summon_magic=magic_index;
+									flag_summon=true;
+									summon_imgs(role_action_table[twoside_counter].tool);
+									role_restore_position(twoside_counter);
+								}
+								role_release_magic(power,role_action_table[twoside_counter].tool,role_action_table[twoside_counter].target,(magics[magic_index].behavior==9)?9:twoside_counter);
+								uint16_t &post_script=rpg.objects[role_action_table[twoside_counter].tool].magic.post;
+								post_script=process_script(post_script,role_action_table[twoside_counter].target);
+								attack_make();
+								if(check_enemy_changes())
+									show_enemy_changes(5);
+								rpg.roles_properties.MP[attacking_role]-=magics[magic_index].power_used;
+								rpg.roles_exp[3][attacking_role].count+=round(rnd1(2));
+								rpg.roles_exp[5][attacking_role].count++;
+							}
+						}
 						break;
 					case USE_ITEM:
 						break;
@@ -974,6 +1070,75 @@ attack_all_label:
 				flag_autobattle=0;
 	}
 	return check_end_battle();
+}
+void battle::show_role_changes(int twoside_counter,int magic)
+{
+	for(int i=0;i<=rpg.team_roles;i++){
+		store_for_diff.roles[i].HP=rpg.roles_properties.HP[rpg.team[i].role];
+		store_for_diff.roles[i].MP=rpg.roles_properties.MP[rpg.team[i].role];
+	}
+	uint16_t &post_script=rpg.objects[magic].magic.post;
+	post_script=process_script(post_script,role_action_table[twoside_counter].target);
+	if(check_role_changes()){
+		draw_battle_scene(0,7);
+		setup_role_status();
+	}
+}
+bool battle::check_role_changes(){
+	bool changed=false;
+	for(int i=0;i<=rpg.team_roles;i++){
+		if(store_for_diff.roles[i].HP-=rpg.roles_properties.HP[rpg.team[i].role]){
+			display_damage_number((store_for_diff.roles[i].HP<0)?1:0,abs(store_for_diff.roles[i].HP),battle_role_data[i].pos_x,battle_role_data[i].pos_y-0x46);
+			changed=true;
+		}
+		if((store_for_diff.roles[i].MP-=rpg.roles_properties.MP[rpg.team[i].role])>0){
+			display_damage_number(2,store_for_diff.roles[i].MP,battle_role_data[i].pos_x,battle_role_data[i].pos_y-0x3E);
+			changed=true;
+		}
+	}
+	return changed;
+}
+void battle::attack_make()
+{
+	for(int i=0;i<enemy_poses_count;i++)
+		if(twoside_affected[i]){
+			battle_enemy_data[i].HP-=delayed_damage[i];
+			if(battle_enemy_data[i].HP<=0)
+				voc(get_monster(i).death_sfx).play();
+			else{
+				battle_enemy_data[i].pos_x=battle_enemy_data[i].pos_x_bak;
+				battle_enemy_data[i].pos_y=battle_enemy_data[i].pos_y_bak;
+			}
+		}
+}
+void battle::show_enemy_changes(int times)
+{
+	int pixels=8;
+	for(int i=1;i<=times;i++){
+		for(int j=0;j<=1;j++){
+			for(int k=0;k<enemy_poses_count;k++)
+				if(twoside_affected[k]){
+					battle_enemy_data[k].pos_x-=pixels;
+					battle_enemy_data[k].pos_y-=pixels/2;
+					if(i==1)
+						affected_enemies[k]=true;
+				}
+			draw_battle_scene(0,1);
+			pixels=-pixels;
+		}
+		pixels/=2;
+	}
+}
+bool battle::check_enemy_changes(){
+	bool changed=false;
+	for(int i=0;i<enemy_poses_count;i++){
+		if(store_for_diff.enemies[i].HP-=battle_enemy_data[i].HP){
+			display_damage_number(1,store_for_diff.enemies[i].HP,battle_enemy_data[i].pos_x,battle_enemy_data[i].pos_y-0x6E);
+			changed=true;
+			affected_enemies[i]=true;
+		}
+	}
+	return changed;
 }
 void battle::auto_attack(){
 	auto_selected_enemy = select_an_enemy_randomly();
@@ -1307,7 +1472,7 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 			defend_multiple[role_pos]++;
 		}
 	}
-	magic_fire(magic.delay,magic_id);
+	magic_fire(magic.delay,rpg.objects[magic_id].magic.magic);
 	magic_image_occurs=0;
 	for(int i=0;i<=rpg.team_roles;i++){
 		int force = ori_force+round(rnd1(4));
@@ -1365,9 +1530,9 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 			battle_role_data[r].frame=battle_role_data[r].frame_bak;
 	enemy_moving_semaphor=true;
 }
-void battle::magic_fire(int frame,int magic_id)
+void battle::magic_fire(int frame,int magic_index)
 {
-	MAGIC &magic=magics[rpg.objects[magic_id].magic.magic];
+	MAGIC &magic=magics[magic_index];
 	voc(magic.sfx).play();
 	magic_waving=magic.waving;
 	int frames=FIRE.slices(magic.effect);
@@ -1393,6 +1558,170 @@ void battle::magic_fire(int frame,int magic_id)
 		backupBackground();
 	}
 }
+void battle::role_release_magic_action(int role_pos,bool not_summon)
+{
+	battle_role_data[role_pos].frame=0;
+	for(int i=1,j=4;i<=4;i++,j--){
+		battle_role_data[role_pos].pos_x-=j;
+		battle_role_data[role_pos].pos_y-=j/2;
+		draw_battle_scene(0,1);
+	}
+	draw_battle_scene(0,2);
+	battle_role_data[role_pos].frame=5;
+	voc(rpg.roles_properties.sfx_discharge[rpg.team[role_pos].role]).play();
+	if(not_summon)
+		role_release_magic_effect(role_pos);
+	draw_battle_scene(0,1);
+}
+void battle::role_release_magic_effect(int role_pos)
+{
+	x[1]=battle_role_data[role_pos].pos_x;
+	y[1]=battle_role_data[role_pos].pos_y;
+	s[1]=100;
+	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(discharge_effects));
+	magic_image_occurs=1;
+	magic_frame=effect_idx[battle_role_data[role_pos].battle_avatar].magic*10+14;
+	for(int i=1;i<=10;i++){
+		magic_frame++;
+		draw_battle_scene(-1,1);
+	}
+	magic_image_occurs=0;
+}
+void battle::role_release_magic(int power,int magic,int target,int pos)
+{
+	bool is_summon=false;
+	if(pos==9)
+		is_summon=true;
+	int magic_index=rpg.objects[magic].magic.magic;
+	memset(twoside_affected,0,sizeof(twoside_affected));
+	if(magics[magic_index].effect>=0){
+		int base_damage=magics[magic_index].base_damage;
+		if(pos<=rpg.team_roles){
+			load_theurgy_image(magic_index);
+			if(!magics[magic_index].delay)
+				battle_role_data[pos].frame=6;
+		}
+		if(is_summon)
+			magic_index=magics[magic_index].effect;
+		enemy_moving_semaphor=false;
+		if(magics[magic_index].behavior<4 && magics[magic_index].behavior>0)
+			for(int i=0;i<enemy_poses_count;i++)
+				if(battle_enemy_data[i].HP>0)
+					twoside_affected[i]=-1;
+		switch(magics[magic_index].behavior){
+			case 7:
+			case 3:
+				magic_image_occurs=1;
+				x[1]=magics[magic_index].x_offset+0xA0;
+				y[1]=magics[magic_index].y_offset+0xC8;
+				s[1]=magics[magic_index].summon_effect;
+				break;
+			case 6:
+				magic_image_occurs=1;
+				x[1]=magics[magic_index].x_offset+0xF0;
+				y[1]=magics[magic_index].y_offset+0xA0;
+				s[1]=magics[magic_index].summon_effect;
+				break;
+			case 5:
+				magic_image_occurs=rpg.team_roles;
+				for(int i=0;i<=rpg.team_roles;i++){
+					++magic_image_occurs;
+					x[magic_image_occurs]=battle_role_data[i].pos_x+magics[magic_index].x_offset;
+					y[magic_image_occurs]=battle_role_data[i].pos_y+magics[magic_index].y_offset;
+					s[magic_image_occurs]=magics[magic_index].summon_effect;
+					twoside_affected[i]=-1;
+				}
+				break;
+			case 4:
+				magic_image_occurs=1;
+				x[1]=battle_role_data[target].pos_x+magics[magic_index].x_offset;
+				y[1]=battle_role_data[target].pos_y+magics[magic_index].y_offset;
+				s[1]=magics[magic_index].summon_effect;
+				twoside_affected[target]=-1;
+				break;
+			case 2:
+				magic_image_occurs=1;
+				x[1]=magics[magic_index].x_offset+0x78;
+				y[1]=magics[magic_index].y_offset+0x64;
+				s[1]=magics[magic_index].summon_effect;
+				break;
+			case 1:
+				magic_image_occurs=3;
+				x[1]=0x46;
+				y[1]=0x8C;
+				x[2]=0x64;
+				y[2]=0x6E;
+				x[3]=0xA0;
+				y[3]=0x64;
+				for(int i=1;i<=magic_image_occurs;i++){
+					x[i]+=magics[magic_index].x_offset;
+					y[i]+=magics[magic_index].y_offset;
+					s[i]=magics[magic_index].summon_effect;
+				}
+				break;
+			case 0:
+				magic_image_occurs=1;
+				x[1]=battle_enemy_data[target].pos_x+magics[magic_index].x_offset;
+				y[1]=battle_enemy_data[target].pos_y+magics[magic_index].y_offset;
+				s[1]=magics[magic_index].summon_effect;
+				twoside_affected[target]=-1;
+				break;
+			default:
+				break;
+		}
+		magic_frame=0;
+		if(magics[magic_index].delay){
+			for(magic_frame=0;magic_frame<magics[magic_index].delay;magic_frame++)
+				draw_battle_scene(magics[magic_index].speed,1);
+			battle_role_data[pos].frame=6;
+		}
+		magic_fire(magic_frame,magic_index);
+		magic_image_occurs=0;
+		max_blow_away=0;
+		if(magics[magic_index].behavior<=3)
+			for(int i=0;i<enemy_poses_count;i++){
+				int damage=power+power*rnd1(0.1);
+				if(!twoside_affected[i])
+					continue;
+				int defence=enemy_level_scaler(i,4)+get_monster(i).defence;
+				if(twoside_affected[i]){
+					damage=calc_base_damage(defence,damage)/2+magics[magic_index].base_damage;
+					int def_elem=0;
+					switch(int elem=magics[magic_index].elem_attr){
+						case STORM:
+						case LIGHT:
+						case FLOOD:
+						case FLAME:
+						case EARTH:
+							def_elem=get_monster(i).elem_defences[elem-1];
+							break;
+						case POISON:
+							def_elem=get_monster(i).poison_defence;
+							break;
+						default:
+							break;
+					}
+					damage=damage*(10-def_elem)/5;
+				}
+				damage=damage*(10+Pal::battlefields[rpg.battlefield].elem_property[magics[magic].elem_attr])/10;
+				if(damage)
+					delayed_damage[i]=damage;
+			}
+		else{
+			draw_battle_scene(-4,1);
+			if(magics[magic_index].behavior<=7)
+				for(int i=2;i<=16;i++){
+					delay(4);
+					for(int r=0;r<=rpg.team_roles;r++)
+						if(twoside_affected[r])
+							team_images[r].getsprite(battle_role_data[i].frame)->blit_filter(screen,battle_role_data[i].pos_x,battle_role_data[i].pos_y,brighter_filter,i,true,true);
+				}
+		}
+		enemy_moving_semaphor=true;
+		stage_blow_away=0;
+	}
+}
+
 void battle::add_occuring_magic_to_drawlist(bool flag)
 {
 	for(int i=1;i<=magic_image_occurs;i++)
@@ -1403,6 +1732,14 @@ void battle::add_occuring_magic_to_drawlist(bool flag)
 }
 void battle::load_theurgy_image(int id){
 	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(FIRE,Pal::magics[id].effect));
+}
+void battle::summon_imgs(int summon)
+{
+	MAGIC &magic=magics[rpg.objects[summon].magic.magic];
+	Font->blit_to(objs(summon),screen,0xC8,0x32,0xE,true);
+	enemy_moving_semaphor=false;
+	bright_every_role(0,rpg.team_roles);
+	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(F,magic.summon_effect+10));
 }
 void battle::enemy_fire_magic(int enemy_pos)
 {

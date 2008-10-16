@@ -70,7 +70,7 @@ extern struct _battle_enemy_data{
 }battle_enemy_data[TEAMENEMIES];
 extern RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 extern int flag_autobattle;
-enum MAGIC_PROP{NONE,ON_SCENE,ON_BATTLE,UNKNOWN,TARGET_ENEMY,OBJECT_ALL};
+enum MAGIC_PROP{ON_SCENE,ON_BATTLE,UNKNOWN,TARGET_ENEMY,OBJECT_ALL};
 
 class battle{
 	enum ACTION{
@@ -128,7 +128,7 @@ class battle{
 
 	void setup_role_enemy_image();
 	void setup_role_status();
-
+	void summon_imgs(int summon);
 
 	void display_damage_number(int color,int num,int x,int y);
 public:
@@ -177,13 +177,22 @@ public:
 	int select_targetting_role();
 	int select_a_living_role_randomly();
 	int select_an_enemy_randomly();
+	void bright_every_role(int begin,int end);
 
 	void enemy_attack_role(int,int);
 	void enemy_physical_attack(int enemy_pos,int role_pos,int force);
 	void enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos);
 	void enemy_fire_magic(int enemy_pos);
 	void role_physical_attack(int role_pos,int enemy_pos,int &damage,int bouts);
+	void role_release_magic_action(int role_pos,bool not_summon);
+	void role_release_magic_effect(int role_pos);
+	void role_release_magic(int power,int magic,int target,int pos);
 	void magic_fire(int delay,int magic_id);
+	bool check_role_changes();
+	bool check_enemy_changes();
+	void show_role_changes(int twoside_counter,int magic);
+	void show_enemy_changes(int times);
+	void attack_make();
 
 	void enemy_crazy_attack_enemy(int from,int target);
 	void role_crazy_attack_team(int from,int target);
@@ -221,6 +230,7 @@ private:
 	int magic_frame;
 	int shake_viewport_y;
 	boost::shared_ptr<sprite_prim> magic_img;
+	int drew_scenes_summon,summon_img_x,summon_img_y;
 };
 battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape);
 #endif //BATTLE_H
