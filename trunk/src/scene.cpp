@@ -90,6 +90,8 @@ inline void palmap::make_tile(uint8_t *_buf,int x,int y,int h,BITMAP *dest)
 }
 void palmap::make_onescreen(BITMAP *dest,int source_x,int source_y,int dest_x,int dest_y)
 {
+	if(curr_map<=0)
+		change(scenes[rpg.scene_id].id);
 	uint8_t *mapbuf=MAP.decode(curr_map,0);
 	for(int y=source_y/16-1;y<dest_y/16+2;y++)
 		for(int x=source_x/32-1;x<dest_x/32+2;x++)

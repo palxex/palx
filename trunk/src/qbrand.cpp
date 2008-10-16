@@ -34,7 +34,7 @@ void randomize()
 	uint64_t u=*reinterpret_cast<uint64_t*>(&f);
 	seed=((u>>48)^((u>>32)&0xffff))<<8;
 }
-int round(double f)
+int round(double f)//四舍五入；到偶数？算了吧
 {
 	return ((f-(int)f)>0.5)?((int)f+1):(int)f;
 }
