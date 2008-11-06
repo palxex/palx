@@ -84,7 +84,7 @@
 					<Add library="winmm" />
 					<Add library="dsound" />
 					<Add library="luabind" />
-					<Add library="lua5.1" />
+					<Add library="lua" />
 				</Linker>
 			</Target>
 		</Build>
