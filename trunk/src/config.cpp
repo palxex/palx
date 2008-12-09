@@ -509,7 +509,11 @@ void global_settings::init()
 	display_setup();
 
 	int digi_policy=(get<string>("music","type")=="rix"?DIGI_AUTODETECT:DIGI_NONE);
+	#if defined WIN32 //some sound driver cannot works well with rix without MIDI- -
+	int midi_policy=MIDI_AUTODETECT;
+	#else //for pulseaudio's midi trick
 	int midi_policy=(get<string>("music","type")=="midi"?MIDI_AUTODETECT:MIDI_NONE);
+	#endif
 	install_sound(digi_policy, midi_policy, NULL);
 	set_volume(get<int>("music","volume"),get<int>("music","volume"));
 	install_timer();

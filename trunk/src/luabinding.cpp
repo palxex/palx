@@ -41,6 +41,9 @@
 ******************************************************************************/
 #ifdef WITH_LUA
 
+//A temprature workaround for vc2008 express
+#pragma comment(linker, "\"/manifestdependency:type='Win32' name='Microsoft.VC90.CRT' version='9.0.21022.8' processorArchitecture='X86' publicKeyToken='1fc8b3b9a1e18e3b' language='*'\"")
+
 #include <iostream>
 #include <string>
 #include <cstdio>
@@ -256,7 +259,7 @@ void registerExports(lua_State *L){
             .def("set",&cached_res::set)
             .def("decode",(uint8_t*(cached_res::*)(int,long&))&cached_res::decode,pure_out_value(_3))
             .def("clear",(void (cached_res::*)())&cached_res::clear)
-		,
+		,/* luabind 0.71 bug?
 		class_<rpg_def>("rpg_def")
 			.def_readwrite("save_times",&rpg_def::save_times)
 			.def_readwrite("viewport_x",&rpg_def::viewport_x)
@@ -284,7 +287,7 @@ void registerExports(lua_State *L){
 					.def_readwrite("frame",&rpg_def::position::frame)
 			]
 			//.def_readwrite("team",&rpg_def::team)
-		,
+		,*/
 		class_<global_settings>("setting")
 			.def("getint",&global_settings::get<int>)
 			.def("getbool",&global_settings::get<bool>)
@@ -293,6 +296,7 @@ void registerExports(lua_State *L){
 			.def("setbool",&global_settings::set<bool>)
 			.def("setstring",&global_settings::set<string>)
 			.def("instance",&global_settings::instance,adopt(result))
+#ifndef _MSC_VER
 		,
 		def("process_script",&process_script),
 		def("process_script_entry",&process_script_entry,out_value(_5)),
@@ -300,6 +304,7 @@ void registerExports(lua_State *L){
 		def("get_rpg",&get_rpg),
 		def("get_data",&get_data),
 		def("set_data",&set_data)
+#endif
     ];
 	globals(L)["ABC"]=boost::ref(Pal::ABC);
 	globals(L)["MAP"]=boost::ref(Pal::MAP);
@@ -314,7 +319,7 @@ void registerExports(lua_State *L){
 	globals(L)["FIRE"]=boost::ref(Pal::FIRE);
 	globals(L)["MGO"]=boost::ref(Pal::MGO);
 	globals(L)["PAT"]=boost::ref(Pal::PAT);
-	globals(L)["RPG"]=boost::ref(Pal::rpg);
+	/*globals(L)["RPG"]=boost::ref(Pal::rpg);*/
 	globals(L)["config"]=boost::ref(*global_settings::instance());
 }
 };

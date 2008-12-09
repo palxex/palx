@@ -83,7 +83,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				UseFAT32Workaround="true"
+				UseFAT32Workaround="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"

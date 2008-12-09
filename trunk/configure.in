@@ -50,9 +50,9 @@ freetype2_CFLAGS="`$PKG_CONFIG freetype2 --cflags`"
 AC_SUBST(freetype2_LIBS)
 AC_SUBST(freetype2_CFLAGS)
 
-dnl lua50
-lua_LIBS="`$PKG_CONFIG lua50 --libs`"
-lua_CFLAGS="`$PKG_CONFIG lua50 --cflags`"
+dnl lua
+lua_LIBS="`$PKG_CONFIG lua --libs`"
+lua_CFLAGS="`$PKG_CONFIG lua --cflags`"
 AC_SUBST(lua_LIBS)
 AC_SUBST(lua_CFLAGS)
 
