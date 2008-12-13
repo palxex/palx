@@ -516,6 +516,7 @@ void global_settings::init()
 	#endif
 	install_sound(digi_policy, midi_policy, NULL);
 	set_volume(get<int>("music","volume"),get<int>("music","volume"));
+	set_volume_per_voice(0);
 	install_timer();
 	install_keyboard();keyboard_lowlevel_callback = key_watcher;
 	//install_mouse();enable_hardware_cursor();select_mouse_cursor(MOUSE_CURSOR_ARROW);show_mouse(screen);
