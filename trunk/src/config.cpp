@@ -137,6 +137,8 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	debugprop["allow_frozen"].comment="允许冻结启动/停止;true/false";
 	debugprop["console"].value="false";
 	debugprop["console"].comment="启动lua控制台;true/false";
+	debugprop["random"].value="true";
+	debugprop["random"].comment="允许随机;true/false";
 	section debug("debug",debugprop);
 	sections["debug"]=debug;
 

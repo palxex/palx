@@ -17,12 +17,18 @@
  *   along with this program; if not, If not, see                          *
  *   <http://www.gnu.org/licenses/>.                                       *
  ***************************************************************************/
-#include "integer.h"
-
+#include <algorithm>
+#include <assert.h>
 #include <time.h>
+
+#include "integer.h"
+#include "config.h"
+#include "internal.h"
 
 uint64_t seed;
 uint32_t a=214013,c=2531011,d=16777216;
+bool random=true;
+double fixed_random=0;
 
 void randomize()
 {
@@ -33,6 +39,11 @@ void randomize()
 	double f=(local->tm_hour*60+local->tm_min)*60+local->tm_sec;
 	uint64_t u=*reinterpret_cast<uint64_t*>(&f);
 	seed=((u>>48)^((u>>32)&0xffff))<<8;
+
+	if(global->get<bool>("debug","random")==false){
+		random=false;
+		fixed_random=1;
+	}
 }
 int round(double f)//四舍五入；到偶数？算了吧
 {
@@ -40,6 +51,8 @@ int round(double f)//四舍五入；到偶数？算了吧
 }
 double rnd0()
 {
+	if(!random)
+		return fixed_random;
 	seed=(seed*a+c)%d;
 	return (double)seed/d;
 }
