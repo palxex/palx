@@ -175,48 +175,51 @@ int battle::select_targetting_enemy()
 	if(get_enemy_alive()==1)
 		for(int i=0;i<enemy_poses_count;i++)
 			if(battle_enemy_data[i].HP>0)
-				return i;
-	int trend=0;
+				return targetting_enemy=i;
+	int trend=1;
 	targetting_enemy=0;
 	while(running){
 		switch(async_getkey())
 		{
 		case PAL_VK_LEFT:
 			trend=-1;
+			targetting_enemy--;
 			break;
 		case PAL_VK_RIGHT:
 			trend=1;
+			targetting_enemy++;
 			break;
 		case PAL_VK_MENU:
 			return -1;
 		case PAL_VK_EXPLORE:
 			return targetting_enemy;
 		default:
-			trend=0;
 			break;
 		}
-		do
-			targetting_enemy=std::min(std::max(targetting_enemy+trend,0),enemy_poses_count-1);
-		while(battle_enemy_data[targetting_enemy].HP<=0);
+		targetting_enemy=(targetting_enemy+enemy_poses_count)%enemy_poses_count;
+		while(battle_enemy_data[targetting_enemy].HP<=0)
+			targetting_enemy=(targetting_enemy+trend+enemy_poses_count)%enemy_poses_count;
 		draw_battle_scene(0,1);
 	}
-	return targetting_enemy=-1;
+	return targetting_enemy;
 }
 int battle::select_targetting_role(){
 	if(get_member_alive()==1)
 		for(int i=0;i<=rpg.team_roles;i++)
 			if(rpg.roles_properties.HP[i]>0)
-				return i;
-	int trend=0;
+				return targetting_role=i;
+	int trend=1;
 	targetting_role=0;
 	while(running){
 		switch(async_getkey())
 		{
 		case PAL_VK_LEFT:
 			trend=-1;
+			targetting_role--;
 			break;
 		case PAL_VK_RIGHT:
 			trend=1;
+			targetting_role++;
 			break;
 		case PAL_VK_MENU:
 			return -1;
@@ -226,12 +229,12 @@ int battle::select_targetting_role(){
 			trend=0;
 			break;
 		}
-		do
-			targetting_role=std::min(std::max(targetting_role+trend,0),(int)rpg.team_roles);
-		while(rpg.roles_properties.HP[targetting_role]<=0);
+		targetting_role=(targetting_role+rpg.team_roles+1)%(rpg.team_roles+1);
+		while(rpg.roles_properties.HP[targetting_role]<=0)
+			targetting_role=(targetting_role+trend+rpg.team_roles+1)%(rpg.team_roles+1);
 		draw_battle_scene(0,1);
 	}
-	return targetting_role=-1;
+	return targetting_role;
 }
 int battle::select_a_living_role_randomly()
 {
@@ -840,9 +843,9 @@ battle::END battle::process()
 			default:
 				if(role_status_pack[commanding_role].pack.high_speed)
 					speed*=3;
-				if(battle_role_data[commanding_role].battle_avatar==1)//weak
+				if(battle_role_data[commanding_role].frame==1)//weak
 					speed/=2;
-				if(battle_role_data[commanding_role].battle_avatar==2)//dead
+				if(battle_role_data[commanding_role].frame==2)//dead
 					speed=0;
 				break;
 			}
@@ -1701,9 +1704,11 @@ void battle::role_release_magic(int power,int magic,int target,int pos)
 						default:
 							break;
 					}
-					damage=damage*(10-def_elem)/5;
+					if(def_elem){
+						damage=damage*(10-def_elem)/5;
+						damage=damage*(10+Pal::battlefields[Pal::rpg.battlefield].elem_property[def_elem])/10;
+					}
 				}
-				damage=damage*(10+Pal::battlefields[rpg.battlefield].elem_property[magics[magic].elem_attr])/10;
 				if(damage)
 					delayed_damage[i]=damage;
 			}
@@ -1714,7 +1719,7 @@ void battle::role_release_magic(int power,int magic,int target,int pos)
 					delay(4);
 					for(int r=0;r<=rpg.team_roles;r++)
 						if(twoside_affected[r])
-							team_images[r].getsprite(battle_role_data[i].frame)->blit_filter(screen,battle_role_data[i].pos_x,battle_role_data[i].pos_y,brighter_filter,i,true,true);
+							team_images[r].getsprite(battle_role_data[r].frame)->blit_filter(screen,battle_role_data[r].pos_x,battle_role_data[r].pos_y,brighter_filter,16-i,true,true);
 				}
 		}
 		enemy_moving_semaphor=true;
@@ -1839,7 +1844,7 @@ void battle::role_physical_attack(int role_pos,int enemy_pos,int &damage,int bou
 		high_attack_flag=1;
 		final_sfx=rpg.roles_properties.sfx_attack[role];
 	}
-	damage=damage*rnd1(1+1.0/8);
+	damage=damage*(1+rnd1(1.0/8));
 	if(role==LEE && round(rnd1(12))==3){
 		damage*=2;
 		high_attack_flag=2;
