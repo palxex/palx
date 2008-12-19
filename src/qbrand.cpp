@@ -25,10 +25,12 @@
 #include "config.h"
 #include "internal.h"
 
-uint64_t seed;
-uint32_t a=214013,c=2531011,d=16777216;
-bool random=true;
-double fixed_random=0;
+namespace{
+    uint64_t seed;
+    uint32_t a=214013,c=2531011,d=16777216;
+    bool is_random=true;
+    double fixed_random=0;
+}
 
 void randomize()
 {
@@ -41,7 +43,7 @@ void randomize()
 	seed=((u>>48)^((u>>32)&0xffff))<<8;
 
 	if(global->get<bool>("debug","random")==false){
-		random=false;
+		is_random=false;
 		fixed_random=1;
 	}
 }
@@ -51,7 +53,7 @@ int round(double f)//四舍五入；到偶数？算了吧
 }
 double rnd0()
 {
-	if(!random)
+	if(!is_random)
 		return fixed_random;
 	seed=(seed*a+c)%d;
 	return (double)seed/d;
