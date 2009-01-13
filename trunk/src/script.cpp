@@ -416,7 +416,13 @@ __walk_npc:
         hockshop();
         break;
     case 0x28:
-        //not implemented
+		for(int i=(param1?param1:0);i<=(param1?param1:battle::get()->enemy_poses_count-1);i++){
+			int posion_index;
+			for(posion_index=0;posion_index<16 && enemy_poison_stack[posion_index][i].poison!=param2;posion_index++);
+			if(rpg.objects[battle_enemy_data[i].id].enemy.voodoo_defence<round(rnd1(10)))
+				for(int l=0;l<16;l++){
+				}
+		}
         break;
     case 0x29:
         //not implemented
@@ -651,7 +657,8 @@ __ride:
 						npc_speed=chase_speed;
 					else if(!barrier_check(object,obj.pos_x+direction_offs[d][0],obj.pos_y+direction_offs[d][1])){
 						if(barrier_check(0,obj.pos_x,obj.pos_y,false)){
-							//allegro_message("Hei,you are on the volcano(%x,%x), NPC #%X!",obj.pos_x,obj.pos_y,object);
+							if(global->get<bool>("debug","check_point"))
+								allegro_message("Hei,you are on the volcano(%x,%x), NPC #%X!",obj.pos_x,obj.pos_y,object);
 							obj.status=0;
 						}
 						obj.direction=d;

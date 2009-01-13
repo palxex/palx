@@ -44,7 +44,7 @@ void randomize()
 
 	if(global->get<bool>("debug","random")==false){
 		is_random=false;
-		fixed_random=1;
+		fixed_random=global->get<double>("debug","random");
 	}
 }
 int round(double f)//四舍五入；到偶数？算了吧

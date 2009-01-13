@@ -138,7 +138,9 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	debugprop["console"].value="false";
 	debugprop["console"].comment="启动lua控制台;true/false";
 	debugprop["random"].value="true";
-	debugprop["random"].comment="允许随机;true/false";
+	debugprop["random"].comment="允许随机;true/浮点";
+	debugprop["check_point"].value="false";
+	debugprop["check_point"].comment="检查敌处在阻隔点之bug;true/false";
 	section debug("debug",debugprop);
 	sections["debug"]=debug;
 
