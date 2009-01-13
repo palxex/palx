@@ -137,6 +137,27 @@ class ini_parser
 				return 0;
 			}
 		}
+		double get(const char *name,double){
+			try
+			{
+				return boost::lexical_cast<double>(keymap[name].value);
+			}
+			catch(boost::bad_lexical_cast &)
+			{
+				try
+				{
+					return hexgetint(keymap[name].value);
+				}
+				catch(...)
+				{
+					return 0;
+				}
+			}
+			catch(...)
+			{
+				return 0;
+			}
+		}
 		void set(const char *name,const std::string &val){
 			keymap[name].value=val;
 		}
@@ -144,6 +165,9 @@ class ini_parser
 			keymap[name].value=(val?"true":"false");
 		}
 		void set(const char *name,int val){
+			keymap[name].value=boost::lexical_cast<std::string>(val);
+		}
+		void set(const char *name,double val){
 			keymap[name].value=boost::lexical_cast<std::string>(val);
 		}
 	};
