@@ -29,7 +29,7 @@ int count_item(int item,bool hasequip=true);
 int get_cons_attrib(int role,int attrib);
 void use_item(int item,int amount);
 
-extern int role_parts[6][17][74];
+extern int role_parts[6][18][74];
 extern int prev_equip;
 
 #endif

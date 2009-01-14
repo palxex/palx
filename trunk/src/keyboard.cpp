@@ -239,6 +239,7 @@ void key_watcher(int scancode)
 		if(key[i])
 			mykey[i]=2;
 	if(scancode<127 && mykey[scancode]==2)	return;*/
+	if(!running) return;
 	keyhook(scancode);
 	scancode=(scancode&0x80)|scancode_translate(scancode&0x7f);
 	if(scancode>127){

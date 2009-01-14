@@ -164,7 +164,7 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 
 	ini_parser::section::configmap musicprop;
 	musicprop["type"].value=MUSIC_TYPE;
-	musicprop["type"].comment="rix/mid/foreverCD,+gameCD,+gameCDmp3，或任意混合。foreverCD指永恒回忆录之FM曲集";
+	musicprop["type"].comment="rix/midi/foreverCD,+gameCD,+gameCDmp3，或任意混合。foreverCD指永恒回忆录之FM曲集";
 	musicprop["opltype"].value="mame";
 	musicprop["opltype"].comment="real/mame/ken;真机OPL芯片/MAME版模拟/Ken版模拟FM音乐";
 	musicprop["oplport"].value="0x388";
@@ -215,6 +215,36 @@ ini_parser::~ini_parser()
 		write();
 }
 
+	void cut_msg_impl::set(const std::string &fname)
+	{
+		FILE *fp=fopen(fname.c_str(),"rb");
+		if(!fp){
+			allegro_message("%s not found",fname.c_str());
+			throw std::exception();
+		}
+		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);
+		glb_buf=new char[len];
+		fread(glb_buf,len,1,fp);
+		fclose(fp);
+	}
+	cut_msg_impl::~cut_msg_impl()
+	{
+		delete[] glb_buf;
+	}
+	char *cut_msg_impl::operator()(int start,int end)
+	{
+		assert(end>start);assert(start>=0);
+		memset(buf,0,sizeof(buf));
+		memcpy(buf,glb_buf+start,end-start);
+		return buf;
+	}
+	char *cut_msg_impl::operator()(int start)
+	{
+		start*=10;
+		int end=start+10;
+		return operator()(start,end);
+	}
+
 namespace{
 	uint8_t *denone_file(const char *file,long &len)
 	{
@@ -222,8 +252,7 @@ namespace{
 		FILE *fp=fopen(file,"rb");
 		if(!fp){
 			allegro_message("%s not found",file);
-			running=false;
-			return NULL;
+			throw std::exception();
 		}
 		fseek(fp,0,SEEK_END);
 		length=ftell(fp);
@@ -255,8 +284,7 @@ namespace{
 		FILE *fp=fopen(file,"rb");
 		if(!fp){
 			allegro_message("%s not found",file);
-			running=false;
-			return NULL;
+			throw std::exception();
 		}
 		fseek(fp,offset,SEEK_SET);
 		fread(&offset,4,1,fp);
@@ -485,6 +513,10 @@ void global_settings::init()
 	if(!running)
 		return;
 
+	//allegro init
+	allegro_init();
+
+	try{
 	using namespace Pal;
 	string path_root=get<string>("config","path");
 	SETUP.set(path_root+"/SETUP.DAT",de_none);
@@ -508,8 +540,6 @@ void global_settings::init()
 	objs.set(path_root+"/WORD.DAT");
 	playrix::set((path_root+"/MUS.MKF").c_str());
 
-	//allegro init
-	allegro_init();
 	display_setup();
 
 	int digi_policy=(get<string>("music","type")=="rix"?DIGI_AUTODETECT:DIGI_NONE);
@@ -551,4 +581,8 @@ void global_settings::init()
 
 	m_lua->init();
 	//install_int(luacallback,100);
+	}catch(...){
+		running=false;
+		allegro_message("Resource error: is path correct?");
+	}
 }

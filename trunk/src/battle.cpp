@@ -414,7 +414,7 @@ int battle::bout_selecting(int &selected)
 	return 0;
 }
 battle::battle(int team,int script):enemy_team(team),script_escape(script),stage_blow_away(0),magic_waving(0),battlefield_waving(battlefields[Pal::rpg.battlefield].waving),endbattle_method(NOT),battle_result(NOT),escape_flag(NOT),
-									max_blow_away(0),role_invisible_rounds(0),twoside_counter(0),flag_attacking_hero(false),enemy_poses_count(0),
+									max_blow_away(0),role_invisible_rounds(0),action_taker(0),flag_attacking_hero(false),enemy_poses_count(0),
 									flag_withdraw(false),effect_height(200),battle_scene_draw(false),magic_image_occurs(0),flag_summon(false),flag_selecting(false),
 									enemy_exps(0),enemy_money(0),need_battle(true),drawlist_parity(0),sth_about_y(0),effective_y(200),flag_second_attacking(false),
 									auto_selected_enemy(0),battle_sfx(0),magic_frame(0),shake_viewport_y(0),drew_scenes_summon(0)
@@ -862,41 +862,41 @@ battle::END battle::process()
 			if(vs_action->second>=100){
 				//enemy action
 				if(role_invisible_rounds==0){
-					twoside_counter=vs_action->second-100;
-					if(enemy_status_pack[twoside_counter].pack.fixed==0 && enemy_status_pack[twoside_counter].pack.sleep==0){
+					action_taker=vs_action->second-100;
+					if(enemy_status_pack[action_taker].pack.fixed==0 && enemy_status_pack[action_taker].pack.sleep==0){
 						if(vs_action!=vs_table.begin() && vs_action->second==prev_action->second)
 							flag_second_attacking=true;
-						if(battle_enemy_data[twoside_counter].HP>0)
-							enemy_attack_role(twoside_counter,select_a_living_role_randomly());
+						if(battle_enemy_data[action_taker].HP>0)
+							enemy_attack_role(action_taker,select_a_living_role_randomly());
 					}
 				}
 			}
 			else{
 				//role action
-				twoside_counter=vs_action->second;
-				int attacking_role=rpg.team[twoside_counter].role;
-				if(twoside_counter>=0 && (rpg.roles_properties.HP[attacking_role]>0 || role_status_pack[twoside_counter].pack.dummy>0)
-					&& role_status_pack[twoside_counter].pack.sleep<=0 && role_status_pack[twoside_counter].pack.fixed<=0)
+				action_taker=vs_action->second;
+				int attacking_role=rpg.team[action_taker].role;
+				if(action_taker>=0 && (rpg.roles_properties.HP[attacking_role]>0 || role_status_pack[action_taker].pack.dummy>0)
+					&& role_status_pack[action_taker].pack.sleep<=0 && role_status_pack[action_taker].pack.fixed<=0)
 				{
 					if(flag_autobattle>=2){
-						role_action_table[twoside_counter].target=auto_selected_enemy;
+						role_action_table[action_taker].target=auto_selected_enemy;
 						if(flag_autobattle==2)//菜单:围攻
-							role_action_table[twoside_counter].action=ATTACK;
+							role_action_table[action_taker].action=ATTACK;
 						else if(flag_autobattle==9){//自动战
-							role_action_table[twoside_counter].action=MAGIC_TO_ENEMY;
-							role_action_table[twoside_counter].tool=rpg.roles_properties.magics[round(rnd1(4))][attacking_role];//只能自动前4招……
+							role_action_table[action_taker].action=MAGIC_TO_ENEMY;
+							role_action_table[action_taker].tool=rpg.roles_properties.magics[round(rnd1(4))][attacking_role];//只能自动前4招……
 						}
 					}
-					if(role_status_pack[twoside_counter].pack.crazy>0)
-						role_action_table[twoside_counter].action=CRAZY_ATTACK;
-					int target_enemy=role_action_table[twoside_counter].target;
+					if(role_status_pack[action_taker].pack.crazy>0)
+						role_action_table[action_taker].action=CRAZY_ATTACK;
+					int target_enemy=role_action_table[action_taker].target;
 					while(battle_enemy_data[target_enemy].HP<=0)
 						target_enemy=(target_enemy+1)%enemy_poses_count;
 					flag_withdraw=false;flag_attacking_hero=false;battle_sfx=0;
 					int enemies_before=get_enemy_alive();
 					for(int i=0;i<5;i++)
 						store_for_diff.enemies[i].HP=battle_enemy_data[i].HP;
-					switch(int action=role_action_table[twoside_counter].action)//fill!!!
+					switch(int action=role_action_table[action_taker].action)//fill!!!
 					{
 					case ATTACK:
 attack_label:
@@ -904,14 +904,14 @@ attack_label:
 							goto attack_all_label;
 						{
 							int total_damage=0;
-							for(int bout=0,bouts=(role_status_pack[twoside_counter].pack.twice_attack>0?1:0);bout<=bouts;bout++)
+							for(int bout=0,bouts=(role_status_pack[action_taker].pack.twice_attack>0?1:0);bout<=bouts;bout++)
 							{
 								int damage=calc_base_damage(get_monster(target_enemy).defence+enemy_level_scaler(target_enemy,4),get_cons_attrib(attacking_role,0x11));
 								damage=damage*2/get_monster(target_enemy).weapon_defence;
-								role_physical_attack(twoside_counter,target_enemy,damage,bouts);
+								role_physical_attack(action_taker,target_enemy,damage,bouts);
 								total_damage+=damage;
 							}
-							role_restore_position(twoside_counter);
+							role_restore_position(action_taker);
 							draw_battle_scene(0,1);
 							battle_enemy_data[target_enemy].HP-=total_damage;
 							if(battle_enemy_data[target_enemy].HP<=0)
@@ -927,20 +927,20 @@ attack_label:
 					case MAGIC_TO_US:
 						{
 							int power=get_cons_attrib(attacking_role,0x12);
-							int magic_index=rpg.objects[role_action_table[twoside_counter].tool].magic.magic;
-							role_release_magic_action(twoside_counter,Pal::magics[magic_index].behavior!=8);
-							uint16_t &pre_script=Pal::rpg.objects[role_action_table[twoside_counter].tool].magic.occur;
-							pre_script=process_script(pre_script,twoside_counter);
+							int magic_index=rpg.objects[role_action_table[action_taker].tool].magic.magic;
+							role_release_magic_action(action_taker,Pal::magics[magic_index].behavior!=8);
+							uint16_t &pre_script=Pal::rpg.objects[role_action_table[action_taker].tool].magic.occur;
+							pre_script=process_script(pre_script,action_taker);
 							if(prelimit_OK){
 								if(magics[magic_index].behavior==8)
-									bright_every_role(twoside_counter,twoside_counter);
+									bright_every_role(action_taker,action_taker);
 								if(magics[magic_index].effect>=0)
-									role_release_magic(power,role_action_table[twoside_counter].tool,role_action_table[twoside_counter].target,twoside_counter);
+									role_release_magic(power,role_action_table[action_taker].tool,role_action_table[action_taker].target,action_taker);
 								rpg.roles_properties.MP[attacking_role]-=magics[magic_index].power_used;
-								show_role_changes(twoside_counter,role_action_table[twoside_counter].tool);
+								show_role_changes(action_taker,role_action_table[action_taker].tool);
 								if(magics[magic_index].behavior==8){
-									battle_role_data[twoside_counter].pos_x=battle_role_data[twoside_counter].pos_x_bak;
-									battle_role_data[twoside_counter].pos_y=battle_role_data[twoside_counter].pos_y_bak;
+									battle_role_data[action_taker].pos_x=battle_role_data[action_taker].pos_x_bak;
+									battle_role_data[action_taker].pos_y=battle_role_data[action_taker].pos_y_bak;
 									setup_role_enemy_image();
 									flag_invisible=-1;
 								}
@@ -953,20 +953,20 @@ attack_label:
 						{
 							flag_summon=false;
 							int power=get_cons_attrib(attacking_role,0x12);
-							int magic_index=rpg.objects[role_action_table[twoside_counter].tool].magic.magic;
-							role_release_magic_action(twoside_counter,magics[magic_index].behavior!=9);
-							uint16_t &pre_script=rpg.objects[role_action_table[twoside_counter].tool].magic.occur;
-							pre_script=process_script(pre_script,twoside_counter);
+							int magic_index=rpg.objects[role_action_table[action_taker].tool].magic.magic;
+							role_release_magic_action(action_taker,magics[magic_index].behavior!=9);
+							uint16_t &pre_script=rpg.objects[role_action_table[action_taker].tool].magic.occur;
+							pre_script=process_script(pre_script,action_taker);
 							if(prelimit_OK){
 								if(magics[magic_index].behavior==9){
 									summon_magic=magic_index;
 									flag_summon=true;
-									summon_imgs(role_action_table[twoside_counter].tool);
-									role_restore_position(twoside_counter);
+									summon_imgs(role_action_table[action_taker].tool);
+									role_restore_position(action_taker);
 								}
-								role_release_magic(power,role_action_table[twoside_counter].tool,role_action_table[twoside_counter].target,(magics[magic_index].behavior==9)?9:twoside_counter);
-								uint16_t &post_script=rpg.objects[role_action_table[twoside_counter].tool].magic.post;
-								post_script=process_script(post_script,role_action_table[twoside_counter].target);
+								role_release_magic(power,role_action_table[action_taker].tool,role_action_table[action_taker].target,(magics[magic_index].behavior==9)?9:action_taker);
+								uint16_t &post_script=rpg.objects[role_action_table[action_taker].tool].magic.post;
+								post_script=process_script(post_script,role_action_table[action_taker].target);
 								attack_make();
 								if(check_enemy_changes())
 									show_enemy_changes(5);
@@ -981,8 +981,8 @@ attack_label:
 					case THROW_ITEM:
 						break;
 					case DEFENCE:
-						battle_role_data[twoside_counter].frame=3;
-						battle_role_data[twoside_counter].prev_frame=3;
+						battle_role_data[action_taker].frame=3;
+						battle_role_data[action_taker].prev_frame=3;
 						draw_battle_scene(0,4);
 						rpg.roles_exp[5][attacking_role].count+=2;
 						break;
@@ -997,8 +997,8 @@ attack_label:
 					case CRAZY_ATTACK:
 						{
 							int target=select_a_living_role_randomly();
-							if(target!=twoside_counter)
-								role_crazy_attack_team(twoside_counter,target);
+							if(target!=action_taker)
+								role_crazy_attack_team(action_taker,target);
 						}
 						break;
 					case ATTACK_ALL:
@@ -1074,14 +1074,14 @@ attack_all_label:
 	}
 	return check_end_battle();
 }
-void battle::show_role_changes(int twoside_counter,int magic)
+void battle::show_role_changes(int action_taker,int magic)
 {
 	for(int i=0;i<=rpg.team_roles;i++){
 		store_for_diff.roles[i].HP=rpg.roles_properties.HP[rpg.team[i].role];
 		store_for_diff.roles[i].MP=rpg.roles_properties.MP[rpg.team[i].role];
 	}
 	uint16_t &post_script=rpg.objects[magic].magic.post;
-	post_script=process_script(post_script,role_action_table[twoside_counter].target);
+	post_script=process_script(post_script,role_action_table[action_taker].target);
 	if(check_role_changes()){
 		draw_battle_scene(0,7);
 		setup_role_status();
@@ -1480,7 +1480,7 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 	for(int i=0;i<=rpg.team_roles;i++){
 		int force = ori_force+round(rnd1(4));
 		if(role_exist[i]){
-			int damage = force+calc_base_damage(get_cons_attrib(i,0x13),force)/2;
+			int damage = magic.base_damage+calc_base_damage(get_cons_attrib(i,0x13),force)/2;
 			damage/=defend_multiple[i];
 			switch(int elem=magic.elem_attr){
 					case 6:

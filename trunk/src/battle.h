@@ -72,6 +72,8 @@ extern RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 extern int flag_autobattle;
 enum MAGIC_PROP{ON_SCENE,ON_BATTLE,UNKNOWN,TARGET_ENEMY,OBJECT_ALL};
 
+MONSTER &get_monster(int pos);
+
 class battle{
 	enum ACTION{
 		ATTACK=0,
@@ -119,7 +121,7 @@ class battle{
 	static battle *thebattle;
 
 	bitmap battlescene,battlebuf;
-	int enemy_team,script_escape;
+	int enemy_team;
 	std::map<int,sprite_prim> team_images;
 	std::map<int,sprite_prim> enemy_images;
 	std::map<int,sprite_prim> magic_images;
@@ -132,6 +134,7 @@ class battle{
 
 	void display_damage_number(int color,int num,int x,int y);
 public:
+	int script_escape;
 	enum END{
 		QUIT=-1,
 		NOT=0,
@@ -190,7 +193,7 @@ public:
 	void magic_fire(int delay,int magic_id);
 	bool check_role_changes();
 	bool check_enemy_changes();
-	void show_role_changes(int twoside_counter,int magic);
+	void show_role_changes(int action_taker,int magic);
 	void show_enemy_changes(int times);
 	void attack_make();
 
@@ -204,7 +207,7 @@ public:
 
 	int flag_invisible;
 	int role_invisible_rounds;
-	int twoside_counter;
+	int action_taker;
 	bool flag_attacking_hero;
 	int enemy_poses_count;
 	void load_theurgy_image(int id);
