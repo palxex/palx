@@ -177,13 +177,34 @@ void clear_effective(int16_t p1,int16_t p2)
 	if(flag_battling)
 		battle::get()->restoreBackground();
 }
+void dialog_got_goods(int word,int goods)
+{
+	single_dialog(0x60,0x20,7,screen);
+	dialog_string(msges(word),0x6A,0x2A,0,true);
+	dialog_string(msges(goods),0x8C,0x2A,0x17,false);
+}
+void overlay_palette_by_16colors(PALETTE &tbl,PALETTE &tbl2,int arg)
+{
+	for(int i=0;i<16;i++)
+		memcpy(tbl2+i*16,tbl+16,sizeof(RGB)*16);
+}
+void palette_filter_fading(int arg)
+{
+	PALETTE p900,p600;
+	overlay_palette_by_16colors(pat.get(rpg.palette_offset),p900,arg);
+	memcpy(p600,pat.get(rpg.palette_offset),sizeof(PALETTE));
+	for(int i=0;i<0x19;i++){
+		palette_fade(p600,p900);
+		delay(8);
+	}
+}
 void process_script_entry(uint16_t func,const int16_t param1,const int16_t param2,const int16_t param3,uint16_t &id,int16_t object)
 {
     //printf("%s\n",scr_desc(func,param).c_str());
 	static sprite_prim scene_sprite;
     EVENT_OBJECT &obj=evtobjs[object];
 #define curr_obj (param1<0?obj:evtobjs[param1])
-    int role=rpg.team[(object>=0&&object<=4)?object:0].role;
+	int role=rpg.team[(object>=0&&object<=rpg.team_roles)?object:0].role;
     char addition[100];
     memset(addition,0,sizeof(addition));
     int npc_speed,role_speed;
@@ -417,24 +438,53 @@ __walk_npc:
         break;
     case 0x28:
 		for(int i=(param1?param1:0);i<=(param1?param1:battle::get()->enemy_poses_count-1);i++){
-			int posion_index;
-			for(posion_index=0;posion_index<16 && enemy_poison_stack[posion_index][i].poison!=param2;posion_index++);
+			int poison_index;
+			for(poison_index=0;poison_index<16 && enemy_poison_stack[poison_index][i].poison!=param2;poison_index++);
+			if(poison_index<16)
+				continue;
 			if(rpg.objects[battle_enemy_data[i].id].enemy.voodoo_defence<round(rnd1(10)))
-				for(int l=0;l<16;l++){
-				}
+				for(int l=0;l<16;l++)
+					if(enemy_poison_stack[l][i].poison==0){
+						enemy_poison_stack[l][i].poison=param2;
+						int16_t &poison_script=enemy_poison_stack[l][i].script=rpg.objects[param2].poison.to_enemy;
+						poison_script=process_script(poison_script,i);
+						l=16;
+					}
 		}
         break;
     case 0x29:
-        //not implemented
+		for(int i=(param1?param1:0);i<=(param1?param1:rpg.team_roles);i++){
+			int poison_index;
+			for(poison_index=0;poison_index<16 && rpg.poison_stack[poison_index][i].poison!=param2;poison_index++);
+			if(poison_index<16)
+				continue;
+			if(get_cons_attrib(rpg.team[i].role,0x16)<rnd1(100))
+				for(int l=0;l<16;l++)
+					if(rpg.poison_stack[l][i].poison==0){
+						rpg.poison_stack[l][i].poison=param2;
+						int16_t &poison_script=rpg.poison_stack[l][i].script=rpg.objects[param2].poison.to_role;
+						poison_script=process_script(poison_script,i);
+						l=16;
+					}
+		}
         break;
     case 0x2a:
-        //not implemented
+		for(int i=(param1?param1:0);i<=(param1?param1:battle::get()->enemy_poses_count-1);i++)
+			for(int l=0;l<16;l++)
+				if(enemy_poison_stack[l][i].poison==param2)
+					enemy_poison_stack[l][i].poison=0;
         break;
     case 0x2b:
-        //not implemented
+		for(int i=(param1?param1:0);i<=(param1?param1:rpg.team_roles);i++)
+			for(int l=0;l<16;l++)
+				if(rpg.poison_stack[l][i].poison==param2)
+					rpg.poison_stack[l][i].poison=0;
         break;
     case 0x2c:
-        //not implemented
+		for(int i=(param1?param1:0);i<=(param1?param1:rpg.team_roles);i++)
+			for(int l=0;l<16;l++)
+				if(rpg.poison_stack[l][i].poison && rpg.objects[rpg.poison_stack[l][i].poison].poison.toxicity<=param2)
+					rpg.poison_stack[l][i].poison=0;
         break;
     case 0x2d:
 		if(param1==4){
@@ -454,13 +504,20 @@ __walk_npc:
 					role_status_pack[object].list[param1]=param2;
         break;
     case 0x2e:
-        //not implemented
+		if(rpg.objects[battle_enemy_data[object].id].enemy.voodoo_defence<rnd1(10)){
+			if(param2>0)
+				enemy_status_pack[param1].list[param2]=param2;
+		}else
+			if(param3)
+				id=param3-1;
         break;
     case 0x2f:
-        //not implemented
+		role_status_pack[object].list[param1]=0;
         break;
     case 0x30:
-        //not implemented
+        if(param3)
+			role=param3-1;
+		role_parts[role][17][param1]=rpg.role_prop_tables[param1][role]*param2/100.0;
         break;
     case 0x31://ChangeCurrentHeroBattleSprite
 		battle_role_data[object].battle_avatar=param1;
@@ -472,10 +529,24 @@ __walk_npc:
             id=param2-1;
         break;
     case 0x33:
-        //not implemented
+        if(get_monster(object).gourd_value>0)
+			rpg.gourd_value+=get_monster(object).gourd_value;
+		else
+			id=param1-1;
         break;
     case 0x34:
-        //not implemented
+		if(rpg.gourd_value){
+			//战场就地炼出减经验取消
+			int seed=rnd1(rpg.gourd_value);
+			seed=(seed>8?8:seed);
+			rpg.gourd_value-=(seed+1);
+			add_goods_to_list(shops[0].item[seed],1);
+			dialog_got_goods(0x2A,shops[0].item[seed]);
+			UIpics.getsprite(70)->blit_to(screen,0x80,0x49);
+			sprite_prim(BALL,shops[0].item[seed]).getsprite(0)->blit_to(screen,0x87,0x50);
+			wait_key(100);
+		}else
+			id=param1-1;
         break;
     case 0x35:
         shake_times=param1;
@@ -500,10 +571,23 @@ __walk_npc:
 		}
 		break;
 	case 0x39:
-        //not implemented
+		if(battle::get()->flag_attacking_hero){
+			rpg.roles_properties.HP[role]-=param1;
+			rpg.roles_properties.HP[role]=(rpg.roles_properties.HP[role]<0?0:rpg.roles_properties.HP[role]);
+			battle_enemy_data[battle::get()->action_taker].HP+=param1;//无上限...
+		}else{
+			battle_enemy_data[object].HP-=param1;
+			role=rpg.team[battle::get()->action_taker].role;
+			rpg.roles_properties.HP[role]+=param1;
+			rpg.roles_properties.HP[role]=(rpg.roles_properties.HP[role]>rpg.roles_properties.HP_max[role]?rpg.roles_properties.HP_max[role]:rpg.roles_properties.HP[role]);
+		}
 		break;
-	case 0x3a:
-        //not implemented
+	case 0x3a://not implemented completely
+		if(battle::get()->script_escape){
+			//battle::get()->escape(true,object);
+		}else
+			if(param1)
+				id=param1-1;
 		break;
     case 0x3b:
         frame_pos_flag=0;
@@ -567,7 +651,16 @@ __walk_npc:
 		prelimit_OK=false;
 		break;
 	case 0x42:
-        //not implemented
+		{
+			int target=object;
+			target=((param3>0 && param3<=5)?param3-1:target);
+			target=(param3<0?rnd1(battle::get()->enemy_poses_count):target);
+			while(battle_enemy_data[target].HP<=0)
+				target=(target+1)%battle::get()->enemy_poses_count;
+			battle::get()->load_theurgy_image(rpg.objects[param1].magic.magic);
+			battle::get()->role_release_magic(param2,param1,target,8);
+			battle::get()->attack_make();
+		}
 		break;
     case 0x43:
         if(rpg.music!=param1 || !param1)
@@ -640,7 +733,7 @@ __ride:
         rpg.battlefield=param1;
         break;
 	case 0x4b:
-        //not implemented
+		obj.vanish_time=-(param1?param1:10);
 		break;
 	case 0x4c://gogogo
 		{
@@ -684,8 +777,18 @@ __ride:
 		break;
 	case 0x4f://fade red
 		if(param1<=0){
-
+			palette_filter_fading(1);
+			for(int i=0;i<320;i++)
+				for(int j=0;j<200;j++)
+					(((uint8_t*)screen->dat)[i*200+j]&=0x0F0F)|=0x10;
+			pat.set(rpg.palette_offset);
 		}else{//not used in game
+			int filter=param1-1;
+			PALETTE p600;
+			overlay_palette_by_16colors(pat.get(rpg.palette_offset),p600,filter);
+			memcpy(pat.get(rpg.palette_offset),p600,sizeof(PALETTE)/2);
+			if(!mutex_can_change_palette)
+				pat.set(rpg.palette_offset);
 		}
 		break;
     case 0x50:

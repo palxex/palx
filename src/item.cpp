@@ -20,7 +20,7 @@
 #include <algorithm>
 #include "game.h"
 
-int role_parts[6][17][74];
+int role_parts[6][18][74];
 int prev_equip;
 
 int compact_items()

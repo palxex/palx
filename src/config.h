@@ -236,31 +236,10 @@ class cut_msg_impl
 	char buf[100];
 public:
 	cut_msg_impl(){}
-	void set(const std::string &fname)
-	{
-		FILE *fp=fopen(fname.c_str(),"rb");
-		long len;fseek(fp,0,SEEK_END);len=ftell(fp);rewind(fp);
-		glb_buf=new char[len];
-		fread(glb_buf,len,1,fp);
-		fclose(fp);
-	}
-	~cut_msg_impl()
-	{
-		delete[] glb_buf;
-	}
-	char *operator()(int start,int end)
-	{
-		assert(end>start);assert(start>=0);
-		memset(buf,0,sizeof(buf));
-		memcpy(buf,glb_buf+start,end-start);
-		return buf;
-	}
-	char *operator()(int start)
-	{
-		start*=10;
-		int end=start+10;
-		return operator()(start,end);
-	}
+	void set(const std::string &fname);
+	~cut_msg_impl();
+	char *operator()(int start,int end);
+	char *operator()(int start);
 };
 extern cut_msg_impl objs,msges;
 

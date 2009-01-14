@@ -57,6 +57,7 @@ void switch_proc()
 }
 void Load_Data()
 {
+	try{
 	using namespace Pal;
 	flag_battling=false;
 	x_off=0,y_off=0;
@@ -108,6 +109,9 @@ void Load_Data()
 	}
 	flag_to_load=0;
 	setup_our_team_data_things();
+	}catch(...){
+		running=false;
+	}
 }
 
 void redraw_everything(int time_gap,BITMAP *dst)

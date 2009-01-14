@@ -118,7 +118,10 @@ Copl *getopl()
 playrix::playrix():opl(getopl()),rix(opl.get()),Buffer(0),stream(0),max_vol(global->get<int>("music","volume"))
 {
 	int BufferLength=SAMPLE_RATE*CHANNELS*10;
-	rix.load(mus, CProvider_Filesystem());
+	if(!rix.load(mus, CProvider_Filesystem())){
+		allegro_message("%s is missing",mus);
+		throw std::exception();
+	};
 	stream = play_audio_stream(BUFFER_SIZE, 16, CHANNELS == 2, SAMPLE_RATE, max_vol, 128);
 	LOCK_VARIABLE(Buffer);
 	LOCK_VARIABLE(stream);
@@ -300,7 +303,7 @@ getout:
 
 void voc::play()
 {
-	if(!not_voc && max_vol)
+	if(!not_voc && max_vol && vocs<MAX_VOICES-1)
 		voices[vocs++]=play_sample(spl,max_vol,128,1000,0);
 }
 void voc::stop()
@@ -432,7 +435,8 @@ void playmidi::play(int sub_song,int times)
 }
 void playmidi::stop(int)
 {
-	destroy_midi(pmidi);
+	stop_midi();
+	//destroy_midi(pmidi);
 	pmidi=NULL;
 	play_midi(pmidi,0);
 }
