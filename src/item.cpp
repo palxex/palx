@@ -65,8 +65,9 @@ int compact_magic(int role)
 		return 0x20-std::count_if(rpg.role_prop_tables+0x20,rpg.role_prop_tables+0x40,rolemagic_select(role,0));
 }
 
-int get_magic_pos(int role,int magic)
+int get_magic_pos(int role_pos,int magic)
 {
+	int role=Pal::rpg.team[role_pos].role;
 	int target=std::find_if(Pal::rpg.roles_properties.magics,Pal::rpg.roles_properties.magics+0x20,rolemagic_select(role,magic))-Pal::rpg.role_prop_tables;
 	return target==0x40?0:target;
 }
