@@ -731,6 +731,7 @@ battle::END battle::process()
 						break;
 					}
 				}
+				commanding_role=rpg.team_roles;
 				ok=true;
 				break;
 			case PAL_VK_AUTO+100:
@@ -889,7 +890,7 @@ battle::END battle::process()
 					}
 					if(role_status_pack[action_taker].pack.crazy>0)
 						role_action_table[action_taker].action=CRAZY_ATTACK;
-					int target_enemy=role_action_table[action_taker].target;
+					int &target_enemy=role_action_table[action_taker].target;
 					while(battle_enemy_data[target_enemy].HP<=0)
 						target_enemy=(target_enemy+1)%enemy_poses_count;
 					flag_withdraw=false;flag_attacking_hero=false;battle_sfx=0;
@@ -1794,7 +1795,7 @@ void battle::enemy_attack_role(int enemy_pos,int role_pos){
 		int role_need_help=-1,role_help=-1;
 		for(int i=0;i<=rpg.team_roles;i++){
 			int role=rpg.team[i].role;
-			if(battle_role_data[role].frame_bak!=0 || rpg.roles_properties.HP[role]<=0)
+			if(battle_role_data[i].frame_bak!=0 || rpg.roles_properties.HP[role]<=0)
 				continue;
 			if(rpg.roles_properties.HP[role]<50 || rpg.roles_properties.HP[role]<=rpg.roles_properties.HP_max[role]/5)
 				voc(rpg.roles_properties.sfx_suffer[role]).play();
