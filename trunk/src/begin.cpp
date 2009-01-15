@@ -36,7 +36,7 @@ using namespace Pal;
 
 void startup_splash()
 {
-	clear_keybuf();
+	//clear_keybuf();
 	pat.read(1);
 	bitmap cat(0,SCREEN_W,SCREEN_H*2);
 	fbp(SPLASH).blit_to(cat,0,0,0,0);

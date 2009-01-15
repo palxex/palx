@@ -87,7 +87,7 @@ void GameLoop_OneCycle(bool trigger)
                         {
                             if (iter->frames)
                             {
-                                clear_keybuf();memset((void*)key,0,KEY_MAX);
+                                //clear_keybuf();memset((void*)key,0,KEY_MAX);
                                 stop_and_update_frame();
                                 iter->curr_frame=0;
                                 iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
@@ -156,7 +156,7 @@ void process_Explore()
                 }
                 iter->trigger_script=process_script(iter->trigger_script,iter-evtobjs);
                 //my def
-                clear_keybuf();
+                //clear_keybuf();
                 rest(50);
                 return;
             }

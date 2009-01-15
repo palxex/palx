@@ -116,14 +116,14 @@ PAL_VKEY async_getkey()
 		default:
 			keygot = PAL_VK_NONE;
 		}
-		clear_keybuf();
+		//clear_keybuf();
 	}
 	return keygot;
 }
 PAL_VKEY sync_getkey()
 {
 	PAL_VKEY x=PAL_VK_NONE;
-	clear_keybuf();
+	//clear_keybuf();
 		perframe_proc();
 		while(running && !is_out && !(x=async_getkey()))
 			delay(1);
@@ -186,7 +186,7 @@ PAL_VKEY get_key_lowlevel()
 				simulate_keypress(k<<8);
 		}
 		if(clear)
-			clear_keybuf();
+			//clear_keybuf();
 	}*/
 	/*reproduct_key();
 	int key_updown=0,key_leftright=0;
