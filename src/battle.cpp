@@ -557,7 +557,7 @@ battle::END battle::process()
 				instrum_usable[1]=0;
 
 
-			bool ok=false;clear_keybuf();
+			bool ok=false;//clear_keybuf();
 			bool ck=false;
 			switch(bout_selecting(instrum_selected))
 			{
