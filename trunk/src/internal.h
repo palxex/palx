@@ -72,7 +72,7 @@ extern std::map<int,int> team_mgos;
 extern std::map<int,int> npc_mgos;
 
 void randomize();
-int round(double f);
+int roundto(double f);
 double rnd0();
 double rnd1(double);
 

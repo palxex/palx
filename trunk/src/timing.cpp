@@ -30,7 +30,7 @@ void wait(uint8_t gap)
 
 void wait_key(uint8_t gap)
 {
-	//clear_keybuf();
+	clear_keybuf();
 	time_interrupt_occurs=0;
 	perframe_proc();
 	while(running && !keypressed() && time_interrupt_occurs<gap)
@@ -39,7 +39,7 @@ void wait_key(uint8_t gap)
 
 PAL_VKEY wait_for_key()
 {
-	//clear_keybuf();
+	clear_keybuf();
 	PAL_VKEY x=PAL_VK_NONE;
 	perframe_proc();
 	while(running && (x=async_getkey())==PAL_VK_NONE)
