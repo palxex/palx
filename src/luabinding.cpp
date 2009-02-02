@@ -50,6 +50,9 @@
 using namespace std;
 
 #define luaall_c
+#ifndef WIN32
+#define LUA_USE_LINUX
+#endif
 #include "luabinding.h"
 #include <luabind/detail/class_registry.hpp>
 #include <luabind/out_value_policy.hpp>
@@ -221,7 +224,6 @@ static int pushline (lua_State *L, int firstline) {
   return 1;
 }
 
-
 static int loadline (lua_State *L) {
   int status;
   lua_settop(L, 0);
@@ -353,6 +355,8 @@ void luabinding::callback()
 		freopen("CONIN$","r+t",stdin);
 	}
 #endif
+	if(!hasConsole)
+		return;
 
 	lua_State *console_L=lua_open();
 	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
@@ -389,7 +393,8 @@ void luabinding::init()
 	#ifdef WIN32
 		thread_id = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)callback, NULL, 0, NULL);
 	#else
-		pthread_create(&thread_id, NULL, (void *)callback, (void *)i);
+	int i=0;
+		pthread_create(&thread_id, NULL, (void* (*)(void*))callback, (void *)i);
 	#endif
 }
 #endif

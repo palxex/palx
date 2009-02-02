@@ -56,7 +56,7 @@ void pal_fade_out(int t)
 }
 void pal_fade_in(int t)
 {
-	//clear_keybuf();
+	clear_keybuf();
 	if(mutex_can_change_palette)
 	{
 		mutex_can_change_palette=false;
@@ -80,7 +80,7 @@ void pal_fade_in(int t)
 void fade_inout(int t)
 {
 	int arg=t?t:1;
-	//clear_keybuf();
+	clear_keybuf();
 	mutex_can_change_palette=false;
 
 	PALETTE pal;

@@ -34,7 +34,7 @@ namespace{
 
 			//Parse Key
 			keygot=get_key_lowlevel();
-			//clear_keybuf();memset((void*)key,0,KEY_MAX);
+			clear_keybuf();memset((void*)key,0,KEY_MAX);
 
 			flag_to_load=0;
 			GameLoop_OneCycle(true);
@@ -60,7 +60,7 @@ namespace{
 
 			//Parse Key
 			keygot=get_key_lowlevel();
-			//clear_keybuf();memset((void*)key,0,KEY_MAX);
+			clear_keybuf();memset((void*)key,0,KEY_MAX);
 
 		if(keygot==PAL_VK_EXPLORE)
 			process_Explore();

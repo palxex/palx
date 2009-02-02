@@ -41,7 +41,7 @@ int leaving=0;
 	static short *buf;
 void update_cache(playrix *plr)
 {
-	static int slen_buf=0,slen=630,v_scale=2;
+	static int slen_buf=0,slen=630,v_scale=1;
 
 	if(leaving<BUFFER_SIZE*CHANNELS && running)
 	{

@@ -28,15 +28,12 @@ AC_C_INLINE
 AC_TYPE_SIZE_T
 AC_C_VOLATILE
 
-# Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_MEMCMP
-AC_FUNC_REALLOC
-AC_FUNC_SELECT_ARGTYPES
-AC_CHECK_FUNCS([atexit getcwd memmove memset select])
-
 dnl check for pkg-config
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+
+dnl binio
+binio_CFLAGS="`$PKG_CONFIG libbinio --cflags`"
+AC_SUBST(binio_CFLAGS)
 
 dnl adplug
 adplug_LIBS="`$PKG_CONFIG adplug --libs`"
@@ -45,22 +42,33 @@ AC_SUBST(adplug_LIBS)
 AC_SUBST(adplug_CFLAGS)
 
 dnl freetype2
-freetype2_LIBS="`$PKG_CONFIG freetype2 --libs`"
-freetype2_CFLAGS="`$PKG_CONFIG freetype2 --cflags`"
+freetype2_LIBS="`freetype-config --libs`"
+freetype2_CFLAGS="`freetype-config --cflags`"
 AC_SUBST(freetype2_LIBS)
 AC_SUBST(freetype2_CFLAGS)
 
-dnl lua
-lua_LIBS="`$PKG_CONFIG lua --libs`"
-lua_CFLAGS="`$PKG_CONFIG lua --cflags`"
+#Features to enable/disable
+AH_TEMPLATE(WITH_LUA,[Define to 1 to enable internal console, requires lua & its c++ binding])
+AC_ARG_ENABLE(console,AC_HELP_STRING([--enable-console],[Enable console]),[
+   AC_CHECK_HEADER(lua.h,have_lua_h=yes,)
+   AC_CHECK_HEADER(luabind/luabind.h,have_luabind_h=yes,)
+   AC_CHECK_LIB(readline,history_list,have_readline_lib=yes,)
+   AC_CHECK_LIB(lua,luaL_openlibs,have_lua_lib=yes,)
+   AC_CHECK_LIB(luabind,lua_tonumber,have_luabind_lib=yes,)
+
+   if test x$enable_console = xno; then
+     AC_MSG_RESULT([Console not enabled])
+   elif test x$have_lua_lib = xyes -a x$have_lua_h = xyes -a x$have_luabind_lib=xyes -a x$have_luabind_h=xyes -a x$have_readline_lib=xyes; then
+     lua_LIBS="$LIBS `$PKG_CONFIG lua --libs` -lreadline -lluabind"
+     lua_CFLAGS="`$PKG_CONFIG lua --cflags` -I/usr/include/luabind"
+     AC_DEFINE(WITH_LUA,1)
+   else 
+     AC_MSG_ERROR([Can't find curses, which is required for debug mode])
+   fi
+],)
 AC_SUBST(lua_LIBS)
 AC_SUBST(lua_CFLAGS)
-
-dnl luabind
-luabind_LIBS="-Lluabind"
-luabind_CFLAGS="-I/usr/include/luabind"
-AC_SUBST(luabind_LIBS)
-AC_SUBST(luabind_CFLAGS)
+AM_CONDITIONAL(LUA_CONSOLE, test "x$lua_LIBS" != "x")
 
 dnl Some stuff for the icon.
 case "$target" in

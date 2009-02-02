@@ -47,7 +47,7 @@ void randomize()
 		fixed_random=global->get<double>("debug","random");
 	}
 }
-int round(double f)//四舍五入；到偶数？算了吧
+int roundto(double f)//四舍五入；到偶数？算了吧
 {
 	return ((f-(int)f)>0.5)?((int)f+1):(int)f;
 }

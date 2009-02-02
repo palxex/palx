@@ -36,7 +36,7 @@ using namespace Pal;
 
 void startup_splash()
 {
-	//clear_keybuf();
+	clear_keybuf();
 	pat.read(1);
 	bitmap cat(0,SCREEN_W,SCREEN_H*2);
 	fbp(SPLASH).blit_to(cat,0,0,0,0);
@@ -46,9 +46,9 @@ void startup_splash()
 	uint16_t &title_height=((uint16_t *)MGO.decode(0x47))[3],max_height=title_height,temp_height=8;
 	int poses[9][3];
 	for(int i=0;i<9;i++){
-		poses[i][0]=round(rnd1(260))+420;
-		poses[i][1]=round(rnd1(80));
-		poses[i][2]=round(rnd1(8));
+		poses[i][0]=roundto(rnd1(260))+420;
+		poses[i][1]=roundto(rnd1(80));
+		poses[i][2]=roundto(rnd1(8));
 	}
 	musicplayer->play(5);
 

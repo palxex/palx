@@ -114,7 +114,7 @@ int menu::operator()(const menu_tmp &con,const int &_selected)
 	return const_cast<menu_tmp&>(con).select(this,_selected);
 }
 menu::~menu(){
-    //clear_keybuf();
+    clear_keybuf();
 }
 
 void menu_tmp::prev_action(menu *abs)
@@ -874,7 +874,7 @@ bool process_Menu()
                 return false;
 		}
 	}
-	//clear_keybuf();
+	clear_keybuf();
 	rest(100);
 	return running;
 }

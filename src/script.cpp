@@ -87,7 +87,7 @@ void GameLoop_OneCycle(bool trigger)
                         {
                             if (iter->frames)
                             {
-                                //clear_keybuf();memset((void*)key,0,KEY_MAX);
+                                clear_keybuf();memset((void*)key,0,KEY_MAX);
                                 stop_and_update_frame();
                                 iter->curr_frame=0;
                                 iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
@@ -156,7 +156,7 @@ void process_Explore()
                 }
                 iter->trigger_script=process_script(iter->trigger_script,iter-evtobjs);
                 //my def
-                //clear_keybuf();
+                clear_keybuf();
                 rest(50);
                 return;
             }
@@ -442,7 +442,7 @@ __walk_npc:
 			for(poison_index=0;poison_index<16 && enemy_poison_stack[poison_index][i].poison!=param2;poison_index++);
 			if(poison_index<16)
 				continue;
-			if(rpg.objects[battle_enemy_data[i].id].enemy.voodoo_defence<round(rnd1(10)))
+			if(rpg.objects[battle_enemy_data[i].id].enemy.voodoo_defence<roundto(rnd1(10)))
 				for(int l=0;l<16;l++)
 					if(enemy_poison_stack[l][i].poison==0){
 						enemy_poison_stack[l][i].poison=param2;
@@ -744,7 +744,7 @@ __ride:
 				int x_off=obj.pos_x-scene->team_pos.toXY().x,y_off=obj.pos_y-scene->team_pos.toXY().y;
 				position pos(obj.pos_x,obj.pos_y);pos.toXYH();pos.toXY();
 				if(abs(x_off)+2*abs(y_off)<guard_field*32*rpg.chase_range){
-					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(round(rnd0())?-1:1),y_off?-y_off:(round(rnd0())?-1:1));
+					DIRECTION d=(DIRECTION)calc_faceto(x_off?-x_off:(roundto(rnd0())?-1:1),y_off?-y_off:(roundto(rnd0())?-1:1));
 					if(param3)
 						obj.direction=d,
 						npc_speed=chase_speed;
