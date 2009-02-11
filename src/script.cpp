@@ -81,24 +81,25 @@ void GameLoop_OneCycle(bool trigger)
         if (trigger)
             for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
                 if (absdec(iter->vanish_time)==0)
-                    if (iter->status>0 && iter->trigger_method>=4)
+                    if (iter->status>0)
                     {
-                        if (abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<(iter->trigger_method-4)*32+16)// in the distance that can trigger
-                        {
-                            if (iter->frames)
-                            {
-                                clear_keybuf();memset((void*)key,0,KEY_MAX);
-                                stop_and_update_frame();
-                                iter->curr_frame=0;
-                                iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
-                                redraw_everything();
-                            }
-							x_off=0,y_off=0;
-                            uint16_t &triggerscript=iter->trigger_script;
-                            triggerscript=process_script(triggerscript,iter-evtobjs);
-                        }
+						if(iter->trigger_method>=4)
+							if (abs(scene->team_pos.x-iter->pos_x)+abs(scene->team_pos.y-iter->pos_y)*2<(iter->trigger_method-4)*32+16)// in the distance that can trigger
+							{
+								if (iter->frames)
+								{
+									clear_keybuf();memset((void*)key,0,KEY_MAX);
+									stop_and_update_frame();
+									iter->curr_frame=0;
+									iter->direction=calc_faceto(scene->team_pos.toXY().x-iter->pos_x,scene->team_pos.toXY().y-iter->pos_y);
+									redraw_everything();
+								}
+								x_off=0,y_off=0;
+								uint16_t &triggerscript=iter->trigger_script;
+								triggerscript=process_script(triggerscript,iter-evtobjs);
+							}
                     }
-                    else if (iter->status<0) //&& in the screen
+                    else //&& in the screen
 						if(iter->pos_x<rpg.viewport_x || iter->pos_x>rpg.viewport_x+320*scale || iter->pos_y<rpg.viewport_y || iter->pos_y>rpg.viewport_y+220*scale){
 							iter->status=abs(iter->status);
 							iter->curr_frame=0;

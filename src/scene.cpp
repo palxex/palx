@@ -197,7 +197,7 @@ void sprite_queue::visible_NPC_movment_setdraw()
 	for(EVENT_OBJECT *i=scene->sprites_begin;i!=scene->sprites_end;i++,t++)
 		if(i->pos_x-Pal::rpg.viewport_x>-64*scale && i->pos_x-Pal::rpg.viewport_x<0x180*scale &&
 		   i->pos_y-Pal::rpg.viewport_y>0   && i->pos_y-Pal::rpg.viewport_y<0x148*scale &&
-		   i->image && i->status && i->vanish_time==0)
+		   i->image && i->status>0 && i->vanish_time==0)
 		{
 			int frame=i->curr_frame;
 			if(i->frames==3){
