@@ -181,8 +181,8 @@ void clear_effective(int16_t p1,int16_t p2)
 void dialog_got_goods(int word,int goods)
 {
 	single_dialog(0x60,0x20,7,screen);
-	dialog_string(msges(word),0x6A,0x2A,0,true);
-	dialog_string(msges(goods),0x8C,0x2A,0x17,false);
+	dialog_string(objs(word),0x6A,0x2A,0,false);
+	dialog_string(objs(goods),0x8C,0x2A,0x17,false);
 }
 void overlay_palette_by_16colors(PALETTE &tbl,PALETTE &tbl2,int arg)
 {
@@ -206,6 +206,11 @@ void process_script_entry(uint16_t func,const int16_t param1,const int16_t param
     EVENT_OBJECT &obj=evtobjs[object];
 #define curr_obj (param1<0?obj:evtobjs[param1])
 	int role=rpg.team[(object>=0&&object<=rpg.team_roles)?object:0].role;
+
+	//common variables
+	battle *thebattle=battle::get();
+	int base_damage=0;//42,66
+
     char addition[100];
     memset(addition,0,sizeof(addition));
     int npc_speed,role_speed;
@@ -391,7 +396,7 @@ __walk_npc:
 		}
         break;
     case 0x21:
-		for(int i=(param1?0:object),max=(param1?battle::get()->enemy_poses_count-1:object);i<=max;i++)
+		for(int i=(param1?0:object),max=(param1?thebattle->enemy_poses_count-1:object);i<=max;i++)
 			battle_enemy_data[i].HP-=param2;
         break;
     case 0x22:
@@ -438,7 +443,7 @@ __walk_npc:
         hockshop();
         break;
     case 0x28:
-		for(int i=(param1?param1:0);i<=(param1?param1:battle::get()->enemy_poses_count-1);i++){
+		for(int i=(param1?param1:0);i<=(param1?param1:thebattle->enemy_poses_count-1);i++){
 			int poison_index;
 			for(poison_index=0;poison_index<16 && enemy_poison_stack[poison_index][i].poison!=param2;poison_index++);
 			if(poison_index<16)
@@ -470,7 +475,7 @@ __walk_npc:
 		}
         break;
     case 0x2a:
-		for(int i=(param1?param1:0);i<=(param1?param1:battle::get()->enemy_poses_count-1);i++)
+		for(int i=(param1?param1:0);i<=(param1?param1:thebattle->enemy_poses_count-1);i++)
 			for(int l=0;l<16;l++)
 				if(enemy_poison_stack[l][i].poison==param2)
 					enemy_poison_stack[l][i].poison=0;
@@ -496,7 +501,7 @@ __walk_npc:
 				if(role_status_pack[object].pack.dummy<param2)
 					role_status_pack[object].pack.dummy=param2;
 				battle_role_data[object].frame=1;
-				battle::get()->draw_battle_scene(0,4);
+				thebattle->draw_battle_scene(0,4);
 				battle_role_data[object].frame=0;
 			}
 		}else
@@ -530,8 +535,8 @@ __walk_npc:
             id=param2-1;
         break;
     case 0x33:
-        if(get_monster(object).gourd_value>0)
-			rpg.gourd_value+=get_monster(object).gourd_value;
+        if(thebattle->get_monster(object).gourd_value>0)
+			rpg.gourd_value+=thebattle->get_monster(object).gourd_value;
 		else
 			id=param1-1;
         break;
@@ -572,20 +577,20 @@ __walk_npc:
 		}
 		break;
 	case 0x39:
-		if(battle::get()->flag_attacking_hero){
+		if(thebattle->flag_attacking_hero){
 			rpg.roles_properties.HP[role]-=param1;
 			rpg.roles_properties.HP[role]=(rpg.roles_properties.HP[role]<0?0:rpg.roles_properties.HP[role]);
-			battle_enemy_data[battle::get()->action_taker].HP+=param1;//无上限...
+			battle_enemy_data[thebattle->action_taker].HP+=param1;//无上限...
 		}else{
 			battle_enemy_data[object].HP-=param1;
-			role=rpg.team[battle::get()->action_taker].role;
+			role=rpg.team[thebattle->action_taker].role;
 			rpg.roles_properties.HP[role]+=param1;
 			rpg.roles_properties.HP[role]=(rpg.roles_properties.HP[role]>rpg.roles_properties.HP_max[role]?rpg.roles_properties.HP_max[role]:rpg.roles_properties.HP[role]);
 		}
 		break;
 	case 0x3a://not implemented completely
-		if(battle::get()->script_escape){
-			//battle::get()->escape(true,object);
+		if(thebattle->script_escape){
+			//thebattle->escape(true,object);
 		}else
 			if(param1)
 				id=param1-1;
@@ -654,13 +659,15 @@ __walk_npc:
 	case 0x42:
 		{
 			int target=object;
+			base_damage=param2;
+emulate_thurgy:
 			target=((param3>0 && param3<=5)?param3-1:target);
-			target=(param3<0?rnd1(battle::get()->enemy_poses_count):target);
+			target=(param3<0?rnd1(thebattle->enemy_poses_count):target);
 			while(battle_enemy_data[target].HP<=0)
-				target=(target+1)%battle::get()->enemy_poses_count;
-			battle::get()->load_theurgy_image(rpg.objects[param1].magic.magic);
-			battle::get()->role_release_magic(param2,param1,target,8);
-			battle::get()->attack_make();
+				target=(target+1)%thebattle->enemy_poses_count;
+			thebattle->load_theurgy_image(rpg.objects[param1].magic.magic);
+			thebattle->role_release_magic(base_damage,param1,target,8);
+			thebattle->attack_make();
 		}
 		break;
     case 0x43:
@@ -812,13 +819,21 @@ __ride:
         learnmagic(false,param1,object);
 		break;
 	case 0x56:
-        //not implemented
+		role=(param2>0?param2-1:role);
+		for(int i=0;i<0x20;i++)
+			if(rpg.roles_properties.magics[i][role]==param1)
+				rpg.roles_properties.magics[i][role]=0;
 		break;
 	case 0x57:
-        //not implemented
+		{
+			int multiplier=(param2?param2:8);
+			magics[param1].base_damage=rpg.roles_properties.MP[role]*multiplier;
+			rpg.roles_properties.MP[role]=1;
+		}
 		break;
 	case 0x58:
-        //not implemented
+		if(count_item(param1)<(param2?param2:1))
+			id=param3-1;
 		break;
     case 0x59:
         if (param1>0 && rpg.scene_id!=param1)
@@ -829,29 +844,55 @@ __ride:
         }
         break;
 	case 0x5a:
-		//not implemented
+		rpg.roles_properties.HP[role]/=2;
 		break;
 	case 0x5b:
-		//not implemented
+		{
+			int damage=battle_enemy_data[object].HP/2;
+			if(param1)
+				damage=(damage>param1?param1:damage);
+			battle_enemy_data[object].HP-=damage;
+		}
 		break;
 	case 0x5c://HeroInvisibleInBattle
-		battle::get()->role_invisible_rounds=(param1?param1:1);
-		battle::get()->flag_invisible=-1;
+		thebattle->role_invisible_rounds=(param1?param1:1);
+		thebattle->flag_invisible=-1;
 		break;
 	case 0x5d:
-		//not implemented
+		{
+			int i=0;
+			for(;i<0x10;i++)
+				if(rpg.poison_stack[i][object].poison==param1)
+					break;
+			if(i==0x10)
+				id=param2-1;
+		}
 		break;
 	case 0x5e:
-		//not implemented
+		{
+			int i=0;
+			for(;i<0x10;i++)
+				if(enemy_poison_stack[i][object].poison==param1)
+					break;
+			if(i==0x10)
+				id=param2-1;
+		}
 		break;
 	case 0x5f:
-		//not implemented
+		rpg.roles_properties.HP[role]=0;
 		break;
 	case 0x60:
-		//not implemented
+		battle_enemy_data[object].HP=-1;
 		break;
 	case 0x61:
-		//not implemented
+		{
+			int i=0;
+			for(;i<0x10;i++)
+				if(rpg.poison_stack[i][object].poison)
+					break;
+			if(i==0x10)
+				id=param2-1;
+		}
 		break;
 	case 0x62:
 		rpg.chasespeed_change_cycles=param1;
@@ -862,7 +903,8 @@ __ride:
 		rpg.chase_range=3;
 		break;
 	case 0x64:
-		//not implemented
+		if((double)battle_enemy_data[object].HP/thebattle->get_monster(object).hp < param1/100.0)
+			id=param2-1;
 		break;
     case 0x65:
         rpg.roles_properties.avator[param1]=param2;
@@ -870,23 +912,80 @@ __ride:
             load_team_mgo();
         break;
 	case 0x66:
-		//not implemented
-		break;
+		{
+			base_damage=rpg.roles_properties.force[rpg.team[thebattle->action_taker].role]*roundto(rnd1(4))+param2*5;
+			goto emulate_thurgy;
+		}
 	case 0x67:
 		monsters[rpg.objects[battle_enemy_data[object].id].enemy.enemy].magic=param1;
 		monsters[rpg.objects[battle_enemy_data[object].id].enemy.enemy].magic_freq=(param2==0?10:param2);
 		break;
 	case 0x68:
-		//not implemented
+		if(thebattle->flag_attacking_hero)
+			id=param1-1;
 		break;
 	case 0x69:
-		//not implemented
+		{
+			int min=(param1?0:object),max=(param1?thebattle->enemy_poses_count-1:object);
+			voc(0x2d).play();//win95 NOT DONE
+			for(int i=0;i<=0xB;i++)
+				for(int j=min;j<=max;j++){
+					battle_enemy_data[j].pos_x-=(i+10);
+					thebattle->draw_battle_scene(0,1);
+				}
+			for(int i=min;i<=max;i++)
+				if(battle_enemy_data[i].HP>0){
+					thebattle->enemy_exps-=thebattle->get_monster(i).exp;
+					thebattle->enemy_money-=thebattle->get_monster(i).coins;
+					battle_enemy_data[i].HP=0;
+				}
+		}
 		break;
 	case 0x6a:
-		//not implemented
+		{
+			int target=thebattle->role_action_table[thebattle->action_taker].target;
+			while(battle_enemy_data[target].HP<=0)
+				target=(target+1)%thebattle->enemy_poses_count;
+			battle_role_data[thebattle->action_taker].frame=10;//stealer
+			int offset=(target-thebattle->action_taker)*8;
+			battle_role_data[thebattle->action_taker].pos_x=battle_enemy_data[target].pos_x+0x40-offset;
+			battle_role_data[thebattle->action_taker].pos_y=battle_enemy_data[target].pos_y+0x16+offset;
+			thebattle->draw_battle_scene(0,1);
+			for(int i=0;i<5;i++){
+				battle_role_data[thebattle->action_taker].pos_x-=(8+i);
+				battle_role_data[thebattle->action_taker].pos_y-=4;
+				thebattle->affected_enemies[target]=(i==4);
+				thebattle->draw_battle_scene(0,1);
+			}
+			battle_role_data[thebattle->action_taker].pos_x--;
+			thebattle->draw_battle_scene(0,3);
+			role_restore_position(thebattle->action_taker);
+			thebattle->draw_battle_scene(0,1);
+
+			if(thebattle->enemy_data[target].steal_amount>0 && roundto(rnd1(10))<=(param1?param1:10)){
+				if(thebattle->enemy_data[target].steal_item == 0) //money
+				{
+					int coins=thebattle->enemy_data[target].steal_amount/roundto(2+rnd0());
+					if(coins){
+						thebattle->enemy_data[target].steal_amount-=coins;
+						rpg.coins+=coins;
+						single_dialog(0x60,0x20,7,screen);
+						dialog_string(objs(34),0x6C,0x2A,0x17,false);
+						show_num_lim(coins,0x8C,0x2E,5);
+						dialog_string(objs(10),0xB4,0x2A,0x17,false);
+					}
+				}
+				else{
+					thebattle->enemy_data[target].steal_amount--;
+					add_goods_to_list(thebattle->enemy_data[target].steal_item,1);
+					dialog_got_goods(0x22,thebattle->enemy_data[target].steal_item);
+				}
+				wait_key(0x7d);
+			}
+		}
 		break;
     case 0x6b:
-		battle::get()->max_blow_away=0;
+		thebattle->max_blow_away=0;
         break;
     case 0x6c:
         curr_obj.pos_x+=param2;
@@ -1143,7 +1242,7 @@ __walk_role:
 		}
 		break;
 	case 0x89:
-		battle::get()->endbattle_method=(battle::END)(param1?param1:battle::QUIT);
+		thebattle->endbattle_method=(battle::END)(param1?param1:battle::QUIT);
 		break;
 	case 0x8a:
 		flag_autobattle=9;

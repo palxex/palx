@@ -72,7 +72,7 @@ extern RPG::POISON_DEF enemy_poison_stack[16][TEAMENEMIES];
 extern int flag_autobattle;
 enum MAGIC_PROP{ON_SCENE,ON_BATTLE,UNKNOWN,TARGET_ENEMY,OBJECT_ALL};
 
-MONSTER &get_monster(int pos);
+void role_restore_position(int role_pos);
 
 class battle{
 	enum ACTION{
@@ -88,14 +88,6 @@ class battle{
 		CRAZY_ATTACK,
 		ATTACK_ALL
 	};
-	struct _role_attack{
-		int target;
-		ACTION action;
-		int tool;
-		int toolpos;
-		int alive;
-	}role_action_table[8],bak_action_table[8];
-
 	struct _number{
 		int x,y;
 		int num;
@@ -114,10 +106,6 @@ class battle{
 
 	std::multimap<int,int,std::greater<int> > vs_table;
 
-	int enemy_HP_r[5];
-
-	bool affected_enemies[TEAMENEMIES],affected_roles[TEAMROLES];
-
 	static battle *thebattle;
 
 	bitmap battlescene,battlebuf;
@@ -134,6 +122,21 @@ class battle{
 
 	void display_damage_number(int color,int num,int x,int y);
 public:
+	struct _role_attack{
+		int target;
+		ACTION action;
+		int tool;
+		int toolpos;
+		int alive;
+	}role_action_table[8],bak_action_table[8];
+
+	bool affected_enemies[TEAMENEMIES],affected_roles[TEAMROLES];
+	MONSTER enemy_data[5];
+	
+	MONSTER &get_monster(int pos);
+	int enemy_level_scaler(int enemy,int scaler);
+	int calc_final_damage(double A,int enemy,int magic);
+
 	int script_escape;
 	enum END{
 		QUIT=-1,
@@ -149,7 +152,7 @@ public:
 		if(thebattle)
 			return thebattle;
 		else
-			return 0;
+			return NULL;
 	}
 
 	int max_blow_away;
@@ -211,6 +214,7 @@ public:
 	bool flag_attacking_hero;
 	int enemy_poses_count;
 	void load_theurgy_image(int id);
+	int enemy_exps,enemy_money;
 private:
 	int commanding_role;
 	bool flag_withdraw;
@@ -219,7 +223,6 @@ private:
 	int magic_image_occurs;
 	bool flag_summon;
 	bool flag_selecting;
-	int enemy_exps,enemy_money;
 	bool need_battle;
 	bool flag_repeat;
 	bool enemy_moving_semaphor;
