@@ -37,11 +37,12 @@ bool instrum_usable[4];//指令可用扩展;从而封攻、令成为可能
 int twoside_affected[5],delayed_damage[5];//延迟伤害
 int x[4],y[4],s[4];
 
-MONSTER &get_monster(int pos)
+MONSTER &battle::get_monster(int pos)
 {
-	return monsters[rpg.objects[battle_enemy_data[pos].id].enemy.enemy];
+	//return monsters[rpg.objects[battle_enemy_data[pos].id].enemy.enemy];
+	return enemy_data[pos];
 }
-int enemy_level_scaler(int enemy,int scaler)
+int battle::enemy_level_scaler(int enemy,int scaler)
 {
 	return (get_monster(enemy).level+6)*scaler;
 }
@@ -62,7 +63,7 @@ int calc_base_damage(double D,double A)
 		damage= 0.5*A-0.3*D;
 	return roundto(damage);
 }
-int calc_final_damage(double A,int enemy,int magic)
+int battle::calc_final_damage(double A,int enemy,int magic)
 {
 	double D=get_monster(enemy).defence+enemy_level_scaler(enemy,4);
 	double damage=calc_base_damage(A*(1+rnd1(0.1)),D);
@@ -101,7 +102,8 @@ void battle::load_enemy(int enemy_pos,int enemy_id)
 	battle_enemy_data[enemy_pos].id=enemy_id;
 	if(enemy_id){
 		battle_enemy_data[enemy_pos].battle_avatar=rpg.objects[enemy_id].enemy.enemy;
-		battle_enemy_data[enemy_pos].HP=monsters[rpg.objects[enemy_id].enemy.enemy].hp;
+		enemy_data[enemy_pos]=monsters[rpg.objects[enemy_id].enemy.enemy];
+		battle_enemy_data[enemy_pos].HP=enemy_data[enemy_pos].hp;
 		battle_enemy_data[enemy_pos].script.script.before=rpg.objects[enemy_id].enemy.before;
 		battle_enemy_data[enemy_pos].script.script.when=rpg.objects[enemy_id].enemy.occur;
 		battle_enemy_data[enemy_pos].script.script.after=rpg.objects[enemy_id].enemy.after;

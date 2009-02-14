@@ -653,7 +653,7 @@ int yes_or_no(int word,int &selected)
 	}while(running && !got);
 	return !!selected;
 }
-void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp)//unimplemented caller:10941@battle,script6a
+void show_num_lim(int num,int x,int y,int digits,BITMAP *bmp)//unimplemented caller:10941@battle
 {
     if(num<0)
         return;
