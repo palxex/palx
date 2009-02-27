@@ -134,6 +134,7 @@ public:
 	MONSTER enemy_data[5];
 	
 	MONSTER &get_monster(int pos);
+	void load_enemy_pos();
 	int enemy_level_scaler(int enemy,int scaler);
 	int calc_final_damage(double A,int enemy,int magic);
 

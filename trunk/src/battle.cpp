@@ -111,6 +111,16 @@ void battle::load_enemy(int enemy_pos,int enemy_id)
 		enemy_money+=monsters[rpg.objects[enemy_id].enemy.enemy].coins;
 	}
 }
+void battle::load_enemy_pos()
+{
+	for(int i=0;i<enemy_poses_count;i++){
+		battle_enemy_data[i].pos_x=enemyposes.pos[i][enemy_poses_count-1].x;
+		battle_enemy_data[i].pos_y=enemyposes.pos[i][enemy_poses_count-1].y+get_monster(i).pos_y_offset;
+		battle_enemy_data[i].pos_x_bak=battle_enemy_data[i].pos_x;
+		battle_enemy_data[i].pos_y_bak=battle_enemy_data[i].pos_y;
+		battle_enemy_data[i].frame=battle_enemy_data[i].frame_bak=0;
+	}
+}
 void battle::setup_role_enemy_image()
 {
 	for(int i=0;i<=rpg.team_roles;i++){
@@ -125,12 +135,8 @@ void battle::setup_role_enemy_image()
 			enemy_images[i]=sprite_prim(Pal::ABC,battle_enemy_data[i].battle_avatar);//rpg.objects[enemyteams[enemy_team].enemy[i]].general.inbeing);
 			battle_enemy_data[i].length=enemy_images[i].getsprite(0)->height;
 		}
-		battle_enemy_data[i].pos_x=enemyposes.pos[i][enemy_poses_count-1].x;
-		battle_enemy_data[i].pos_y=enemyposes.pos[i][enemy_poses_count-1].y+get_monster(i).pos_y_offset;
-		battle_enemy_data[i].pos_x_bak=battle_enemy_data[i].pos_x;
-		battle_enemy_data[i].pos_y_bak=battle_enemy_data[i].pos_y;
-		battle_enemy_data[i].frame=battle_enemy_data[i].frame_bak=0;
 	}
+	load_enemy_pos();
 }
 void battle::setup_role_status()
 {

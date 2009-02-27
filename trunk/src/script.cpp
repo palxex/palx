@@ -106,7 +106,7 @@ void GameLoop_OneCycle(bool trigger)
 						}
         for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
         {
-            if (iter->status!=0)
+            if (iter->status>=0)
                 if (uint16_t &autoscript=iter->auto_script)
                     autoscript=process_autoscript(autoscript,iter-evtobjs);
             if (iter->status==2 && iter->image>0 && trigger
@@ -197,6 +197,13 @@ void palette_filter_fading(int arg)
 	for(int i=0;i<0x19;i++){
 		palette_fade(p600,p900);
 		delay(8);
+	}
+}
+void enemy_clear_poison_status(int target)
+{
+	for(int i=0;i<0x10;i++){
+		enemy_poison_stack[i][target].poison=0;
+		enemy_status_pack[target].list[i]=0;
 	}
 }
 void process_script_entry(uint16_t func,const int16_t param1,const int16_t param2,const int16_t param3,uint16_t &id,int16_t object)
@@ -389,7 +396,7 @@ __walk_npc:
     case 0x20:
 		{
 			int amount=(param2?param2:1);
-			if(amount<=count_item(param1,true) || param3==0)
+			if(amount<=count_item(param1) || param3==0)
 				use_item(param1,amount);
 			else
 				id=param3-1;
@@ -657,10 +664,10 @@ __walk_npc:
 		prelimit_OK=false;
 		break;
 	case 0x42:
+emulate_thurgy:
 		{
 			int target=object;
 			base_damage=param2;
-emulate_thurgy:
 			target=((param3>0 && param3<=5)?param3-1:target);
 			target=(param3<0?rnd1(thebattle->enemy_poses_count):target);
 			while(battle_enemy_data[target].HP<=0)
@@ -1059,7 +1066,13 @@ __walk_role:
         clear_effective(param2,param1>0?param1:1);
         break;
 	case 0x74:
-		//not implemented
+		for(int i=0;i<=rpg.team_roles;i++)
+			if(rpg.roles_properties.HP[rpg.team[i].role]<rpg.roles_properties.HP_max[rpg.team[i].role]
+			|| rpg.roles_properties.MP[rpg.team[i].role]<rpg.roles_properties.MP_max[rpg.team[i].role])
+			{
+				id=param1-1;
+				break;
+			}
 		break;
     case 0x75:
         rpg.team[0].role=(param1-1<0?0:param1-1);
@@ -1228,8 +1241,11 @@ __walk_role:
     case 0x85:
         wait(param1*10);
         break;
-	case 0x86://equip?
-		//not implemented
+	case 0x86:
+		if(count_item_equiping(param1)<(param2?param2:1))
+		{
+			id=param3-1;
+		}
 		break;
     case 0x87:
         NPC_walk_one_step(obj,0);
@@ -1284,10 +1300,26 @@ __walk_role:
 			rpg.objects[param1].general.script[param3]=param2;
 		break;
 	case 0x91:
-		//not implemented
+		{
+			int avatar=battle_enemy_data[object].battle_avatar,i=0;
+			for(;i<thebattle->enemy_poses_count;i++)
+				if(i!=object && battle_enemy_data[i].battle_avatar==avatar)
+					break;
+			if(i==thebattle->enemy_poses_count)
+				id=param1-1;
+		}
 		break;
     case 0x92:
-        //clear_effective(1,0x41);
+		if(flag_battling){
+			if(param1>0){
+				int role=param1-1;
+				battle_role_data[role].frame=6;
+				thebattle->draw_battle_scene(0,1);
+				thebattle->role_release_magic_action(role,false);
+			}
+			thebattle->bright_every_role(0,rpg.team_roles);
+			clear_effective(1,0x41);
+		}
         break;
     case 0x93:
 		fade_inout(param1);
@@ -1412,15 +1444,63 @@ __walk_role:
 		}
         break;
 	case 0x9c:
-		//not implemented
+		if(thebattle->get_enemy_alive()==1 && battle_enemy_data[object].HP>1){
+			int splitter=(param1?param1:1),s2=splitter;
+			for(int i=0;i<5;i++)
+				if(splitter>0 && battle_enemy_data[i].HP<=0){
+					splitter--;
+					battle_enemy_data[i]=battle_enemy_data[object];
+					thebattle->enemy_data[i]=thebattle->enemy_data[object];
+					thebattle->enemy_money+=thebattle->enemy_data[object].coins;
+					thebattle->enemy_exps+=thebattle->enemy_data[object].exp;
+				}
+			for(int i=0;i<5;i++)
+				if(battle_enemy_data[i].HP>0){
+					thebattle->enemy_poses_count=i+1;
+					battle_enemy_data[i].HP=(battle_enemy_data[i].HP+s2)/(s2+1);
+				}
+			for(int i=0;i<thebattle->enemy_poses_count;i++)
+			{
+				battle_enemy_data[i].pos_x_bak=enemyposes.pos[i][thebattle->enemy_poses_count-1].x;
+				battle_enemy_data[i].pos_y_bak=enemyposes.pos[i][thebattle->enemy_poses_count-1].y+thebattle->get_monster(i).pos_y_offset;
+			}
+			for(int i=1;i<=10;i++){
+				for(int j=0;j<thebattle->enemy_poses_count;j++){
+					battle_enemy_data[j].pos_x=(battle_enemy_data[j].pos_x+battle_enemy_data[j].pos_x_bak)/2;
+					battle_enemy_data[j].pos_y=(battle_enemy_data[j].pos_y+battle_enemy_data[j].pos_y_bak)/2;
+				}
+				thebattle->draw_battle_scene(0,1);
+			}
+			thebattle->load_enemy_pos();
+		}else if(param2){
+			id=param2-1;
+			prelimit_OK=false;
+		}
 		break;
-    case 0x9d:
+    case 0x9d://lost script
         //clear_effective(2,0x4E);
         //clear_effective(1,0x2A);
         break;
     case 0x9e:
+		if(thebattle->get_enemy_alive()+(param2?param2:1) <= thebattle->enemy_poses_count){
+			int summonee=(param1?param1:battle_enemy_data[object].id),
+				summonno=(param2?param2:1),s2=summonno;
+			thebattle->enemy_fire_magic(object);
+			for(int i=0;i<5;i++)
+				if(summonno>0 && battle_enemy_data[i].HP<=0){
+					summonno--;
+					thebattle->load_enemy(i,summonee);
+					enemy_clear_poison_status(i);
+					enemy_status_pack[i].pack.fixed=1;
+					thebattle->affected_enemies[i]=true;
+				}
+			//thebattle->load_enemy_pos
         //clear_effective(1,0x4E);
         //clear_effective(1,0x2A);
+		}else if(param3){
+			id=param3-1;
+			prelimit_OK=false;
+		}
         break;
     case 0x9f:
         //clear_effective(1,0x48);

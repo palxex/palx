@@ -38,19 +38,23 @@ void add_goods_to_list(int goods,int num)
         ptr->item=goods;
     ptr->amount+=num;
 }
-int count_item(int item,bool hasequip)
+int count_item_equiping(int item)
+{
+	int amount=0;
+	for(int i=0,role=Pal::rpg.team[i].role;i<Pal::rpg.team_roles;role=Pal::rpg.team[++i].role)
+		for(int part=0xB;part<=0x10;part++)
+			if(Pal::rpg.role_prop_tables[part][role] == item)
+				amount++;
+	return amount;
+}
+int count_item(int item)
 {
 	RPG::ITEM *it=NULL;int amount=0;
 	if((it=std::find(Pal::rpg.items,Pal::rpg.items+0x100,item))==Pal::rpg.items+0x100)
 		amount=0;
 	else
 		amount=it->amount;
-	if(hasequip)
-		for(int i=0,role=Pal::rpg.team[i].role;i<Pal::rpg.team_roles;role=Pal::rpg.team[++i].role)
-			for(int part=0xB;part<=0x10;part++)
-				if(Pal::rpg.role_prop_tables[part][role] == item)
-					amount++;
-	return amount;
+	return amount+count_item_equiping(item);
 }
 int compact_magic(int role)
 {
