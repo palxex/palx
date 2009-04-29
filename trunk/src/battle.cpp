@@ -121,7 +121,7 @@ void battle::load_enemy_pos()
 		battle_enemy_data[i].frame=battle_enemy_data[i].frame_bak=0;
 	}
 }
-void battle::setup_role_enemy_image()
+void battle::load_our_pic()
 {
 	for(int i=0;i<=rpg.team_roles;i++){
 		team_images[i]=sprite_prim(F,battle_role_data[i].battle_avatar);//Pal::rpg.roles_properties.battle_avator[Pal::rpg.team[i].role]
@@ -130,6 +130,9 @@ void battle::setup_role_enemy_image()
 		battle_role_data[i].pos_x_bak=battle_role_data[i].pos_x;
 		battle_role_data[i].pos_y_bak=battle_role_data[i].pos_y;
 	}
+}
+void battle::load_enemy_pic_pos()
+{
 	for(int i=0;i<enemy_poses_count;i++){
 		if(battle_enemy_data[i].HP>0 && battle_enemy_data[i].id>0){
 			enemy_images[i]=sprite_prim(Pal::ABC,battle_enemy_data[i].battle_avatar);//rpg.objects[enemyteams[enemy_team].enemy[i]].general.inbeing);
@@ -463,7 +466,8 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 		return;
 	}
 
-	setup_role_enemy_image();
+	load_enemy_pic_pos();
+	load_our_pic();
 	setup_role_status();
 
 	musicplayer->play(Pal::rpg.battle_music);
@@ -950,7 +954,7 @@ attack_label:
 								if(magics[magic_index].behavior==8){
 									battle_role_data[action_taker].pos_x=battle_role_data[action_taker].pos_x_bak;
 									battle_role_data[action_taker].pos_y=battle_role_data[action_taker].pos_y_bak;
-									setup_role_enemy_image();
+									load_our_pic();
 									flag_invisible=-1;
 								}
 								rpg.roles_exp[3][attacking_role].count+=roundto(rnd1(2));
@@ -1035,7 +1039,7 @@ attack_all_label:
 				battle_numbers[i].times=0;
 
 			if(flag_summon){
-				setup_role_enemy_image();
+				load_our_pic();
 				flag_summon=false;
 				serials_of_fade(summon_magic);
 			}
@@ -1405,13 +1409,13 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 		magic_image_occurs=1;
 		x[1]=magic.x_offset+0xA0;
 		y[1]=magic.y_offset+0xC8;
-		s[1]=magic.summon_effect;
+		s[1]=magic.z_order;
 		break;
 	case 2://一方
 		magic_image_occurs=1;
 		x[1]=magic.x_offset+0xF0;
 		y[1]=magic.y_offset+0x96;
-		s[1]=magic.summon_effect;
+		s[1]=magic.z_order;
 		break;
 	case 1://三叠
 		magic_image_occurs=3;
@@ -1424,13 +1428,13 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 		for(int i=1;i<=magic_image_occurs;i++)
 			x[i]+=magic.x_offset,
 			y[i]+=magic.y_offset,
-			s[i]=magic.summon_effect;
+			s[i]=magic.z_order;
 		break;
 	case 0://定点
 		magic_image_occurs=1;
 		x[1]=battle_role_data[role_pos].pos_x+magic.x_offset;
 		y[1]=battle_role_data[role_pos].pos_y+magic.y_offset;
-		s[1]=magic.summon_effect;
+		s[1]=magic.z_order;
 		break;
 	default:
 		break;
@@ -1492,13 +1496,13 @@ void battle::enemy_magical_attack(int ori_force,int magic_id,int role_pos,int en
 			int damage = magic.base_damage+calc_base_damage(get_cons_attrib(i,0x13),force)/2;
 			damage/=defend_multiple[i];
 			switch(int elem=magic.elem_attr){
-					case 6:
+					case POISON:
 						elem=0;
-					case 1:
-					case 2:
-					case 3:
-					case 4:
-					case 5:
+					case STORM:
+					case LIGHT:
+					case FLOOD:
+					case FLAME:
+					case EARTH:
 						damage=damage*(100-get_cons_attrib(i,elem+0x16))/100;
 						if(elem)
 							damage=damage*(10+Pal::battlefields[rpg.battlefield].elem_property[elem])/10;
@@ -1626,13 +1630,13 @@ void battle::role_release_magic(int power,int magic,int target,int pos)
 				magic_image_occurs=1;
 				x[1]=magics[magic_index].x_offset+0xA0;
 				y[1]=magics[magic_index].y_offset+0xC8;
-				s[1]=magics[magic_index].summon_effect;
+				s[1]=magics[magic_index].z_order;
 				break;
 			case 6:
 				magic_image_occurs=1;
 				x[1]=magics[magic_index].x_offset+0xF0;
 				y[1]=magics[magic_index].y_offset+0xA0;
-				s[1]=magics[magic_index].summon_effect;
+				s[1]=magics[magic_index].z_order;
 				break;
 			case 5:
 				magic_image_occurs=rpg.team_roles;
@@ -1640,7 +1644,7 @@ void battle::role_release_magic(int power,int magic,int target,int pos)
 					++magic_image_occurs;
 					x[magic_image_occurs]=battle_role_data[i].pos_x+magics[magic_index].x_offset;
 					y[magic_image_occurs]=battle_role_data[i].pos_y+magics[magic_index].y_offset;
-					s[magic_image_occurs]=magics[magic_index].summon_effect;
+					s[magic_image_occurs]=magics[magic_index].z_order;
 					twoside_affected[i]=-1;
 				}
 				break;
@@ -1648,14 +1652,14 @@ void battle::role_release_magic(int power,int magic,int target,int pos)
 				magic_image_occurs=1;
 				x[1]=battle_role_data[target].pos_x+magics[magic_index].x_offset;
 				y[1]=battle_role_data[target].pos_y+magics[magic_index].y_offset;
-				s[1]=magics[magic_index].summon_effect;
+				s[1]=magics[magic_index].z_order;
 				twoside_affected[target]=-1;
 				break;
 			case 2:
 				magic_image_occurs=1;
 				x[1]=magics[magic_index].x_offset+0x78;
 				y[1]=magics[magic_index].y_offset+0x64;
-				s[1]=magics[magic_index].summon_effect;
+				s[1]=magics[magic_index].z_order;
 				break;
 			case 1:
 				magic_image_occurs=3;
@@ -1668,14 +1672,14 @@ void battle::role_release_magic(int power,int magic,int target,int pos)
 				for(int i=1;i<=magic_image_occurs;i++){
 					x[i]+=magics[magic_index].x_offset;
 					y[i]+=magics[magic_index].y_offset;
-					s[i]=magics[magic_index].summon_effect;
+					s[i]=magics[magic_index].z_order;
 				}
 				break;
 			case 0:
 				magic_image_occurs=1;
 				x[1]=battle_enemy_data[target].pos_x+magics[magic_index].x_offset;
 				y[1]=battle_enemy_data[target].pos_y+magics[magic_index].y_offset;
-				s[1]=magics[magic_index].summon_effect;
+				s[1]=magics[magic_index].z_order;
 				twoside_affected[target]=-1;
 				break;
 			default:
@@ -1753,7 +1757,7 @@ void battle::summon_imgs(int summon)
 	Font->blit_to(objs(summon),screen,0xC8,0x32,0xE,true);
 	enemy_moving_semaphor=false;
 	bright_every_role(0,rpg.team_roles);
-	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(F,magic.summon_effect+10));
+	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(F,magic.z_order+10));
 }
 void battle::enemy_fire_magic(int enemy_pos)
 {
@@ -1901,6 +1905,8 @@ void battle::role_physical_attack(int role_pos,int enemy_pos,int &damage,int bou
 void battle::enemy_crazy_attack_enemy(int from,int target)
 {}
 void battle::role_crazy_attack_team(int from,int target)
+{}
+void battle::levelup(bool recharge,int levels,int role)
 {}
 battle::END process_Battle(uint16_t enemy_team,uint16_t script_escape)
 {

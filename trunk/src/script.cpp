@@ -1287,7 +1287,8 @@ __walk_role:
 		}
 		break;
 	case 0x8d://level up
-		//not implemented
+		thebattle->levelup(false,param1?param1:1,role);
+		rpg.roles_exp[0][role].exp=0;
 		break;
     case 0x8e:
         restore_screen();
@@ -1486,7 +1487,7 @@ __walk_role:
 			int summonee=(param1?param1:battle_enemy_data[object].id),
 				summonno=(param2?param2:1),s2=summonno;
 			thebattle->enemy_fire_magic(object);
-			for(int i=0;i<5;i++)
+			for(int i=0;i<5;i++){
 				if(summonno>0 && battle_enemy_data[i].HP<=0){
 					summonno--;
 					thebattle->load_enemy(i,summonee);
@@ -1494,16 +1495,35 @@ __walk_role:
 					enemy_status_pack[i].pack.fixed=1;
 					thebattle->affected_enemies[i]=true;
 				}
-			//thebattle->load_enemy_pos
-        //clear_effective(1,0x4E);
-        //clear_effective(1,0x2A);
+			}
+			thebattle->load_enemy_pic_pos();
+			voc(0xD4).play();
+			clear_effective(1,0x4E);
+			for(int i=0;i<5;i++)
+				thebattle->affected_enemies[i]=false;
+			clear_effective(1,0x2A);
+			battle_enemy_data[object].frame_bak=battle_enemy_data[object].frame;
 		}else if(param3){
 			id=param3-1;
 			prelimit_OK=false;
 		}
         break;
     case 0x9f:
-        //clear_effective(1,0x48);
+		if(param1>0){
+			thebattle->enemy_fire_magic(object);
+			thebattle->enemy_exps -= thebattle->enemy_data[object].exp;
+			thebattle->enemy_money -= thebattle->enemy_data[object].coins;
+			int HP=battle_enemy_data[object].HP,
+				prescript=battle_enemy_data[object].script.script.before,
+				postscript=battle_enemy_data[object].script.script.after;
+			thebattle->load_enemy(object,param1);
+			battle_enemy_data[object].HP=HP,
+			battle_enemy_data[object].script.script.before=prescript,
+			battle_enemy_data[object].script.script.after=postscript;
+			thebattle->load_enemy_pic_pos();
+			voc(0x2f).play();
+			clear_effective(1,0x48);
+		}
         break;
     case 0xa0:
         clear_bitmap(screen);
@@ -1522,7 +1542,7 @@ __walk_role:
 		}
 		break;
 	case 0xa2:
-		//not implemented
+		id += roundto(rnd1(param1));
 		break;
 	case 0xa3:
 		if(mask_use_CD)
