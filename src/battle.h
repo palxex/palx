@@ -116,7 +116,7 @@ class battle{
 
 	int stage_blow_away;
 
-	void setup_role_enemy_image();
+	void load_our_pic();
 	void setup_role_status();
 	void summon_imgs(int summon);
 
@@ -135,6 +135,7 @@ public:
 	
 	MONSTER &get_monster(int pos);
 	void load_enemy_pos();
+	void load_enemy_pic_pos();
 	int enemy_level_scaler(int enemy,int scaler);
 	int calc_final_damage(double A,int enemy,int magic);
 
@@ -208,6 +209,8 @@ public:
 	void use_or_throw(int use,int &select,bool& refresh);
 	void escape();
 	void status();
+
+	void levelup(bool recharge,int levels,int role);
 
 	int flag_invisible;
 	int role_invisible_rounds;
