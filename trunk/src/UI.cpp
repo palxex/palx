@@ -722,8 +722,8 @@ void role_status()
 		fbp(0).blit_to(buf);
 
 		Font->blit_to(objs(2   ),buf,6,8   ,0x4E,true);
-		show_number(rpg.roles_exp[0][cur_role].exp,                    0x4E,8   ,0,buf);
-		show_number(upgradexp[rpg.roles_exp[0][cur_role].level+1],0x4E,0x12,1,buf);
+		show_number(rpg.exps[cur_role].kinds_exps.general.exp,                    0x4E,8   ,0,buf);
+		show_number(upgradexp[rpg.exps[cur_role].kinds_exps.general.level+1],0x4E,0x12,1,buf);
 
 		Font->blit_to(objs(0x30),buf,6,0x22,0x4E,true);
 		show_number(rpg.roles_properties.level[cur_role],              0x3A,0x26,0,buf);

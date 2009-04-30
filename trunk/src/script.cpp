@@ -105,24 +105,24 @@ void GameLoop_OneCycle(bool trigger)
 							iter->curr_frame=0;
 						}
         for (evt_obj iter=scene->sprites_begin;iter!=scene->sprites_end&&rpg.scene_id==map_toload;++iter)
-        {
-            if (iter->status>=0)
-                if (uint16_t &autoscript=iter->auto_script)
-                    autoscript=process_autoscript(autoscript,iter-evtobjs);
-            if (iter->status==2 && iter->image>0 && trigger
-                    && abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
-                //check barrier;this means, role status 2 means it takes place
-                for (int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
-                    if (!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
-                    {
-						backup_position();
-                        scene->team_pos.toXY().x+=direction_offs[direction][0];
-                        scene->team_pos.toXY().y+=direction_offs[direction][1];
-						sync_viewport();
-						scene->move_usable_screen();
-                        break;
-                    }
-        }
+			if (iter->status>0){
+				if (iter->vanish_time == 0)
+					if (uint16_t &autoscript=iter->auto_script)
+						autoscript=process_autoscript(autoscript,iter-evtobjs);
+				if (iter->status==2 && iter->image>0 && trigger
+						&& abs(iter->pos_x-scene->team_pos.toXY().x)+2*abs(iter->pos_y-scene->team_pos.toXY().y)<0xD)//&& beside role && face to it
+					//check barrier;this means, role status 2 means it takes place
+					for (int direction=(iter->direction+1)%4,i=0;i<4;direction=(direction+1)%4,i++)
+						if (!barrier_check(0,scene->team_pos.toXY().x+direction_offs[direction][0],scene->team_pos.toXY().y+direction_offs[direction][1]))
+						{
+							backup_position();
+							scene->team_pos.toXY().x+=direction_offs[direction][0];
+							scene->team_pos.toXY().y+=direction_offs[direction][1];
+							sync_viewport();
+							scene->move_usable_screen();
+							break;
+						}
+			}
 		if(!--rpg.chasespeed_change_cycles)
 			rpg.chase_range=1;
     }
@@ -313,9 +313,18 @@ __walk_npc:
         rpg.role_prop_tables[param1][param3>0?param3-1:role]+=param2;
         break;
     case 0x1a:
-        if (param3<=0)
-            ;//battle time;
-        else
+		if (param3<=0){
+			switch(param1){
+				case 1:
+					battle_role_data[object].battle_avatar=param2;
+					break;
+				case 0x41:
+					battle_role_data[object].contract_magic=param2;
+					break;
+				default:
+					rpg.role_prop_tables[param1][role]=param2;
+			}
+		}else
             rpg.role_prop_tables[param1][param3-1]=param2;
         break;
     case 0x1b:
@@ -570,6 +579,7 @@ __walk_npc:
     case 0x36://Set RNG
         RNG.clear();
         RNG_num=param1;
+		voc::stop();
         flag_to_load|=0x10;
         break;
     case 0x37:
@@ -1288,7 +1298,7 @@ __walk_role:
 		break;
 	case 0x8d://level up
 		thebattle->levelup(false,param1?param1:1,role);
-		rpg.roles_exp[0][role].exp=0;
+		rpg.exps[role].kinds_exps.general.exp=0;
 		break;
     case 0x8e:
         restore_screen();

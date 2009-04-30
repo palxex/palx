@@ -55,11 +55,11 @@ int main(int argc, char *argv[])
 		for(int i=0;i<5;i++)
 			for(int j=0;j<8;j++)
 				if(j)
-					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i]+roundto(rnd1(2))+2,
-					rpg.roles_exp[j][i].exp=roundto(rnd1(20));
+					rpg.exps[i].roles_exp[j].level=rpg.roles_properties.level[i]+roundto(rnd1(2))+2,
+					rpg.exps[i].roles_exp[j].exp=roundto(rnd1(20));
 				else
-					rpg.roles_exp[j][i].level=rpg.roles_properties.level[i],
-					rpg.roles_exp[j][i].exp=0;
+					rpg.exps[i].roles_exp[j].level=rpg.roles_properties.level[i],
+					rpg.exps[i].roles_exp[j].exp=0;
 		pal_fade_out(1);
 	}
 	run();

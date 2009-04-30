@@ -453,7 +453,7 @@ battle::battle(int team,int script):enemy_team(team),script_escape(script),stage
 	//隐藏经验纪录清空,原版盖罗娇不清,修正
 	for(int i=0;i<6;i++)
 		for(int j=0;j<8;j++)
-			rpg.roles_exp[j][i].count=0;
+			rpg.exps[i].roles_exp[j].count=0;
 
 	for(int i=0;i<5;i++){
 		if(enemyteams[enemy_team].enemy[i]>0)
@@ -933,8 +933,8 @@ attack_label:
 								battle_enemy_data[target_enemy].pos_x=battle_enemy_data[target_enemy].pos_x_bak;
 								battle_enemy_data[target_enemy].pos_y=battle_enemy_data[target_enemy].pos_y_bak;
 							}
-							rpg.roles_exp[1][attacking_role].count+=roundto(rnd1(2));
-							rpg.roles_exp[3][attacking_role].count++;
+							rpg.exps[attacking_role].kinds_exps.HP.count+=roundto(rnd1(2));
+							rpg.exps[attacking_role].kinds_exps.force.count++;
 						}
 						break;
 					case MAGIC_TO_US:
@@ -957,8 +957,8 @@ attack_label:
 									load_our_pic();
 									flag_invisible=-1;
 								}
-								rpg.roles_exp[3][attacking_role].count+=roundto(rnd1(2));
-								rpg.roles_exp[5][attacking_role].count++;
+								rpg.exps[attacking_role].kinds_exps.MP.count+=roundto(rnd1(2));
+								rpg.exps[attacking_role].kinds_exps.power.count++;
 							}
 						}
 						break;
@@ -984,8 +984,8 @@ attack_label:
 								if(check_enemy_changes())
 									show_enemy_changes(5);
 								rpg.roles_properties.MP[attacking_role]-=magics[magic_index].power_used;
-								rpg.roles_exp[3][attacking_role].count+=roundto(rnd1(2));
-								rpg.roles_exp[5][attacking_role].count++;
+								rpg.exps[attacking_role].kinds_exps.MP.count+=roundto(rnd1(2));
+								rpg.exps[attacking_role].kinds_exps.power.count++;
 							}
 						}
 						break;
@@ -997,7 +997,7 @@ attack_label:
 						battle_role_data[action_taker].frame=3;
 						battle_role_data[action_taker].prev_frame=3;
 						draw_battle_scene(0,4);
-						rpg.roles_exp[5][attacking_role].count+=2;
+						rpg.exps[attacking_role].kinds_exps.defence.count+=roundto(rnd1(2));
 						break;
 					case AUTO_ATTACK:
 						flag_autobattle=2;
@@ -1016,6 +1016,13 @@ attack_label:
 						break;
 					case ATTACK_ALL:
 attack_all_label:
+						for(int i=0;i<=!!role_status_pack[action_taker].pack.twice_attack;i++)
+							role_attack_all(role_status_pack[action_taker].pack.twice_attack,action_taker);
+						role_restore_position(action_taker);
+						draw_battle_scene(0,1);
+						attack_make();
+						rpg.exps[attacking_role].kinds_exps.HP.count+=roundto(rnd1(2));
+						rpg.exps[attacking_role].kinds_exps.force.count++;
 						break;
 					default:
 						break;
@@ -1594,7 +1601,7 @@ void battle::role_release_magic_effect(int role_pos)
 	x[1]=battle_role_data[role_pos].pos_x;
 	y[1]=battle_role_data[role_pos].pos_y;
 	s[1]=100;
-	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(discharge_effects));
+	load_useMagicEffect_to_decoded_pack();
 	magic_image_occurs=1;
 	magic_frame=effect_idx[battle_role_data[role_pos].battle_avatar].magic*10+14;
 	for(int i=1;i<=10;i++){
@@ -1876,7 +1883,7 @@ void battle::role_physical_attack(int role_pos,int enemy_pos,int &damage,int bou
 	battle_role_data[role_pos].pos_x-=0x10;
 	battle_role_data[role_pos].pos_y-=4;
 	magic_image_occurs=high_attack_flag;
-	magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(discharge_effects));
+	load_useMagicEffect_to_decoded_pack();
 	magic_frame=effect_idx[battle_role_data[role_pos].battle_avatar].attack*3;
 	for(int i=1,x=battle_enemy_data[enemy_pos].pos_x,y=battle_enemy_data[enemy_pos].pos_y-battle_enemy_data[enemy_pos].length/3+10;i<=magic_image_occurs;x-=16,y+=16,i++)
 	{
@@ -1901,6 +1908,66 @@ void battle::role_physical_attack(int role_pos,int enemy_pos,int &damage,int bou
 		offset=-offset;
 		draw_battle_scene(0,1);
 	}
+}
+void battle::role_attack_all(int param,int role_pos)
+{
+	int role=rpg.team[role_pos].role,
+		sfx_attack=0x45;
+	double multiplier = 1.0f;
+	memset(twoside_affected,0,sizeof(twoside_affected));
+	if(role_status_pack[role_pos].pack.high_attack || roundto(rnd1(6)) == 4){
+		multiplier = 3.0f;
+		sfx_attack=0x47;
+	}
+	sfx_attack=rpg.role_prop_tables[sfx_attack][role];
+	magic_image_occurs=0;
+	load_useMagicEffect_to_decoded_pack();
+	if(param==0){
+		battle_role_data[role_pos].frame=7;
+		draw_battle_scene(0,4);
+	}
+	voc(sfx_attack).play();
+	battle_role_data[role_pos].frame=8;
+	if(param==0){
+		battle_role_data[role_pos].pos_x-=0x28;
+		battle_role_data[role_pos].pos_y-=0x12;
+	}
+	draw_battle_scene(0,2);
+	battle_role_data[role_pos].pos_x-=10;
+	battle_role_data[role_pos].pos_y-=5;
+	battle_role_data[role_pos].frame=9;
+	draw_battle_scene(0,1);
+	battle_role_data[role_pos].pos_x-=2;
+	battle_role_data[role_pos].pos_y--;
+	magic_image_occurs=0;
+	magic_frame=effect_idx[battle_role_data[role_pos].battle_avatar].attack*3;
+	for(int i=0;i<enemy_poses_count;i++)
+		if(battle_enemy_data[i].HP>0){
+			magic_image_occurs++;
+			x[i]=battle_enemy_data[i].pos_x;
+			y[i]=battle_enemy_data[i].pos_y-battle_enemy_data[i].length/3;
+			s[i]=99;
+		}
+	voc(rpg.roles_properties.sfx_weapon[role]).play();
+	draw_battle_scene(0,1);
+	magic_frame++;
+	for(int i=0;i<5;i++){
+		int enemy_pos=enemy_sequence[i];
+		if(battle_enemy_data[enemy_pos].HP>0){
+			twoside_affected[enemy_pos]=-1;
+			delayed_damage[enemy_pos]=calc_base_damage(enemy_level_scaler(enemy_pos,4)+enemy_data[enemy_pos].defence,get_cons_attrib(role,0x11))*2/enemy_data[enemy_pos].weapon_defence*multiplier;
+			multiplier/=2;
+			display_damage_number(1,delayed_damage[enemy_pos],battle_enemy_data[enemy_pos].pos_x,battle_enemy_data[enemy_pos].pos_y-0x6E);
+			affected_enemies[enemy_pos]=true;
+		}
+	}
+	draw_battle_scene(0,1);
+	magic_frame++;
+	battle_role_data[role_pos].pos_x+=2;
+	battle_role_data[role_pos].pos_y++;
+	draw_battle_scene(0,1);
+	magic_image_occurs=0;
+	show_enemy_changes(3);
 }
 void battle::enemy_crazy_attack_enemy(int from,int target)
 {}

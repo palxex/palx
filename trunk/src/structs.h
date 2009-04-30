@@ -191,11 +191,23 @@ typedef struct rpg_def{
 		int16_t x,y;
 		int16_t direction;
 	}team_track[TEAMROLES];
-	struct _exp{
-		int32_t exp;
-		int16_t level;
-		int16_t count;
-	}roles_exp[8][ALLROLES];
+	union _kind_exp{
+		struct _exp{
+			int32_t exp;
+			int16_t level;
+			int16_t count;
+		} roles_exp[8];
+		struct _kinds{
+			_exp general,
+				 HP,
+				 MP,
+				 force,
+				 power,
+				 defence,
+				 speed,
+				 lucky;
+		}kinds_exps;
+	}exps[ALLROLES];
 	union{
 	    ROLES_PROP roles_properties;
 	    roles role_prop_tables[sizeof(ROLES_PROP)/sizeof(roles)];
