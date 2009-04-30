@@ -169,6 +169,9 @@ public:
 	void restoreBackground(){
 		battlebuf.blit_to(battlescene);
 	}
+	void load_useMagicEffect_to_decoded_pack(){
+		magic_img=boost::shared_ptr<sprite_prim>(new sprite_prim(Pal::discharge_effects));
+	}
 
 	void load_enemy(int enemy_pos,int enemy_id);
 	void battle_produce_screen(BITMAP *buf);
@@ -192,6 +195,7 @@ public:
 	void enemy_magical_attack(int force,int magic,int role_pos,int enemy_pos);
 	void enemy_fire_magic(int enemy_pos);
 	void role_physical_attack(int role_pos,int enemy_pos,int &damage,int bouts);
+	void role_attack_all(int param,int role_pos);
 	void role_release_magic_action(int role_pos,bool not_summon);
 	void role_release_magic_effect(int role_pos);
 	void role_release_magic(int power,int magic,int target,int pos);
