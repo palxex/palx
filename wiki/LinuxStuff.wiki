@@ -13,6 +13,9 @@ after
 ./configure
 make
 }}}
+Gentoo specific:
+put http://github.com/palxex/palxex-overlay/blob/e1172058907a241e5de69f4978a01891b1cf889a/games-rpg/palx/palx-9999.ebuild to your own overlay, and then emerge palx (with console USE flag to enable lua console).
+
 copy src/palx to the pal game's directory, (note: use the follow script all file's filename!) and play now:)
 {{{
 for i in *;
