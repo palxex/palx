@@ -37,7 +37,7 @@
 #   if defined (WIN32)
 #       define FONT_PATH "%WINDIR%/fonts/simsun.ttc"
 #       define CONFIG_ENCODE "chs"
-#       define CONF "palxw95.conf"
+#       define CONF "~/Library/palxw95.conf"
 #   	define CONFIG_PATH "."
 #		define DISPLAY_SCALE "2"
 #		define DISPLAY_FULLSCREEN "false"
@@ -84,7 +84,7 @@
 #   elif defined __APPLE__
 #       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
 #       define CONFIG_ENCODE "BIG5"
-#       define CONF "palxrc"
+#       define CONF "~/Library/palxrc"
 #	    define CONFIG_PATH "../../.."
 #		define DISPLAY_SCALE "2"
 #		define DISPLAY_FULLSCREEN "false"
@@ -116,42 +116,42 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 {
 	ini_parser::section::configmap configprop;
 	configprop["path"].value=CONFIG_PATH;
-	configprop["path"].comment="×ÊÔ´Â·¾¶";
+	configprop["path"].comment="èµ„æºè·¯å¾„";
 	configprop["setup"].value=CONFIG_SETUP;
-	configprop["setup"].comment="Bool;ÊÇ·ñÓÃsetup.datÀïµÄÉèÖÃ¸²¸ÇÕâÀïµÄ¶ÔÓ¦ÉèÖÃ";
+	configprop["setup"].comment="Bool;æ˜¯å¦ç”¨setup.daté‡Œçš„è®¾ç½®è¦†ç›–è¿™é‡Œçš„å¯¹åº”è®¾ç½®";
 	configprop["allow_memory"].value="false";
-	configprop["allow_memory"].comment="Bool;ÊÇ·ñÔÊĞí¿ç½ø³Ì¼ÇÒä×îºó´æµµ";
+	configprop["allow_memory"].comment="Bool;æ˜¯å¦å…è®¸è·¨è¿›ç¨‹è®°å¿†æœ€åå­˜æ¡£";
 	configprop["last"].value="";
-	configprop["last"].comment="Int;×îºóÔØÈëµÄ´æµµ";
+	configprop["last"].comment="Int;æœ€åè½½å…¥çš„å­˜æ¡£";
 	configprop["encode"].value=CONFIG_ENCODE;
 	configprop["encode"].comment="win32:chs/cht;linux/mac/dos/...(iconv):GBK/BIG5";
 	configprop["switch_off"].value="true";
-	configprop["switch_off"].comment="¿ØÖÆÇĞ»»³ö´°¿ÚÊ±³ÌĞòÊÇ·ñ¼ÌĞøÖ´ĞĞ";
+	configprop["switch_off"].comment="æ§åˆ¶åˆ‡æ¢å‡ºçª—å£æ—¶ç¨‹åºæ˜¯å¦ç»§ç»­æ‰§è¡Œ";
 	section config("config",configprop);
 	sections["config"]=config;
 
 	ini_parser::section::configmap debugprop;
 	debugprop["resource"].value="mkf";
-	debugprop["resource"].comment="×ÊÔ´Ê¹ÓÃ·½Ê½;mkf/filesystem";
+	debugprop["resource"].comment="èµ„æºä½¿ç”¨æ–¹å¼;mkf/filesystem";
 	debugprop["allow_frozen"].value="true";
-	debugprop["allow_frozen"].comment="ÔÊĞí¶³½áÆô¶¯/Í£Ö¹;true/false";
+	debugprop["allow_frozen"].comment="å…è®¸å†»ç»“å¯åŠ¨/åœæ­¢;true/false";
 	debugprop["console"].value="false";
-	debugprop["console"].comment="Æô¶¯lua¿ØÖÆÌ¨;true/false";
+	debugprop["console"].comment="å¯åŠ¨luaæ§åˆ¶å°;true/false";
 	debugprop["random"].value="true";
-	debugprop["random"].comment="ÔÊĞíËæ»ú;true/¸¡µã";
+	debugprop["random"].comment="å…è®¸éšæœº;true/æµ®ç‚¹";
 	debugprop["check_point"].value="false";
-	debugprop["check_point"].comment="¼ì²éµĞ´¦ÔÚ×è¸ôµãÖ®bug;true/false";
+	debugprop["check_point"].comment="æ£€æŸ¥æ•Œå¤„åœ¨é˜»éš”ç‚¹ä¹‹bug;true/false";
 	section debug("debug",debugprop);
 	sections["debug"]=debug;
 
 	ini_parser::section::configmap displayprop;
 	displayprop["height"].value="200";
-	displayprop["height"].comment="Á£¶È;320x200ÕıÕûÊı±¶.";
+	displayprop["height"].comment="ç²’åº¦;320x200æ­£æ•´æ•°å€.";
 	displayprop["width"].value="320";
 	displayprop["scale"].value=DISPLAY_SCALE;
 	displayprop["scale"].comment="1,2;etc.";
 	displayprop["fullscreen"].value=DISPLAY_FULLSCREEN;
-	displayprop["fullscreen"].comment="Bool ;È«ÆÁ";
+	displayprop["fullscreen"].comment="Bool ;å…¨å±";
 	section display("display",displayprop);
 	sections["display"]=display;
 
@@ -164,16 +164,16 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 
 	ini_parser::section::configmap musicprop;
 	musicprop["type"].value=MUSIC_TYPE;
-	musicprop["type"].comment="rix/midi/foreverCD,+gameCD,+gameCDmp3£¬»òÈÎÒâ»ìºÏ¡£foreverCDÖ¸ÓÀºã»ØÒäÂ¼Ö®FMÇú¼¯";
+	musicprop["type"].comment="rix/midi/foreverCD,+gameCD,+gameCDmp3ï¼Œæˆ–ä»»æ„æ··åˆã€‚foreverCDæŒ‡æ°¸æ’å›å¿†å½•ä¹‹FMæ›²é›†";
 	musicprop["opltype"].value="mame";
-	musicprop["opltype"].comment="real/mame/ken;Õæ»úOPLĞ¾Æ¬/MAME°æÄ£Äâ/Ken°æÄ£ÄâFMÒôÀÖ";
+	musicprop["opltype"].comment="real/mame/ken;çœŸæœºOPLèŠ¯ç‰‡/MAMEç‰ˆæ¨¡æ‹Ÿ/Kenç‰ˆæ¨¡æ‹ŸFMéŸ³ä¹";
 	musicprop["oplport"].value="0x388";
-	musicprop["oplport"].comment="Õæ»úOPL2¶Ë¿ÚºÅ;0x388ÎªadlibÉù¿¨Ä¬ÈÏ.Ö»ÔÚdos build(ÉĞÎ´³öÏÖ)ÉúĞ§";
+	musicprop["oplport"].comment="çœŸæœºOPL2ç«¯å£å·;0x388ä¸ºadlibå£°å¡é»˜è®¤.åªåœ¨dos build(å°šæœªå‡ºç°)ç”Ÿæ•ˆ";
 	musicprop["volume"].value="255";
-	musicprop["volume"].comment="0-255;ÒôÁ¿";
+	musicprop["volume"].comment="0-255;éŸ³é‡";
 	musicprop["volume_sfx"].value="255";
-	musicprop["volume_sfx"].comment="0-255;ÒôĞ§ÒôÁ¿";
-	section music("music",musicprop,"ÓësetupÕı½»");
+	musicprop["volume_sfx"].comment="0-255;éŸ³æ•ˆéŸ³é‡";
+	section music("music",musicprop,"ä¸setupæ­£äº¤");
 	sections["music"]=music;
 
 	ini_parser::section::configmap keyprop;
@@ -181,7 +181,7 @@ ini_parser::ini_parser(const char *conf,bool once):name(conf),needwrite(false)
 	keyprop["north"].value="0x48";
 	keyprop["east"].value="0x4d";
 	keyprop["south"].value="0x50";
-	section keymap("keymap",keyprop,"ĞĞ×ß¼üÅÌ¶¨Òå£»ÓësetupÕı½»");
+	section keymap("keymap",keyprop,"è¡Œèµ°é”®ç›˜å®šä¹‰ï¼›ä¸setupæ­£äº¤");
 	sections["keymap"]=keymap;
 
 	ifstream ifs((env_expand(name)).c_str());
