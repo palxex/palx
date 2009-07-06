@@ -51,8 +51,8 @@
 #   elif defined __APPLE__
 #       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
 #       define CONFIG_ENCODE "GBK"
-#       define CONF "~/.palxw95rc"
-#	    define CONFIG_PATH ".."
+#       define CONF "palxw95rc"
+#	    define CONFIG_PATH "../../.."
 #		define DISPLAY_SCALE "2"
 #		define DISPLAY_FULLSCREEN "false"
 #   else   //predicate *NIX
@@ -84,8 +84,8 @@
 #   elif defined __APPLE__
 #       define FONT_PATH "/System/Library/Fonts/\xE5\x84\xB7\xE9\xBB\x91 Pro.ttf"
 #       define CONFIG_ENCODE "BIG5"
-#       define CONF "~/.palxrc"
-#	    define CONFIG_PATH ".."
+#       define CONF "palxrc"
+#	    define CONFIG_PATH "../../.."
 #		define DISPLAY_SCALE "2"
 #		define DISPLAY_FULLSCREEN "false"
 #   else   //predicate *NIX
