@@ -73,19 +73,20 @@ typedef union object_def{
 			int16_t image;
 			int16_t value;
 			uint16_t use,equip,chuck;
-			uint16_t param;
 			#ifdef PAL_WIN95
 			uint16_t desc_script;
 			#endif
+			uint16_t param;
 		}item;
 		struct{
 			int16_t magic;
 			uint16_t ___reserved;
-			uint16_t post,occur,reserved;
-			uint16_t param;
+			uint16_t post,occur;
 			#ifdef PAL_WIN95
 			uint16_t desc_script;
 			#endif
+			uint16_t reserved;
+			uint16_t param;
 		}magic;
 		struct{
 			int16_t enemy;
