@@ -24,7 +24,9 @@
 #include "UI.h"
 #include "battle.h"
 #include "item.h"
+
 #include "fade.h"
+
 #include "allegdef.h"
 
 #include <stdlib.h>
@@ -151,7 +153,7 @@ void process_Explore()
                 {
                     iter->curr_frame=0;
                     iter->direction=(rpg.team_direction+2)&3;
-                    for (int t=0;t<=rpg.team_roles;t++)//¸úËæÕß²»ÓÃ×ª£¿
+                    for (int t=0;t<=rpg.team_roles;t++)//ï¿½ï¿½ï¿½ï¿½ï¿½ß²ï¿½ï¿½ï¿½×ªï¿½ï¿½
                         rpg.team[t].frame=rpg.team_direction*3;
                     redraw_everything(0);
                 }
@@ -261,10 +263,10 @@ __walk_npc:
 
             //afterward check;MUST have,or will not match dospal exactly
             if (obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
-                obj.curr_frame=0;//printf(addition,"Íê³É");
+                obj.curr_frame=0;//printf(addition,"ï¿½ï¿½ï¿½");
             else
             {
-                //printf(addition,"µ±Ç°X:%x,Y:%x  Ä¿µÄX:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
+                //printf(addition,"ï¿½ï¿½Ç°X:%x,Y:%x  Ä¿ï¿½ï¿½X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
                 --id;
             }
         }
@@ -272,7 +274,7 @@ __walk_npc:
     case 0x11:
         if ((object&1) != flag_parallel_mutex)
         {
-            //printf(addition,"±»¶ÂÈû µ±Ç°X:%x,Y:%x  Ä¿µÄX:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
+            //printf(addition,"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç°X:%x,Y:%x  Ä¿ï¿½ï¿½X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
             --id;
             break;
         }
@@ -558,7 +560,7 @@ __walk_npc:
         break;
     case 0x34:
 		if(rpg.gourd_value){
-			//Õ½³¡¾ÍµØÁ¶³ö¼õ¾­ÑéÈ¡Ïû
+			//Õ½ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½
 			int seed=rnd1(rpg.gourd_value);
 			seed=(seed>8?8:seed);
 			rpg.gourd_value-=(seed+1);
@@ -597,7 +599,7 @@ __walk_npc:
 		if(thebattle->flag_attacking_hero){
 			rpg.roles_properties.HP[role]-=param1;
 			rpg.roles_properties.HP[role]=(rpg.roles_properties.HP[role]<0?0:rpg.roles_properties.HP[role]);
-			battle_enemy_data[thebattle->action_taker].HP+=param1;//ÎÞÉÏÏÞ...
+			battle_enemy_data[thebattle->action_taker].HP+=param1;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½...
 		}else{
 			battle_enemy_data[object].HP-=param1;
 			role=rpg.team[thebattle->action_taker].role;
@@ -1038,9 +1040,9 @@ __ride:
         if (evtobjs[param1].status==param2)
         {
             obj.status=param2;
-            //printf(addition,"³É¹¦");
+            //printf(addition,"ï¿½É¹ï¿½");
         }//else
-        //printf(addition,"Ê§°Ü");
+        //printf(addition,"Ê§ï¿½ï¿½");
         break;
     case 0x70:
         role_speed=2;
@@ -1677,17 +1679,17 @@ uint16_t process_script(uint16_t id,int16_t object)
     {
         const SCRIPT &curr=scripts[id];
 		const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
-        //printf("¶ÀÕ¼½Å±¾%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
+        //printf("ï¿½ï¿½Õ¼ï¿½Å±ï¿½%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
         switch (curr.func)
         {
         case 0:
             id = next_id-1;
-            //printf("Í£Ö¹Ö´ÐÐ\n");
+            //printf("Í£Ö¹Ö´ï¿½ï¿½\n");
             ok=false;
             break;
 		case -1:
 			{
-				//printf("ÏÔÊ¾¶Ô»° `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
+				//printf("ï¿½ï¿½Ê¾ï¿½Ô»ï¿½ `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
 				if (current_dialog_lines>3)
 				{
 					show_wait_icon();
@@ -1712,57 +1714,57 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			}
         case 1:
-            //printf("Í£Ö¹Ö´ÐÐ£¬½«µ÷ÓÃµØÖ·Ìæ»»ÎªÏÂÒ»ÌõÃüÁî\n");
+            //printf("Í£Ö¹Ö´ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ö·ï¿½æ»»Îªï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
             ok=false;
             break;
         case 2:
-            //printf("Í£Ö¹Ö´ÐÐ£¬½«µ÷ÓÃµØÖ·Ìæ»»Îª½Å±¾%x:",param1);
+            //printf("Í£Ö¹Ö´ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ö·ï¿½æ»»Îªï¿½Å±ï¿½%x:",param1);
             if (param2==0)
             {
-                //printf("³É¹¦\n");
+                //printf("ï¿½É¹ï¿½\n");
                 id = param1-1;
                 ok=false;
                 break;
             }
             else if (++obj.scr_jmp_count<param2)
             {
-                //printf("µÚ%x´Î³É¹¦\n",obj.scr_jmp_count);
+                //printf("ï¿½ï¿½%xï¿½Î³É¹ï¿½\n",obj.scr_jmp_count);
                 id = param1-1;
                 ok=false;
                 break;
             }
             else
             {
-                //printf("¹ýÆÚÊ§Ð§\n");
+                //printf("ï¿½ï¿½ï¿½ï¿½Ê§Ð§\n");
                 obj.scr_jmp_count = 0;
             }
             break;
         case 3:
-            //printf("Ìø×ªµ½½Å±¾%x:",param1);
+            //printf("ï¿½ï¿½×ªï¿½ï¿½ï¿½Å±ï¿½%x:",param1);
             if (param2==0)
             {
-                //printf("³É¹¦\n");
+                //printf("ï¿½É¹ï¿½\n");
                 id = param1;
                 continue;
             }
             else if (++obj.scr_jmp_count<param2)
             {
-                //printf("µÚ%x´Î³É¹¦\n",obj.scr_jmp_count);
+                //printf("ï¿½ï¿½%xï¿½Î³É¹ï¿½\n",obj.scr_jmp_count);
                 id = param1;
                 continue;
             }
             else
             {
-                //printf("¹ýÆÚÊ§Ð§\n",param1);
+                //printf("ï¿½ï¿½ï¿½ï¿½Ê§Ð§\n",param1);
                 obj.scr_jmp_count = 0;
             }
             break;
         case 4:
-            //printf("µ÷ÓÃ½Å±¾%x %x\n",param1,param2);
+            //printf("ï¿½ï¿½ï¿½Ã½Å±ï¿½%x %x\n",param1,param2);
             process_script(param1,param2?param2:object);
             break;
         case 5:
-            //printf("ÇåÆÁ ·½Ê½%x ÑÓ³Ù%x,¸üÐÂ½ÇÉ«ÐÅÏ¢:%s\n",param1,param2,param3?"ÊÇ":"·ñ");
+            //printf("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ê½%x ï¿½Ó³ï¿½%x,ï¿½ï¿½ï¿½Â½ï¿½É«ï¿½ï¿½Ï¢:%s\n",param1,param2,param3?"ï¿½ï¿½":"ï¿½ï¿½");
             if (current_dialog_lines>0)
                 show_wait_icon(),current_dialog_lines=0;
             if (flag_pic_level==0)
@@ -1775,10 +1777,10 @@ uint16_t process_script(uint16_t id,int16_t object)
                 restore_screen();
             break;
         case 6:
-            //printf("ÒÔ%d%%¼¸ÂÊÌø×ªµ½½Å±¾%x:",param1,param2);
+            //printf("ï¿½ï¿½%d%%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Å±ï¿½%x:",param1,param2);
             if (param1<rnd1(100))
             {
-                //printf("³É¹¦\n");
+                //printf("ï¿½É¹ï¿½\n");
 				if(!param2){
 					ok=false;
 					id--;
@@ -1788,10 +1790,10 @@ uint16_t process_script(uint16_t id,int16_t object)
                 continue;
             }
             else
-                //printf("Ê§°Ü\n");
+                //printf("Ê§ï¿½ï¿½\n");
                 break;
         case 7:
-            //printf("¿ªÕ½ µÚ%x×éµÐÈË Ê¤Àû½Å±¾%x ÌÓÅÜ½Å±¾%x\n",param1,param2,param3);
+            //printf("ï¿½ï¿½Õ½ ï¿½ï¿½%xï¿½ï¿½ï¿½ï¿½ï¿½ Ê¤ï¿½ï¿½Å±ï¿½%x ï¿½ï¿½ï¿½Ü½Å±ï¿½%x\n",param1,param2,param3);
             if (current_dialog_lines>0)
                 show_wait_icon();
             switch(process_Battle(param1,param3))
@@ -1814,15 +1816,15 @@ uint16_t process_script(uint16_t id,int16_t object)
             break;
         case 8:
             next_id = id+1;
-            //printf("½«µ÷ÓÃµØÖ·Ìæ»»Îª½Å±¾%x\n",next_id);
+            //printf("ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ö·ï¿½æ»»Îªï¿½Å±ï¿½%x\n",next_id);
             break;
         case 9:
-            //printf("¿ÕÏÐ%xÑ­»·\n",param1);
+            //printf("ï¿½ï¿½ï¿½ï¿½%xÑ­ï¿½ï¿½\n",param1);
             if (current_dialog_lines>0)
                 show_wait_icon(),current_dialog_lines=0;
             for (int cycle=1;cycle<=(param1?param1:1);++cycle)
             {
-                //printf("µÚ%xÑ­»·:\n",cycle);
+                //printf("ï¿½ï¿½%xÑ­ï¿½ï¿½:\n",cycle);
                 if (param3)
                     calc_trace_frames(),
                     calc_followers_screen_pos();
@@ -1831,15 +1833,15 @@ uint16_t process_script(uint16_t id,int16_t object)
             }
             break;
         case 0xA:
-            //printf("Ñ¡Ôñ:Ñ¡·ñÔò¼ÌÐø(y/n)");
+            //printf("Ñ¡ï¿½ï¿½:Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(y/n)");
             current_dialog_lines=0;
             if (yes_or_no()<=0)
             {
                 id = param1;
-                //printf("Ìø×ª\n");
+                //printf("ï¿½ï¿½×ª\n");
                 continue;
             }
-            //printf("¼ÌÐø\n");
+            //printf("ï¿½ï¿½ï¿½ï¿½\n");
             break;
         default:
             if (current_dialog_lines>0)
@@ -1857,56 +1859,59 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
     SCRIPT &curr=scripts[id];
     EVENT_OBJECT &obj=evtobjs[object];
     const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
+
     int for_eliminating_warning=param3;for_eliminating_warning++;
-    //printf("´¥·¢³¡¾°:%s,´¥·¢¶ÔÏó:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
-    //printf("×Ô¶¯½Å±¾%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
+    //printf("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:%s,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
+    //printf("ï¿½Ô¶ï¿½ï¿½Å±ï¿½%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
     switch (curr.func)
     {
     case 0:
-        //printf("Í£Ö¹Ö´ÐÐ\n");
+        //printf("Í£Ö¹Ö´ï¿½ï¿½\n");
         id--;
     case 2:
-        //printf("Í£Ö¹Ö´ÐÐ£¬½«µ÷ÓÃµØÖ·Ìæ»»Îª½Å±¾%x:",param1);
+        //printf("Í£Ö¹Ö´ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ö·ï¿½æ»»Îªï¿½Å±ï¿½%x:",param1);
         if (param2==0)
         {
-            //printf("³É¹¦\n");
+            //printf("ï¿½É¹ï¿½\n");
             id = param1 - 1;
         }
         else if (++obj.scr_jmp_count_auto<param2)
         {
-            //printf("µÚ%x´Î³É¹¦\n",obj.scr_jmp_count_auto);
+            //printf("ï¿½ï¿½%xï¿½Î³É¹ï¿½\n",obj.scr_jmp_count_auto);
             id = param1 - 1;
         }
         else
         {
-            //printf("Ê§°Ü\n");
+            //printf("Ê§ï¿½ï¿½\n");
             obj.scr_jmp_count_auto = 0;
         }
         break;
     case 3:
-        //printf("Ìø×ªµ½½Å±¾%x",param1);
+        //printf("ï¿½ï¿½×ªï¿½ï¿½ï¿½Å±ï¿½%x",param1);
         if (param2==0)
-            //printf("³É¹¦\n");
+            //printf("ï¿½É¹ï¿½\n");
             id = process_autoscript(param1,object) - 1;
         else if (++obj.scr_jmp_count_auto<param2)
-            //printf("µÚ%x´Î³É¹¦\n",obj.scr_jmp_count_auto);
+            //printf("ï¿½ï¿½%xï¿½Î³É¹ï¿½\n",obj.scr_jmp_count_auto);
             id = process_autoscript(param1,object) - 1;
         else
-            //printf("Ê§°Ü\n");
+            //printf("Ê§ï¿½ï¿½\n");
             obj.scr_jmp_count_auto = 0;
         break;
     case 4:
-        //printf("µ÷ÓÃ½Å±¾%x %x\n",param1,param2);
+        //printf("ï¿½ï¿½ï¿½Ã½Å±ï¿½%x %x\n",param1,param2);
         process_script(param1,param2?param2:object);
         break;
     case 6:
-        //printf("ÒÔ%d%%¼¸ÂÊÌø×ªµ½½Å±¾%x:",param1,param2);
-        if (param1<rnd1(100) && param2)
-            //printf("³É¹¦\n");
-            id = process_autoscript(param2,object) - 1;
+        //printf("ï¿½ï¿½%d%%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Å±ï¿½%x:",param1,param2);
+        if (param1<rnd1(100) )
+            if( param2 )
+            	id = process_autoscript(param2,object) - 1;
+            else
+            	id--;
         break;
     case 9:
-        //printf("×Ô¶¯½Å±¾¿ÕÏÐµÚ%xÑ­»·:\n",++obj.scr_jmp_count_auto);
+        //printf("ï¿½Ô¶ï¿½ï¿½Å±ï¿½ï¿½ï¿½ï¿½Ðµï¿½%xÑ­ï¿½ï¿½:\n",++obj.scr_jmp_count_auto);
         if (++obj.scr_jmp_count_auto<param1)
             id--;
         else
