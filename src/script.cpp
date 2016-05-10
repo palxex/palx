@@ -24,9 +24,7 @@
 #include "UI.h"
 #include "battle.h"
 #include "item.h"
-
 #include "fade.h"
-
 #include "allegdef.h"
 
 #include <stdlib.h>
@@ -153,7 +151,7 @@ void process_Explore()
                 {
                     iter->curr_frame=0;
                     iter->direction=(rpg.team_direction+2)&3;
-                    for (int t=0;t<=rpg.team_roles;t++)//�����߲���ת��
+                    for (int t=0;t<=rpg.team_roles;t++)//跟随者不用转？
                         rpg.team[t].frame=rpg.team_direction*3;
                     redraw_everything(0);
                 }
@@ -263,10 +261,10 @@ __walk_npc:
 
             //afterward check;MUST have,or will not match dospal exactly
             if (obj.pos_x==param1*32+param3*16 && obj.pos_y==param2*16+param3*8)
-                obj.curr_frame=0;//printf(addition,"���");
+                obj.curr_frame=0;//printf(addition,"完成");
             else
             {
-                //printf(addition,"��ǰX:%x,Y:%x  Ŀ��X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
+                //printf(addition,"当前X:%x,Y:%x  目的X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
                 --id;
             }
         }
@@ -274,7 +272,7 @@ __walk_npc:
     case 0x11:
         if ((object&1) != flag_parallel_mutex)
         {
-            //printf(addition,"������ ��ǰX:%x,Y:%x  Ŀ��X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
+            //printf(addition,"被堵塞 当前X:%x,Y:%x  目的X:%x,Y:%x",obj.pos_x,obj.pos_y,(param1*32+param3*16),(param2*16+param3*8));
             --id;
             break;
         }
@@ -560,7 +558,7 @@ __walk_npc:
         break;
     case 0x34:
 		if(rpg.gourd_value){
-			//ս���͵�������ȡ��
+			//战场就地炼出减经验取消
 			int seed=rnd1(rpg.gourd_value);
 			seed=(seed>8?8:seed);
 			rpg.gourd_value-=(seed+1);
@@ -599,7 +597,7 @@ __walk_npc:
 		if(thebattle->flag_attacking_hero){
 			rpg.roles_properties.HP[role]-=param1;
 			rpg.roles_properties.HP[role]=(rpg.roles_properties.HP[role]<0?0:rpg.roles_properties.HP[role]);
-			battle_enemy_data[thebattle->action_taker].HP+=param1;//������...
+			battle_enemy_data[thebattle->action_taker].HP+=param1;//无上限...
 		}else{
 			battle_enemy_data[object].HP-=param1;
 			role=rpg.team[thebattle->action_taker].role;
@@ -1040,9 +1038,9 @@ __ride:
         if (evtobjs[param1].status==param2)
         {
             obj.status=param2;
-            //printf(addition,"�ɹ�");
+            //printf(addition,"成功");
         }//else
-        //printf(addition,"ʧ��");
+        //printf(addition,"失败");
         break;
     case 0x70:
         role_speed=2;
@@ -1679,17 +1677,17 @@ uint16_t process_script(uint16_t id,int16_t object)
     {
         const SCRIPT &curr=scripts[id];
 		const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
-        //printf("��ռ�ű�%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
+        //printf("独占脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
         switch (curr.func)
         {
         case 0:
             id = next_id-1;
-            //printf("ִֹͣ��\n");
+            //printf("停止执行\n");
             ok=false;
             break;
 		case -1:
 			{
-				//printf("��ʾ�Ի� `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
+				//printf("显示对话 `%s`\n",cut_msg(rpg.msgs[param1],rpg.msgs[param1+1]));
 				if (current_dialog_lines>3)
 				{
 					show_wait_icon();
@@ -1714,57 +1712,57 @@ uint16_t process_script(uint16_t id,int16_t object)
 				break;
 			}
         case 1:
-            //printf("ִֹͣ�У������õ�ַ�滻Ϊ��һ������\n");
+            //printf("停止执行，将调用地址替换为下一条命令\n");
             ok=false;
             break;
         case 2:
-            //printf("ִֹͣ�У������õ�ַ�滻Ϊ�ű�%x:",param1);
+            //printf("停止执行，将调用地址替换为脚本%x:",param1);
             if (param2==0)
             {
-                //printf("�ɹ�\n");
+                //printf("成功\n");
                 id = param1-1;
                 ok=false;
                 break;
             }
             else if (++obj.scr_jmp_count<param2)
             {
-                //printf("��%x�γɹ�\n",obj.scr_jmp_count);
+                //printf("第%x次成功\n",obj.scr_jmp_count);
                 id = param1-1;
                 ok=false;
                 break;
             }
             else
             {
-                //printf("����ʧЧ\n");
+                //printf("过期失效\n");
                 obj.scr_jmp_count = 0;
             }
             break;
         case 3:
-            //printf("��ת���ű�%x:",param1);
+            //printf("跳转到脚本%x:",param1);
             if (param2==0)
             {
-                //printf("�ɹ�\n");
+                //printf("成功\n");
                 id = param1;
                 continue;
             }
             else if (++obj.scr_jmp_count<param2)
             {
-                //printf("��%x�γɹ�\n",obj.scr_jmp_count);
+                //printf("第%x次成功\n",obj.scr_jmp_count);
                 id = param1;
                 continue;
             }
             else
             {
-                //printf("����ʧЧ\n",param1);
+                //printf("过期失效\n",param1);
                 obj.scr_jmp_count = 0;
             }
             break;
         case 4:
-            //printf("���ýű�%x %x\n",param1,param2);
+            //printf("调用脚本%x %x\n",param1,param2);
             process_script(param1,param2?param2:object);
             break;
         case 5:
-            //printf("���� ��ʽ%x �ӳ�%x,���½�ɫ��Ϣ:%s\n",param1,param2,param3?"��":"��");
+            //printf("清屏 方式%x 延迟%x,更新角色信息:%s\n",param1,param2,param3?"是":"否");
             if (current_dialog_lines>0)
                 show_wait_icon(),current_dialog_lines=0;
             if (flag_pic_level==0)
@@ -1777,10 +1775,10 @@ uint16_t process_script(uint16_t id,int16_t object)
                 restore_screen();
             break;
         case 6:
-            //printf("��%d%%������ת���ű�%x:",param1,param2);
+            //printf("以%d%%几率跳转到脚本%x:",param1,param2);
             if (param1<rnd1(100))
             {
-                //printf("�ɹ�\n");
+                //printf("成功\n");
 				if(!param2){
 					ok=false;
 					id--;
@@ -1790,10 +1788,10 @@ uint16_t process_script(uint16_t id,int16_t object)
                 continue;
             }
             else
-                //printf("ʧ��\n");
+                //printf("失败\n");
                 break;
         case 7:
-            //printf("��ս ��%x����� ʤ��ű�%x ���ܽű�%x\n",param1,param2,param3);
+            //printf("开战 第%x组敌人 胜利脚本%x 逃跑脚本%x\n",param1,param2,param3);
             if (current_dialog_lines>0)
                 show_wait_icon();
             switch(process_Battle(param1,param3))
@@ -1816,15 +1814,15 @@ uint16_t process_script(uint16_t id,int16_t object)
             break;
         case 8:
             next_id = id+1;
-            //printf("�����õ�ַ�滻Ϊ�ű�%x\n",next_id);
+            //printf("将调用地址替换为脚本%x\n",next_id);
             break;
         case 9:
-            //printf("����%xѭ��\n",param1);
+            //printf("空闲%x循环\n",param1);
             if (current_dialog_lines>0)
                 show_wait_icon(),current_dialog_lines=0;
             for (int cycle=1;cycle<=(param1?param1:1);++cycle)
             {
-                //printf("��%xѭ��:\n",cycle);
+                //printf("第%x循环:\n",cycle);
                 if (param3)
                     calc_trace_frames(),
                     calc_followers_screen_pos();
@@ -1833,15 +1831,15 @@ uint16_t process_script(uint16_t id,int16_t object)
             }
             break;
         case 0xA:
-            //printf("ѡ��:ѡ�������(y/n)");
+            //printf("选择:选否则继续(y/n)");
             current_dialog_lines=0;
             if (yes_or_no()<=0)
             {
                 id = param1;
-                //printf("��ת\n");
+                //printf("跳转\n");
                 continue;
             }
-            //printf("����\n");
+            //printf("继续\n");
             break;
         default:
             if (current_dialog_lines>0)
@@ -1859,59 +1857,59 @@ uint16_t process_autoscript(uint16_t id,int16_t object)
     SCRIPT &curr=scripts[id];
     EVENT_OBJECT &obj=evtobjs[object];
     const int16_t &param1=curr.param[0],&param2=curr.param[1],&param3=curr.param[2];
-
     int for_eliminating_warning=param3;for_eliminating_warning++;
-    //printf("��������:%s,��������:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
-    //printf("�Զ��ű�%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
+    //printf("触发场景:%s,触发对象:(%04x,%s)\n",scr_desc.getdesc("SceneID",scene_curr).c_str(),object,scr_desc.getdesc("ObjectID",object).c_str());
+    //printf("自动脚本%04x:%04x %04x %04x %04x ;",id,curr.func,(uint16_t)param1,(uint16_t)param2,(uint16_t)param3);
     switch (curr.func)
     {
     case 0:
-        //printf("ִֹͣ��\n");
+        //printf("停止执行\n");
         id--;
     case 2:
-        //printf("ִֹͣ�У������õ�ַ�滻Ϊ�ű�%x:",param1);
+        //printf("停止执行，将调用地址替换为脚本%x:",param1);
         if (param2==0)
         {
-            //printf("�ɹ�\n");
+            //printf("成功\n");
             id = param1 - 1;
         }
         else if (++obj.scr_jmp_count_auto<param2)
         {
-            //printf("��%x�γɹ�\n",obj.scr_jmp_count_auto);
+            //printf("第%x次成功\n",obj.scr_jmp_count_auto);
             id = param1 - 1;
         }
         else
         {
-            //printf("ʧ��\n");
+            //printf("失败\n");
             obj.scr_jmp_count_auto = 0;
         }
         break;
     case 3:
-        //printf("��ת���ű�%x",param1);
+        //printf("跳转到脚本%x",param1);
         if (param2==0)
-            //printf("�ɹ�\n");
+            //printf("成功\n");
             id = process_autoscript(param1,object) - 1;
         else if (++obj.scr_jmp_count_auto<param2)
-            //printf("��%x�γɹ�\n",obj.scr_jmp_count_auto);
+            //printf("第%x次成功\n",obj.scr_jmp_count_auto);
             id = process_autoscript(param1,object) - 1;
         else
-            //printf("ʧ��\n");
+            //printf("失败\n");
             obj.scr_jmp_count_auto = 0;
         break;
     case 4:
-        //printf("���ýű�%x %x\n",param1,param2);
+        //printf("调用脚本%x %x\n",param1,param2);
         process_script(param1,param2?param2:object);
         break;
     case 6:
-        //printf("��%d%%������ת���ű�%x:",param1,param2);
-        if (param1<rnd1(100) )
-            if( param2 )
+        //printf("以%d%%几率跳转到脚本%x:",param1,param2);
+        if (param1<rnd1(100))
+        	if(param2)
+            	//printf("成功\n");
             	id = process_autoscript(param2,object) - 1;
             else
             	id--;
         break;
     case 9:
-        //printf("�Զ��ű����е�%xѭ��:\n",++obj.scr_jmp_count_auto);
+        //printf("自动脚本空闲第%x循环:\n",++obj.scr_jmp_count_auto);
         if (++obj.scr_jmp_count_auto<param1)
             id--;
         else
