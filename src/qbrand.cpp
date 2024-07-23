@@ -26,7 +26,7 @@
 #include "internal.h"
 
 namespace{
-    uint64_t seed;
+    uint32_t seed;
     uint32_t a=214013,c=2531011,d=16777216;
     bool is_random=true;
     double fixed_random=0;
@@ -47,7 +47,7 @@ void randomize()
 		fixed_random=global->get<double>("debug","random");
 	}
 }
-int roundto(double f)//ËÄÉáÎåÈë£»µ½Å¼Êı£¿ËãÁË°É
+int roundto(double f)//å››èˆäº”å…¥ï¼›åˆ°å¶æ•°ï¼Ÿç®—äº†å§
 {
 	return ((f-(int)f)>0.5)?((int)f+1):(int)f;
 }
@@ -55,7 +55,7 @@ double rnd0()
 {
 	if(!is_random)
 		return fixed_random;
-	seed=(seed*a+c)%d;
+	seed=seed*a+c;
 	return (double)seed/d;
 }
 double rnd1(double s)
