@@ -27,7 +27,8 @@
 
 namespace{
     uint32_t seed;
-    uint32_t a=214013,c=2531011,d=16777216;
+    uint16_t a=0x343FD,c=0x269EC3;
+    uint32_t d=1<<24;
     bool is_random=true;
     double fixed_random=0;
 }
@@ -53,9 +54,11 @@ int roundto(double f)//四舍五入；到偶数？算了吧
 }
 double rnd0()
 {
+	uint32_t s;
 	if(!is_random)
 		return fixed_random;
-	seed=seed*a+c;
+	s=seed*a+c;
+	seed=(s+((s&0xffff)<<16))&0xffffff;
 	return (double)seed/d;
 }
 double rnd1(double s)
